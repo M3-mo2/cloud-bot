@@ -78,8 +78,12 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
    type (for example) `ls`, and it is sent with Enter; `cd`, `export`, aliases
    survive because it is one long-lived shell.
 3. **Ctrl-C** sends `INT` to the foreground process group (it interrupts the
-   running command without ending the terminal). **Ctrl-D** sends the EOF byte to
-   the shell. **↔️ Resize** changes the PTY size (`stty size` reflects it).
+   running command without ending the terminal). **Ctrl-D** sends the EOF byte
+   (`0x04`) to the shell — chosen over a `TERM` signal because it is the
+   interactive end-of-input that lets the shell exit **gracefully** on its own
+   (running its exit traps) instead of being killed; the session then reads as
+   `exited`/`shell_exit`. **↔️ Resize** changes the PTY size (`stty size`
+   reflects it).
 4. **⏹ Close** ends the terminal; later input reads as the documented
    `session_ended` and the screen offers a new terminal.
 5. The view states when the terminal closes (idle and absolute lifetime), from the
