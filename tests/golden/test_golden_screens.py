@@ -525,10 +525,16 @@ SCREEN_BUILDERS = {
     "language_picker": lambda f, loc: language_picker(loc),
     "menu": lambda f, loc: menu_screens.main_menu([f["ws"], f["suspended"]], loc, display_name="sara"),
     "menu_empty": lambda f, loc: menu_screens.main_menu([], loc, display_name="sara"),
+    "menu_inside": lambda f, loc: menu_screens.main_menu(
+        [f["ws"], f["suspended"]], loc, display_name="sara", inside=f["ws"]
+    ),
     "help": lambda f, loc: menu_screens.help_screen(loc),
     "settings": lambda f, loc: menu_screens.settings_screen(loc),
     "ws_list": lambda f, loc: ws_screens.workspace_list([f["ws"], f["suspended"]], loc),
     "ws_list_empty": lambda f, loc: ws_screens.workspace_list([], loc),
+    "ws_list_inside": lambda f, loc: ws_screens.workspace_list(
+        [f["ws"], f["suspended"]], loc, inside=f["ws"]
+    ),
     "ws_detail": lambda f, loc: ws_screens.workspace_detail(f["ws"], loc, now=NOW, active_run=True),
     "ws_detail_suspended": lambda f, loc: ws_screens.workspace_detail(f["suspended"], loc, now=NOW),
     "ws_detail_locked": lambda f, loc: ws_screens.workspace_detail(f["locked"], loc, now=NOW),
@@ -714,7 +720,13 @@ KB_AFFECTED = {
     "settings",
     "ws_list",
     "ws_list_empty",
+    "ws_list_inside",
+    "menu_inside",
     "language_picker",
+    # Task 10: the workspace home carries the log-out row in every status branch.
+    "ws_detail",
+    "ws_detail_suspended",
+    "ws_detail_locked",
 }
 
 

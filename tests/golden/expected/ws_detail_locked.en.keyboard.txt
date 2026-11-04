@@ -1,0 +1,5 @@
+🔄 Renew [ws:renew:3xnpl67c] enabled | 📁 Files [file:ls:8frr6yh6] enabled
+▶️ Run [run:choose:3xnpl67c] disabled | 🖥 Terminals [term:list:3xnpl67c] disabled
+🚪 Log out of workspace [ws:logout:3xnpl67c] enabled
+🛑 Stop All [ws:stop_confirm:3xnpl67c] enabled | 🗑 Delete [ws:delete_confirm:3xnpl67c] enabled
+⬅️ Back [ws:list:9zs7qoq3] enabled

@@ -1,0 +1,9 @@
+📁 Files [file:ls:9wi2u4xc] enabled | ▶️ Run [run:choose:4xt1tp8g] disabled
+📜 Runs [run:history:4xt1tp8g] enabled | 🖥 Terminals [term:list:4xt1tp8g] enabled
+🐍 Packages [pkg:list:4xt1tp8g] enabled | 🌐 Public links [tnl:list:4xt1tp8g] enabled
+🔌 Ports [port:list:4xt1tp8g] enabled | 🧠 Processes [proc:list:4xt1tp8g] enabled
+📊 Resources [met:view:4xt1tp8g] enabled | 🗜 Archives [arc:menu:4xt1tp8g] enabled
+⏸️ Suspend [ws:suspend_confirm:4xt1tp8g] enabled
+🚪 Log out of workspace [ws:logout:4xt1tp8g] enabled
+🛑 Stop All [ws:stop_confirm:4xt1tp8g] enabled | 🗑 Delete [ws:delete_confirm:4xt1tp8g] enabled
+⬅️ Back [ws:list:9zs7qoq3] enabled

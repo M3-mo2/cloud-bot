@@ -1,0 +1,9 @@
+📁 الملفات [file:ls:9wi2u4xc] enabled | ▶️ تشغيل [run:choose:4xt1tp8g] disabled
+📜 التشغيلات [run:history:4xt1tp8g] enabled | 🖥 الطرفيات [term:list:4xt1tp8g] enabled
+🐍 الحزم [pkg:list:4xt1tp8g] enabled | 🌐 الروابط العامة [tnl:list:4xt1tp8g] enabled
+🔌 المنافذ [port:list:4xt1tp8g] enabled | 🧠 العمليات [proc:list:4xt1tp8g] enabled
+📊 الموارد [met:view:4xt1tp8g] enabled | 🗜 الأرشيفات [arc:menu:4xt1tp8g] enabled
+⏸️ إيقاف مؤقت [ws:suspend_confirm:4xt1tp8g] enabled
+🚪 تسجيل الخروج من مساحة العمل [ws:logout:4xt1tp8g] enabled
+🛑 إيقاف الكل [ws:stop_confirm:4xt1tp8g] enabled | 🗑 حذف [ws:delete_confirm:4xt1tp8g] enabled
+⬅️ رجوع [ws:list:9zs7qoq3] enabled

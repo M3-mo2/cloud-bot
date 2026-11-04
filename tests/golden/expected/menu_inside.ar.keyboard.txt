@@ -1,0 +1,4 @@
+➕ مساحة جديدة [ws:new] enabled
+🏠 demo [ws:home] enabled | 📦 المساحات [ws:list] enabled
+⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
+❓ مساعدة [nav:help] enabled

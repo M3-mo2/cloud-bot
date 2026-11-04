@@ -1,0 +1,5 @@
+▶️ استئناف [ws:resume:4cbx57pb] enabled | 📁 الملفات [file:ls:mez2rxf] enabled
+▶️ تشغيل [run:choose:4cbx57pb] disabled | 🖥 الطرفيات [term:list:4cbx57pb] disabled
+🚪 تسجيل الخروج من مساحة العمل [ws:logout:4cbx57pb] enabled
+🛑 إيقاف الكل [ws:stop_confirm:4cbx57pb] enabled | 🗑 حذف [ws:delete_confirm:4cbx57pb] enabled
+⬅️ رجوع [ws:list:9zs7qoq3] enabled
