@@ -90,6 +90,29 @@ def session_status_label(status: SessionStatus, locale: Locale) -> str:
     return catalog.t(session_status_key(status), locale)
 
 
+#: Session end ``reason`` → catalog key (UI 05 §5). Anything not listed falls
+#: back to ``session.reason.fallback`` — never the raw token.
+SESSION_REASON_KEYS: dict[str, str] = {
+    "workspace_stopped": "session.reason.workspace_stopped",
+    "workspace_deleted": "session.reason.workspace_deleted",
+    "idle_timeout": "session.reason.idle_timeout",
+    "lifetime": "session.reason.lifetime",
+    "shell_exit": "session.reason.shell_exit",
+    "shell_exited": "session.reason.shell_exited",
+    "user_closed": "session.reason.user_closed",
+    "workspace_suspended": "session.reason.workspace_suspended",
+    "service_shutdown": "session.reason.service_shutdown",
+    "interrupted": "session.reason.interrupted",
+    "sandbox_unavailable": "session.reason.sandbox_unavailable",
+}
+
+
+def session_reason_label(reason: str, locale: Locale) -> str:
+    """Human sentence for a session end reason; never the raw token."""
+    key = SESSION_REASON_KEYS.get((reason or "").strip(), "session.reason.fallback")
+    return catalog.t(key, locale)
+
+
 def _num(value: int, locale: Locale) -> str:
     from cloudbot.presentation.i18n.formatters import localize_digits
 

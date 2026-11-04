@@ -187,6 +187,11 @@ def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool =
         rows.append(
             [
                 inline(catalog.t("ws.runs", locale), _cb("run:history", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
+            ]
+        )
+        rows.append(
+            [
                 inline(catalog.t("ws.suspend", locale), _cb("ws:suspend_confirm", ws_id), intent=Intent.PRIMARY),
             ]
         )
@@ -200,6 +205,7 @@ def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool =
         rows.append(
             [
                 inline(catalog.t("ws.run", locale), _cb("run:choose", ws_id), intent=Intent.MUTED, disabled=True),
+                inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.MUTED, disabled=True),
             ]
         )
     elif ws.status is WorkspaceStatus.LOCKED:
@@ -212,6 +218,7 @@ def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool =
         rows.append(
             [
                 inline(catalog.t("ws.run", locale), _cb("run:choose", ws_id), intent=Intent.MUTED, disabled=True),
+                inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.MUTED, disabled=True),
             ]
         )
     else:
