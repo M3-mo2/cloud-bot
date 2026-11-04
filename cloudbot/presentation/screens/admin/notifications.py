@@ -10,6 +10,7 @@ from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import fragment, italic
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin._helpers import num
 from cloudbot.presentation.screens.screen import Screen
 
@@ -66,7 +67,7 @@ def notifications_screen(view: AdminView) -> Screen:
             [
                 inline(
                     label,
-                    f"adm:notify_toggle:{category.value}",
+                    admin_cb.notify_toggle(category.value),
                     intent=Intent.SUCCESS if enabled else Intent.MUTED,
                 )
             ]
@@ -75,17 +76,17 @@ def notifications_screen(view: AdminView) -> Screen:
         [
             inline(
                 catalog.t("admin.notify.all_off" if all_on else "admin.notify.all_on", locale),
-                "adm:notify_all:" + ("off" if all_on else "on"),
+                admin_cb.notify_all(not all_on),
                 intent=Intent.PRIMARY,
             ),
             inline(
                 catalog.t("admin.notify.resume" if paused else "admin.notify.pause", locale),
-                "adm:notify_pause:" + ("off" if paused else "on"),
+                admin_cb.notify_pause(not paused),
                 intent=Intent.SUCCESS if paused else Intent.PRIMARY,
             ),
         ]
     )
-    kb.append([inline(catalog.t("admin.back", locale), "adm:menu", intent=Intent.PRIMARY)])
+    kb.append([inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(kb))
 
 

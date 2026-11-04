@@ -12,6 +12,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.mapping.statuses import workspace_status_label
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import fragment
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin._helpers import add_entered_banner
 from cloudbot.presentation.screens.screen import Screen
 
@@ -106,7 +107,7 @@ def _menu_markup(locale):
             [
                 inline(
                     section.resolve_title(locale),
-                    f"adm:sec:{section.key}",
+                    admin_cb.section(section.key),
                     intent=Intent.PRIMARY,
                 )
             ]

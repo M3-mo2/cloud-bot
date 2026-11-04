@@ -10,6 +10,7 @@ from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import code, fragment
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin._helpers import num
 from cloudbot.presentation.screens.screen import Screen
 
@@ -75,20 +76,24 @@ def users_screen(view: AdminView, *, page: int = 0) -> Screen:
         label = catalog.t(
             "admin.users.open", locale, name=u.display_name or f"#{num(u.tg_id, locale)}"
         )
-        kb.append([inline(label, f"adm:user:{u.tg_id}", intent=Intent.PRIMARY)])
+        kb.append([inline(label, admin_cb.user(u.tg_id), intent=Intent.PRIMARY)])
     kb.append(
         [
-            inline(catalog.t("admin.users.search", locale), "adm:users_search", intent=Intent.PRIMARY)
+            inline(
+                catalog.t("admin.users.search", locale),
+                admin_cb.users_search(),
+                intent=Intent.PRIMARY,
+            )
         ]
     )
     kb.extend(_paging(locale, page, page_obj.total, page_obj.limit, page_obj.query))
-    kb.append([inline(catalog.t("admin.back", locale), "adm:menu", intent=Intent.PRIMARY)])
+    kb.append([inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(kb))
 
 
 def _nav(locale, page, total_pages):
     return inline_markup(
-        [[inline(catalog.t("admin.back", locale), "adm:menu", intent=Intent.PRIMARY)]]
+        [[inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)]]
     )
 
 
@@ -97,11 +102,11 @@ def _paging(locale, page: int, total: int, limit: int, query: str):
     row = []
     if page > 0:
         row.append(
-            inline(catalog.t("admin.users.prev", locale), f"adm:users_page:{page - 1}", intent=Intent.PRIMARY)
+            inline(catalog.t("admin.users.prev", locale), admin_cb.users_page(page - 1), intent=Intent.PRIMARY)
         )
     if page + 1 < pages:
         row.append(
-            inline(catalog.t("admin.users.next", locale), f"adm:users_page:{page + 1}", intent=Intent.PRIMARY)
+            inline(catalog.t("admin.users.next", locale), admin_cb.users_page(page + 1), intent=Intent.PRIMARY)
         )
     return [row] if row else []
 

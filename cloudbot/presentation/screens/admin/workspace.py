@@ -15,6 +15,7 @@ from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.screens import workspaces as ws_screens
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
@@ -30,7 +31,7 @@ def entered_workspace_screen(view: AdminView) -> Screen:
         return Screen(
             doc=doc,
             markup=inline_markup(
-                [[inline(catalog.t("admin.back", locale), "adm:menu", intent=Intent.PRIMARY)]]
+                [[inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)]]
             ),
         )
 
@@ -39,7 +40,7 @@ def entered_workspace_screen(view: AdminView) -> Screen:
     screen = ws_screens.workspace_detail(ws, locale, now=view.now)
     rows = [list(r) for r in screen.markup.inline_keyboard]
     rows.append(
-        [inline(catalog.t("admin.entered.leave", locale), "adm:leave", intent=Intent.PRIMARY)]
+        [inline(catalog.t("admin.entered.leave", locale), admin_cb.leave(), intent=Intent.PRIMARY)]
     )
     return Screen(doc=screen.doc, markup=inline_markup(rows))
 

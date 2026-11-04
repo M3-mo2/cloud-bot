@@ -10,6 +10,7 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.screen import Screen
 
 
@@ -57,7 +58,7 @@ def prepend_banner(screen: Screen, ctx) -> None:
     )
     screen.doc.prepend_raw(f"<blockquote>⚠️ {esc(text)}</blockquote>")
     leave = inline(
-        catalog.t("admin.entered.leave", ctx.locale), "adm:leave", intent=Intent.PRIMARY
+        catalog.t("admin.entered.leave", ctx.locale), admin_cb.leave(), intent=Intent.PRIMARY
     )
     if screen.markup is None:
         screen.markup = inline_markup([[leave]])
@@ -66,7 +67,7 @@ def prepend_banner(screen: Screen, ctx) -> None:
 
 
 def leave_entered_row(locale: Locale):
-    return [inline(catalog.t("admin.entered.leave", locale), "adm:leave", intent=Intent.PRIMARY)]
+    return [inline(catalog.t("admin.entered.leave", locale), admin_cb.leave(), intent=Intent.PRIMARY)]
 
 
 def user_display(summary_display: str, tg_id: int, locale: Locale) -> str:
