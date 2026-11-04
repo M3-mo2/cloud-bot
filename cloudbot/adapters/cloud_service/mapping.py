@@ -26,14 +26,22 @@ from cloudbot.domain.value_objects import (
     ExecResult,
     FileContent,
     FilePage,
+    InstallResult,
     LifecycleResult,
     Limits,
     LogChunk,
+    Package,
+    PackageList,
+    PortEntry,
+    PortReport,
     RunPage,
     RunStatus,
     SessionPage,
     SessionStatus,
     SummaryState,
+    Tunnel,
+    TunnelList,
+    UnixSocket,
     WorkspaceId,
     WorkspaceStatus,
     WorkspaceSummary,
@@ -349,4 +357,91 @@ def meta_from_dict(data: dict) -> EngineMeta:
         egress_decoy=_capability("egress_decoy"),
         identity_masking=_capability("identity_masking"),
         provider_tools_hidden=_capability("provider_tools_hidden"),
+    )
+
+
+# -- Phase 2a: Python packages -----------------------------------------------
+def package_list_from_dto(env: dto.PackageListEnvelope) -> PackageList:
+    return PackageList(
+        packages=tuple(
+            Package(name=p.name, version=p.version) for p in env.packages
+        ),
+        count=env.count,
+        truncated=env.truncated,
+        shared_enabled=env.shared_enabled,
+        shared_available=env.shared_available,
+        shared_path=env.shared_path,
+        private_path=env.private_path,
+    )
+
+
+def install_result_from_dto(d: dto.InstallResultDTO) -> InstallResult:
+    return InstallResult(
+        exit_code=d.exit_code,
+        output=d.output,
+        stdout=d.stdout,
+        duration_ms=d.duration_ms,
+        timed_out=d.timed_out,
+        truncated=d.truncated,
+        target=d.target,
+    )
+
+
+# -- Phase 2b: tunnels -------------------------------------------------------
+def tunnel_from_dto(t: dto.TunnelDTO) -> Tunnel:
+    return Tunnel(
+        id=t.id,
+        workspace_id=t.workspace_id,
+        port=t.port,
+        url=t.url,
+        status=t.status,
+        created_at=_dt(t.created_at),
+    )
+
+
+def tunnel_list_from_dto(env: dto.TunnelListEnvelope) -> TunnelList:
+    return TunnelList(tunnels=tuple(tunnel_from_dto(t) for t in env.tunnels))
+
+
+# -- Phase 2c: port discovery ------------------------------------------------
+def port_entry_from_dto(p: dto.PortEntryDTO) -> PortEntry:
+    return PortEntry(
+        port=p.port,
+        protocol=p.protocol,
+        address=p.address,
+        scope=p.scope,
+        state=p.state,
+        attributed=p.attributed,
+        pid=p.pid,
+        kind=p.kind,
+        label=p.label,
+        argv=tuple(p.argv),
+        owners=tuple(p.owners),
+        inode=p.inode,
+    )
+
+
+def unix_socket_from_dto(u: dto.UnixSocketDTO) -> UnixSocket:
+    return UnixSocket(
+        path=u.path,
+        type=u.type,
+        state=u.state,
+        attributed=u.attributed,
+        pid=u.pid,
+        kind=u.kind,
+    )
+
+
+def port_report_from_dto(env: dto.PortReportEnvelope) -> PortReport:
+    return PortReport(
+        workspace_id=env.workspace_id,
+        ports=tuple(port_entry_from_dto(p) for p in env.ports),
+        unix=tuple(unix_socket_from_dto(u) for u in env.unix),
+        count=env.count,
+        unix_count=env.unix_count,
+        complete=env.complete,
+        notes=tuple(env.notes),
+        pids_scanned=env.pids_scanned,
+        fds_scanned=env.fds_scanned,
+        reachability=env.reachability,
     )

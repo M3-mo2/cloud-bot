@@ -18,14 +18,22 @@ from cloudbot.domain.value_objects import (
     ExecResult,
     FileContent,
     FilePage,
+    InstallResult,
     LifecycleResult,
     Limits,
     LogChunk,
+    Package,
+    PackageList,
+    PortEntry,
+    PortReport,
     RunPage,
     RunStatus,
     SessionPage,
     SessionStatus,
     SummaryState,
+    Tunnel,
+    TunnelList,
+    UnixSocket,
     WorkspaceId,
     WorkspaceStatus,
     WorkspaceSummary,
@@ -70,6 +78,7 @@ class FakeEngine:
         self._run_ticks: dict[str, int] = {}
         self._sessions: dict[str, TerminalSession] = {}
         self._session_output: dict[str, str] = {}
+        self._tunnels: dict[str, Tunnel] = {}
         self._seq = 0
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK4", "demo", WorkspaceStatus.ACTIVE, active=1)
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK5", "scraper", WorkspaceStatus.SUSPENDED)
@@ -582,6 +591,137 @@ class FakeEngine:
         )
         self._sessions[ses_id] = closed
         return closed
+
+    # -- packages (Phase 2a) -------------------------------------------------
+    async def list_packages(self, ws_id: WorkspaceId) -> PackageList:
+        await self.get_workspace(ws_id)
+        return PackageList(
+            packages=(Package(name="six", version="1.16.0"),),
+            count=1,
+            truncated=False,
+            shared_enabled=True,
+            shared_available=False,
+            shared_path="",
+            private_path="/opt/python/private",
+        )
+
+    async def install_packages(self, ws_id: WorkspaceId, packages: list[str]) -> InstallResult:
+        ws = await self.get_workspace(ws_id)
+        if not ws.limits.allow_net:
+            return InstallResult(
+                exit_code=1,
+                output="ERROR: Could not find a version that satisfies the requirement ...\n"
+                "Could not fetch URL https://pypi.org/simple/: connection error",
+                stdout="",
+                duration_ms=1200,
+                timed_out=False,
+                truncated=False,
+                target="/opt/python/private",
+            )
+        names = " ".join(packages)
+        return InstallResult(
+            exit_code=0,
+            output=f"Successfully installed {names}\n",
+            stdout=f"Successfully installed {names}\n",
+            duration_ms=10_000,
+            timed_out=False,
+            truncated=False,
+            target="/opt/python/private",
+        )
+
+    async def remove_package(self, ws_id: WorkspaceId, name: str) -> None:
+        await self.get_workspace(ws_id)
+
+    async def remove_all_packages(self, ws_id: WorkspaceId) -> None:
+        await self.get_workspace(ws_id)
+
+    # -- tunnels (Phase 2b) --------------------------------------------------
+    async def list_tunnels(self, ws_id: WorkspaceId) -> TunnelList:
+        await self.get_workspace(ws_id)
+        tunnels = [t for t in self._tunnels.values() if t.workspace_id == str(ws_id)]
+        return TunnelList(tunnels=tuple(tunnels))
+
+    async def create_tunnel(self, ws_id: WorkspaceId, port: int) -> Tunnel:
+        ws = await self.get_workspace(ws_id)
+        if not ws.limits.allow_net:
+            raise EngineRefused(
+                "tunnels_disabled",
+                details={"config": "limits.allow_net", "field": "allow_net"},
+            )
+        if not ws.limits.allow_tunnels:
+            raise EngineRefused(
+                "tunnels_disabled",
+                details={"config": "limits.allow_tunnels", "field": "allow_tunnels"},
+            )
+        self._seq += 1
+        tunnel = Tunnel(
+            id=f"tnl_FAKE{self._seq:020d}",
+            workspace_id=str(ws_id),
+            port=port,
+            url=f"https://fake-{self._seq}.trycloudflare.com",
+            status="active",
+            created_at=_NOW,
+        )
+        self._tunnels[tunnel.id] = tunnel
+        return tunnel
+
+    async def delete_tunnel(self, ws_id: WorkspaceId, tunnel_id: str) -> None:
+        if tunnel_id not in self._tunnels:
+            raise EngineRefused("not_found")
+        del self._tunnels[tunnel_id]
+
+    # -- ports (Phase 2c) ----------------------------------------------------
+    async def list_ports(self, ws_id: WorkspaceId) -> PortReport:
+        await self.get_workspace(ws_id)
+        return PortReport(
+            workspace_id=str(ws_id),
+            ports=(
+                PortEntry(
+                    port=8080,
+                    protocol="tcp",
+                    address="0.0.0.0",
+                    scope="wildcard",
+                    state="LISTEN",
+                    attributed=True,
+                    pid=1234,
+                    kind="run",
+                    label="python3 -m http.server 8080",
+                    argv=("python3", "-m", "http.server", "8080"),
+                    owners=(1234,),
+                    inode=99,
+                ),
+                PortEntry(
+                    port=5353,
+                    protocol="udp",
+                    address="0.0.0.0",
+                    scope="wildcard",
+                    state="",
+                    attributed=False,
+                    owners=(),
+                ),
+            ),
+            unix=(
+                UnixSocket(
+                    path="/tmp/demo.sock",
+                    type="stream",
+                    state="unconnected",
+                    attributed=True,
+                    pid=4321,
+                    kind="run",
+                ),
+            ),
+            count=2,
+            unix_count=1,
+            complete=True,
+            notes=(),
+            pids_scanned=2,
+            fds_scanned=8,
+            reachability=(
+                "ports are listening inside the workspace's private network namespace; "
+                "this does not mean they are reachable from outside. Publishing a port "
+                "requires a tunnel (limits.allow_tunnels and tunnels.enabled)."
+            ),
+        )
 
     async def sleep(self, seconds: float) -> None:  # pragma: no cover - helper
         await asyncio.sleep(seconds)

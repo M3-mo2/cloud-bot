@@ -116,11 +116,12 @@ def translate(
         return EngineUnavailable(retryable=False, cause="auth")
     if code in _RATE_LIMITED_CODES:
         return RateLimited(retry_after_s=retry_after if retry_after is not None else 5.0)
-    if code in _UNAVAILABLE_CODES:
-        return EngineUnavailable(retryable=True, cause=message)
-    if code == "unavailable":
-        return EngineUnavailable(retryable=True, cause=message)
-    if status >= 500:
-        # Any unmodelled 5xx is transient.
+    # A modelled code is honoured even on a 5xx: a 504 `tunnel_url_unavailable`
+    # is a refusal with its own screen, not a generic "engine unavailable".
+    if code not in KNOWN_CODES:
+        if code in _UNAVAILABLE_CODES or code == "unavailable" or status >= 500:
+            return EngineUnavailable(retryable=True, cause=message)
+        return EngineRefused(code, message=message, details=details)
+    if code in _UNAVAILABLE_CODES or code == "unavailable":
         return EngineUnavailable(retryable=True, cause=message)
     return EngineRefused(code, message=message, details=details)

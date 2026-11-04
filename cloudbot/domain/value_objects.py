@@ -272,3 +272,104 @@ class ResourceUsage:
     active_runs: int
     max_runs: int
     disk_complete: bool = True
+
+
+# -- Phase 2a: Python packages (pip inside the workspace) --------------------
+@dataclass(frozen=True)
+class Package:
+    name: str
+    version: str = ""
+
+
+@dataclass(frozen=True)
+class PackageList:
+    packages: tuple[Package, ...]
+    count: int
+    truncated: bool
+    shared_enabled: bool
+    shared_available: bool
+    shared_path: str
+    private_path: str
+
+
+@dataclass(frozen=True)
+class InstallResult:
+    """The outcome of ``POST /packages/install``.
+
+    ``exit_code`` is the honest bit: a non-zero code is a **failed** install (the
+    reason is in ``output``). Never render this as success just because the HTTP
+    call returned ``200``.
+    """
+
+    exit_code: int
+    output: str
+    stdout: str
+    duration_ms: int
+    timed_out: bool
+    truncated: bool
+    target: str
+
+    @property
+    def ok(self) -> bool:
+        return self.exit_code == 0
+
+
+# -- Phase 2b: tunnels (ephemeral public URL) --------------------------------
+@dataclass(frozen=True)
+class Tunnel:
+    id: str
+    workspace_id: str
+    port: int
+    url: str
+    status: str
+    created_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class TunnelList:
+    tunnels: tuple[Tunnel, ...]
+
+    @property
+    def count(self) -> int:
+        return len(self.tunnels)
+
+
+# -- Phase 2c: port discovery ------------------------------------------------
+@dataclass(frozen=True)
+class PortEntry:
+    port: int
+    protocol: str
+    address: str
+    scope: str
+    state: str
+    attributed: bool
+    pid: int | None = None
+    kind: str = ""
+    label: str = ""
+    argv: tuple[str, ...] = ()
+    owners: tuple[int, ...] = ()
+    inode: int | None = None
+
+
+@dataclass(frozen=True)
+class UnixSocket:
+    path: str
+    type: str
+    state: str
+    attributed: bool
+    pid: int | None = None
+    kind: str = ""
+
+
+@dataclass(frozen=True)
+class PortReport:
+    workspace_id: str
+    ports: tuple[PortEntry, ...]
+    unix: tuple[UnixSocket, ...]
+    count: int
+    unix_count: int
+    complete: bool
+    notes: tuple[str, ...]
+    pids_scanned: int
+    fds_scanned: int
+    reachability: str

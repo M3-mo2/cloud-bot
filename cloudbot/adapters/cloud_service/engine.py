@@ -19,12 +19,17 @@ from cloudbot.adapters.cloud_service.mapping import (
     file_content_from_dto,
     file_page_from_dto,
     file_entry_from_dto,
+    install_result_from_dto,
     lifecycle_from_dto,
     log_chunk_from_dto,
+    package_list_from_dto,
+    port_report_from_dto,
     run_from_dto,
     run_page_from_dto,
     session_from_dto,
     session_page_from_dto,
+    tunnel_from_dto,
+    tunnel_list_from_dto,
     usage_from_dto,
     workspace_from_dto,
 )
@@ -36,11 +41,16 @@ from cloudbot.domain.value_objects import (
     ExecResult,
     FileContent,
     FilePage,
+    InstallResult,
     LifecycleResult,
     Limits,
     LogChunk,
+    PackageList,
+    PortReport,
     RunPage,
     SessionPage,
+    Tunnel,
+    TunnelList,
     WorkspaceId,
 )
 
@@ -48,6 +58,14 @@ from cloudbot.domain.value_objects import (
 EXEC_HARD_CAP_SEC = 60
 #: Default page size for file listings (UI 03 uses 10–20 per page).
 FILE_PAGE_LIMIT = 20
+#: A pip install runs inside the sandbox and is slow (measured ~10 s for one
+#: package); the client timeout must exceed that, bounded so it can never hang.
+PACKAGE_INSTALL_TIMEOUT_S = 300.0
+#: A tunnel create waits for cloudflared to observe a URL
+#: (``tunnels.url_timeout_sec``, measured 45 s); bound the client timeout above it.
+TUNNEL_TIMEOUT_S = 90.0
+#: A bounded port scan reads /proc for the workspace's pids and fds.
+PORTS_TIMEOUT_S = 30.0
 
 
 def _ws_path(ws_id: WorkspaceId, suffix: str = "") -> str:
@@ -65,6 +83,8 @@ class EngineAdapter:
         self._client = client
         self._timeout_s = timeout_s
         self._meta = MetaCache(client)
+        self._install_timeout_s = PACKAGE_INSTALL_TIMEOUT_S
+        self._tunnel_timeout_s = TUNNEL_TIMEOUT_S
 
     @classmethod
     def create(
@@ -449,6 +469,62 @@ class EngineAdapter:
         if env.session is None:
             raise EngineRefused("not_found")
         return session_from_dto(env.session, ws_id=ws_id)
+
+    # -- Python packages (Phase 2a) ------------------------------------------
+    async def list_packages(self, ws_id: WorkspaceId) -> PackageList:
+        response = await self._client.get(_ws_path(ws_id, "/packages"))
+        return package_list_from_dto(dto.PackageListEnvelope.model_validate(response.json()))
+
+    async def install_packages(
+        self, ws_id: WorkspaceId, packages: list[str]
+    ) -> InstallResult:
+        # An install runs pip inside the sandbox and can take tens of seconds
+        # (measured ~10 s for one package); give it a generous, bounded timeout
+        # and never let a slow install block the update loop (the handler awaits
+        # it off the update task). Creation POSTs are never auto-retried.
+        response = await self._client.post(
+            _ws_path(ws_id, "/packages/install"),
+            json={"packages": list(packages)},
+            timeout=self._install_timeout_s,
+        )
+        return install_result_from_dto(
+            dto.InstallResultDTO.model_validate(response.json())
+        )
+
+    async def remove_package(self, ws_id: WorkspaceId, name: str) -> None:
+        await self._client.delete(_ws_path(ws_id, "/packages"), params={"name": name})
+
+    async def remove_all_packages(self, ws_id: WorkspaceId) -> None:
+        await self._client.delete(_ws_path(ws_id, "/packages"), params={"all": "true"})
+
+    # -- tunnels (Phase 2b) --------------------------------------------------
+    async def list_tunnels(self, ws_id: WorkspaceId) -> TunnelList:
+        response = await self._client.get(_ws_path(ws_id, "/tunnels"))
+        return tunnel_list_from_dto(
+            dto.TunnelListEnvelope.model_validate(response.json())
+        )
+
+    async def create_tunnel(self, ws_id: WorkspaceId, port: int) -> Tunnel:
+        # cloudflared can take up to ``tunnels.url_timeout_sec`` to observe a URL;
+        # give the call room (a POST is never auto-retried).
+        response = await self._client.post(
+            _ws_path(ws_id, "/tunnels"),
+            json={"port": port},
+            timeout=self._tunnel_timeout_s,
+        )
+        return tunnel_from_dto(
+            dto.TunnelEnvelope.model_validate(response.json()).tunnel
+        )
+
+    async def delete_tunnel(self, ws_id: WorkspaceId, tunnel_id: str) -> None:
+        await self._client.delete(_ws_path(ws_id, f"/tunnels/{tunnel_id}"))
+
+    # -- port discovery (Phase 2c) -------------------------------------------
+    async def list_ports(self, ws_id: WorkspaceId) -> PortReport:
+        response = await self._client.get(_ws_path(ws_id, "/ports"))
+        return port_report_from_dto(
+            dto.PortReportEnvelope.model_validate(response.json())
+        )
 
 
 def _basename(path: str) -> str:

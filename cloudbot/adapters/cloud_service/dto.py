@@ -244,3 +244,85 @@ class UsageDTO(_DTO):
 
 class DeleteRunsEnvelope(_DTO):
     deleted: int = 0
+
+
+# -- Phase 2a: Python packages -----------------------------------------------
+class PackageDTO(_DTO):
+    name: str = ""
+    version: str = ""
+
+
+class PackageListEnvelope(_DTO):
+    packages: list[PackageDTO] = Field(default_factory=list)
+    count: int = 0
+    truncated: bool = False
+    shared_enabled: bool = False
+    shared_available: bool = False
+    shared_path: str = ""
+    private_path: str = "/opt/python/private"
+
+
+class InstallResultDTO(_DTO):
+    duration_ms: int = 0
+    exit_code: int = 0
+    output: str = ""
+    stdout: str = ""
+    timed_out: bool = False
+    truncated: bool = False
+    target: str = ""
+
+
+# -- Phase 2b: tunnels -------------------------------------------------------
+class TunnelDTO(_DTO):
+    id: str = ""
+    workspace_id: str = ""
+    port: int = 0
+    url: str = ""
+    status: str = ""
+    created_at: str = ""
+
+
+class TunnelEnvelope(_DTO):
+    tunnel: TunnelDTO
+
+
+class TunnelListEnvelope(_DTO):
+    tunnels: list[TunnelDTO] = Field(default_factory=list)
+
+
+# -- Phase 2c: port discovery ------------------------------------------------
+class PortEntryDTO(_DTO):
+    port: int = 0
+    protocol: str = "tcp"
+    address: str = ""
+    scope: str = ""
+    state: str = ""
+    attributed: bool = False
+    pid: int | None = None
+    kind: str = ""
+    label: str = ""
+    argv: list[str] = Field(default_factory=list)
+    owners: list[int] = Field(default_factory=list)
+    inode: int | None = None
+
+
+class UnixSocketDTO(_DTO):
+    path: str = ""
+    type: str = ""
+    state: str = ""
+    attributed: bool = False
+    pid: int | None = None
+    kind: str = ""
+
+
+class PortReportEnvelope(_DTO):
+    workspace_id: str = ""
+    ports: list[PortEntryDTO] = Field(default_factory=list)
+    count: int = 0
+    unix: list[UnixSocketDTO] = Field(default_factory=list)
+    unix_count: int = 0
+    complete: bool = True
+    notes: list[str] = Field(default_factory=list)
+    pids_scanned: int = 0
+    fds_scanned: int = 0
+    reachability: str = ""

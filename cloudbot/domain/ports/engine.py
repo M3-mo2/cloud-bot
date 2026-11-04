@@ -15,12 +15,17 @@ from cloudbot.domain.value_objects import (
     ExecResult,
     FileContent,
     FilePage,
+    InstallResult,
     LifecycleResult,
     Limits,
     LogChunk,
+    PackageList,
+    PortReport,
     ResourceUsage,
     RunPage,
     SessionPage,
+    Tunnel,
+    TunnelList,
     WorkspaceId,
 )
 
@@ -148,3 +153,19 @@ class EnginePort(Protocol):
     async def session_resize(self, ws_id: WorkspaceId, ses_id: str, *, cols: int, rows: int) -> None: ...
     async def session_signal(self, ws_id: WorkspaceId, ses_id: str, signal: str) -> None: ...
     async def close_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession: ...
+
+    # -- Python packages (Phase 2a, pip inside the workspace) ----------------
+    async def list_packages(self, ws_id: WorkspaceId) -> PackageList: ...
+    async def install_packages(
+        self, ws_id: WorkspaceId, packages: list[str]
+    ) -> InstallResult: ...
+    async def remove_package(self, ws_id: WorkspaceId, name: str) -> None: ...
+    async def remove_all_packages(self, ws_id: WorkspaceId) -> None: ...
+
+    # -- tunnels (Phase 2b, ephemeral public URL) ----------------------------
+    async def list_tunnels(self, ws_id: WorkspaceId) -> TunnelList: ...
+    async def create_tunnel(self, ws_id: WorkspaceId, port: int) -> Tunnel: ...
+    async def delete_tunnel(self, ws_id: WorkspaceId, tunnel_id: str) -> None: ...
+
+    # -- port discovery (Phase 2c, read-only introspection) ------------------
+    async def list_ports(self, ws_id: WorkspaceId) -> PortReport: ...
