@@ -8,7 +8,7 @@ import structlog
 from aiogram import BaseMiddleware
 from aiogram.types import CallbackQuery, Message, TelegramObject
 
-from cloudbot.core.errors import DomainError
+from cloudbot.core.errors import DomainError, EngineUnavailable
 from cloudbot.core.modes import RunMode
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.mapping.errors import error_screen
@@ -30,8 +30,24 @@ class ErrorGuardMiddleware(BaseMiddleware):
         try:
             return await handler(event, data)
         except DomainError as exc:
+            self._record_engine_unreachable(exc, data)
             await self._render(event, data, exc)
             return None
+
+    @staticmethod
+    def _record_engine_unreachable(exc: DomainError, data: dict[str, Any]) -> None:
+        """Emit ``engine.unreachable`` from the same buffer the event source writes.
+
+        This is the single place a transient engine failure becomes an event, so
+        handlers never grow their own logging calls.
+        """
+        events = data.get("events")
+        if events is None or not isinstance(exc, EngineUnavailable):
+            return
+        try:
+            events.engine_unreachable(reason=exc.cause or "unavailable")
+        except Exception:  # noqa: BLE001
+            pass
 
     async def _render(self, event: TelegramObject, data: dict[str, Any], exc: DomainError) -> None:
         ctx: UserContext | None = data.get("ctx")

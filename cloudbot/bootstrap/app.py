@@ -16,8 +16,10 @@ from aiogram.types import BotCommand
 from cloudbot.core.config import Settings
 from cloudbot.core.modes import persistence_fsm
 from cloudbot.bootstrap.container import Container
+from cloudbot.middleware.admin_gate import AdminGateMiddleware
 from cloudbot.middleware.context_mw import ContextMiddleware
 from cloudbot.middleware.error_guard import ErrorGuardMiddleware
+from cloudbot.middleware.events_source import EventSourceMiddleware
 from cloudbot.middleware.inject import InjectMiddleware
 from cloudbot.middleware.mode_gate import ModeGateMiddleware
 from cloudbot.middleware.observability import ObservabilityMiddleware
@@ -43,16 +45,42 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
 
     sender = RichSender(bot)
     dispatcher.update.outer_middleware(ObservabilityMiddleware())
-    dispatcher.update.outer_middleware(ContextMiddleware(container.services.account, settings))
+    dispatcher.update.outer_middleware(
+        ContextMiddleware(
+            container.services.account, settings, admin_state=container.admin_state
+        )
+    )
     dispatcher.update.outer_middleware(InjectMiddleware(container.services, sender))
     dispatcher.update.outer_middleware(ThrottleMiddleware(settings))
     dispatcher.update.outer_middleware(ModeGateMiddleware())
+    # The event source must run outside the error guard so ``engine.unreachable``
+    # intents recorded by the guard are flushed; the guard wraps the router so it
+    # catches a DomainError raised anywhere below.
+    dispatcher.update.middleware(EventSourceMiddleware(container.services.events))
     dispatcher.update.middleware(ErrorGuardMiddleware(sender))
+    # Identity-based admin gate: one seam, on the message/callback observers (an
+    # update-level middleware never sees a Message). A non-admin is swallowed here
+    # so ``/admin`` and ``adm:`` callbacks reveal nothing.
+    dispatcher.message.outer_middleware(AdminGateMiddleware())
+    dispatcher.callback_query.outer_middleware(AdminGateMiddleware())
 
-    from cloudbot.handlers import admin, callbacks, common, execution, features, files, terminal, workspaces
+    from cloudbot.handlers import (
+        admin,
+        admin_panel,
+        callbacks,
+        common,
+        execution,
+        features,
+        files,
+        terminal,
+        workspaces,
+    )
 
     dispatcher.include_router(common.router)
     dispatcher.include_router(callbacks.navigation.router)
+    # Admin panel before the workspace/file routers so a ``/admin`` command and its
+    # ``adm:`` callbacks are never mistaken for user navigation.
+    dispatcher.include_router(admin_panel.router)
     dispatcher.include_router(workspaces.router)
     dispatcher.include_router(files.router)
     dispatcher.include_router(execution.router)
