@@ -5,10 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from cloudbot.services.account import AccountService
+from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
+from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.metrics import MetricsService
+from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
 from cloudbot.services.ports import PortsService
@@ -32,3 +35,6 @@ class Services:
     metrics: MetricsService
     processes: ProcessesService
     archives: ArchivesService
+    events: EventsService
+    admin: AdminService
+    notifier: NotifierService

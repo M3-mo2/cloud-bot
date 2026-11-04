@@ -23,3 +23,18 @@ class OwnershipService:
 
     async def owns(self, tg_id: int, ws_id: WorkspaceId) -> bool:
         return await self._users.owns(tg_id, ws_id)
+
+    async def assert_admin_override(self, admin_id: int, ws_id: WorkspaceId) -> None:
+        """THE one place the admin read/write exemption is expressed.
+
+        An admin may read and act on other users' workspaces *by design* — that is
+        the entire purpose of the panel (see ``docs/ADMIN-PANEL.md``). Expressed
+        here as a single named method so the exemption is not sprinkled as
+        ``if is_admin`` through the services. Only ``AdminService`` calls this;
+        every user-facing path still goes through ``assert_owned``.
+
+        It is intentionally a no-op that does not even look at ``ws_id``: the
+        caller has already been proven an admin by the identity gate
+        (``middleware/admin_gate.py``) before any handler runs.
+        """
+        return None

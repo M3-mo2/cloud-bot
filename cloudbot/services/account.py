@@ -25,5 +25,8 @@ class AccountService:
     async def set_locale(self, tg_id: int, locale: Locale) -> None:
         await self._users.set_locale(tg_id, locale)
 
+    async def set_display_name(self, tg_id: int, display_name: str) -> None:
+        await self._users.set_display_name(tg_id, display_name)
+
     async def profile(self, tg_id: int, *, default_locale: Locale) -> User:
         return await self._users.get_or_create(tg_id, default_locale=default_locale)

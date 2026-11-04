@@ -10,18 +10,26 @@ from dataclasses import dataclass
 from cloudbot.adapters.cloud_service.engine import EngineAdapter
 from cloudbot.adapters.cloud_service.fake import FakeEngine
 from cloudbot.adapters.persistence.database import Database
+from cloudbot.adapters.persistence.sqlite_events import (
+    SqliteAdminStateStore,
+    SqliteEventLog,
+)
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.core.clock import SystemClock
 from cloudbot.core.config import Settings
 from cloudbot.core.modes import mock_engine_allowed
+from cloudbot.core.runtime import BotRuntime
 from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.services.account import AccountService
+from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
 from cloudbot.services.bundle import Services
+from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.metrics import MetricsService
+from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
 from cloudbot.services.ports import PortsService
@@ -38,6 +46,8 @@ class Container:
     database: Database
     users: SqliteUserRepository
     sessions: SqliteSessionStore
+    event_log: SqliteEventLog
+    admin_state: SqliteAdminStateStore
     services: Services
 
     async def aclose(self) -> None:
@@ -60,6 +70,8 @@ def build(settings: Settings) -> Container:
     database = Database(settings.database_url)
     users = SqliteUserRepository(database)
     sessions = SqliteSessionStore(database)
+    event_log = SqliteEventLog(database)
+    admin_state = SqliteAdminStateStore(database)
     clock = SystemClock()
     ownership = OwnershipService(users)
 
@@ -76,6 +88,9 @@ def build(settings: Settings) -> Container:
         metrics=MetricsService(engine, ownership),
         processes=ProcessesService(engine, ownership),
         archives=ArchivesService(engine, ownership),
+        events=EventsService(event_log),
+        admin=AdminService(users, engine, event_log, admin_state, ownership, BotRuntime()),
+        notifier=NotifierService(event_log, admin_state),
     )
     return Container(
         settings=settings,
@@ -83,5 +98,7 @@ def build(settings: Settings) -> Container:
         database=database,
         users=users,
         sessions=sessions,
+        event_log=event_log,
+        admin_state=admin_state,
         services=services,
     )
