@@ -112,9 +112,13 @@ class SqliteUserRepository(UserRepository):
     async def owns(self, tg_id, ws_id) -> bool: ...
 ```
 
-`get_or_create` is a single transaction (`INSERT ... ON CONFLICT DO NOTHING`,
-then `SELECT`) so concurrent first-messages cannot create duplicates.
-`owns` is a single indexed `SELECT EXISTS`.
+`get_or_create` upserts the row (`INSERT ... ON CONFLICT DO NOTHING`) and then
+`SELECT`s it, so concurrent first-messages cannot create duplicates or crash. The
+shared connection runs in **autocommit** (`isolation_level=None`) precisely so two
+overlapping statements from concurrently-processed updates cannot nest a
+transaction on the one connection; each statement is individually atomic and every
+multi-statement write is expressed as idempotent upserts. `owns` is a single
+indexed `SELECT EXISTS`.
 
 ### 4.2 `SessionStore` (Phase 1.5)
 

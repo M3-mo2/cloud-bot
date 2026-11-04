@@ -46,6 +46,52 @@ async def test_get_or_create_single_transaction():
     await db.close()
 
 
+async def test_concurrent_get_or_create_does_not_nest_transactions():
+    """The bot processes updates concurrently on one shared connection. An
+    explicit ``BEGIN`` in ``get_or_create`` raised "cannot start a transaction
+    within a transaction" when two reads overlapped. The connection is autocommit
+    and the upsert is idempotent, so concurrent first messages are race-safe."""
+    import asyncio
+
+    db = Database(":memory:")
+    await db.connect()
+    await db.migrate()
+    repo = SqliteUserRepository(db)
+
+    users = await asyncio.gather(
+        *[repo.get_or_create(i, default_locale=Locale.EN) for i in range(1, 40)]
+    )
+    assert {u.tg_id for u in users} == set(range(1, 40))
+
+    # Concurrent first messages from the *same* new user must not duplicate or crash.
+    same = await asyncio.gather(
+        *[repo.get_or_create(999, default_locale=Locale.EN) for _ in range(25)]
+    )
+    assert {u.tg_id for u in same} == {999}
+    await db.close()
+
+
+async def test_concurrent_mixed_writes_do_not_nest_transactions():
+    """A write racing a write (both multi-statement) must also survive on the
+    shared autocommit connection."""
+    import asyncio
+
+    db = Database(":memory:")
+    await db.connect()
+    await db.migrate()
+    repo = SqliteUserRepository(db)
+    ws = WorkspaceId("ws_abc")
+
+    async def register(i: int) -> None:
+        await repo.get_or_create(i, default_locale=Locale.EN)
+        await repo.add_workspace(i, ws)
+
+    await asyncio.gather(*[register(i) for i in range(1, 40)])
+    for i in range(1, 40):
+        assert await repo.owns(i, ws)
+    await db.close()
+
+
 async def test_ownership_registry():
     db = Database(":memory:")
     await db.connect()

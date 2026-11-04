@@ -20,25 +20,20 @@ class SqliteUserRepository:
     async def get_or_create(self, tg_id: int, *, default_locale: Locale) -> User:
         conn = await self._db.connect()
         now = utc_now_iso()
-        # Single transaction: insert-if-absent then select, so concurrent first
-        # messages cannot create duplicates.
-        await conn.execute("BEGIN")
-        try:
-            await conn.execute(
-                "INSERT INTO users (tg_id, locale, plan, created_at, last_seen_at) "
-                "VALUES (?, ?, 'free', ?, ?) "
-                "ON CONFLICT(tg_id) DO NOTHING",
-                (tg_id, default_locale.value, now, now),
-            )
-            await conn.execute(
-                "UPDATE users SET last_seen_at = ? WHERE tg_id = ?", (now, tg_id)
-            )
-            async with conn.execute("SELECT * FROM users WHERE tg_id = ?", (tg_id,)) as cur:
-                row = await cur.fetchone()
-            await conn.commit()
-        except Exception:
-            await conn.rollback()
-            raise
+        # The connection is autocommit; each statement is individually atomic.
+        # ``INSERT ... ON CONFLICT DO NOTHING`` makes concurrent first messages
+        # race-safe without an explicit (nestable) transaction.
+        await conn.execute(
+            "INSERT INTO users (tg_id, locale, plan, created_at, last_seen_at) "
+            "VALUES (?, ?, 'free', ?, ?) "
+            "ON CONFLICT(tg_id) DO NOTHING",
+            (tg_id, default_locale.value, now, now),
+        )
+        await conn.execute(
+            "UPDATE users SET last_seen_at = ? WHERE tg_id = ?", (now, tg_id)
+        )
+        async with conn.execute("SELECT * FROM users WHERE tg_id = ?", (tg_id,)) as cur:
+            row = await cur.fetchone()
         assert row is not None
         return row_to_user(row)
 

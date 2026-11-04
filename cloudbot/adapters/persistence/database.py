@@ -59,7 +59,12 @@ class Database:
             return self._conn
         if self._path != ":memory:":
             Path(self._path).parent.mkdir(parents=True, exist_ok=True)
-        conn = await aiosqlite.connect(self._path)
+        # Autocommit (isolation_level=None): statements are individually atomic and
+        # no implicit transaction is held on the shared connection. The bot
+        # processes updates concurrently, so an explicit BEGIN (or an implicit
+        # one) overlapping another would raise "cannot start a transaction within
+        # a transaction". Idempotent upserts keep multi-statement operations safe.
+        conn = await aiosqlite.connect(self._path, isolation_level=None)
         conn.row_factory = aiosqlite.Row
         await conn.execute("PRAGMA foreign_keys = ON")
         self._conn = conn
