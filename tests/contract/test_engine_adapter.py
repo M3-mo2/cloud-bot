@@ -443,3 +443,280 @@ async def test_list_sessions_parses_page():
     assert str(page.sessions[0].workspace_id) == WS
     await adapter.aclose()
 
+
+# -- packages (Phase 2a) -----------------------------------------------------
+PACKAGES = {
+    "packages": [{"name": "six", "version": "1.16.0"}],
+    "count": 1,
+    "truncated": False,
+    "shared_enabled": True,
+    "shared_available": False,
+    "shared_path": "",
+    "private_path": "/opt/python/private",
+}
+
+INSTALL_OK = {
+    "duration_ms": 10000,
+    "exit_code": 0,
+    "output": "Successfully installed six\n",
+    "stdout": "Successfully installed six\n",
+    "timed_out": False,
+    "truncated": False,
+    "target": "/opt/python/private",
+}
+
+INSTALL_FAILED = {
+    "duration_ms": 1200,
+    "exit_code": 1,
+    "output": "ERROR: Could not find a version that satisfies the requirement six\n",
+    "stdout": "",
+    "timed_out": False,
+    "truncated": False,
+    "target": "/opt/python/private",
+}
+
+
+async def test_list_packages_parses_envelope():
+    adapter = make_adapter({("GET", f"/v1/workspaces/{WS}/packages"): httpx.Response(200, json=PACKAGES)})
+    pkg_list = await adapter.list_packages(WS)
+    assert pkg_list.count == 1
+    assert pkg_list.packages[0].name == "six"
+    assert pkg_list.shared_enabled is True
+    assert pkg_list.private_path == "/opt/python/private"
+    await adapter.aclose()
+
+
+async def test_install_packages_parses_200_and_reports_exit_code():
+    adapter = make_adapter(
+        {("POST", f"/v1/workspaces/{WS}/packages/install"): httpx.Response(200, json=INSTALL_FAILED)}
+    )
+    result = await adapter.install_packages(WS, ["six"])
+    # A 200 with exit_code 1 is a FAILED install; the adapter keeps the code.
+    assert result.exit_code == 1
+    assert result.ok is False
+    assert "Could not find a version" in result.output
+    await adapter.aclose()
+
+
+async def test_install_packages_sends_packages_body():
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json=INSTALL_OK)
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    result = await adapter.install_packages(WS, ["six"])
+    assert captured["body"] == {"packages": ["six"]}
+    assert result.exit_code == 0
+    await adapter.aclose()
+
+
+async def test_remove_package_and_all_use_query_params():
+    captured: list[tuple[str, str]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append((request.url.path, request.url.query.decode()))
+        return httpx.Response(204)
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    await adapter.remove_package(WS, "six")
+    await adapter.remove_all_packages(WS)
+    assert captured == [
+        (f"/v1/workspaces/{WS}/packages", "name=six"),
+        (f"/v1/workspaces/{WS}/packages", "all=true"),
+    ]
+    await adapter.aclose()
+
+
+# -- tunnels (Phase 2b) ------------------------------------------------------
+TUNNEL = {
+    "id": "tnl_01M6HJASCWM9Z1PF755GT89NK4",
+    "workspace_id": WS,
+    "port": 8080,
+    "url": "https://example-abc.trycloudflare.com",
+    "status": "active",
+    "created_at": "2026-11-03T20:41:39Z",
+}
+
+
+async def test_create_tunnel_parses_201():
+    adapter = make_adapter(
+        {("POST", f"/v1/workspaces/{WS}/tunnels"): httpx.Response(201, json={"tunnel": TUNNEL})}
+    )
+    tunnel = await adapter.create_tunnel(WS, 8080)
+    assert tunnel.port == 8080
+    assert tunnel.url.startswith("https://")
+    await adapter.aclose()
+
+
+async def test_list_tunnels_parses_envelope():
+    adapter = make_adapter(
+        {("GET", f"/v1/workspaces/{WS}/tunnels"): httpx.Response(200, json={"tunnels": [TUNNEL]})}
+    )
+    tunnels = await adapter.list_tunnels(WS)
+    assert tunnels.count == 1
+    assert tunnels.tunnels[0].id == TUNNEL["id"]
+    await adapter.aclose()
+
+
+async def test_tunnels_disabled_422_carries_details():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/tunnels"): httpx.Response(
+                422,
+                json={
+                    "error": {
+                        "code": "tunnels_disabled",
+                        "message": "tunnels are not permitted for this workspace",
+                        "details": {"config": "limits.allow_tunnels", "field": "allow_tunnels"},
+                    }
+                },
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.create_tunnel(WS, 8080)
+    assert exc.value.engine_code == "tunnels_disabled"
+    assert exc.value.details["config"] == "limits.allow_tunnels"
+    assert exc.value.details["field"] == "allow_tunnels"
+    await adapter.aclose()
+
+
+async def test_too_many_tunnels_422():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/tunnels"): httpx.Response(
+                422, json={"error": {"code": "too_many_tunnels", "message": "", "details": {}}}
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.create_tunnel(WS, 8080)
+    assert exc.value.engine_code == "too_many_tunnels"
+    await adapter.aclose()
+
+
+async def test_tunnel_url_unavailable_504_is_refusal_not_retry():
+    """A 504 with a modelled code is a ``top-level`` refusal, never a blind retry.
+
+    The adapter retries idempotent verbs on 504, but a creation POST is never
+    retried, so the caller sees the documented ``tunnel_url_unavailable``.
+    """
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/tunnels"): httpx.Response(
+                504,
+                json={
+                    "error": {
+                        "code": "tunnel_url_unavailable",
+                        "message": "cloudflared produced no URL",
+                        "details": {"reason": "cloudflare 429"},
+                    }
+                },
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.create_tunnel(WS, 8080)
+    assert exc.value.engine_code == "tunnel_url_unavailable"
+    assert exc.value.details.get("reason") == "cloudflare 429"
+    await adapter.aclose()
+
+
+async def test_delete_tunnel_204():
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.method)
+        return httpx.Response(204)
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    await adapter.delete_tunnel(WS, TUNNEL["id"])
+    assert calls == ["DELETE"]
+    await adapter.aclose()
+
+
+# -- ports (Phase 2c) --------------------------------------------------------
+PORTS = {
+    "workspace_id": WS,
+    "ports": [
+        {
+            "port": 18090,
+            "protocol": "tcp",
+            "address": "0.0.0.0",
+            "scope": "wildcard",
+            "state": "LISTEN",
+            "attributed": True,
+            "pid": 890648,
+            "kind": "run",
+            "label": "python3 -c ...",
+            "argv": ["/bin/python3", "-c", "..."],
+            "owners": [890648],
+            "inode": 2726317911,
+        },
+        {
+            "port": 5353,
+            "protocol": "udp",
+            "address": "0.0.0.0",
+            "scope": "wildcard",
+            "state": "",
+            "attributed": False,
+        },
+    ],
+    "unix": [
+        {
+            "path": "/tmp/demo.sock",
+            "type": "stream",
+            "state": "unconnected",
+            "attributed": True,
+            "pid": 890654,
+            "kind": "run",
+        }
+    ],
+    "count": 2,
+    "unix_count": 1,
+    "complete": True,
+    "notes": [],
+    "pids_scanned": 2,
+    "fds_scanned": 8,
+    "reachability": "ports are listening inside the workspace's private network namespace; ...",
+}
+
+
+async def test_list_ports_parses_report():
+    adapter = make_adapter({("GET", f"/v1/workspaces/{WS}/ports"): httpx.Response(200, json=PORTS)})
+    report = await adapter.list_ports(WS)
+    assert report.count == 2
+    assert report.ports[0].port == 18090
+    assert report.ports[0].state == "LISTEN"
+    # UDP state is the empty string, not invented.
+    assert report.ports[1].state == ""
+    assert report.ports[1].attributed is False
+    assert report.unix_count == 1
+    assert report.reachability.startswith("ports are listening")
+    await adapter.aclose()
+
+
+async def test_list_ports_partial_flags_complete_false():
+    body = {**PORTS, "complete": False, "notes": ["pids_scanned reached max_pids=64"]}
+    adapter = make_adapter({("GET", f"/v1/workspaces/{WS}/ports"): httpx.Response(200, json=body)})
+    report = await adapter.list_ports(WS)
+    assert report.complete is False
+    assert report.notes
+    await adapter.aclose()
+
+
+async def test_ports_disabled_404():
+    adapter = make_adapter(
+        {
+            ("GET", f"/v1/workspaces/{WS}/ports"): httpx.Response(
+                404, json={"error": {"code": "ports_disabled", "message": "", "details": {}}}
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.list_ports(WS)
+    assert exc.value.engine_code == "ports_disabled"
+    await adapter.aclose()
+

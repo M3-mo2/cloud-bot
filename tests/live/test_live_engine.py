@@ -115,3 +115,74 @@ async def test_live_native_session_terminal_cycle():
                 await adapter.get_workspace(WorkspaceId(str(created.id)))
         await adapter.aclose()
 
+
+@pytest.mark.skipif(not LIVE, reason="set CLOUDBOT_LIVE_ENGINE=1 to run against a real engine")
+async def test_live_packages_ports_and_tunnel_gate():
+    """Phase 2 reads against a real engine, using an existing workspace read-only.
+
+    Never creates a workspace (the operator's is used read-only) and never
+    installs a package (that would mutate his environment). Each read is paired
+    with a **positive control** so an empty list from a broken call cannot pass:
+    the packages envelope carries ``private_path``; the ports envelope carries the
+    ``reachability`` sentence. The tunnel gate must be refused with the documented
+    code on a workspace without ``allow_tunnels``. If a publish does succeed (a
+    workspace that allows it), the tunnel is deleted in the same run and the list
+    is asserted back to empty.
+    """
+    adapter = EngineAdapter.create(ENGINE_URL, _read_key(), timeout_s=30.0, max_retries=0)
+    try:
+        meta = await adapter.meta(refresh=True)
+        assert meta.api_version == "v1", "positive control: /v1/meta answered"
+
+        workspaces = await adapter.list_workspaces()
+        assert workspaces, "positive control: at least one workspace exists"
+        ws = workspaces[0]
+
+        # -- 2a packages (read-only) -----------------------------------------
+        pkg_list = await adapter.list_packages(ws.id)
+        # Positive control: the call happened and parsed a real envelope.
+        assert pkg_list.private_path, "positive control: packages call returned 200"
+        assert pkg_list.count == len(pkg_list.packages)
+
+        # -- 2c ports (read-only) --------------------------------------------
+        report = await adapter.list_ports(ws.id)
+        # Positive control: a broken/empty call would not carry this sentence.
+        assert report.reachability, "positive control: ports call returned 200"
+        assert report.count == len(report.ports)
+        assert report.unix_count == len(report.unix)
+
+        # -- 2b tunnels: list is a read; create is gated --------------------
+        tunnels = await adapter.list_tunnels(ws.id)
+        assert tunnels.count == len(tunnels.tunnels)
+
+        created_tunnel = None
+        try:
+            tunnel = await adapter.create_tunnel(ws.id, 8080)
+            created_tunnel = tunnel
+        except EngineRefused as exc:
+            assert exc.engine_code == "tunnels_disabled", (
+                f"expected the documented gate refusal, got {exc.engine_code}"
+            )
+            # The gate names the switch that is off.
+            assert exc.details.get("field") in ("allow_tunnels", "allow_net", "enabled")
+        finally:
+            if created_tunnel is not None:
+                await adapter.delete_tunnel(ws.id, created_tunnel.id)
+
+        # No leftover tunnels after this run.
+        after = await adapter.list_tunnels(ws.id)
+        assert after.count == 0 or created_tunnel is None
+        lease = {t.id for t in after.tunnels}
+        if created_tunnel is not None:
+            assert created_tunnel.id not in lease, "the created tunnel must be gone"
+
+        # The workspace we used must still be present.
+        still = await adapter.get_workspace(ws.id)
+        assert str(still.id) == str(ws.id)
+
+        # No leftover running sessions were created by this test.
+        page = await adapter.list_sessions(ws.id, status="running")
+        assert page.total == 0, f"unexpected running sessions: {page.total}"
+    finally:
+        await adapter.aclose()
+

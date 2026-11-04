@@ -19,11 +19,19 @@ from cloudbot.domain.value_objects import (
     ExecResult,
     FileContent,
     FilePage,
+    InstallResult,
     LifecycleResult,
     Limits,
+    Package,
+    PackageList,
+    PortEntry,
+    PortReport,
     RunPage,
     RunStatus,
     SummaryState,
+    Tunnel,
+    TunnelList,
+    UnixSocket,
     WorkspaceStatus,
     WorkspaceSummary,
 )
@@ -32,13 +40,17 @@ from cloudbot.domain.meta import EngineMeta
 from cloudbot.presentation.mapping import errors as error_mapping
 from cloudbot.presentation.screens import files as file_screens
 from cloudbot.presentation.screens import menu as menu_screens
+from cloudbot.presentation.screens import packages as pkg_screens
+from cloudbot.presentation.screens import ports as port_screens
 from cloudbot.presentation.screens import run as run_screens
 from cloudbot.presentation.screens import terminal as term_screens
+from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.presentation.screens import run_logs as history_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.presentation.screens.language import language_card, language_picker
 from cloudbot.presentation.keyboards.callbacks import CallbackCodec
 from cloudbot.domain.value_objects import SessionStatus
+from cloudbot.services.packages import InstallOutcome
 
 EXPECTED = Path(__file__).resolve().parent / "expected"
 NOW = datetime(2026, 11, 3, 20, 43, 39, tzinfo=timezone.utc)
@@ -156,6 +168,122 @@ def _fixtures():
         diagnostic="sandbox unavailable: PTY allocation failed",
     )
     meta = EngineMeta(version="0.0.20", api_version="v1")
+    package_list = PackageList(
+        packages=(Package(name="six", version="1.16.0"), Package(name="requests", version="2.32.0")),
+        count=2,
+        truncated=False,
+        shared_enabled=True,
+        shared_available=False,
+        shared_path="",
+        private_path="/opt/python/private",
+    )
+    empty_package_list = PackageList(
+        packages=(),
+        count=0,
+        truncated=False,
+        shared_enabled=True,
+        shared_available=True,
+        shared_path="/opt/python/shared",
+        private_path="/opt/python/private",
+    )
+    install_ok = InstallOutcome(
+        result=InstallResult(
+            exit_code=0,
+            output="Successfully installed six requests\n",
+            stdout="Successfully installed six requests\n",
+            duration_ms=10_000,
+            timed_out=False,
+            truncated=False,
+            target="/opt/python/private",
+        ),
+        allow_net=True,
+    )
+    install_failed_no_net = InstallOutcome(
+        result=InstallResult(
+            exit_code=1,
+            output="ERROR: Could not find a version that satisfies the requirement requests\n",
+            stdout="",
+            duration_ms=1200,
+            timed_out=False,
+            truncated=False,
+            target="/opt/python/private",
+        ),
+        allow_net=False,
+    )
+    tunnel_list = TunnelList(
+        tunnels=(
+            Tunnel(
+                id="tnl_01M6HJASCWM9Z1PF755GT89NK4",
+                workspace_id=str(ws.id),
+                port=8080,
+                url="https://example-abc.trycloudflare.com",
+                status="active",
+                created_at=NOW,
+            ),
+        )
+    )
+    empty_tunnel_list = TunnelList(tunnels=())
+    port_report = PortReport(
+        workspace_id=str(ws.id),
+        ports=(
+            PortEntry(
+                port=8080,
+                protocol="tcp",
+                address="0.0.0.0",
+                scope="wildcard",
+                state="LISTEN",
+                attributed=True,
+                pid=890648,
+                kind="run",
+                label="python3 -m http.server 8080",
+                argv=("python3", "-m", "http.server", "8080"),
+                owners=(890648,),
+                inode=2726317911,
+            ),
+            PortEntry(
+                port=5353,
+                protocol="udp",
+                address="0.0.0.0",
+                scope="wildcard",
+                state="",
+                attributed=False,
+                owners=(),
+            ),
+        ),
+        unix=(
+            UnixSocket(
+                path="/tmp/demo.sock",
+                type="stream",
+                state="unconnected",
+                attributed=True,
+                pid=890654,
+                kind="session",
+            ),
+        ),
+        count=2,
+        unix_count=1,
+        complete=True,
+        notes=(),
+        pids_scanned=2,
+        fds_scanned=8,
+        reachability=(
+            "ports are listening inside the workspace's private network namespace; "
+            "this does not mean they are reachable from outside. Publishing a port "
+            "requires a tunnel (limits.allow_tunnels and tunnels.enabled)."
+        ),
+    )
+    partial_port_report = PortReport(
+        workspace_id=str(ws.id),
+        ports=port_report.ports[:1],
+        unix=(),
+        count=1,
+        unix_count=0,
+        complete=False,
+        notes=("pids_scanned reached max_pids=64",),
+        pids_scanned=64,
+        fds_scanned=512,
+        reachability=port_report.reachability,
+    )
     return dict(
         ws=ws,
         suspended=suspended,
@@ -172,6 +300,14 @@ def _fixtures():
         ended_session=ended_session,
         failed_session=failed_session,
         meta=meta,
+        package_list=package_list,
+        empty_package_list=empty_package_list,
+        install_ok=install_ok,
+        install_failed_no_net=install_failed_no_net,
+        tunnel_list=tunnel_list,
+        empty_tunnel_list=empty_tunnel_list,
+        port_report=port_report,
+        partial_port_report=partial_port_report,
     )
 
 
@@ -225,6 +361,35 @@ SCREEN_BUILDERS = {
     "err_workspace_suspended": lambda f, loc: error_mapping.error_code_screen("workspace_suspended", loc),
     "err_unprocessable": lambda f, loc: error_mapping.error_code_screen("unprocessable", loc),
     "err_not_found": lambda f, loc: error_mapping.error_code_screen("not_found", loc),
+    # -- Phase 2a: packages --------------------------------------------------
+    "package_list": lambda f, loc: pkg_screens.packages_screen(f["package_list"], f["ws"].id, loc),
+    "package_list_empty": lambda f, loc: pkg_screens.packages_screen(f["empty_package_list"], f["ws"].id, loc),
+    "package_install_prompt": lambda f, loc: pkg_screens.install_prompt(f["ws"].id, loc),
+    "package_install_working": lambda f, loc: pkg_screens.installing_screen(f["ws"].id, loc),
+    "package_install_ok": lambda f, loc: pkg_screens.install_result_screen(f["install_ok"], "six requests", f["ws"].id, loc),
+    "package_install_failed_no_net": lambda f, loc: pkg_screens.install_result_screen(
+        f["install_failed_no_net"], "requests", f["ws"].id, loc
+    ),
+    "package_remove_prompt": lambda f, loc: pkg_screens.remove_prompt(f["ws"].id, loc),
+    "package_remove_all_confirm": lambda f, loc: pkg_screens.remove_all_confirm("demo", f["ws"].id, loc),
+    # -- Phase 2b: tunnels ---------------------------------------------------
+    "tunnel_list": lambda f, loc: tnl_screens.tunnels_screen(f["tunnel_list"], f["ws"].id, loc),
+    "tunnel_list_empty": lambda f, loc: tnl_screens.tunnels_screen(f["empty_tunnel_list"], f["ws"].id, loc),
+    "tunnel_gate_allow_tunnels": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, allow_tunnels=False
+    ),
+    "tunnel_gate_allow_net": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, allow_net=False
+    ),
+    "tunnel_gate_server": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, server_enabled=False
+    ),
+    "tunnel_publish": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[8080]),
+    "tunnel_publish_custom": lambda f, loc: tnl_screens.publish_custom_prompt(f["ws"].id, loc),
+    "tunnel_remove_confirm": lambda f, loc: tnl_screens.remove_confirm(f["tunnel_list"].tunnels[0], f["ws"].id, loc),
+    # -- Phase 2c: ports -----------------------------------------------------
+    "port_list": lambda f, loc: port_screens.ports_screen(f["port_report"], f["ws"].id, loc),
+    "port_list_partial": lambda f, loc: port_screens.ports_screen(f["partial_port_report"], f["ws"].id, loc),
 }
 
 

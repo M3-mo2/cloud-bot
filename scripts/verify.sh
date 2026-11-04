@@ -64,5 +64,75 @@ PY
 echo "== 5. offset protocol + session_ended after close =="
 "$PY" -m pytest -q tests/unit/test_sessions.py tests/contract/test_engine_adapter.py -k "session or offset or fifo or terminal"
 
+echo "== 6. the install result is honest (non-zero exit_code ⇒ failure screen) =="
+"$PY" - <<'PY'
+import sys
+from cloudbot.core.locale import Locale
+from cloudbot.domain.value_objects import InstallResult
+from cloudbot.services.packages import InstallOutcome
+from cloudbot.presentation.screens import packages as pkg
+
+# A 200 response whose payload carries exit_code 1 must render as a FAILURE.
+failed = InstallOutcome(
+    result=InstallResult(exit_code=1, output="pip: error", stdout="", duration_ms=100,
+                         timed_out=False, truncated=False, target="/opt/python/private"),
+    allow_net=False,
+)
+screen = pkg.install_result_screen(failed, "six", "ws_x", Locale.EN)
+html = screen.doc.html
+assert "failed" in html.lower() or "❌" in html, "failed install did not render as failure"
+assert "no internet" in html.lower(), "allow_net explanation missing for the no-net failure"
+# And a zero exit_code renders as success.
+ok = InstallOutcome(
+    result=InstallResult(exit_code=0, output="ok", stdout="ok", duration_ms=100,
+                         timed_out=False, truncated=False, target="/opt/python/private"),
+    allow_net=True,
+)
+assert "installed" in pkg.install_result_screen(ok, "six", "ws_x", Locale.EN).doc.html.lower()
+print("OK: exit_code drives the result screen; the no-net failure is explained in words")
+PY
+
+echo "== 7. the tunnel URL is never cached (LINK button on the live screen only) =="
+"$PY" - <<'PY'
+import pathlib, sys
+# (a) Nothing in persistence stores a tunnel or a url.
+persistence = list(pathlib.Path("cloudbot/adapters/persistence").rglob("*.py"))
+persistence += list(pathlib.Path("cloudbot/adapters/persistence/migrations").glob("*.sql"))
+joined = "\n".join(p.read_text(encoding="utf-8") for p in persistence)
+assert "tunnel" not in joined.lower(), "persistence layer mentions tunnels (it must not store them)"
+# (b) The tunnel screen carries the URL only as a LINK button, never as text.
+from cloudbot.core.locale import Locale
+from cloudbot.domain.value_objects import Tunnel, TunnelList, WorkspaceId
+from cloudbot.presentation.screens import tunnels as tnl
+
+URL = "https://secret-abc.trycloudflare.com"
+tl = TunnelList(tunnels=(Tunnel(id="tnl_x", workspace_id="ws_x", port=8080, url=URL,
+                               status="active"),))
+screen = tnl.tunnels_screen(tl, WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4"), Locale.EN)
+assert URL not in screen.doc.html, "the ephemeral URL leaked into the stored screen text"
+links = [b for row in screen.markup.inline_keyboard for b in row if getattr(b, "url", None)]
+assert any(b.url == URL and b.style == "link" for b in links), "the URL is not a LINK button"
+print("OK: URL only travels as a LINK button; never persisted, never rendered as text")
+PY
+
+echo "== 8. the three tunnel gates are distinguished =="
+"$PY" -m pytest -q tests/unit/test_features.py -k "gate or three"
+
+echo "== 9. the reachability sentence is present verbatim as a blockquote =="
+"$PY" - <<'PY'
+from cloudbot.core.locale import Locale
+from cloudbot.domain.value_objects import PortReport, WorkspaceId
+from cloudbot.presentation.screens import ports as port_screens
+
+SENTENCE = ("ports are listening inside the private network namespace; "
+            "this does not mean they are reachable from outside.")
+report = PortReport(workspace_id="ws_x", ports=(), unix=(), count=0, unix_count=0,
+                    complete=True, notes=(), pids_scanned=0, fds_scanned=0,
+                    reachability=SENTENCE)
+html = port_screens.ports_screen(report, WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4"), Locale.EN).doc.html
+assert f"<blockquote>{SENTENCE}</blockquote>" in html, "reachability is not a verbatim blockquote"
+print("OK: the reachability sentence is surfaced verbatim inside <blockquote>")
+PY
+
 echo
-echo "all five proofs passed"
+echo "all nine proofs passed"

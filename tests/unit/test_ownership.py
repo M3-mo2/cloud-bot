@@ -14,7 +14,10 @@ from cloudbot.services.account import AccountService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.ownership import OwnershipService
+from cloudbot.services.packages import PackagesService
+from cloudbot.services.ports import PortsService
 from cloudbot.services.sessions import SessionsService
+from cloudbot.services.tunnels import TunnelsService
 from cloudbot.services.workspaces import WorkspacesService
 from cloudbot.core.locale import Locale
 
@@ -55,6 +58,9 @@ async def _setup(engine, users, sessions):
             "files": FilesService(spy, ownership),
             "execution": ExecutionService(spy, ownership),
             "sessions": SessionsService(spy, sessions, ownership),
+            "packages": PackagesService(spy, ownership),
+            "tunnels": TunnelsService(spy, ownership),
+            "ports": PortsService(spy, ownership),
         },
     )()
     return spy, services
@@ -66,6 +72,9 @@ def _scoped_calls(services):
     f = services.files
     e = services.execution
     s = services.sessions
+    p = services.packages
+    t = services.tunnels
+    po = services.ports
     return {
         "workspaces.get": lambda: w.get(2, WS),
         "workspaces.patch": lambda: w.patch(2, WS, name="y"),
@@ -97,6 +106,14 @@ def _scoped_calls(services):
         "sessions.resize": lambda: s.resize(2, WS, "ses_x", cols=100, rows=40),
         "sessions.signal": lambda: s.signal(2, WS, "ses_x", "INT"),
         "sessions.close": lambda: s.close(2, WS, "ses_x"),
+        "packages.list": lambda: p.list(2, WS),
+        "packages.install": lambda: p.install(2, WS, ["six"]),
+        "packages.remove": lambda: p.remove(2, WS, "six"),
+        "packages.remove_all": lambda: p.remove_all(2, WS),
+        "tunnels.list": lambda: t.list(2, WS),
+        "tunnels.publish": lambda: t.publish(2, WS, 8080),
+        "tunnels.remove": lambda: t.remove(2, WS, "tnl_x"),
+        "ports.list": lambda: po.list(2, WS),
     }
 
 
