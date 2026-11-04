@@ -12,12 +12,15 @@ from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.core.locale import Locale
 from cloudbot.services.account import AccountService
+from cloudbot.services.archives import ArchivesService
 from cloudbot.services.bundle import Services
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
+from cloudbot.services.metrics import MetricsService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
 from cloudbot.services.ports import PortsService
+from cloudbot.services.processes import ProcessesService
 from cloudbot.services.sessions import SessionsService
 from cloudbot.services.tunnels import TunnelsService
 from cloudbot.services.workspaces import WorkspacesService
@@ -62,6 +65,9 @@ async def services(engine, users, sessions):
         packages=PackagesService(engine, ownership),
         tunnels=TunnelsService(engine, ownership),
         ports=PortsService(engine, ownership),
+        metrics=MetricsService(engine, ownership),
+        processes=ProcessesService(engine, ownership),
+        archives=ArchivesService(engine, ownership),
     )
 
 

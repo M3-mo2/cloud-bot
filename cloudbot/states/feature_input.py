@@ -14,3 +14,6 @@ class FeatureInput(StatesGroup):
     awaiting_package_install = State()
     awaiting_package_remove = State()
     awaiting_port = State()
+    awaiting_archive_upload = State()
+    awaiting_archive_extract = State()
+    awaiting_archive_export = State()
