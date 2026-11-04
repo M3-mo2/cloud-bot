@@ -16,6 +16,8 @@ import pytest
 from cloudbot.core.locale import Locale
 from cloudbot.adapters.cloud_service.fake import _ws
 from cloudbot.domain.value_objects import (
+    ArchiveEntry,
+    ArchiveResult,
     ExecResult,
     FileContent,
     FilePage,
@@ -26,22 +28,29 @@ from cloudbot.domain.value_objects import (
     PackageList,
     PortEntry,
     PortReport,
+    ProcessEntry,
+    ProcessList,
+    ProcessStopResult,
     RunPage,
     RunStatus,
     SummaryState,
     Tunnel,
     TunnelList,
     UnixSocket,
+    WorkspaceMetrics,
     WorkspaceStatus,
     WorkspaceSummary,
 )
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.presentation.mapping import errors as error_mapping
+from cloudbot.presentation.screens import archives as arc_screens
 from cloudbot.presentation.screens import files as file_screens
 from cloudbot.presentation.screens import menu as menu_screens
+from cloudbot.presentation.screens import metrics as met_screens
 from cloudbot.presentation.screens import packages as pkg_screens
 from cloudbot.presentation.screens import ports as port_screens
+from cloudbot.presentation.screens import processes as proc_screens
 from cloudbot.presentation.screens import run as run_screens
 from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
@@ -284,6 +293,101 @@ def _fixtures():
         fds_scanned=512,
         reachability=port_report.reachability,
     )
+    metrics = WorkspaceMetrics(
+        workspace_id=str(ws.id),
+        timestamp="2026-11-04T16:06:07Z",
+        interval_seconds=3,
+        ram_used_bytes=18_874_368,
+        ram_limit_bytes=536_870_912,
+        ram_percent=3.5,
+        ram_complete=True,
+        disk_used_bytes=6089,
+        disk_limit_bytes=1_073_741_824,
+        disk_percent=0.0006,
+        disk_complete=True,
+        write_rate_limit_mb_s=0,
+        live_runs=2,
+        live_cgroups=2,
+    )
+    metrics_idle = WorkspaceMetrics(
+        workspace_id=str(ws.id),
+        timestamp="2026-11-04T16:06:07Z",
+        interval_seconds=3,
+        ram_used_bytes=0,
+        ram_limit_bytes=536_870_912,
+        ram_percent=0.0,
+        ram_complete=True,
+        disk_used_bytes=0,
+        disk_limit_bytes=1_073_741_824,
+        disk_percent=0.0,
+        disk_complete=False,
+        write_rate_limit_mb_s=0,
+        live_runs=0,
+        live_cgroups=0,
+    )
+    process_list = ProcessList(
+        processes=(
+            ProcessEntry(
+                id="proc_0123456789abcdef",
+                pid=179173,
+                ppid=179172,
+                argv=("python3", "bot.py"),
+                kind="session",
+                source_id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+                started_at=NOW,
+            ),
+            ProcessEntry(
+                id="proc_fedcba9876543210",
+                pid=179200,
+                ppid=1,
+                argv=("sleep", "600"),
+                kind="detached",
+                source_id="",
+                started_at=NOW,
+            ),
+        ),
+        count=2,
+    )
+    empty_process_list = ProcessList(processes=(), count=0)
+    stop_stopped = ProcessStopResult(
+        process_id="proc_0123456789abcdef", status="stopped", stopped=True, stopped_at=NOW
+    )
+    stop_gone = ProcessStopResult(
+        process_id="proc_0123456789abcdef", status="gone", stopped=False, stopped_at=NOW
+    )
+    archive_result = ArchiveResult(
+        format="zip",
+        destination="/",
+        entries_total=3,
+        entries_extracted=1,
+        entries_skipped=1,
+        entries_rejected=1,
+        bytes_written=15,
+        dry_run=False,
+        entries=(
+            ArchiveEntry(name="src/main.py", path="/src/main.py", type="file", size=15,
+                         mode="-rw-r--r--", rejected=False, skipped=False),
+            ArchiveEntry(name="__MACOSX/._x", path="/__MACOSX/._x", type="file", size=0,
+                         mode="-rw-r--r--", rejected=False, skipped=True, skip_reason="junk"),
+            ArchiveEntry(name="../evil", path="/evil", type="file", size=0,
+                         mode="-rw-r--r--", rejected=True, skipped=False,
+                         reason="archive_unsafe_entry"),
+        ),
+    )
+    archive_dry_run = ArchiveResult(
+        format="zip",
+        destination="/dst",
+        entries_total=2,
+        entries_extracted=0,
+        entries_skipped=1,
+        entries_rejected=0,
+        bytes_written=0,
+        dry_run=True,
+        entries=(
+            ArchiveEntry(name="src/main.py", path="/dst/src/main.py", type="file", size=15,
+                         mode="-rw-r--r--", rejected=False, skipped=False),
+        ),
+    )
     return dict(
         ws=ws,
         suspended=suspended,
@@ -308,6 +412,14 @@ def _fixtures():
         empty_tunnel_list=empty_tunnel_list,
         port_report=port_report,
         partial_port_report=partial_port_report,
+        metrics=metrics,
+        metrics_idle=metrics_idle,
+        process_list=process_list,
+        empty_process_list=empty_process_list,
+        stop_stopped=stop_stopped,
+        stop_gone=stop_gone,
+        archive_result=archive_result,
+        archive_dry_run=archive_dry_run,
     )
 
 
@@ -390,6 +502,27 @@ SCREEN_BUILDERS = {
     # -- Phase 2c: ports -----------------------------------------------------
     "port_list": lambda f, loc: port_screens.ports_screen(f["port_report"], f["ws"].id, loc),
     "port_list_partial": lambda f, loc: port_screens.ports_screen(f["partial_port_report"], f["ws"].id, loc),
+    # -- Phase 2d: metrics ---------------------------------------------------
+    "metrics": lambda f, loc: met_screens.metrics_screen(f["metrics"], f["ws"].id, loc),
+    "metrics_idle_incomplete": lambda f, loc: met_screens.metrics_screen(f["metrics_idle"], f["ws"].id, loc),
+    # -- Phase 2e: processes -------------------------------------------------
+    "process_list": lambda f, loc: proc_screens.processes_screen(f["process_list"], f["ws"].id, loc),
+    "process_list_empty": lambda f, loc: proc_screens.processes_screen(f["empty_process_list"], f["ws"].id, loc),
+    "process_stop_confirm": lambda f, loc: proc_screens.stop_confirm(f["process_list"].processes[0], f["ws"].id, loc),
+    "process_stopped": lambda f, loc: proc_screens.stop_result_screen(f["stop_stopped"], f["ws"].id, loc),
+    "process_gone": lambda f, loc: proc_screens.stop_result_screen(f["stop_gone"], f["ws"].id, loc),
+    # -- Phase 2g: archives --------------------------------------------------
+    "archive_menu": lambda f, loc: arc_screens.archive_menu(f["ws"].id, loc),
+    "archive_upload_prompt": lambda f, loc: arc_screens.upload_prompt(f["ws"].id, 50, loc),
+    "archive_extract_prompt": lambda f, loc: arc_screens.extract_prompt(f["ws"].id, loc),
+    "archive_export_prompt": lambda f, loc: arc_screens.export_prompt(f["ws"].id, loc),
+    "archive_result": lambda f, loc: arc_screens.archive_result_screen(f["archive_result"], f["ws"].id, loc),
+    "archive_dry_run": lambda f, loc: arc_screens.dry_run_prompt(
+        f["archive_dry_run"], f["ws"].id, loc, action="extract", target="/bundle.zip"
+    ),
+    "archive_export_done": lambda f, loc: arc_screens.export_done_screen(
+        "project.zip", 4096, f["ws"].id, loc
+    ),
 }
 
 

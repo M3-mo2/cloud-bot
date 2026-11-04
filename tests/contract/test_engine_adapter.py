@@ -720,3 +720,268 @@ async def test_ports_disabled_404():
     assert exc.value.engine_code == "ports_disabled"
     await adapter.aclose()
 
+
+# -- metrics (Phase 2d) ------------------------------------------------------
+METRICS = {
+    "timestamp": "2026-11-04T16:06:07Z",
+    "interval_seconds": 3,
+    "workspaces": [
+        {
+            "workspace_id": WS,
+            "ram_used_bytes": 0,
+            "ram_limit_bytes": 536870912,
+            "ram_percent": 0,
+            "ram_complete": True,
+            "disk_used_bytes": 6089,
+            "disk_limit_bytes": 1073741824,
+            "disk_percent": 0.0006,
+            "disk_complete": True,
+            "write_rate_limit_mb_s": 0,
+            "live_runs": 0,
+            "live_cgroups": 0,
+        }
+    ],
+    "sampler": {"ticks": 4, "cgroup_reads": 0, "statfs_reads": 6,
+                "tree_walk_reads": 0, "subscribers": 0, "running": 0,
+                "dropped_frames": 0, "candidates": 1},
+}
+
+
+async def test_workspace_metrics_parses_frame():
+    adapter = make_adapter({("GET", f"/v1/workspaces/{WS}/metrics"): httpx.Response(200, json=METRICS)})
+    metrics = await adapter.workspace_metrics(WS)
+    assert metrics.workspace_id == WS
+    assert metrics.interval_seconds == 3
+    assert metrics.ram_used_bytes == 0
+    assert metrics.ram_complete is True
+    assert metrics.disk_used_bytes == 6089
+    assert metrics.disk_complete is True
+    await adapter.aclose()
+
+
+async def test_workspace_metrics_honours_incomplete_flag():
+    body = {
+        **METRICS,
+        "workspaces": [{**METRICS["workspaces"][0], "disk_used_bytes": 0, "disk_complete": False}],
+    }
+    adapter = make_adapter({("GET", f"/v1/workspaces/{WS}/metrics"): httpx.Response(200, json=body)})
+    metrics = await adapter.workspace_metrics(WS)
+    # The honesty flag is carried through untouched; a false figure is not a zero.
+    assert metrics.disk_complete is False
+    assert metrics.ram_complete is True
+    await adapter.aclose()
+
+
+# -- processes (Phase 2e) ----------------------------------------------------
+PROCESSES = {
+    "processes": [
+        {
+            "id": "proc_0123456789abcdef",
+            "pid": 179173,
+            "ppid": 179172,
+            "argv": ["python3", "bot.py"],
+            "kind": "session",
+            "source_id": "ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+            "started_at": "2026-11-04T16:06:07Z",
+        },
+        {
+            "id": "proc_fedcba9876543210",
+            "pid": 179200,
+            "ppid": 1,
+            "argv": ["sleep", "600"],
+            "kind": "detached",
+            "source_id": "",
+            "started_at": "2026-11-04T16:06:08Z",
+        },
+    ],
+    "count": 2,
+}
+
+
+async def test_list_processes_parses_inventory():
+    adapter = make_adapter({("GET", f"/v1/workspaces/{WS}/processes"): httpx.Response(200, json=PROCESSES)})
+    pl = await adapter.list_processes(WS)
+    assert pl.count == 2
+    assert pl.processes[0].id == "proc_0123456789abcdef"
+    assert pl.processes[0].kind == "session"
+    # A detached process is reported, never hidden.
+    assert pl.processes[1].kind == "detached"
+    assert pl.processes[1].source_id == ""
+    await adapter.aclose()
+
+
+async def test_list_processes_empty_is_200_with_positive_control():
+    """An empty inventory is an honest 200 — proven, not inferred from a blank."""
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        return httpx.Response(200, json={"processes": [], "count": 0})
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    pl = await adapter.list_processes(WS)
+    # Positive control: the call actually happened and answered 200.
+    assert calls == [f"/v1/workspaces/{WS}/processes"]
+    assert pl.count == 0
+    assert pl.processes == ()
+    await adapter.aclose()
+
+
+async def test_stop_process_parses_stopped():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/processes/proc_0123456789abcdef/stop"): httpx.Response(
+                200,
+                json={"process_id": "proc_0123456789abcdef", "status": "stopped",
+                      "stopped": True, "stopped_at": "2026-11-04T16:06:09Z"},
+            )
+        }
+    )
+    result = await adapter.stop_process(WS, "proc_0123456789abcdef")
+    assert result.status == "stopped"
+    assert result.stopped is True
+    assert result.gone is False
+    await adapter.aclose()
+
+
+async def test_stop_process_gone_and_repeat_404():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/processes/proc_1111111111111111/stop"): httpx.Response(
+                200,
+                json={"process_id": "proc_1111111111111111", "status": "gone",
+                      "stopped": False, "stopped_at": "2026-11-04T16:06:09Z"},
+            ),
+            ("POST", f"/v1/workspaces/{WS}/processes/proc_2222222222222222/stop"): httpx.Response(
+                404, json={"error": {"code": "not_found", "message": "", "details": {}}}
+            ),
+        }
+    )
+    gone = await adapter.stop_process(WS, "proc_1111111111111111")
+    assert gone.status == "gone"
+    assert gone.stopped is False
+    assert gone.gone is True
+    # A second stop is a 404 because the process left the inventory.
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.stop_process(WS, "proc_2222222222222222")
+    assert exc.value.engine_code == "not_found"
+    await adapter.aclose()
+
+
+# -- archives (Phase 2g) -----------------------------------------------------
+ARCHIVE_RESULT = {
+    "format": "zip",
+    "destination": "/",
+    "entries_total": 5,
+    "entries_extracted": 4,
+    "entries_skipped": 1,
+    "entries_rejected": 0,
+    "bytes_written": 51,
+    "dry_run": False,
+    "entries": [
+        {"name": "src/main.py", "path": "/src/main.py", "type": "file", "size": 15,
+         "mode": "-rw-r--r--", "rejected": False, "skipped": False},
+    ],
+}
+
+
+async def test_upload_and_extract_is_multipart_and_parses_result():
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["content_type"] = request.headers.get("content-type", "")
+        captured["body"] = request.content
+        return httpx.Response(200, json=ARCHIVE_RESULT)
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    result = await adapter.upload_and_extract(
+        WS, filename="project.zip", data=b"PK\x03\x04payload", path="/dst", dry_run=True
+    )
+    # The upload is multipart — never the JSON helper.
+    assert captured["content_type"].startswith("multipart/form-data")
+    assert b'name="archive"' in captured["body"]
+    assert b'name="path"' in captured["body"]
+    assert b"project.zip" in captured["body"]
+    assert b'name="dry_run"' in captured["body"]
+    assert result.format == "zip"
+    assert result.entries_total == 5
+    assert result.entries_extracted == 4
+    assert result.entries_skipped == 1
+    await adapter.aclose()
+
+
+async def test_extract_archive_sends_json_body():
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json=ARCHIVE_RESULT)
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    await adapter.extract_archive(WS, path="/bundle.zip", dest="/out", dry_run=True)
+    assert captured["body"] == {"path": "/bundle.zip", "dest": "/out",
+                                "overwrite": False, "dry_run": True}
+    await adapter.aclose()
+
+
+async def test_export_archive_reads_raw_bytes_not_json():
+    zip_bytes = b"PK\x03\x04\x14\x00\x00\x00binaryzipcontent"
+    calls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        return httpx.Response(
+            200, content=zip_bytes, headers={"Content-Type": "application/zip"}
+        )
+
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=httpx.MockTransport(handler))
+    data = await adapter.export_archive(WS, "/project")
+    assert calls == [f"/v1/workspaces/{WS}/files/archive"]
+    # The bytes survive untouched — never parsed as JSON.
+    assert data == zip_bytes
+    await adapter.aclose()
+
+
+@pytest.mark.parametrize(
+    "status,code",
+    [
+        (409, "archive_entry_exists"),
+        (413, "archive_too_large"),
+        (413, "archive_too_many_entries"),
+        (413, "archive_ratio_exceeded"),
+        (413, "payload_too_large"),
+        (415, "unsupported_archive"),
+        (422, "archive_encrypted"),
+        (422, "archive_multivolume"),
+        (422, "archive_unsafe_entry"),
+        (422, "unprocessable"),
+        (507, "insufficient_storage"),
+    ],
+)
+async def test_every_archive_refusal_code_translates(status, code):
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/files/extract"): httpx.Response(
+                status, json={"error": {"code": code, "message": "m", "details": {}}}
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.extract_archive(WS, path="/x.zip")
+    assert exc.value.engine_code == code
+    await adapter.aclose()
+
+
+async def test_extract_missing_source_is_404_not_found():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/files/extract"): httpx.Response(
+                404, json={"error": {"code": "not_found", "message": "file not found", "details": {}}}
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.extract_archive(WS, path="/nope.txt")
+    assert exc.value.engine_code == "not_found"
+    await adapter.aclose()
+

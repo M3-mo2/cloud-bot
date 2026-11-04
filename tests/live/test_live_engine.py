@@ -8,7 +8,10 @@ never printed.
 
 from __future__ import annotations
 
+import base64
+import io
 import os
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -185,4 +188,104 @@ async def test_live_packages_ports_and_tunnel_gate():
         assert page.total == 0, f"unexpected running sessions: {page.total}"
     finally:
         await adapter.aclose()
+
+
+@pytest.mark.skipif(not LIVE, reason="set CLOUDBOT_LIVE_ENGINE=1 to run against a real engine")
+async def test_live_metrics_processes_and_archive_dry_run_round_trip():
+    """Phase 2d/2e/2g: metrics, the process inventory, and a full archive round trip.
+
+    Uses the operator's **existing** workspace (never creating or deleting one)
+    and confines every mutation to ``/.phase2deg-check/``, which it removes at the
+    end, asserting the root listing is back to what it was. Each empty result is
+    paired with a **positive control** so a broken call cannot read as a pass.
+    """
+    adapter = EngineAdapter.create(ENGINE_URL, _read_key(), timeout_s=30.0, max_retries=0)
+    OWN = "/.phase2deg-check"
+    try:
+        meta = await adapter.meta(refresh=True)
+        assert meta.api_version == "v1", "positive control: /v1/meta answered"
+        workspaces = await adapter.list_workspaces()
+        assert workspaces, "positive control: at least one workspace exists"
+        ws = workspaces[0]
+
+        # -- 2d metrics: a one-shot snapshot ---------------------------------
+        metrics = await adapter.workspace_metrics(ws.id)
+        # Positive control: the frame names this workspace and carries the
+        # enforced ceiling, so a broken call cannot masquerade as a zero reading.
+        assert metrics.workspace_id == str(ws.id), "positive control: metrics call returned this ws"
+        assert metrics.ram_limit_bytes >= 0
+        assert isinstance(metrics.ram_complete, bool)
+        assert isinstance(metrics.disk_complete, bool)
+
+        # -- 2e processes: the inventory -------------------------------------
+        before_root = await adapter.list_files(ws.id, "/")
+        process_list = await adapter.list_processes(ws.id)
+        # Positive control: the count mirrors the array (an honest empty 200).
+        assert process_list.count == len(process_list.processes)
+        # We do not stop any process we did not start.
+
+        # -- 2g archives: a self-created dry-run round trip ------------------
+        zip_bytes = _make_zip({"main.py": b"print('phase2deg')\n", "data.txt": b"hello\n"})
+        source = f"{OWN}/bundle.zip"
+        await adapter.write_file(
+            ws.id, source, base64.b64encode(zip_bytes).decode("ascii"), encoding="base64"
+        )
+
+        dest = f"{OWN}/out"
+        # 1. dry run: validate and report, writing nothing. The engine reports
+        #    how many entries *would* be extracted; the honesty signal for
+        #    "nothing written" is bytes_written == 0 and an absent destination.
+        dry = await adapter.extract_archive(ws.id, path=source, dest=dest, dry_run=True)
+        assert dry.dry_run is True
+        assert dry.entries_total >= 2
+        assert dry.bytes_written == 0
+        # Positive control for "nothing was written": the destination is absent
+        # (a missing directory is a 404, or an empty listing).
+        assert not await _has_files(adapter, ws.id, dest)
+
+        # 2. extract for real: the entries land.
+        real = await adapter.extract_archive(ws.id, path=source, dest=dest, dry_run=False)
+        assert real.dry_run is False
+        assert real.entries_extracted >= 2
+        landed = await adapter.list_files(ws.id, dest)
+        names = {e.name for e in landed.entries}
+        assert "main.py" in names and "data.txt" in names
+        # The control proves the same archive DOES add files when not a dry run.
+
+        # 3. clean up our own subtree and assert the root is back.
+        await adapter.delete_file(ws.id, OWN)
+        after_root = await adapter.list_files(ws.id, "/")
+        assert {e.name for e in after_root.entries} == {e.name for e in before_root.entries}
+        assert not any(e.name == ".phase2deg-check" for e in after_root.entries)
+
+        # No processes were stopped, no sessions created, the workspace persists.
+        after_processes = await adapter.list_processes(ws.id)
+        assert after_processes.count == len(after_processes.processes)
+        still = await adapter.get_workspace(ws.id)
+        assert str(still.id) == str(ws.id)
+        page = await adapter.list_sessions(ws.id, status="running")
+        assert page.total == 0, f"unexpected running sessions: {page.total}"
+    finally:
+        # Best-effort cleanup even if an assertion above failed.
+        try:
+            await adapter.delete_file(ws.id, OWN)
+        except Exception:  # noqa: BLE001
+            pass
+        await adapter.aclose()
+
+
+def _make_zip(entries: dict[str, bytes]) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for name, payload in entries.items():
+            zf.writestr(name, payload)
+    return buffer.getvalue()
+
+
+async def _has_files(adapter: EngineAdapter, ws_id, path: str) -> bool:
+    try:
+        page = await adapter.list_files(ws_id, path)
+    except EngineRefused:
+        return False
+    return bool(page.entries)
 
