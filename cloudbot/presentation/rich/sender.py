@@ -66,6 +66,19 @@ class RichSender:
             reply_parameters=ReplyParameters(message_id=reply_to) if reply_to is not None else None,
         )
 
+    async def delete(self, chat_id: int, message_id: int) -> bool:
+        """Delete a message; ``False`` if Telegram refuses (it may be too old).
+
+        Used only for the one-time reply-keyboard-removal carrier: it carries no
+        visible content, so leaving it in the chat is pure noise.
+        """
+        try:
+            await self._bot.delete_message(chat_id=chat_id, message_id=message_id)
+            return True
+        except TelegramBadRequest as exc:
+            log.info("sender.delete_refused", chat_id=chat_id, message_id=message_id, error=str(exc)[:80])
+            return False
+
     async def edit(
         self,
         chat_id: int,

@@ -43,11 +43,27 @@ async def _open_menu(
     await show_screen(event, screen, ctx=ctx, sender=sender)
 
 
-async def _clear_legacy_keyboard(chat_id: int, locale: Locale, sender: RichSender) -> None:
-    """Send the one-time ReplyKeyboardRemove (migration off the old reply menu)."""
+async def _clear_legacy_keyboard(
+    chat_id: int, locale: Locale, sender: RichSender, services: Services, tg_id: int
+) -> None:
+    """Clear a legacy reply keyboard ONCE per user, leaving nothing visible.
+
+    The carrier message's body is a single zero-width space, so sending it on every
+    `/start` put a permanent blank message in the chat. Two guards: an already-cleared
+    user is skipped (persisted, so a restart cannot repeat it), and the carrier is
+    deleted immediately so even the one time leaves no blank message.
+    """
+    if await services.account.legacy_keyboard_cleared(tg_id):
+        return
     doc = RichDoc(locale)
     doc.p(_EMPTY)
-    await sender.send(chat_id, doc, markup=remove_reply())
+    sent = await sender.send(chat_id, doc, markup=remove_reply())
+    message_id = getattr(sent, "message_id", None)
+    if message_id:
+        await sender.delete(chat_id, message_id)
+    # Recorded even if the delete was refused: retrying forever would re-spam the user,
+    # and the keyboard is cleared by then in either case.
+    await services.account.mark_legacy_keyboard_cleared(tg_id)
 
 
 @router.message(Command("start"))
@@ -65,11 +81,11 @@ async def on_start(
         events.user_new(tg_id=ctx.tg_id, name=ctx.display_name)
         await show_screen(message, language_card(ctx.locale), ctx=ctx, sender=sender)
         return
-    # Returning user: clear any legacy persistent reply keyboard once, then show
+    # Returning user: clear a legacy persistent reply keyboard at most once, then show
     # the menu. If they are inside a workspace, resume it directly (task 10): the
     # persisted session survives a restart/redeploy, so `/start` puts them back
     # inside instead of re-asking.
-    await _clear_legacy_keyboard(message.chat.id, user.locale, sender)
+    await _clear_legacy_keyboard(message.chat.id, user.locale, sender, services, ctx.tg_id)
     from cloudbot.presentation.screens import workspaces as ws_screens
 
     inside = await services.session.current(ctx.tg_id)
