@@ -14,7 +14,7 @@ async def test_migrations_apply_and_are_idempotent():
     db = Database(":memory:")
     await db.connect()
     applied = await db.migrate()
-    assert applied == [1, 2]
+    assert applied == [1, 2, 3]
     again = await db.migrate()
     assert again == []  # forward-only, idempotent
     await db.close()

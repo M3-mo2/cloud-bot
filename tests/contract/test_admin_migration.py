@@ -49,7 +49,7 @@ async def test_0001_then_0002_preserves_existing_rows(tmp_path):
     db = Database(f"sqlite+aiosqlite:///{path}")
     await db.connect()
     applied = await db.migrate()
-    assert applied == [2]
+    assert applied == [2, 3]
 
     conn = await db.connect()
     async with conn.execute("SELECT tg_id FROM users") as cur:

@@ -169,3 +169,56 @@ def test_welcome_board_keeps_its_inline_start_button():
     screen = menu_screens.main_menu([], Locale.EN, display_name="sara")
     actions = {_callback(b) for row in _rows(screen) for b in row}
     assert "ws:new" in actions
+
+
+# -- task 10: the session-aware nav block ------------------------------------
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_nav_inside_has_home_first_and_stays_within_the_rule(locale):
+    rows = nav.nav_rows(locale, "workspaces", inside=WS)
+    assert nav.NAV_ACTIONS >= {_callback(b) for row in rows for b in row}
+    # The workspace-home entry is the FIRST nav item.
+    assert _callback(rows[0][0]) == "ws:home"
+    assert len(rows) <= 3, "inside nav block exceeds the 3-row rule"
+    for row in rows:
+        assert len(row) <= 2, "nav row has >2 columns"
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+@pytest.mark.parametrize(
+    "current", ["workspaces", "settings", "language", "help", "menu", "workspace_home"]
+)
+def test_nav_inside_never_exceeds_three_rows(current, locale):
+    """The 3-row rule holds for every 'current' while inside (six buttons max)."""
+    rows = nav.nav_rows(locale, current, inside=WS)
+    assert len(rows) <= 3, f"inside nav block for {current} exceeds 3 rows: {len(rows)}"
+    for row in rows:
+        assert len(row) <= 2
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_every_inside_screen_carries_the_home_entry(locale):
+    """The workspace-home entry is present on every top-level screen while
+    inside, so the user can always get back to the workspace."""
+    screens = {
+        "main_menu": menu_screens.main_menu([WS], locale, display_name="sara", inside=WS),
+        "help": menu_screens.help_screen(locale, inside=WS),
+        "settings": menu_screens.settings_screen(locale, inside=WS),
+        "ws_list": ws_screens.workspace_list([WS], locale, inside=WS),
+        "language_picker": language_picker(locale, inside=WS),
+    }
+    for name, screen in screens.items():
+        callbacks = {_callback(b) for row in _rows(screen) for b in row}
+        assert "ws:home" in callbacks, f"{name}/{locale} lacks the workspace-home entry"
+
+
+def test_nav_without_a_session_is_unchanged():
+    """While not inside, the nav block offers no workspace-home entry."""
+    rows = nav.nav_rows(Locale.EN, "workspaces")
+    callbacks = {_callback(b) for row in rows for b in row}
+    assert "ws:home" not in callbacks
+
+
+def test_home_entry_is_muted_on_the_workspace_home_itself():
+    rows = nav.nav_rows(Locale.EN, "workspace_home", inside=WS)
+    entries = [b for row in rows for b in row if _callback(b) == "ws:home"]
+    assert entries and all(isinstance(b.disabled, DisabledButton) for b in entries)
