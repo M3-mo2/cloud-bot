@@ -14,6 +14,7 @@ from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import code, italic
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin._helpers import num
 from cloudbot.presentation.screens.screen import Screen
 
@@ -83,7 +84,7 @@ def audit_screen(view: AdminView, *, page: int = 0, tg_id: int | None = None) ->
         filter_row.append(
             inline(
                 catalog.t(category.label_key, locale),
-                f"adm:audit_cat:{category.value}:0",
+                admin_cb.audit_cat(category.value, 0),
                 intent=Intent.PRIMARY,
             )
         )
@@ -92,7 +93,7 @@ def audit_screen(view: AdminView, *, page: int = 0, tg_id: int | None = None) ->
         [
             inline(
                 catalog.t("admin.audit.all", locale),
-                f"adm:audit_all:{'user:' + str(tg_id) if tg_id is not None else 'global'}:0",
+                admin_cb.audit_all(tg_id, 0),
                 intent=Intent.PRIMARY,
             )
         ]
@@ -103,7 +104,7 @@ def audit_screen(view: AdminView, *, page: int = 0, tg_id: int | None = None) ->
             paging.append(
                 inline(
                     catalog.t("admin.users.prev", locale),
-                    f"adm:{'audit_user:' + str(tg_id) if tg_id is not None else 'audit'}:{page - 1}",
+                    _page_callback(tg_id, page - 1),
                     intent=Intent.PRIMARY,
                 )
             )
@@ -111,17 +112,24 @@ def audit_screen(view: AdminView, *, page: int = 0, tg_id: int | None = None) ->
             paging.append(
                 inline(
                     catalog.t("admin.users.next", locale),
-                    f"adm:{'audit_user:' + str(tg_id) if tg_id is not None else 'audit'}:{page + 1}",
+                    _page_callback(tg_id, page + 1),
                     intent=Intent.PRIMARY,
                 )
             )
         if paging:
             kb.append(paging)
     if tg_id is not None:
-        kb.append([inline(catalog.t("admin.back", locale), f"adm:user:{tg_id}", intent=Intent.PRIMARY)])
+        kb.append([inline(catalog.t("admin.back", locale), admin_cb.user(tg_id), intent=Intent.PRIMARY)])
     else:
-        kb.append([inline(catalog.t("admin.back", locale), "adm:menu", intent=Intent.PRIMARY)])
+        kb.append([inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(kb))
+
+
+def _page_callback(tg_id: int | None, page: int) -> str:
+    """The audit paging callback — per-user when scoped, global otherwise."""
+    if tg_id is not None:
+        return admin_cb.audit_user(tg_id, page)
+    return admin_cb.audit(page)
 
 
 register(

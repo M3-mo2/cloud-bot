@@ -17,6 +17,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.mapping.statuses import display_state
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import code, fragment, italic
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin._helpers import num
 from cloudbot.presentation.screens.admin.actions import action, action_button
 from cloudbot.presentation.screens.screen import Screen
@@ -34,7 +35,7 @@ def user_screen(view: AdminView) -> Screen:
         return Screen(
             doc=doc,
             markup=inline_markup(
-                [[inline(catalog.t("admin.back", locale), "adm:menu", intent=Intent.PRIMARY)]]
+                [[inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)]]
             ),
         )
 
@@ -109,14 +110,22 @@ def user_screen(view: AdminView) -> Screen:
             kb.append(row)
 
     _recent_activity(doc, view, locale)
-    kb.append([inline(catalog.t("admin.user.audit", locale), f"adm:audit_user:{u.tg_id}", intent=Intent.PRIMARY)])
+    kb.append(
+        [
+            inline(
+                catalog.t("admin.user.audit", locale),
+                admin_cb.audit_user(u.tg_id, 0),
+                intent=Intent.PRIMARY,
+            )
+        ]
+    )
     # The notification scope for this user, if the admin wants to watch only them.
     if view.notify_scope == u.tg_id:
         scope_label = catalog.t("admin.user.scope_clear", locale)
     else:
         scope_label = catalog.t("admin.user.scope_set", locale)
-    kb.append([inline(scope_label, f"adm:notify_scope:{u.tg_id}", intent=Intent.PRIMARY)])
-    kb.append([inline(catalog.t("admin.back", locale), "adm:sec:users", intent=Intent.PRIMARY)])
+    kb.append([inline(scope_label, admin_cb.notify_scope(u.tg_id), intent=Intent.PRIMARY)])
+    kb.append([inline(catalog.t("admin.back", locale), admin_cb.section("users"), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(kb))
 
 

@@ -4,6 +4,11 @@ Thin aiogram routers: build the ``AdminView`` read model through ``AdminService`
 → render one registry-driven screen → send/edit. Every handler here is reached
 only through the identity gate (``middleware/admin_gate.py``); none of them
 re-checks ``is_admin``, and none renders a raw engine value.
+
+Every ``adm:`` callback is parsed by the panel's **one codec**
+(``presentation/screens/admin/callbacks.py``) — no handler does
+``cb.data.split(":")[n]``. A malformed or out-of-date callback is answered with a
+correctable screen (``_stale``), never an ``IndexError`` (Task 07, Bug A).
 """
 
 from __future__ import annotations
@@ -27,6 +32,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens.admin import audit as audit_screen_mod
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin import registry
 from cloudbot.presentation.screens.admin import user_page as user_page_mod
 from cloudbot.presentation.screens.admin import users as users_screen_mod
@@ -35,6 +41,7 @@ from cloudbot.presentation.screens.admin.actions import (
     confirmation_screen,
     ADMIN_ACTION_PREFIX,
 )
+from cloudbot.presentation.screens.admin.callbacks import AdminCallback
 from cloudbot.presentation.screens.screen import Screen
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import RequestEvents
@@ -103,19 +110,40 @@ async def on_notifications(
     await show_screen(message, _section("notify").build(await _view(ctx, services)), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data == "adm:menu")
-async def on_menu(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+# -- every ``adm:`` callback: parse with the codec, then dispatch -------------
+# Bug A was a handler reading ``cb.data.split(":")[3]`` from a button whose
+# producer had emitted only two components. No handler here splits callback data:
+# parsing is the codec's job, it is total, and an invalid result is answered with
+# a correctable screen instead of raising.
+@router.callback_query(F.data.startswith(f"{ADMIN_ACTION_PREFIX}:"))
+async def on_admin_callback(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
+) -> None:
+    parsed = admin_cb.parse(cb.data)
+    route = _ROUTES.get(parsed.action) if parsed.valid else None
+    if route is None:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    await route(cb, parsed, ctx, services, sender, state, events)
+
+
+# -- overview / sections -----------------------------------------------------
+async def _route_menu(cb, parsed, ctx, services, sender, state, events) -> None:
     overview = await services.admin.overview()
     view = await _view(ctx, services, overview=overview)
     await show_screen(cb, _section("overview").build(view), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:sec:"))
-async def on_section(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    key = cb.data.split(":", 2)[2]
+async def _route_section(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    key = parsed.args[0]
     section = _section(key)
     if section is None:
-        await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
         return
     view = await _view(ctx, services)
     if key == "users":
@@ -123,42 +151,27 @@ async def on_section(cb: CallbackQuery, ctx: UserContext, services: Services, se
     await show_screen(cb, section.build(view), ctx=ctx, sender=sender)
 
 
-# -- users list --------------------------------------------------------------
-@router.callback_query(F.data.startswith("adm:users_page:"))
-async def on_users_page(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    page = int(cb.data.split(":", 2)[2])
+async def _route_users_page(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    page = parsed.arg_int(0)
     page_obj = await services.admin.users_page(offset=page * PAGE_SIZE, limit=PAGE_SIZE)
     view = await _view(ctx, services, users_page=page_obj)
     await show_screen(cb, users_screen_mod.users_screen(view, page=page), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data == "adm:users_search")
-async def on_users_search(cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext) -> None:
+async def _route_users_search(cb, parsed, ctx, services, sender, state, events) -> None:
     await state.set_state(AdminInput.awaiting_user_search)
     doc = RichDoc(ctx.locale)
     doc.h(2, catalog.t("admin.users.search_title", ctx.locale))
     doc.p(catalog.t("admin.users.search_prompt", ctx.locale))
     markup = inline_markup(
-        [[inline(catalog.t("admin.back", ctx.locale), "adm:sec:users", intent=Intent.PRIMARY)]]
+        [[inline(catalog.t("admin.back", ctx.locale), admin_cb.section("users"), intent=Intent.PRIMARY)]]
     )
     await show_screen(cb, Screen(doc=doc, markup=markup), ctx=ctx, sender=sender)
 
 
-@router.message(AdminInput.awaiting_user_search)
-async def on_users_search_text(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
-) -> None:
-    await state.clear()
-    query = (message.text or "").strip()
-    page_obj = await services.admin.users_page(query=query, limit=PAGE_SIZE)
-    view = await _view(ctx, services, users_page=page_obj)
-    await show_screen(message, users_screen_mod.users_screen(view, page=0), ctx=ctx, sender=sender)
-
-
 # -- user page ---------------------------------------------------------------
-@router.callback_query(F.data.startswith("adm:user:"))
-async def on_user(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    tg_id = int(cb.data.split(":", 2)[2])
+async def _route_user(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    tg_id = parsed.arg_int(0)
     page = await services.admin.user_page(tg_id)
     if page is None:
         await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
@@ -169,22 +182,18 @@ async def on_user(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 
 
 # -- actions -----------------------------------------------------------------
-@router.callback_query(F.data.startswith(f"{ADMIN_ACTION_PREFIX}:ask:"))
-async def on_action_ask(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    parts = cb.data.split(":", 3)
-    # adm:ask:<key>:<subject>
-    key, subject = parts[2], parts[3]
+async def _route_ask(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    key, subject = parsed.args
     act = action(key)
     if act is None:
-        await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
         return
     label = await _subject_label(services, subject)
     await show_screen(cb, confirmation_screen(act, label, subject, ctx.locale), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:cancel:"))
-async def on_action_cancel(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    subject = cb.data.split(":", 2)[2]
+async def _route_cancel(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    subject = parsed.subject
     owner = await services.admin.owner_of(WorkspaceId(subject))
     if owner is not None:
         page = await services.admin.user_page(owner)
@@ -195,11 +204,8 @@ async def on_action_cancel(cb: CallbackQuery, ctx: UserContext, services: Servic
     await show_screen(cb, _section("overview").build(await _view(ctx, services)), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:enter:"))
-async def on_enter(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, events: RequestEvents
-) -> None:
-    ws_id = cb.data.split(":", 2)[2]
+async def _route_enter(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    ws_id = parsed.subject
     owner = await services.admin.owner_of(WorkspaceId(ws_id))
     if owner is None:
         await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
@@ -221,11 +227,8 @@ async def on_enter(
     await show_screen(cb, section.build(view), ctx=entered_ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:suspend:"))
-async def on_suspend(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, events: RequestEvents
-) -> None:
-    ws_id = cb.data.split(":", 2)[2]
+async def _route_suspend(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    ws_id = parsed.subject
     owner = await services.admin.owner_of(WorkspaceId(ws_id))
     await services.admin.suspend_workspace(WorkspaceId(ws_id))
     events.admin_action(
@@ -234,11 +237,8 @@ async def on_suspend(
     await _back_to_owner(cb, ctx, services, sender, owner)
 
 
-@router.callback_query(F.data.startswith("adm:resume:"))
-async def on_resume(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, events: RequestEvents
-) -> None:
-    ws_id = cb.data.split(":", 2)[2]
+async def _route_resume(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    ws_id = parsed.subject
     owner = await services.admin.owner_of(WorkspaceId(ws_id))
     await services.admin.resume_workspace(WorkspaceId(ws_id))
     events.admin_action(
@@ -247,11 +247,8 @@ async def on_resume(
     await _back_to_owner(cb, ctx, services, sender, owner)
 
 
-@router.callback_query(F.data.startswith("adm:delete:"))
-async def on_delete(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, events: RequestEvents
-) -> None:
-    ws_id = cb.data.split(":", 2)[2]
+async def _route_delete(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    ws_id = parsed.subject
     owner = await services.admin.owner_of(WorkspaceId(ws_id))
     await services.admin.delete_workspace(WorkspaceId(ws_id))
     events.admin_action(
@@ -280,8 +277,7 @@ async def _back_to_owner(
     await show_screen(cb, _section("overview").build(await _view(ctx, services)), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data == "adm:leave")
-async def on_leave(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def _route_leave(cb, parsed, ctx, services, sender, state, events) -> None:
     await services.admin.leave_workspace(ctx.actor_tg_id)
     # This update's ctx still carries entered mode; render with a cleared one so
     # the banner is not re-added on the way out.
@@ -294,31 +290,22 @@ async def on_leave(cb: CallbackQuery, ctx: UserContext, services: Services, send
 
 
 # -- notifications -----------------------------------------------------------
-@router.callback_query(F.data.startswith("adm:notify_toggle:"))
-async def on_notify_toggle(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
-) -> None:
-    category = cb.data.split(":", 2)[2]
+async def _route_notify_toggle(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    category = parsed.args[0]
     subs = await services.admin.subscriptions(ctx.actor_tg_id)
     enabled = not subs.get(category, True)
     await services.admin.set_subscription(ctx.actor_tg_id, category, enabled)
     await _show_notifications(cb, ctx, services, sender)
 
 
-@router.callback_query(F.data.startswith("adm:notify_all:"))
-async def on_notify_all(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
-) -> None:
-    enabled = cb.data.split(":", 2)[2] == "on"
+async def _route_notify_all(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    enabled = parsed.args[0] == "on"
     await services.admin.set_all_subscriptions(ctx.actor_tg_id, enabled)
     await _show_notifications(cb, ctx, services, sender)
 
 
-@router.callback_query(F.data.startswith("adm:notify_pause:"))
-async def on_notify_pause(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
-) -> None:
-    paused = cb.data.split(":", 2)[2] == "on"
+async def _route_notify_pause(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    paused = parsed.args[0] == "on"
     await services.admin.set_paused(ctx.actor_tg_id, paused)
     await _show_notifications(cb, ctx, services, sender)
 
@@ -328,24 +315,21 @@ async def _show_notifications(cb, ctx, services, sender) -> None:
     await show_screen(cb, _section("notify").build(view), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:notify_scope:"))
-async def on_notify_scope(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
-) -> None:
-    raw = cb.data.split(":", 2)[2]
+async def _route_notify_scope(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    raw = parsed.args[0]
     if raw == "none":
         await services.admin.set_notify_scope(ctx.actor_tg_id, None)
-    else:
-        tg_id = int(raw)
-        # Tapping the scoped user again clears the scope (a toggle).
-        current = await services.admin.notify_scope(ctx.actor_tg_id)
-        await services.admin.set_notify_scope(
-            ctx.actor_tg_id, None if current == tg_id else tg_id
-        )
-    page = await services.admin.user_page(int(raw)) if raw != "none" else None
+        await _show_notifications(cb, ctx, services, sender)
+        return
+    tg_id = int(raw)
+    # Tapping the scoped user again clears the scope (a toggle).
+    current = await services.admin.notify_scope(ctx.actor_tg_id)
+    await services.admin.set_notify_scope(
+        ctx.actor_tg_id, None if current == tg_id else tg_id
+    )
+    page = await services.admin.user_page(tg_id)
     if page is not None:
-        view = await _view(ctx, services, user_page=page)
-        recent = await services.admin.recent_for_user(int(raw), limit=10)
+        recent = await services.admin.recent_for_user(tg_id, limit=10)
         view = await _view(ctx, services, user_page=page, recent_events=recent)
         await show_screen(cb, user_page_mod.user_screen(view), ctx=ctx, sender=sender)
     else:
@@ -353,19 +337,22 @@ async def on_notify_scope(
 
 
 # -- audit -------------------------------------------------------------------
-@router.callback_query(F.data.startswith("adm:audit_cat:"))
-async def on_audit_cat(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    parts = cb.data.split(":")
-    category, page = parts[2], int(parts[3])
-    page_obj = await services.admin.audit_page(category=category, offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE)
+async def _route_audit_cat(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    category, page = parsed.args[0], parsed.arg_int(1)
+    page_obj = await services.admin.audit_page(
+        category=category, offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE
+    )
     view = await _view(ctx, services, audit_page=page_obj)
     await show_screen(cb, audit_screen_mod.audit_screen(view, page=page), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:audit_all:"))
-async def on_audit_all(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    scope, page = cb.data.split(":")[2], int(cb.data.split(":")[3])
-    tg_id = int(scope.split(":", 1)[1]) if scope.startswith("user:") else None
+async def _route_audit_all(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    if parsed.args[0] == "global":
+        tg_id = None
+        page = parsed.arg_int(1)
+    else:
+        tg_id = parsed.arg_int(1)
+        page = parsed.arg_int(2)
     page_obj = await services.admin.audit_page(
         tg_id=tg_id, offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE
     )
@@ -373,21 +360,61 @@ async def on_audit_all(cb: CallbackQuery, ctx: UserContext, services: Services, 
     await show_screen(cb, audit_screen_mod.audit_screen(view, page=page, tg_id=tg_id), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:audit:"))
-async def on_audit(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    page = int(cb.data.split(":", 2)[2])
-    page_obj = await services.admin.audit_page(offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE)
+async def _route_audit(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    page = parsed.arg_int(0)
+    page_obj = await services.admin.audit_page(
+        offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE
+    )
     view = await _view(ctx, services, audit_page=page_obj)
     await show_screen(cb, audit_screen_mod.audit_screen(view, page=page), ctx=ctx, sender=sender)
 
 
-@router.callback_query(F.data.startswith("adm:audit_user:"))
-async def on_audit_user(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    parts = cb.data.split(":")
-    tg_id, page = int(parts[2]), int(parts[3])
-    page_obj = await services.admin.audit_page(tg_id=tg_id, offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE)
+async def _route_audit_user(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    tg_id, page = parsed.arg_int(0), parsed.arg_int(1)
+    page_obj = await services.admin.audit_page(
+        tg_id=tg_id, offset=page * audit_screen_mod.PAGE_SIZE, limit=audit_screen_mod.PAGE_SIZE
+    )
     view = await _view(ctx, services, audit_page=page_obj)
     await show_screen(cb, audit_screen_mod.audit_screen(view, page=page, tg_id=tg_id), ctx=ctx, sender=sender)
+
+
+#: The one dispatch table: action key (from the codec) → route. Adding a section
+#: or an action is one codec builder + one entry here; a callback the parser does
+#: not know is answered with the stale screen, never a crash.
+_ROUTES = {
+    admin_cb.MENU: _route_menu,
+    admin_cb.SECTION: _route_section,
+    admin_cb.USERS_PAGE: _route_users_page,
+    admin_cb.USERS_SEARCH: _route_users_search,
+    admin_cb.USER: _route_user,
+    admin_cb.ASK: _route_ask,
+    admin_cb.CANCEL: _route_cancel,
+    "enter": _route_enter,
+    "suspend": _route_suspend,
+    "resume": _route_resume,
+    "delete": _route_delete,
+    admin_cb.LEAVE: _route_leave,
+    admin_cb.NOTIFY_TOGGLE: _route_notify_toggle,
+    admin_cb.NOTIFY_ALL: _route_notify_all,
+    admin_cb.NOTIFY_PAUSE: _route_notify_pause,
+    admin_cb.NOTIFY_SCOPE: _route_notify_scope,
+    admin_cb.AUDIT_CAT: _route_audit_cat,
+    admin_cb.AUDIT_ALL: _route_audit_all,
+    admin_cb.AUDIT: _route_audit,
+    admin_cb.AUDIT_USER: _route_audit_user,
+}
+
+
+# -- users search (text step) ------------------------------------------------
+@router.message(AdminInput.awaiting_user_search)
+async def on_users_search_text(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    await state.clear()
+    query = (message.text or "").strip()
+    page_obj = await services.admin.users_page(query=query, limit=PAGE_SIZE)
+    view = await _view(ctx, services, users_page=page_obj)
+    await show_screen(message, users_screen_mod.users_screen(view, page=0), ctx=ctx, sender=sender)
 
 
 def _not_found(ctx: UserContext) -> Screen:
@@ -397,6 +424,22 @@ def _not_found(ctx: UserContext) -> Screen:
     return Screen(
         doc=doc,
         markup=inline_markup(
-            [[inline(catalog.t("admin.back", ctx.locale), "adm:menu", intent=Intent.PRIMARY)]]
+            [[inline(catalog.t("admin.back", ctx.locale), admin_cb.menu(), intent=Intent.PRIMARY)]]
+        ),
+    )
+
+
+def _stale(ctx: UserContext) -> Screen:
+    """A callback the current panel cannot resolve (stale or malformed button).
+
+    The user must never see a crash or nothing at all; the screen names the fix.
+    """
+    doc = RichDoc(ctx.locale)
+    doc.h(2, catalog.t("admin.stale.title", ctx.locale))
+    doc.p(catalog.t("admin.stale.body", ctx.locale))
+    return Screen(
+        doc=doc,
+        markup=inline_markup(
+            [[inline(catalog.t("admin.stale.reopen", ctx.locale), admin_cb.menu(), intent=Intent.PRIMARY)]]
         ),
     )

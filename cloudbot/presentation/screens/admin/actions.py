@@ -17,10 +17,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.screen import Screen
 
-#: Callback-data prefixes for the panel.
-ADMIN_ACTION_PREFIX = "adm"
+#: Callback-data prefixes for the panel (the codec owns the wire shape).
+ADMIN_ACTION_PREFIX = admin_cb.ADMIN_PREFIX
 
 
 @dataclass(frozen=True)
@@ -38,14 +39,12 @@ class AdminAction:
     def ask_callback(self, subject: str) -> str:
         """The button on the row: opens the confirmation (or does it if trivially safe)."""
         if self.confirm:
-            return f"{ADMIN_ACTION_PREFIX}:ask:{self.key}:{subject}"
+            return admin_cb.ask(self.key, subject)
         return self.callback(subject)
 
-    def callback(self, subject: str = "") -> str:
-        """The callback that actually performs the action."""
-        if subject:
-            return f"{ADMIN_ACTION_PREFIX}:{self.key}:{subject}"
-        return f"{ADMIN_ACTION_PREFIX}:{self.key}"
+    def callback(self, subject: str) -> str:
+        """The callback that actually performs the action on ``subject``."""
+        return admin_cb.action(self.key, subject)
 
     def label(self, locale: Locale) -> str:
         return catalog.t(self.label_key, locale)
@@ -109,7 +108,7 @@ def confirmation_screen(act: AdminAction, subject_label: str, subject: str, loca
                 act.callback(subject),
                 intent=Intent.DANGER if act.dangerous else Intent.PRIMARY,
             ),
-            inline(catalog.t("common.cancel", locale), f"{ADMIN_ACTION_PREFIX}:cancel:{subject}", intent=Intent.PRIMARY),
+            inline(catalog.t("common.cancel", locale), admin_cb.cancel(subject), intent=Intent.PRIMARY),
         ]
     ]
     return Screen(doc=doc, markup=inline_markup(rows))
