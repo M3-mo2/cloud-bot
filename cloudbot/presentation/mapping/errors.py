@@ -196,6 +196,18 @@ def view_for_error(err: DomainError) -> ErrorView:
                 "empty": "err.domain.invalid_input.port_empty",
                 "out_of_range": "err.domain.invalid_input.port_out_of_range",
             }.get(err.reason, "err.domain.invalid_input.port_invalid")
+        elif err.field == "interval":
+            key = {
+                "below_min": "err.domain.invalid_input.interval_below_min",
+                "above_max": "err.domain.invalid_input.interval_above_max",
+            }.get(err.reason, "err.domain.invalid_input.interval_invalid")
+        elif err.field == "process":
+            key = "err.domain.invalid_input.process_invalid"
+        elif err.field == "archive":
+            key = {
+                "empty": "err.domain.invalid_input.archive_empty",
+                "too_large": "err.domain.invalid_input.archive_too_large",
+            }.get(err.reason, "err.domain.invalid_input")
         elif err.reason == "too_long":
             key = "err.domain.invalid_input.name_too_long"
         elif err.reason == "empty":

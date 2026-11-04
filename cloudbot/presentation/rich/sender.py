@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from aiogram.types import InputRichMessage, Message, ReplyParameters
+from aiogram.types import BufferedInputFile, InputRichMessage, Message, ReplyParameters
 
 from cloudbot.presentation.rich.document import RichDoc
 
@@ -76,6 +76,25 @@ class RichSender:
             can_stop=can_stop,
             keep_on_stop=keep_on_stop,
         )
+
+    async def send_document(
+        self, chat_id: int, filename: str, data: bytes, *, reply_to: int | None = None
+    ) -> Message:
+        """Deliver raw bytes as a Telegram document.
+
+        Used only by the two documented archive-delivery paths (the exported ZIP
+        and the archive the user uploaded); general file delivery remains CB-14.
+        """
+        return await self._bot.send_document(
+            chat_id=chat_id,
+            document=BufferedInputFile(data, filename=filename),
+            reply_parameters=ReplyParameters(message_id=reply_to) if reply_to is not None else None,
+        )
+
+    async def download_document(self, document: Any) -> bytes:
+        """Download a Telegram document's bytes through the bot session."""
+        buffer = await self._bot.download(document)
+        return buffer.read()
 
     async def answer_callback(
         self, cb: Any, *, text: str | None = None, alert: bool = False
