@@ -1,0 +1,419 @@
+# UI 02 — Workspaces
+
+A **workspace** is the user's private sandbox. This document covers: the list, the
+detail view, creation, and the lifecycle actions (suspend / resume / stop /
+delete). All Arabic screens are sent with **`is_rtl=True`**.
+
+Status vocabulary used here comes from
+[`05-errors-and-status.md`](05-errors-and-status.md): `active` → "نشِطة / Active",
+`suspended` → "متوقفة مؤقتًا / Paused", `locked` → "مقفلة / Locked",
+`unlimited` → "بلا انتهاء / No expiry".
+
+---
+
+## 1. Workspace list
+
+### 1.1 English
+
+```html
+<h2>📦 My Workspaces</h2>
+<p>2 workspaces</p>
+<table is_bordered="true">
+  <tr><th>Name</th><th>Status</th><th>Runs</th><th>Disk</th></tr>
+  <tr><td><code>demo</code></td><td>Active</td><td>1 active</td><td>2.3 MB / 256 MB</td></tr>
+  <tr><td><code>scraper</code></td><td>Paused</td><td>—</td><td>12 MB / 512 MB</td></tr>
+</table>
+<p><i>Page 1 of 1</i></p>
+```
+
+### 1.2 Arabic (`is_rtl=True`)
+
+```html
+<h2>📦 مساحاتي</h2>
+<p>مساحتان</p>
+<table is_bordered="true">
+  <tr><th>الاسم</th><th>الحالة</th><th>التشغيلات</th><th>القرص</th></tr>
+  <tr><td><code>demo</code></td><td>نشِطة</td><td>١ نشِط</td><td>٢٫٣ ميغابايت / ٢٥٦ ميغابايت</td></tr>
+  <tr><td><code>scraper</code></td><td>متوقفة مؤقتًا</td><td>—</td><td>١٢ ميغابايت / ٥١٢ ميغابايت</td></tr>
+</table>
+<p><i>صفحة ١ من ١</i></p>
+```
+
+### 1.3 Keyboard
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 📦 demo | 📦 demo | inline | primary | opens detail |
+| 📦 scraper | 📦 scraper | inline | primary | opens detail |
+| ➕ مساحة جديدة | ➕ New Workspace | inline | success | — |
+| ➕ المزيد | ➕ Load more | inline | primary | only if more pages |
+| 🏠 القائمة | 🏠 Menu | inline | primary | — |
+
+The list shows up to 10 per page, then a **Load more** button (primary), which
+requests the next page (the engine's offset pagination). When there are no more
+pages, the button is omitted.
+
+### 1.4 Empty state
+
+English:
+
+```html
+<h2>📦 My Workspaces</h2>
+<p>You don't have any workspaces yet.</p>
+<p>A workspace is your own private sandbox where you can run code safely.</p>
+```
+
+Arabic (`is_rtl=True`):
+
+```html
+<h2>📦 مساحاتي</h2>
+<p>لا توجد لديك أي مساحات عمل بعد.</p>
+<p>مساحة العمل هي بيئتك الخاصة المعزولة التي تشغّل فيها الأكواد بأمان.</p>
+```
+
+Keyboard: **➕ New Workspace** (inline, success), **🏠 Menu** (inline, primary).
+
+---
+
+## 2. Workspace detail
+
+### 2.1 English
+
+```html
+<h2>📦 demo</h2>
+<p><b>Status:</b> Active</p>
+<table is_bordered="true">
+  <tr><th>Runtime</th><td>python3</td></tr>
+  <tr><th>Profile</th><td>python</td></tr>
+  <tr><th>CPU</th><td>1 core</td></tr>
+  <tr><th>Memory</th><td>512 MB</td></tr>
+  <tr><th>Disk</th><td>2.3 MB / 256 MB (1%)</td></tr>
+  <tr><th>Runs</th><td>3 total, 1 active</td></tr>
+  <tr><th>Last activity</th><td>2 minutes ago</td></tr>
+  <tr><th>Created</th><td>3 Nov 2026, 20:41</td></tr>
+</table>
+<hr>
+<p><b>ID:</b> <code>ws_01M6HJASCWM9Z1PF755GT89NK4</code></p>
+```
+
+### 2.2 Arabic (`is_rtl=True`)
+
+```html
+<h2>📦 demo</h2>
+<p><b>الحالة:</b> نشِطة</p>
+<table is_bordered="true">
+  <tr><th>بيئة التشغيل</th><td>python3</td></tr>
+  <tr><th>الملف التعريفي</th><td>python</td></tr>
+  <tr><th>المعالج</th><td>نواة واحدة</td></tr>
+  <tr><th>الذاكرة</th><td>٥١٢ ميغابايت</td></tr>
+  <tr><th>القرص</th><td>٢٫٣ ميغابايت / ٢٥٦ ميغابايت (١٪)</td></tr>
+  <tr><th>التشغيلات</th><td>٣ إجمالًا، ١ نشِط</td></tr>
+  <tr><th>آخر نشاط</th><td>قبل دقيقتين</td></tr>
+  <tr><th>أُنشئت</th><td>٣ نوفمبر ٢٠٢٦، ٢٠:٤١</td></tr>
+</table>
+<hr>
+<p><b>المعرّف:</b> <code>ws_01M6HJASCWM9Z1PF755GT89NK4</code></p>
+```
+
+> `python3`, `python` and the id stay ASCII; the id is in `<code>` and never
+> digit-localized (see [`../architecture/06-i18n.md`](../architecture/06-i18n.md) §6).
+
+### 2.3 Keyboard — `active` workspace
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 📁 الملفات | 📁 Files | inline | primary | — |
+| ▶️ تشغيل | ▶️ Run | inline | success | `disabled` if a run is active |
+| 📜 التشغيلات | 📜 Runs | inline | primary | — |
+| ⏸️ إيقاف مؤقت | ⏸️ Suspend | inline | primary | — |
+| 🛑 إيقاف الكل | 🛑 Stop All | inline | danger | confirm |
+| 🗑 حذف | 🗑 Delete | inline | danger | confirm |
+| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+
+### 2.4 Keyboard — `suspended` workspace
+
+Work on a suspended workspace is refused (`409 workspace_suspended`), so the
+app-like actions are **disabled** rather than hidden, and Resume is the primary
+action.
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| ▶️ استئناف | ▶️ Resume | inline | success | — |
+| 📁 الملفات | 📁 Files | inline | primary | read-only ops work |
+| ▶️ تشغيل | ▶️ Run | inline | — | **disabled** |
+| 🗑 حذف | 🗑 Delete | inline | danger | confirm |
+| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+
+### 2.5 Keyboard — `locked` workspace (subscription lapsed)
+
+While locked, the engine refuses compute with `403 subscription_expired`, but
+reads and delete are allowed. The bot shows a renewal action.
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 🔄 تجديد | 🔄 Renew | inline | success | Phase 2 |
+| 📁 الملفات | 📁 Files | inline | primary | read-only |
+| ▶️ تشغيل | ▶️ Run | inline | — | **disabled** |
+| 🗑 حذف | 🗑 Delete | inline | danger | confirm |
+| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+
+A banner line is added when locked:
+
+```html
+<blockquote>⏳ Your plan has expired. Renew to run code again.
+Your files are safe.</blockquote>
+```
+```html
+<blockquote>⏳ انتهت صلاحية خطتك. جدّد لتشغيل الأكواد مجددًا.
+ملفاتك آمنة.</blockquote>
+```
+
+### 2.6 "Run" disabled while a run is active
+
+When the workspace already has an active run, the Run button is `MUTED`
+(`disabled=True`) and a caption explains why:
+
+English: `<p><i>A run is already in progress.</i></p>`
+Arabic: `<p><i>هناك تشغيل جارٍ بالفعل.</i></p>`
+
+---
+
+## 3. Create a workspace
+
+Creation is a small wizard. Step 1 uses a **`force_reply=True`** prompt to collect
+the name; then, when the engine advertises profiles, a profile choice follows.
+
+### 3.1 Name prompt (send, `force_reply=True`)
+
+English:
+
+```html
+<h2>➕ New Workspace</h2>
+<p>Send me a name for your workspace.</p>
+<p><i>Up to 128 characters. This is just a label — you can rename it later.</i></p>
+```
+
+Arabic (`is_rtl=True`):
+
+```html
+<h2>➕ مساحة جديدة</h2>
+<p>أرسل لي اسمًا لمساحة العمل.</p>
+<p><i>حتى ١٢٨ حرفًا. هذا مجرد اسم — يمكنك تغييره لاحقًا.</i></p>
+```
+
+Keyboard (markup has `force_reply=True`):
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| ✖️ إلغاء | ✖️ Cancel | inline | primary | — |
+
+### 3.2 Profile choice (only if `meta.profiles.profiles` has >1 entry)
+
+English:
+
+```html
+<h2>🧰 Choose a runtime</h2>
+<p>Pick the toolchain this workspace will use.</p>
+```
+
+Arabic:
+
+```html
+<h2>🧰 اختر بيئة التشغيل</h2>
+<p>اختر مجموعة الأدوات التي ستستخدمها مساحة العمل.</p>
+```
+
+Keyboard (one button per `profiles[].name`, default marked):
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 🐍 Python ✓ | 🐍 Python ✓ | inline | success | default profile |
+| 📦 أخرى | 📦 Other | inline | primary | — |
+| ✖️ إلغاء | ✖️ Cancel | inline | primary | — |
+
+Profile descriptions come from `meta.profiles.profiles[].description`, shown as a
+`<details>` block per profile if the user taps info. Only names the engine offers
+are ever shown (the engine refuses unknown profiles).
+
+### 3.3 Limits (optional, advanced)
+
+Hidden by default. An "Advanced ⚙️" inline button (primary) opens a screen whose
+sliders are **bounded by `meta.limits_defaults` and `meta.limits_maxima`** — the
+bot never offers a value the engine would refuse with `422`.
+
+English:
+
+```html
+<h2>⚙️ Advanced</h2>
+<table is_bordered="true">
+  <tr><th>CPU</th><td>1 core <i>(max 4)</i></td></tr>
+  <tr><th>Memory</th><td>512 MB <i>(max 4096 MB)</i></td></tr>
+  <tr><th>Disk</th><td>256 MB <i>(max 10240 MB)</i></td></tr>
+  <tr><th>Network</th><td>Off</td></tr>
+</table>
+<p><i>Limits apply to the next run.</i></p>
+```
+
+Arabic (`is_rtl=True`):
+
+```html
+<h2>⚙️ إعدادات متقدمة</h2>
+<table is_bordered="true">
+  <tr><th>المعالج</th><td>نواة واحدة <i>(الأقصى ٤)</i></td></tr>
+  <tr><th>الذاكرة</th><td>٥١٢ ميغابايت <i>(الأقصى ٤٠٩٦ ميغابايت)</i></td></tr>
+  <tr><th>القرص</th><td>٢٥٦ ميغابايت <i>(الأقصى ١٠٢٤٠ ميغابايت)</i></td></tr>
+  <tr><th>الشبكة</th><td>مُعطّلة</td></tr>
+</table>
+<p><i>تُطبّق الحدود على التشغيل التالي.</i></p>
+```
+
+Keyboard: **✅ Create** (success, confirm), **✖️ Cancel** (primary).
+
+### 3.4 Success
+
+After the engine returns, the workspace is registered and its detail screen is
+shown. A short confirmation block is prepended:
+
+English:
+
+```html
+<blockquote>✅ <b>demo</b> is ready.</blockquote>
+```
+
+Arabic:
+
+```html
+<blockquote>✅ <b>demo</b> جاهزة.</blockquote>
+```
+
+---
+
+## 4. Lifecycle confirms
+
+Destructive actions always confirm, and the confirm button is `danger`. The
+confirmation is a distinct screen (not a popup) so the consequences are visible.
+
+### 4.1 Delete workspace — confirm
+
+English:
+
+```html
+<h2>🗑 Delete workspace?</h2>
+<p><b>demo</b> will be permanently deleted.</p>
+<blockquote>⚠️ All files inside it will be removed. This cannot be undone.</blockquote>
+```
+
+Arabic (`is_rtl=True`):
+
+```html
+<h2>🗑 حذف مساحة العمل؟</h2>
+<p>سيتم حذف <b>demo</b> نهائيًا.</p>
+<blockquote>⚠️ ستُحذف جميع الملفات داخلها. لا يمكن التراجع عن هذا الإجراء.</blockquote>
+```
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| ✅ حذف نهائيًا | ✅ Delete permanently | inline | danger | — |
+| ✖️ إلغاء | ✖️ Cancel | inline | primary | — |
+
+### 4.2 Delete — result
+
+English:
+
+```html
+<blockquote>🗑 <b>demo</b> has been deleted.</blockquote>
+```
+Arabic: `<blockquote>🗑 تم حذف <b>demo</b>.</blockquote>`
+Then the list screen.
+
+### 4.3 Stop all — confirm / result
+
+English confirm:
+
+```html
+<h2>🛑 Stop everything?</h2>
+<p>All runs, terminals and background processes in <b>demo</b> will be stopped.</p>
+<p><i>The workspace stays active. Your files are not affected.</i></p>
+```
+Arabic confirm:
+
+```html
+<h2>🛑 إيقاف كل شيء؟</h2>
+<p>سيتم إيقاف جميع التشغيلات والجلسات والعمليات الخلفية في <b>demo</b>.</p>
+<p><i>تبقى مساحة العمل نشِطة. لا تتأثر ملفاتك.</i></p>
+```
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 🛑 إيقاف الكل | 🛑 Stop all | inline | danger | — |
+| ✖️ إلغاء | ✖️ Cancel | inline | primary | — |
+
+Result uses the engine's counts, humanized:
+
+English:
+
+```html
+<blockquote>🛑 Stopped 2 runs and 1 terminal.</blockquote>
+```
+Arabic:
+
+```html
+<blockquote>🛑 تم إيقاف تشغيلين وجلسة واحدة.</blockquote>
+```
+
+Zero-count cases read naturally: "Nothing was running. / لا شيء كان يعمل."
+
+### 4.4 Suspend — confirm / result
+
+English confirm:
+
+```html
+<h2>⏸️ Suspend workspace?</h2>
+<p><b>demo</b> will be paused. Running work stops and new work is refused.</p>
+<p><i>Your files are kept. Resume anytime.</i></p>
+```
+Arabic confirm:
+
+```html
+<h2>⏸️ إيقاف مؤقت؟</h2>
+<p>سيتوقف <b>demo</b> مؤقتًا. يتوقف العمل الجاري وتُرفض المهام الجديدة.</p>
+<p><i>تبقى ملفاتك محفوظة. يمكنك الاستئناف في أي وقت.</i></p>
+```
+
+Keyboard: **⏸️ Suspend** (primary — reversible), **✖️ Cancel** (primary).
+
+Result:
+
+```html
+<blockquote>⏸️ demo is paused.</blockquote>
+```
+```html
+<blockquote>⏸️ تم إيقاف demo مؤقتًا.</blockquote>
+```
+
+### 4.5 Resume — result
+
+```html
+<blockquote>▶️ demo is active again.</blockquote>
+```
+```html
+<blockquote>▶️ أصبحت demo نشِطة مرة أخرى.</blockquote>
+```
+
+---
+
+## 5. Transitions
+
+| From | Action | Result |
+| --- | --- | --- |
+| Menu | "My Workspaces" | list |
+| List | tap workspace | detail |
+| List | "New Workspace" | name prompt (force_reply) → profile → create → detail |
+| Detail | "Files" | file browser |
+| Detail | "Run" | execution screen |
+| Detail | "Runs" | run history |
+| Detail | Suspend | confirm → paused detail |
+| Detail | Resume | active detail |
+| Detail | Stop All | confirm → active detail + counts |
+| Detail | Delete | confirm → list |
+| Any | Back | previous screen (inline edit) |
