@@ -318,12 +318,13 @@ Factories that combine text (from the catalog), style, and flags:
 ```python
 def inline(text: str, action: str, *, intent=Intent.PRIMARY,
            disabled: bool = False, url: str | None = None) -> InlineKeyboardButton: ...
-def reply(text: str, *, intent=Intent.PRIMARY) -> KeyboardButton: ...
+def remove_reply() -> ReplyKeyboardRemove: ...  # one-time legacy migration on /start
 ```
 
 `inline(..., disabled=True)` sets `disabled=DisabledButton()`.
-`reply` colorizes persistent menu items. `force_reply=True` is set on the markup,
-not the button (see keyboards doc).
+There is no reply-button factory: every user-facing button is inline, and
+`remove_reply` is the single, documented exception (`docs/DECISIONS.md` CB-25/26).
+`force_reply=True` is set on the markup, not the button (see keyboards doc).
 
 ### 4.7 `presentation/screens/*` — `Screen`
 

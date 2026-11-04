@@ -1,9 +1,13 @@
 # Keyboards and Buttons
 
 The bot uses the full aiogram 3.31.0 button feature set — colored styles, disabled
-buttons, forced reply, inline and reply keyboards, and link-style buttons — under
-one uniform convention so every screen feels the same. Screens declare an
-**intent**, never a color; a single module maps intent → style.
+buttons, forced reply, inline keyboards, and link-style buttons — under one
+uniform convention so every screen feels the same. Screens declare an **intent**,
+never a color; a single module maps intent → style.
+
+**There is no reply keyboard.** Every user-facing button is an inline button. The
+one exception is a single `ReplyKeyboardRemove` sent on `/start` to migrate a
+legacy user off the old reply menu (§10).
 
 ---
 
@@ -15,9 +19,7 @@ one uniform convention so every screen feels the same. Screens declare an
 | `InlineKeyboardButton` | `style` | `link` | Renders as a borderless link. |
 | `InlineKeyboardButton` | `disabled` | `DisabledButton()` | Shown but inert. |
 | `InlineKeyboardButton` | `url` | str | External link target. |
-| `KeyboardButton` | `style` | `primary`, `success`, `danger` | Reply-keyboard coloring. |
 | `InlineKeyboardMarkup` | `force_reply` | bool | Shows the reply interface. |
-| `ReplyKeyboardMarkup` | `force_reply` | bool | Shows the reply interface. |
 | `Bot.send_rich_message` | `reply_markup` | `ReplyMarkupUnion` | **Rich send can carry any markup** (inline, reply, remove, force-reply). |
 | `Bot.edit_message_text` | `reply_markup` | `InlineKeyboardMarkup \| None` | **Edits can only change inline keyboards.** |
 
@@ -25,10 +27,9 @@ one uniform convention so every screen feels the same. Screens declare an
 
 - **Navigation and in-place updates** always use **inline keyboards**, because
   edits can only update inline markups — and edits are how we avoid message spam.
-- **The persistent global menu** is a **reply keyboard**, attached when a message
-  is *sent*; changing or removing it requires a new sent rich message carrying the
-  new `ReplyKeyboardMarkup` (or `ReplyKeyboardRemove`) as `reply_markup`. That is
-  allowed because `send_rich_message` accepts the full `ReplyMarkupUnion`.
+- Nothing is persistent. Navigation travels as an inline block at the bottom of
+  every top-level screen (§5.1); the only reply markup ever sent is the one-time
+  `ReplyKeyboardRemove` on `/start` (§10).
 
 ---
 
@@ -68,55 +69,60 @@ Rationale (recorded in `DECISIONS.md`):
 | --- | --- | --- |
 | **Inline, callback** | All in-message actions, navigation, pagination, per-item actions, confirmations | Enables in-place `edit`, keeps chat clean, carries callback data. |
 | **Inline, url + `LINK`** | External links (docs, published tunnel URL) | Opens directly, styled as a link. |
-| **Inline, `disabled=True`** | Actions not currently valid | Shows the affordance without offering a dead end. |
+| **Inline, `disabled=True`** | Actions not currently valid (incl. the current nav destination) | Shows the affordance without offering a dead end. |
 | **Inline, `force_reply=True`** (markup) | Short input prompts | Focuses the reply box on the prompt. |
-| **Reply keyboard** | Persistent global menu only | Always-available navigation, no scrolling to a message. |
-| **Reply, `force_reply=True`** (markup) | Prompts where a reply keyboard is active | Same as inline force_reply but coexists with the menu. |
 
-**Never** put the global menu in an inline keyboard, and **never** put per-item
-actions in a reply keyboard. One rule, applied everywhere.
+There is **no reply keyboard** and no per-item reply actions. One rule, applied
+everywhere: every user-facing button is inline.
 
 ---
 
-## 4. The global reply menu (persistent)
+## 3a. The shared bottom navigation block
 
-Shown after onboarding and reachable anytime. Reply keyboard, `resize_keyboard=True`,
-`is_persistent=True`.
+One helper (`presentation/screens/nav.py`) renders the same nav block at the
+bottom of every top-level screen: Workspaces (`ws:list`), Settings
+(`nav:settings`), Language (`nav:language`), Help (`nav:help`), plus Menu
+(`nav:menu`) where the screen is not the menu. **At most two buttons per row,
+at most three rows**; a screen's primary action (e.g. `➕ New Workspace`) sits full
+width above it. The destination the user is already on is `MUTED` (disabled) —
+visible, not tappable.
 
 ```
-┌─────────────────────────────┐
-│  📦 المساحات   📦 Workspaces │   primary / primary
-│  ⚙️ الإعدادات  ⚙️ Settings   │   primary / primary
-│  🌐 اللغة      🌐 Language    │   primary / primary
-│  ❓ مساعدة     ❓ Help        │   primary / primary
-└─────────────────────────────┘
+[ 📦 المساحات ] [ ⚙️ الإعدادات ]
+[ 🌐 اللغة ]     [ ❓ مساعدة ]
+[ 🏠 القائمة ]                      ← only where the screen is not the menu
 ```
-
-In code:
 
 ```python
-ReplyKeyboardMarkup(
-    keyboard=[
-        [reply("menu.workspaces", intent=PRIMARY), reply("menu.settings", intent=PRIMARY)],
-        [reply("menu.language",   intent=PRIMARY), reply("menu.help",     intent=PRIMARY)],
-    ],
-    resize_keyboard=True,
-    is_persistent=True,
-    input_field_placeholder=catalog.t("menu.placeholder", locale),
-)
+from cloudbot.presentation.screens import nav
+
+rows  = [[inline("menu.new_workspace", "ws:new", intent=SUCCESS)]]
+rows += nav.nav_rows(locale, "menu")     # current surface
 ```
 
-There is no `disabled` for reply buttons, so unavailable menu entries are simply
-omitted.
+The old per-screen **Back** buttons remain on *inner* screens (workspace detail,
+files, runs); the nav block is the top-level pattern.
+
+---
+
+## 4. (retired) The global reply menu
+
+The bot used to carry a persistent reply keyboard (`ReplyKeyboardMarkup`, four
+buttons 2×2). It is **gone**: navigation is the inline block in §3a. A legacy user
+who still has the old keyboard installed is migrated off it by a single
+`ReplyKeyboardRemove` sent on `/start` (§10 and `docs/DECISIONS.md` CB-26).
 
 ---
 
 ## 5. Standard inline patterns (reused across screens)
 
-### 5.1 Navigation row
+### 5.1 Navigation
+
+Top-level screens use the shared bottom block (§3a). Inner screens keep a
+**Back** (primary) row:
 
 ```
-[ ⬅️ رجوع | ⬅️ Back ]  (primary)     [ 🏠 القائمة | 🏠 Menu ] (primary)
+[ ⬅️ رجوع | ⬅️ Back ]  (primary)
 ```
 
 ### 5.2 Confirm / cancel (destructive)
@@ -176,6 +182,8 @@ edited.
 ## 7. `disabled=True` usage
 
 - **Pagination current-page indicator** (a label, §5.4).
+- **The current nav destination** on a top-level screen (§3a): the screen you are
+  on is shown muted, so tapping it is not offered.
 - **An action that is already happening**: "Run" while a run is active shows
   `MUTED` (disabled) so the user sees why.
 - **Empty states**: e.g. "No files" as a disabled button inside an otherwise
@@ -221,8 +229,8 @@ Action namespaces:
 
 1. Colors come **only** from `Intent`; a screen never names a `ButtonStyle`.
 2. Every destructive action is `DANGER` **and** requires an explicit confirm.
-3. Every screen has a **Back** (primary) and the main menu is always one tap away
-   via the reply keyboard.
+3. Every top-level screen ends with the shared inline nav block (§3a); inner
+   screens carry a **Back** (primary) button. There is no reply keyboard.
 4. Button text always comes from the catalog, in the user's locale — never a
    hardcoded English string.
 5. Icons are part of the catalog string (`"🗑 حذف"` / `"🗑 Delete"`), so both
@@ -231,6 +239,8 @@ Action namespaces:
 7. A golden test renders every screen's keyboard for AR and EN and asserts:
    styles match the intent table, every `DANGER` button is behind a confirm, and
    all `callback_data` ≤ 64 bytes.
+8. An architecture test forbids `ReplyKeyboardMarkup`/`KeyboardButton` anywhere in
+   `cloudbot/`; the only permitted reply markup is `remove_reply` (§10).
 
 ---
 
@@ -238,8 +248,8 @@ Action namespaces:
 
 | Screen element | Type | Intent | Flags |
 | --- | --- | --- | --- |
-| Menu → Workspaces | reply | primary | — |
-| Back / Menu | inline | primary | — |
+| Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one `MUTED` |
+| Back (inner screens) | inline | primary | — |
 | Open workspace | inline | primary | — |
 | Create workspace | inline | success | — |
 | Run / Exec | inline | success | `MUTED` if running |
@@ -251,4 +261,13 @@ Action namespaces:
 | Purge runs | inline | danger | confirm |
 | Page indicator | inline | — | `disabled=True` |
 | Docs / tunnel URL | inline (url) | link | — |
-| Input prompt (name/path/command) | inline/reply markup | — | `force_reply=True` |
+| Input prompt (name/path/command) | inline markup | — | `force_reply=True` |
+| Legacy reply-keyboard removal | `ReplyKeyboardRemove` | — | once, on `/start` only |
+
+## 11. The one-time `ReplyKeyboardRemove`
+
+A legacy user with the old persistent reply keyboard installed cannot have it
+removed by an inline keyboard. On `/start`, and only there, a returning user gets
+exactly one extra message with `remove_reply()` (an invisible zero-width body)
+before the menu. It never displaces the screen's inline keys and never fires from
+another command or callback. See `docs/DECISIONS.md` CB-26.

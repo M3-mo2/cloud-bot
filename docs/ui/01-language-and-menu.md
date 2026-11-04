@@ -12,6 +12,39 @@ Conventions used in this document:
 
 ---
 
+## 0. Navigation — one inline block on every top-level screen
+
+**There is no reply keyboard. Every button is an inline button.** Navigation lives
+in a single shared block at the **bottom** of every top-level screen — the main
+menu, the welcome board, `/help`, `/settings`, the workspaces list and the
+language picker. It is rendered by one helper (`presentation/screens/nav.py`) so
+every screen agrees.
+
+**Layout rule (a future screen follows it).** The nav block has **at most two
+buttons per row and at most three rows**, and a screen's own primary action may
+sit **full width above** it. No screen anywhere uses more than two columns.
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
+| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
+| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
+| 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` — only where the screen is not the menu |
+
+The destination the user is **already on** is rendered `MUTED` (a disabled inline
+button — visible, not tappable); on the menu itself nothing is muted and no Menu
+button appears. The block is thus 2 rows on the menu (four destinations) and 3
+rows elsewhere (four destinations + Menu).
+
+```
+[ ➕ مساحة جديدة ]                         (success, full width — the screen's own action)
+[ 📦 المساحات ] [ ⚙️ الإعدادات ]
+[ 🌐 اللغة ]     [ ❓ مساعدة ]              ← the nav block, always last
+```
+
+---
+
 ## 1. First contact — `/start` with no stored user
 
 The bot has no session yet. Before it can speak, it asks the user to choose a
@@ -49,16 +82,16 @@ InlineKeyboardMarkup(inline_keyboard=[[
 ### After the user taps `العربية`
 
 The same message is **edited in place** into the menu, now in Arabic with
-`is_rtl=True`, and the persistent reply menu is attached to a freshly **sent**
-message (reply keyboards can only be introduced by a send).
+`is_rtl=True`, carrying that screen's inline nav block. No reply keyboard is ever
+sent.
 
 ---
 
 ## 2. The main menu
 
 The menu is the home screen. It is a rich message with a greeting and a live
-snapshot, plus an inline "quick actions" row; the persistent navigation lives in
-the reply keyboard.
+snapshot, a full-width **New Workspace** action, and the shared inline nav block
+(§0) below it. Its own navigation no longer lives in a reply keyboard.
 
 ### 2.1 English
 
@@ -93,22 +126,28 @@ the reply keyboard.
 > Workspace names are user-supplied; they are placed in `<code>` and escaped, so
 > an RTL name inside the Arabic table cannot break the layout.
 
-### 2.3 Menu keyboard (inline quick actions)
+### 2.3 Menu keyboard
+
+Full-width primary action, then the shared inline nav block (§0). The layout is
+rebuilt from the old three-full-width-row version to spend the rows it saves on
+the distributed block.
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| ➕ مساحة جديدة | ➕ New Workspace | inline | success | — |
-| 📦 مساحاتي | 📦 My Workspaces | inline | primary | — |
-| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | — |
+| ➕ مساحة جديدة | ➕ New Workspace | inline | success | `ws:new`, full width |
+| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
+| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
+| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 
-### 2.4 Persistent reply menu (AR/EN mirrors)
+```
+[ ➕ مساحة جديدة ]
+[ 📦 المساحات ] [ ⚙️ الإعدادات ]
+[ 🌐 اللغة ]     [ ❓ مساعدة ]
+```
 
-| Label (AR) | Label (EN) | Type | Style | Flags |
-| --- | --- | --- | --- | --- |
-| 📦 المساحات | 📦 Workspaces | reply | primary | — |
-| ⚙️ الإعدادات | ⚙️ Settings | reply | primary | — |
-| 🌐 اللغة | 🌐 Language | reply | primary | — |
-| ❓ مساعدة | ❓ Help | reply | primary | — |
+There is no persistent reply menu. "My workspaces" is reachable as the
+**📦 Workspaces** destination in the nav block.
 
 With no workspaces, the menu is replaced by the **welcome board** (§2.5).
 
@@ -150,11 +189,14 @@ No laptop. No setup. No hassle.</p>
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
 | ▶️ ابدأ | ▶️ Start | inline | success | opens the create wizard (`ws:new`) |
-| ❓ كيف يعمل | ❓ How it works | inline | primary | opens `/help` (`nav:help`) |
+| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
+| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
+| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 
 The board deliberately avoids architecture jargon (no "isolated", "sandbox",
-"secure"): it speaks to what the user gets, not how the engine works. The
-persistent reply menu is attached by a follow-up send, as on every menu entry.
+"secure"): it speaks to what the user gets, not how the engine works. The inline
+Start button is kept (his `b606238` fix); the shared nav block follows it.
 
 
 ---
@@ -204,7 +246,9 @@ so the screen stays short.
 <p><i>ملفاتك خاصة بك وحدك. لا شيء مشترك بين المستخدمين.</i></p>
 ```
 
-Keyboard: single **Back/Menu** (inline, primary).
+Keyboard: the shared inline nav block (§0) with **Help** muted (we are on it), so
+the block is **Workspaces · Settings**, then **Language · Help (muted)** and a
+third row **Menu**. There is no Back/reply button.
 
 ---
 
@@ -232,34 +276,36 @@ Keyboard: single **Back/Menu** (inline, primary).
 
 ### Keyboard
 
+The shared inline nav block (§0) with **Settings** muted. Changing the language is
+the **Language** destination (`nav:language`), and **Menu** returns home.
+
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| 🌐 تغيير اللغة | 🌐 Change Language | inline | primary | — |
-| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings`, **muted** |
+| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
+| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
+| 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` |
 
 ---
 
 ## 5. Language picker (from Settings)
 
-Same card as onboarding, but reached mid-session, so it includes a Back button.
-The **current** language is shown as a `disabled` label so the user sees their
-state.
+Same card as onboarding, but reached mid-session. The **current** language is
+shown as a `disabled` label so the user sees their state, and the shared inline
+nav block (§0) with **Language** muted follows.
 
 ### English (current = EN)
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| العربية | — | inline | primary | — |
-| ✓ English | ✓ English | inline | primary | **disabled** |
-| ⬅️ Back | ⬅️ Back | inline | primary | — |
-
-### Arabic (current = AR, `is_rtl=True`)
-
-| Label (AR) | Label (EN) | Type | Style | Flags |
-| --- | --- | --- | --- | --- |
-| ✓ العربية | — | inline | primary | **disabled** |
-| English | — | inline | primary | — |
-| رجوع ⬅️ | — | inline | primary | — |
+| العربية | — | inline | primary | `lang:ar` |
+| — | ✓ English | inline | primary | `lang:en`, **disabled** |
+| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
+| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language`, **muted** |
+| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
+| 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` |
 
 Switching language edits the current message into the menu in the new locale.
 
@@ -269,8 +315,22 @@ Switching language edits the current message into the menu in the new locale.
 
 | From | Action | Result |
 | --- | --- | --- |
-| `/start` (new) | tap لغتي | edit language card → menu (new locale) + send reply menu |
-| Anywhere | reply "🌐 Language" | settings → language card |
+| `/start` (returning) | — | one `ReplyKeyboardRemove` (legacy migration, §7), then the menu |
+| `/start` (new) | tap لغتي | edit language card → menu (new locale) |
 | Language card | tap a language | edit into menu in new locale, persist choice |
-| Anywhere | reply "⚙️ Settings" | settings screen |
-| Anywhere | reply "❓ Help" | help screen |
+| Any top-level screen | tap a nav destination | edit into that screen |
+| Anywhere | `/settings` | settings screen |
+| Anywhere | `/help` | help screen |
+
+---
+
+## 7. The one-time legacy-keyboard migration
+
+An inline keyboard cannot remove a **persistent reply keyboard** a user already
+has installed from an older build — it would stay stuck at the bottom of the chat
+forever. So on `/start`, and **only** there, a returning user receives exactly one
+extra message carrying `ReplyKeyboardRemove` (an invisible zero-width body),
+before the menu. It never displaces the screen's inline keys, fires at most once
+per `/start`, and never appears from `/help`, `/settings`, or any nav callback.
+New users never had a reply keyboard, so it is a harmless no-op for them. See
+`docs/DECISIONS.md` CB-26.

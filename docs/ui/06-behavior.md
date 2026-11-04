@@ -17,8 +17,8 @@ The bot is **edit-first**, send-second:
   - a **flow starts** (a prompt that needs `force_reply`, which edits cannot
     carry),
   - a **result should be kept** (a run's final output, an exec result),
-  - a **reply keyboard must be introduced/changed** (only sends carry
-    `ReplyKeyboardMarkup`),
+  - a legacy user is migrated off the old reply keyboard (the one-time
+    `ReplyKeyboardRemove` on `/start`; see [`01-language-and-menu.md`](01-language-and-menu.md) §7),
   - the previous message is too old or was deleted (fallback).
 - Identical edits are suppressed (`RichSender` caches the last HTML per message),
   because Telegram rejects "message not modified" edits.
@@ -163,8 +163,8 @@ rendered as a `[████░░░░] 50%` line inside `<code>` (visual, lan
 - Prompts (which are sent, not edited) are re-sent in the new locale if the user
   switches before answering; the FSM stores only state and raw user input, never
   rendered text.
-- The persistent reply menu is re-sent (with the new locale's labels) on the next
-  send after a language switch, because reply keyboards cannot be edited.
+- There is no persistent reply menu to re-send: the inline nav block is part of
+  each screen and is edited in place with it.
 
 ---
 

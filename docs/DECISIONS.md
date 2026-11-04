@@ -373,6 +373,61 @@ tappable immediately.
 create wizard`. The reply menu arrives with the workspace menu. Nothing is lost:
 the welcome board's "How it works" opens `/help`, and Start opens the wizard.
 
+> **Superseded in part by CB-25 / CB-26.** The persistent reply menu no longer
+> exists; navigation is a shared inline block. The welcome board still keeps its
+> own inline Start button, which is why CB-24's rule holds.
+
+---
+
+## CB-25 — Navigation is a shared inline row at the bottom of every top-level screen
+
+**Decision.** There is **no reply keyboard anywhere, ever** — every button is an
+inline button. Every top-level screen (main menu, welcome board, help, settings,
+workspaces list, language picker) ends with one shared **nav block**: the four
+destinations Workspaces (`ws:list`), Settings (`nav:settings`), Language
+(`nav:language`) and Help (`nav:help`) — plus Menu (`nav:menu`) where the screen
+is not the menu itself — laid out **two buttons per row, at most three rows**.
+The destination the user is already on is rendered `MUTED` (inert): visible, not
+tappable. The main menu's own primary action (`➕ New Workspace`) sits full width
+*above* the block. One helper (`presentation/screens/nav.py`) renders it, so every
+screen agrees.
+
+**Why.** He asked for no reply keyboard and a *smart placement with good
+distribution*. The bottom of the message is where a thumb already expects
+navigation. Because the old reply keyboard was *persistent*, the user could reach
+any destination from anywhere; an inline block restores that reachability from
+every top-level screen while never scrolling away or stacking up, and it can be
+edited in place. Two columns across two-to-three short rows is the densest layout
+that keeps every label readable on a phone.
+
+**Consequences.** The catalog keys `menu.placeholder` and `menu.my_workspaces`
+(both tied to the old reply menu) are deleted, along with `welcome.how` (now
+covered by the Help destination). An architecture test forbids
+`ReplyKeyboardMarkup`/`KeyboardButton` anywhere and permits one
+`ReplyKeyboardRemove` (CB-26). Screen-specific keyboards (workspace detail, files,
+runs) keep their own layout; only the top-level surfaces carry the nav block.
+
+---
+
+## CB-26 — One `ReplyKeyboardRemove` on `/start`, and only there
+
+**Decision.** On `/start` for a returning user, the bot sends exactly one extra
+message carrying `ReplyKeyboardRemove`, then the menu (or the welcome board). It
+is never sent on any other screen, never more than one per `/start`, and the
+screen's own inline keyboard is never displaced — the removal rides its own
+message with an invisible zero-width body.
+
+**Why.** An inline keyboard cannot remove a persistent reply keyboard a user
+already has installed from an older build, so it would stay stuck at the bottom
+of their chat forever. `/start` is the natural migration point: it is where a
+user returns to re-anchor the bot. Doing it once bounds the clutter to a single
+extra message.
+
+**Consequences.** A legacy user who sends `/start` gets a clean chat and the new
+inline navigation. New users never see a reply keyboard, so for them the removal
+is a harmless no-op. The removal is guarded by tests (fires on `/start`, not on
+`/help`, `/settings`, or a nav callback) and by the architecture guard (CB-25).
+
 ---
 
 ## Open questions deliberately left open
