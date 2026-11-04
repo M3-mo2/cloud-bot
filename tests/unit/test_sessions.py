@@ -141,3 +141,40 @@ def test_terminal_is_not_a_fifo_or_run_reinvention():
     assert "/sessions" in engine_source
     assert "open_session" in engine_source
     assert "session_signal" in engine_source
+
+
+async def test_cap_pre_check_refuses_BEFORE_reaching_the_engine(engine, users, sessions):
+    """The cap is the SERVICE's job, and this asserts it happens before the engine is called.
+
+    Why this exists: `FakeEngine.open_session` raises `too_many_sessions` by itself, so the older test
+    above passes even when the service's pre-check is deleted — its name claims "without touching the
+    engine" and verifies nothing of the sort. This test counts the engine's calls, so it goes red the
+    moment the pre-check stops running. It is the difference between a test that asserts an outcome the
+    fake also produces, and one that asserts the behaviour under test.
+    """
+    svc = await _service(engine, users, sessions)
+    cap = (await svc.meta()).sessions.max_per_workspace
+
+    calls: list[int] = []
+    real_open = engine.open_session
+
+    async def counting_open(*args, **kwargs):
+        calls.append(1)
+        return await real_open(*args, **kwargs)
+
+    engine.open_session = counting_open  # type: ignore[method-assign]
+    try:
+        for _ in range(cap):
+            await svc.open(1, WS)
+        at_capacity = len(calls)
+        assert at_capacity == cap
+
+        with pytest.raises(EngineRefused) as exc:
+            await svc.open(1, WS)
+        assert exc.value.engine_code == "too_many_sessions"
+        assert len(calls) == at_capacity, (
+            "the refused open still reached the engine — the cap is being left to the engine "
+            "instead of being pre-checked"
+        )
+    finally:
+        engine.open_session = real_open  # type: ignore[method-assign]
