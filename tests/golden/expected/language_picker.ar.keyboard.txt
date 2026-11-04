@@ -1,0 +1,4 @@
+✓ العربية [lang:ar] disabled | English [lang:en] enabled
+📦 المساحات [ws:list] enabled | ⚙️ الإعدادات [nav:settings] enabled
+🌐 اللغة [nav:language] disabled | ❓ مساعدة [nav:help] enabled
+🏠 القائمة [nav:menu] enabled

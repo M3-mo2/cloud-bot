@@ -703,3 +703,55 @@ def test_arabic_goldens_contain_arabic():
     for path in ar_files:
         text = path.read_text(encoding="utf-8")
         assert any("\u0600" <= ch <= "\u06ff" for ch in text), f"{path.name} has no Arabic"
+
+
+# -- keyboard goldens (TASK 09) ----------------------------------------------
+#: The top-level screens whose inline navigation block is layout-load-bearing.
+KB_AFFECTED = {
+    "menu",
+    "menu_empty",
+    "help",
+    "settings",
+    "ws_list",
+    "ws_list_empty",
+    "language_picker",
+}
+
+
+def _keyboard_text(screen) -> str:
+    """A stable, human-readable dump of a screen's keyboard (texts, callbacks,
+    disabled flags). Rows are one per line; a reply keyboard is spelled out so its
+    reappearance is a visible golden diff."""
+    markup = screen.markup
+    if markup is None:
+        return "<no keyboard>\n"
+    inline_rows = getattr(markup, "inline_keyboard", None)
+    if inline_rows is None:
+        return f"REPLY_KEYBOARD {markup!r}\n"
+    lines = []
+    for row in inline_rows:
+        cells = []
+        for button in row:
+            action = button.callback_data or button.url or ""
+            flag = "disabled" if getattr(button, "disabled", None) is not None else "enabled"
+            cells.append(f"{button.text} [{action}] {flag}")
+        lines.append(" | ".join(cells))
+    return "\n".join(lines) + "\n"
+
+
+@pytest.mark.parametrize("name", sorted(KB_AFFECTED))
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_golden_keyboard(name, locale):
+    CallbackCodec()
+    screen = SCREEN_BUILDERS[name](_fixtures(), locale)
+    text = _keyboard_text(screen)
+    assert "REPLY_KEYBOARD" not in text, f"{name}/{locale} returned a reply keyboard"
+    expected_file = EXPECTED / f"{name}.{locale.value}.keyboard.txt"
+    if UPDATE or not expected_file.exists():
+        expected_file.parent.mkdir(parents=True, exist_ok=True)
+        expected_file.write_text(text, encoding="utf-8")
+        pytest.skip(f"wrote keyboard golden {expected_file.name}")
+    assert text == expected_file.read_text(encoding="utf-8"), (
+        f"{name}/{locale} keyboard differs from golden; run UPDATE_GOLDEN=1 to refresh"
+    )
+

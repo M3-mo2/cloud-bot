@@ -1,0 +1,3 @@
+▶️ ابدأ [ws:new] enabled
+📦 المساحات [ws:list] enabled | ⚙️ الإعدادات [nav:settings] enabled
+🌐 اللغة [nav:language] enabled | ❓ مساعدة [nav:help] enabled

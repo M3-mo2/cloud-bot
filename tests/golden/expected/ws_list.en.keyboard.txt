@@ -1,0 +1,6 @@
+📦 demo [ws:view:4xt1tp8g] enabled
+📦 scraper [ws:view:4cbx57pb] enabled
+➕ New Workspace [ws:new] enabled
+📦 Workspaces [ws:list] disabled | ⚙️ Settings [nav:settings] enabled
+🌐 Language [nav:language] enabled | ❓ Help [nav:help] enabled
+🏠 Menu [nav:menu] enabled
