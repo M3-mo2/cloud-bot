@@ -16,6 +16,7 @@ from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
 from cloudbot.services.ports import PortsService
 from cloudbot.services.processes import ProcessesService
+from cloudbot.services.session import SessionService
 from cloudbot.services.sessions import SessionsService
 from cloudbot.services.tunnels import TunnelsService
 from cloudbot.services.workspaces import WorkspacesService
@@ -25,6 +26,7 @@ from cloudbot.services.workspaces import WorkspacesService
 class Services:
     account: AccountService
     workspaces: WorkspacesService
+    session: SessionService
     files: FilesService
     execution: ExecutionService
     sessions: SessionsService
