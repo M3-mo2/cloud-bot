@@ -8,6 +8,7 @@ from cloudbot.services.account import AccountService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.ownership import OwnershipService
+from cloudbot.services.sessions import SessionsService
 from cloudbot.services.workspaces import WorkspacesService
 
 
@@ -17,4 +18,5 @@ class Services:
     workspaces: WorkspacesService
     files: FilesService
     execution: ExecutionService
+    sessions: SessionsService
     ownership: OwnershipService

@@ -21,6 +21,7 @@ from cloudbot.services.bundle import Services
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.ownership import OwnershipService
+from cloudbot.services.sessions import SessionsService
 from cloudbot.services.workspaces import WorkspacesService
 
 
@@ -61,6 +62,7 @@ def build(settings: Settings) -> Container:
         workspaces=WorkspacesService(engine, users, ownership),
         files=FilesService(engine, ownership),
         execution=ExecutionService(engine, ownership),
+        sessions=SessionsService(engine, sessions, ownership),
         ownership=ownership,
     )
     return Container(
