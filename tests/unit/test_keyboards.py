@@ -7,7 +7,7 @@ from aiogram.types import DisabledButton, InlineKeyboardButton
 
 from cloudbot.core.locale import Locale
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.keyboards.buttons import MAX_CALLBACK_BYTES, inline, reply
+from cloudbot.presentation.keyboards.buttons import MAX_CALLBACK_BYTES, inline
 from cloudbot.presentation.keyboards.callbacks import CallbackCodec
 from cloudbot.presentation.keyboards.styles import (
     ALLOWED_STYLES,
@@ -70,13 +70,6 @@ def test_raw_bool_disabled_raises_the_measured_way():
 
     with pytest.raises(ValidationError):
         InlineKeyboardButton(text="x", callback_data="y", disabled=True)
-
-
-def test_reply_button_style():
-    from aiogram.enums import ButtonStyle
-
-    button = reply("Menu", intent=Intent.PRIMARY)
-    assert button.style == ButtonStyle.PRIMARY.value
 
 
 def test_callback_codec_under_64_bytes():

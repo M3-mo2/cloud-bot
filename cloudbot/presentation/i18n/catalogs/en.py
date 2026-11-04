@@ -35,7 +35,6 @@ MESSAGES: dict[str, str] = {
     "lang.change_later_en": "You can change this later from the menu.",
     "lang.change_later_ar": "يمكنك تغييرها لاحقًا من القائمة.",
     "lang.current_marker": "✓ {label}",
-    "lang.change": "🌐 Change Language",
 
     # -- welcome (first run, no workspaces) ---------------------------------
     "welcome.title": "☁️ CloudBot",
@@ -44,19 +43,16 @@ MESSAGES: dict[str, str] = {
     "welcome.ready": "Ready to begin?",
     "welcome.start_hint": "Press <b>Start</b> and you're in.",
     "welcome.start": "▶️ Start",
-    "welcome.how": "❓ How it works",
 
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
     "menu.hello": "Hello, {name} 👋",
     "menu.tap_hint": "Tap a workspace to open it, or create a new one.",
     "menu.new_workspace": "➕ New Workspace",
-    "menu.my_workspaces": "📦 My Workspaces",
     "menu.settings": "⚙️ Settings",
     "menu.workspaces": "📦 Workspaces",
     "menu.language": "🌐 Language",
     "menu.help": "❓ Help",
-    "menu.placeholder": "Choose an action…",
     "menu.column.workspace": "Workspace",
     "menu.column.status": "Status",
     "menu.column.runs": "Runs",

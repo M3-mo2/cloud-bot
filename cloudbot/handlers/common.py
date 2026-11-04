@@ -1,4 +1,9 @@
-"""Handlers: /start, /help, /settings, language switching, and the reply menu."""
+"""Handlers: /start, /help, /settings, language switching.
+
+Every button is inline; there is no reply keyboard anywhere. ``/start`` sends one
+one-time ``ReplyKeyboardRemove`` so a user who still has a legacy persistent reply
+keyboard from an older build gets it cleared (see ``docs/DECISIONS.md`` CB-25).
+"""
 
 from __future__ import annotations
 
@@ -9,6 +14,8 @@ from aiogram.types import CallbackQuery, Message
 from cloudbot.core.locale import Locale
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
+from cloudbot.presentation.keyboards.markup import remove_reply
+from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import menu as menu_screens
 from cloudbot.presentation.screens.language import language_card, language_picker
@@ -16,6 +23,10 @@ from cloudbot.services.bundle import Services
 from cloudbot.services.events import RequestEvents
 
 router = Router(name="common")
+
+#: A zero-width space body: the removal message carries no visible content, only
+#: the ``ReplyKeyboardRemove`` markup. Telegram requires a non-empty body.
+_EMPTY = "\u200b"
 
 
 async def _open_menu(
@@ -27,6 +38,13 @@ async def _open_menu(
     workspaces = await services.workspaces.list(ctx.tg_id)
     screen = menu_screens.main_menu(workspaces, ctx.locale, display_name=ctx.display_name)
     await show_screen(event, screen, ctx=ctx, sender=sender)
+
+
+async def _clear_legacy_keyboard(chat_id: int, locale: Locale, sender: RichSender) -> None:
+    """Send the one-time ReplyKeyboardRemove (migration off the old reply menu)."""
+    doc = RichDoc(locale)
+    doc.p(_EMPTY)
+    await sender.send(chat_id, doc, markup=remove_reply())
 
 
 @router.message(Command("start"))
@@ -44,17 +62,13 @@ async def on_start(
         events.user_new(tg_id=ctx.tg_id, name=ctx.display_name)
         await show_screen(message, language_card(ctx.locale), ctx=ctx, sender=sender)
         return
-    # Returning user: menu. A rich message carries a single reply_markup, so the
-    # persistent reply menu (a send) goes out only once there are workspaces; the
-    # welcome board keeps its own inline keyboard (the Start button).
+    # Returning user: clear any legacy persistent reply keyboard once, then show
+    # the menu (or the welcome board when there are no workspaces). The screen's
+    # own inline keyboard is never displaced — the removal rides its own message.
+    await _clear_legacy_keyboard(message.chat.id, user.locale, sender)
     workspaces = await services.workspaces.list(ctx.tg_id)
     screen = menu_screens.main_menu(workspaces, user.locale, display_name=ctx.display_name)
-    if workspaces:
-        await sender.send(
-            message.chat.id, screen.doc, markup=menu_screens.reply_menu(user.locale)
-        )
-    else:
-        await show_screen(message, screen, ctx=ctx, sender=sender)
+    await show_screen(message, screen, ctx=ctx, sender=sender)
 
 
 @router.message(Command("help"))
@@ -65,35 +79,6 @@ async def on_help(message: Message, ctx: UserContext, sender: RichSender) -> Non
 @router.message(Command("settings"))
 async def on_settings(message: Message, ctx: UserContext, sender: RichSender) -> None:
     await show_screen(message, menu_screens.settings_screen(ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.message(F.text == "❓ مساعدة")
-@router.message(F.text == "❓ Help")
-async def on_reply_help(message: Message, ctx: UserContext, sender: RichSender) -> None:
-    await show_screen(message, menu_screens.help_screen(ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.message(F.text == "⚙️ الإعدادات")
-@router.message(F.text == "⚙️ Settings")
-async def on_reply_settings(message: Message, ctx: UserContext, sender: RichSender) -> None:
-    await show_screen(message, menu_screens.settings_screen(ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.message(F.text == "📦 المساحات")
-@router.message(F.text == "📦 Workspaces")
-async def on_reply_workspaces(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender
-) -> None:
-    from cloudbot.presentation.screens.workspaces import workspace_list
-
-    workspaces = await services.workspaces.list(ctx.tg_id)
-    await show_screen(message, workspace_list(workspaces, ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.message(F.text == "🌐 اللغة")
-@router.message(F.text == "🌐 Language")
-async def on_reply_language(message: Message, ctx: UserContext, sender: RichSender) -> None:
-    await show_screen(message, language_picker(ctx.locale), ctx=ctx, sender=sender)
 
 
 @router.callback_query(F.data == "nav:menu")
@@ -130,12 +115,6 @@ async def on_language(
     await sender.answer_callback(cb)
     if cb.message is not None:
         await sender.edit(cb.message.chat.id, cb.message.message_id, screen.doc, markup=screen.markup)
-        # Reply keyboards can only be introduced by a send; the welcome board
-        # keeps its inline Start button, so only the workspace menu re-sends.
-        if workspaces:
-            await sender.send(
-                cb.message.chat.id, screen.doc, markup=menu_screens.reply_menu(target)
-            )
 
 
 @router.callback_query(F.data == "nav:cancel")

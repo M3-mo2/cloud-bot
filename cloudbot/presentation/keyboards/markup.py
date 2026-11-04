@@ -1,18 +1,16 @@
-"""Keyboard composition helpers."""
+"""Keyboard composition helpers.
+
+Only inline keyboards exist. ``remove_reply`` is the single, documented
+exception: the one-time ``ReplyKeyboardRemove`` sent on ``/start`` to clear a
+legacy persistent reply keyboard a user may still have installed (see
+``docs/DECISIONS.md`` CB-25).
+"""
 
 from __future__ import annotations
 
 from typing import Sequence
 
-from aiogram.types import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    KeyboardButton,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-)
-
-from cloudbot.presentation.keyboards.buttons import reply
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 
 
 def inline_markup(
@@ -23,20 +21,6 @@ def inline_markup(
     )
 
 
-def reply_markup(
-    rows: Sequence[Sequence[KeyboardButton]],
-    *,
-    placeholder: str | None = None,
-    force_reply: bool = False,
-) -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(
-        keyboard=[list(row) for row in rows],
-        resize_keyboard=True,
-        is_persistent=True,
-        input_field_placeholder=placeholder,
-        force_reply=force_reply,
-    )
-
-
 def remove_reply() -> ReplyKeyboardRemove:
+    """The one-time migration button: clear a legacy reply keyboard."""
     return ReplyKeyboardRemove()

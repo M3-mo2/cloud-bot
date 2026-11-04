@@ -1,17 +1,16 @@
 """Onboarding / start screen: the welcome board carries its inline Start button.
 
-Regression for the live bug where ``on_start`` built the welcome screen and then
-sent it with ``markup=reply_menu(...)``, silently discarding ``screen.markup`` —
-so the inline "Start" button never appeared. A rich message carries exactly one
-reply_markup (a reply keyboard OR an inline one), so the empty welcome board must
-keep its inline keyboard.
+The bot has no reply keyboard. ``/start`` for a returning user sends exactly one
+one-time ``ReplyKeyboardRemove`` (clearing a legacy persistent reply menu from an
+older build) and then the menu, whose navigation lives in the inline nav block.
+The empty welcome board keeps its inline keyboard.
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from aiogram.types import CallbackQuery, Chat, Message, Update, User
+from aiogram.types import CallbackQuery, Chat, Message, ReplyKeyboardRemove, Update, User
 
 from cloudbot.adapters.cloud_service.fake import FakeEngine
 from cloudbot.bootstrap.app import build_dispatcher
@@ -77,6 +76,14 @@ def _inline_actions(markup) -> set[str]:
     return {b.callback_data for row in rows for b in row if b.callback_data}
 
 
+def _reply_keyboard_sends(sent: list[dict]) -> list:
+    return [e["markup"] for e in sent if getattr(e["markup"], "keyboard", None) is not None]
+
+
+def _removal_sends(sent: list[dict]) -> list:
+    return [e for e in sent if isinstance(e["markup"], ReplyKeyboardRemove)]
+
+
 def _container():
     settings = Settings(
         mode="dev",
@@ -107,7 +114,7 @@ async def test_first_start_shows_the_welcome_board_with_an_inline_start_button()
         await container.aclose()
 
 
-async def test_returning_user_with_a_workspace_gets_the_persistent_reply_menu():
+async def test_returning_user_with_a_workspace_gets_the_inline_menu_and_one_removal():
     container, engine = _container()
     await container.database.migrate()
     bot = FakeBot()
@@ -117,10 +124,33 @@ async def test_returning_user_with_a_workspace_gets_the_persistent_reply_menu():
         ws = (await engine.list_workspaces())[0]
         await container.users.add_workspace(222, ws.id)
         await dispatcher.feed_update(bot, _message(1, 222, "/start"))
-        last = bot.sent[-1]
-        # The menu send carries the reply keyboard, not the inline quick-actions.
-        assert getattr(last["markup"], "keyboard", None), "reply menu missing"
-        assert not _inline_actions(last["markup"])
+        # No reply keyboard is ever installed.
+        assert _reply_keyboard_sends(bot.sent) == [], "a reply keyboard was sent"
+        # Exactly one migration removal, and the menu carries the inline nav block.
+        assert len(_removal_sends(bot.sent)) == 1, "expected exactly one ReplyKeyboardRemove"
+        assert "ws:new" in _inline_actions(bot.sent[-1]["markup"])
+        assert "nav:settings" in _inline_actions(bot.sent[-1]["markup"])
+    finally:
+        await container.aclose()
+
+
+async def test_the_removal_fires_only_on_start_not_on_other_screens():
+    container, engine = _container()
+    await container.database.migrate()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await container.users.get_or_create(222, default_locale=Locale.EN)
+        ws = (await engine.list_workspaces())[0]
+        await container.users.add_workspace(222, ws.id)
+        # /start fires it once.
+        await dispatcher.feed_update(bot, _message(1, 222, "/start"))
+        assert len(_removal_sends(bot.sent)) == 1
+        # Other commands and a nav callback do not.
+        await dispatcher.feed_update(bot, _message(2, 222, "/help"))
+        await dispatcher.feed_update(bot, _message(3, 222, "/settings"))
+        await dispatcher.feed_update(bot, _callback(4, 222, "nav:menu"))
+        assert len(_removal_sends(bot.sent)) == 1, "the removal leaked onto another screen"
     finally:
         await container.aclose()
 
@@ -149,5 +179,22 @@ async def test_menu_callback_with_no_workspaces_still_renders_the_welcome_board(
     try:
         await dispatcher.feed_update(bot, _callback(1, 444, "nav:menu"))
         assert "ws:new" in _inline_actions(bot.sent[-1]["markup"])
+    finally:
+        await container.aclose()
+
+
+async def test_former_reply_button_texts_are_now_ordinary_and_do_nothing():
+    container, _ = _container()
+    await container.database.migrate()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        stale = ["📦 المساحات", "⚙️ الإعدادات", "🌐 اللغة", "❓ مساعدة",
+                 "📦 Workspaces", "⚙️ Settings", "🌐 Language", "❓ Help"]
+        for uid, text in enumerate(stale, start=1):
+            # A plain message equal to the old reply-button label must not crash
+            # and must not trigger the special screen it used to open.
+            await dispatcher.feed_update(bot, _message(uid, 555, text))
+        assert bot.sent == [], "a former reply-button text still opened a screen"
     finally:
         await container.aclose()

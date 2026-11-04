@@ -1,12 +1,15 @@
-"""Button factories: inline and reply, with styles, disabled and force_reply.
+"""Button factories: inline, with styles and disabled.
 
 ``inline(..., disabled=True)`` builds a ``DisabledButton`` instance itself; a raw
 ``True`` would raise ``ValidationError`` (measured against aiogram 3.31.0).
+
+There is no reply-button factory: the bot has no reply keyboard anywhere. Every
+button is an inline button.
 """
 
 from __future__ import annotations
 
-from aiogram.types import DisabledButton, InlineKeyboardButton, KeyboardButton
+from aiogram.types import DisabledButton, InlineKeyboardButton
 
 from cloudbot.core.errors import DomainError
 from cloudbot.presentation.keyboards.styles import Intent, is_muted, style_for
@@ -47,8 +50,3 @@ def inline(
         style=style,
         disabled=disabled_obj,
     )
-
-
-def reply(text: str, *, intent: Intent = Intent.PRIMARY) -> KeyboardButton:
-    style = style_for(intent)
-    return KeyboardButton(text=text, style=style)

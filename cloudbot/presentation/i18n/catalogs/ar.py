@@ -35,7 +35,6 @@ MESSAGES: dict[str, str] = {
     "lang.change_later_en": "You can change this later from the menu.",
     "lang.change_later_ar": "يمكنك تغييرها لاحقًا من القائمة.",
     "lang.current_marker": "✓ {label}",
-    "lang.change": "🌐 تغيير اللغة",
 
     # -- welcome (first run, no workspaces) ---------------------------------
     "welcome.title": "☁️ CloudBot",
@@ -44,19 +43,16 @@ MESSAGES: dict[str, str] = {
     "welcome.ready": "جاهز للبدء؟",
     "welcome.start_hint": "اضغط <b>ابدأ</b> وابدأ فورًا.",
     "welcome.start": "▶️ ابدأ",
-    "welcome.how": "❓ كيف يعمل",
 
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
     "menu.hello": "مرحبًا، {name} 👋",
     "menu.tap_hint": "اضغط على مساحة لفتحها، أو أنشئ واحدة جديدة.",
     "menu.new_workspace": "➕ مساحة جديدة",
-    "menu.my_workspaces": "📦 مساحاتي",
     "menu.settings": "⚙️ الإعدادات",
     "menu.workspaces": "📦 المساحات",
     "menu.language": "🌐 اللغة",
     "menu.help": "❓ مساعدة",
-    "menu.placeholder": "اختر إجراءً…",
     "menu.column.workspace": "المساحة",
     "menu.column.status": "الحالة",
     "menu.column.runs": "التشغيلات",
