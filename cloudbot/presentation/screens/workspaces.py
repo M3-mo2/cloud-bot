@@ -199,6 +199,13 @@ def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool =
         rows.append(
             [
                 inline(catalog.t("ws.ports", locale), _cb("port:list", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("ws.processes", locale), _cb("proc:list", ws_id), intent=Intent.PRIMARY),
+            ]
+        )
+        rows.append(
+            [
+                inline(catalog.t("ws.metrics", locale), _cb("met:view", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("ws.archives", locale), _cb("arc:menu", ws_id), intent=Intent.PRIMARY),
             ]
         )
         rows.append(
