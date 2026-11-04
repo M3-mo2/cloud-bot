@@ -59,6 +59,11 @@ class RichDoc:
         """Insert trusted, already-built HTML (used only by this module's peers)."""
         return self._add(html)
 
+    def prepend_raw(self, html: str) -> "RichDoc":
+        """Insert trusted HTML at the very top (the entered-mode banner seam)."""
+        self._parts.insert(0, html)
+        return self
+
     def div(self) -> "RichDoc":
         return self._add("<hr>")
 

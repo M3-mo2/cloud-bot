@@ -24,7 +24,14 @@ async def show_screen(
     Sends (rather than edits) when: the screen needs a reply keyboard or
     ``force_reply`` (edits cannot carry them), the result should be kept
     (``force_send``), or the event is a plain message.
+
+    While an admin is in entered mode the persistent banner is added here — one
+    seam, so every screen they reach is marked, including reused user screens.
     """
+    if ctx.in_entered_mode:
+        from cloudbot.presentation.screens.admin._helpers import prepend_banner
+
+        prepend_banner(screen, ctx)
     if isinstance(event, CallbackQuery) and event.message is not None and not (
         screen.send_new or force_send
     ):
