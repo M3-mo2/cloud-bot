@@ -106,9 +106,9 @@ def file_browser_markup(page: FilePage, ws_id: WorkspaceId, locale: Locale, *, p
     crumb_row = [inline(catalog.t("file.home", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)]
     for i, (label, target) in enumerate(crumbs):
         if i == len(crumbs) - 1:
-            crumb_row.append(inline(label, f"file:ls:{ws_id}:{target}", intent=Intent.PRIMARY, disabled=True))
+            crumb_row.append(inline(label, _cb("file:ls", ws_id, target), intent=Intent.PRIMARY, disabled=True))
         else:
-            crumb_row.append(inline(label, f"file:ls:{ws_id}:{target}", intent=Intent.PRIMARY))
+            crumb_row.append(inline(label, _cb("file:ls", ws_id, target), intent=Intent.PRIMARY))
     rows.append(crumb_row)
 
     for entry in page.entries:
@@ -261,7 +261,7 @@ def upload_too_large(path: str, size: str, limit: str, ws_id: WorkspaceId, local
     doc.h(2, catalog.t("file.upload.title", locale))
     doc.blockquote(catalog.t("file.upload.too_large", locale, size=size, limit=limit))
     markup = inline_markup(
-        [[inline(catalog.t("common.back", locale), f"file:cd:{ws_id}:{_b64(path)}", intent=Intent.PRIMARY)]]
+        [[inline(catalog.t("common.back", locale), _cb("file:cd", ws_id, path), intent=Intent.PRIMARY)]]
     )
     return Screen(doc=doc, markup=markup)
 

@@ -54,7 +54,7 @@ def run_mode(ws: Workspace, locale: Locale, *, has_files: bool = False) -> Scree
     ]
     if has_files:
         rows.append([inline(catalog.t("run.run_file", locale), _cb("run:pick_file", ws.id, 0), intent=Intent.PRIMARY)])
-    rows.append([inline(catalog.t("common.cancel", locale), f"ws:view:{ws.id}", intent=Intent.PRIMARY)])
+    rows.append([inline(catalog.t("common.cancel", locale), _cb("ws:view", ws.id), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
