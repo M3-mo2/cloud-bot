@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, Chat, Message, Update, User
 
 from cloudbot.adapters.cloud_service.fake import FakeEngine
@@ -21,12 +22,16 @@ class FakeBot:
 
     def __init__(self):
         self.sent: list[str] = []
+        #: When set, every edit raises it (to simulate Telegram's refusal).
+        self.raise_on_edit = None
 
     async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
         self.sent.append(rich_message.html)
         return Message.model_construct(chat={"id": chat_id}, message_id=1)
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
+        if self.raise_on_edit is not None:
+            raise self.raise_on_edit
         self.sent.append(getattr(rich_message, "html", ""))
         return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
 
@@ -157,3 +162,56 @@ async def test_admin_suspend_action_affects_and_names_the_workspace():
         assert admin_events[-1].actor == f"admin:{ADMIN}"
     finally:
         await container.aclose()
+
+
+# -- Task 07 Bug A: a malformed/stale callback must not crash -----------------
+async def test_short_audit_callback_renders_the_stale_screen_not_a_crash():
+    """The exact live callback: ``adm:audit_user:<tg_id>`` — no page component,
+    which used to raise ``IndexError`` and render nothing."""
+    container, ws = await _container_with_owner()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await dispatcher.feed_update(bot, _callback(1, ADMIN, f"adm:audit_user:{WS_OWNER}"))
+        assert bot.sent, "a malformed callback rendered nothing"
+        assert "out of date" in bot.sent[-1].lower() or "reopen" in bot.sent[-1].lower()
+    finally:
+        await container.aclose()
+
+
+async def test_unknown_admin_callback_renders_the_stale_screen():
+    container, ws = await _container_with_owner()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await dispatcher.feed_update(bot, _callback(1, ADMIN, "adm:no_such_action:1:2"))
+        assert bot.sent
+        assert "out of date" in bot.sent[-1].lower() or "reopen" in bot.sent[-1].lower()
+    finally:
+        await container.aclose()
+
+
+# -- Task 07 Bug B: resume then back to the owner page, same screen ----------
+async def test_resume_then_back_to_owner_identical_screen_does_not_raise():
+    container, ws = await _container_with_owner()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        # The admin opens the owner's page — the very screen resume returns to.
+        await dispatcher.feed_update(bot, _callback(1, ADMIN, f"adm:user:{WS_OWNER}"))
+        assert bot.sent and "Mohamed" in bot.sent[-1]
+
+        # Telegram refuses the identical re-render; it must not escape.
+        bot.raise_on_edit = TelegramBadRequest(
+            method=None,  # type: ignore[arg-type]
+            message=(
+                "Bad Request: message is not modified: specified new message content "
+                "and reply markup are exactly the same as a current content and reply markup"
+            ),
+        )
+        await dispatcher.feed_update(bot, _callback(2, ADMIN, f"adm:resume:{ws.id}"))
+        # Reached here without an exception: the intended state is already on screen.
+        assert await container.services.admin.entered(ADMIN) is None
+    finally:
+        await container.aclose()
+
