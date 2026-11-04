@@ -261,3 +261,185 @@ async def test_unknown_field_body_does_not_crash():
     meta = await adapter.meta(refresh=True)
     assert meta.version == "0.0.20"
     await adapter.aclose()
+
+
+# -- sessions (Phase 1.5, native engine PTY) ---------------------------------
+SES = "ses_01M6HJATZTFXTWXWBG8A5KWYS8"
+
+SESSION = {
+    "session": {
+        "id": SES,
+        "workspace_id": WS,
+        "shell": "/bin/sh",
+        "cwd": "",
+        "cols": 80,
+        "rows": 24,
+        "status": "running",
+        "created_at": "2026-11-03T20:41:39Z",
+        "last_activity_at": "2026-11-03T20:41:39Z",
+        "started_at": "2026-11-03T20:41:39Z",
+        "ended_at": "",
+        "exit_code": None,
+        "output_bytes": 0,
+        "output_truncated": False,
+    }
+}
+
+FAILED_SESSION = {
+    "session": {
+        "id": SES,
+        "workspace_id": WS,
+        "status": "failed",
+        "reason": "sandbox_unavailable",
+        "diagnostic": "sandbox unavailable: PTY allocation failed",
+        "cols": 80,
+        "rows": 24,
+        "output_bytes": 0,
+        "output_truncated": False,
+    }
+}
+
+
+async def test_open_session_parses_201():
+    adapter = make_adapter(
+        {("POST", f"/v1/workspaces/{WS}/sessions"): httpx.Response(201, json=SESSION)}
+    )
+    session = await adapter.open_session(WS, cols=80, rows=24)
+    assert session.id == SES
+    assert session.status.value == "running"
+    assert session.cols == 80
+    await adapter.aclose()
+
+
+async def test_open_session_201_failed_reports_failed_with_diagnostic():
+    adapter = make_adapter(
+        {("POST", f"/v1/workspaces/{WS}/sessions"): httpx.Response(201, json=FAILED_SESSION)}
+    )
+    session = await adapter.open_session(WS)
+    assert session.status.value == "failed"
+    assert session.reason == "sandbox_unavailable"
+    # The diagnostic is carried on the entity for DEBUG+admin only.
+    assert session.diagnostic.startswith("sandbox unavailable")
+    await adapter.aclose()
+
+
+async def test_open_session_input_resize_signal_bodies():
+    captured: list[tuple[str, dict]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append((request.url.path, json.loads(request.content or b"{}")))
+        return httpx.Response(204)
+
+    transport = httpx.MockTransport(handler)
+    adapter = EngineAdapter.create("http://engine.test", "k", transport=transport)
+    await adapter.session_input(WS, SES, "ls\n")
+    await adapter.session_resize(WS, SES, cols=120, rows=40)
+    await adapter.session_signal(WS, SES, "INT")
+    assert captured == [
+        (f"/v1/workspaces/{WS}/sessions/{SES}/input", {"data": "ls\n"}),
+        (f"/v1/workspaces/{WS}/sessions/{SES}/resize", {"cols": 120, "rows": 40}),
+        (f"/v1/workspaces/{WS}/sessions/{SES}/signal", {"signal": "INT"}),
+    ]
+    await adapter.aclose()
+
+
+async def test_session_output_offset_protocol():
+    adapter = make_adapter(
+        {
+            ("GET", f"/v1/workspaces/{WS}/sessions/{SES}/output"): httpx.Response(
+                200,
+                json={"data": "$ echo hi\r\nhi\r\n$ ", "offset": 0, "next": 18, "eof": True, "truncated": False},
+            )
+        }
+    )
+    chunk = await adapter.session_output(WS, SES, offset=0)
+    assert chunk.data.startswith("$ echo hi")
+    assert chunk.next == 18
+    assert chunk.eof is True
+    await adapter.aclose()
+
+
+async def test_close_session_returns_200_not_204():
+    adapter = make_adapter(
+        {
+            ("DELETE", f"/v1/workspaces/{WS}/sessions/{SES}"): httpx.Response(
+                200,
+                json={
+                    "session": {**SESSION["session"], "status": "killed", "reason": "user_closed"},
+                    "changed": True,
+                },
+            )
+        }
+    )
+    session = await adapter.close_session(WS, SES)
+    assert session.status.value == "killed"
+    assert session.reason == "user_closed"
+    await adapter.aclose()
+
+
+async def test_read_after_close_is_409_session_ended():
+    adapter = make_adapter(
+        {
+            ("GET", f"/v1/workspaces/{WS}/sessions/{SES}/output"): httpx.Response(
+                409,
+                json={
+                    "error": {
+                        "code": "session_ended",
+                        "message": "session has ended",
+                        "details": {"status": "killed"},
+                    }
+                },
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.session_output(WS, SES, offset=0)
+    assert exc.value.engine_code == "session_ended"
+    assert exc.value.details.get("status") == "killed"
+    await adapter.aclose()
+
+
+async def test_too_many_sessions_is_409_refusal():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/sessions"): httpx.Response(
+                409, json={"error": {"code": "too_many_sessions", "message": "", "details": {}}}
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.open_session(WS)
+    assert exc.value.engine_code == "too_many_sessions"
+    await adapter.aclose()
+
+
+async def test_session_needs_interpreter_is_422_refusal():
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/sessions"): httpx.Response(
+                422,
+                json={"error": {"code": "session_needs_interpreter", "message": "", "details": {}}},
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.open_session(WS)
+    assert exc.value.engine_code == "session_needs_interpreter"
+    await adapter.aclose()
+
+
+async def test_list_sessions_parses_page():
+    adapter = make_adapter(
+        {
+            ("GET", f"/v1/workspaces/{WS}/sessions"): httpx.Response(
+                200,
+                json={"sessions": [SESSION["session"]], "total": 1, "limit": 20, "offset": 0},
+            )
+        }
+    )
+    page = await adapter.list_sessions(WS)
+    assert page.total == 1
+    assert page.sessions[0].id == SES
+    assert str(page.sessions[0].workspace_id) == WS
+    await adapter.aclose()
+

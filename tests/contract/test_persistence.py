@@ -65,3 +65,41 @@ async def test_ownership_registry():
 def test_dsn_parsing():
     assert parse_sqlite_path("sqlite+aiosqlite:///./data/bot.db") == "./data/bot.db"
     assert parse_sqlite_path("sqlite+aiosqlite:///:memory:") == ":memory:"
+
+
+async def test_session_store_roundtrip():
+    from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
+    from cloudbot.domain.value_objects import SessionId, SessionStatus
+
+    db = Database(":memory:")
+    await db.connect()
+    await db.migrate()
+    repo = SqliteUserRepository(db)
+    store = SqliteSessionStore(db)
+    await repo.get_or_create(7, default_locale=Locale.EN)
+    ws = WorkspaceId("ws_abc")
+    ses = SessionId("ses_abc")
+    await store.create(7, ws, ses, cols=100, rows=30)
+
+    handle = await store.get(7, ses)
+    assert handle is not None
+    assert handle.workspace_id == ws
+    assert handle.cols == 100 and handle.rows == 30
+    assert handle.out_offset == 0
+    # The store carries an unknown status; the engine owns the live status.
+    assert handle.status is SessionStatus.UNKNOWN
+
+    await store.set_offset(7, ses, 42)
+    await store.update_size(7, ses, cols=120, rows=40)
+    handle = await store.get(7, ses)
+    assert handle.out_offset == 42
+    assert handle.cols == 120 and handle.rows == 40
+
+    listed = await store.list_for_workspace(7, ws)
+    assert [h.id for h in listed] == ["ses_abc"]
+    assert [h.id for h in await store.list_for_user(7)] == ["ses_abc"]
+
+    await store.delete(7, ses)
+    assert await store.get(7, ses) is None
+    await db.close()
+

@@ -27,15 +27,18 @@ from cloudbot.domain.value_objects import (
     WorkspaceStatus,
     WorkspaceSummary,
 )
-from cloudbot.domain.entities import FileEntry, Run
+from cloudbot.domain.entities import FileEntry, Run, TerminalSession
+from cloudbot.domain.meta import EngineMeta
 from cloudbot.presentation.mapping import errors as error_mapping
 from cloudbot.presentation.screens import files as file_screens
 from cloudbot.presentation.screens import menu as menu_screens
 from cloudbot.presentation.screens import run as run_screens
+from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import run_logs as history_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.presentation.screens.language import language_card, language_picker
 from cloudbot.presentation.keyboards.callbacks import CallbackCodec
+from cloudbot.domain.value_objects import SessionStatus
 
 EXPECTED = Path(__file__).resolve().parent / "expected"
 NOW = datetime(2026, 11, 3, 20, 43, 39, tzinfo=timezone.utc)
@@ -127,6 +130,32 @@ def _fixtures():
         limit=10,
         offset=0,
     )
+    running_session = TerminalSession(
+        id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+        workspace_id=ws.id,
+        status=SessionStatus.RUNNING,
+        cols=80,
+        rows=24,
+        created_at=NOW,
+    )
+    ended_session = TerminalSession(
+        id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+        workspace_id=ws.id,
+        status=SessionStatus.TIMED_OUT,
+        cols=100,
+        rows=30,
+        created_at=NOW,
+        reason="idle_timeout",
+    )
+    failed_session = TerminalSession(
+        id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+        workspace_id=ws.id,
+        status=SessionStatus.FAILED,
+        created_at=NOW,
+        reason="sandbox_unavailable",
+        diagnostic="sandbox unavailable: PTY allocation failed",
+    )
+    meta = EngineMeta(version="0.0.20", api_version="v1")
     return dict(
         ws=ws,
         suspended=suspended,
@@ -139,6 +168,10 @@ def _fixtures():
         binary_content=binary_content,
         exec_ok=exec_ok,
         run_page=run_page,
+        running_session=running_session,
+        ended_session=ended_session,
+        failed_session=failed_session,
+        meta=meta,
     )
 
 
@@ -178,6 +211,16 @@ SCREEN_BUILDERS = {
     "live_logs_finished": lambda f, loc: run_screens.live_logs(f["finished_run"], loc, stdout="done: 500 records\n"),
     "run_history": lambda f, loc: history_screens.run_history(f["run_page"], f["ws"].id, loc, now=NOW),
     "purge_conflict": lambda f, loc: history_screens.purge_conflict(f["ws"].id, loc),
+    "terminal_list": lambda f, loc: term_screens.my_terminals([f["running_session"], f["ended_session"]], f["ws"].id, loc, now=NOW),
+    "terminal_list_empty": lambda f, loc: term_screens.my_terminals([], f["ws"].id, loc),
+    "terminal_view_running": lambda f, loc: term_screens.terminal_view(
+        f["running_session"], f["ws"].id, loc, output="$ ls\nmain.py  README.md\n$ ", meta=f["meta"]
+    ),
+    "terminal_view_ended": lambda f, loc: term_screens.terminal_view(f["ended_session"], f["ws"].id, loc, output="$ echo hi\nhi\n$ "),
+    "terminal_view_failed": lambda f, loc: term_screens.terminal_view(f["failed_session"], f["ws"].id, loc),
+    "terminal_resize": lambda f, loc: term_screens.resize_screen(f["running_session"], f["ws"].id, loc),
+    "terminal_ended": lambda f, loc: term_screens.ended_screen(f["ended_session"], f["ws"].id, loc),
+    "terminal_command": lambda f, loc: term_screens.command_prompt(f["ws"].id, f["running_session"].id, loc),
     "err_unavailable": lambda f, loc: error_mapping.error_code_screen("unavailable", loc),
     "err_workspace_suspended": lambda f, loc: error_mapping.error_code_screen("workspace_suspended", loc),
     "err_unprocessable": lambda f, loc: error_mapping.error_code_screen("unprocessable", loc),

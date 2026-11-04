@@ -14,6 +14,7 @@ from cloudbot.services.account import AccountService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.ownership import OwnershipService
+from cloudbot.services.sessions import SessionsService
 from cloudbot.services.workspaces import WorkspacesService
 from cloudbot.core.locale import Locale
 
@@ -39,7 +40,7 @@ class SpyEngine:
         return wrapper
 
 
-async def _setup(engine, users):
+async def _setup(engine, users, sessions):
     """Owner 1 owns WS; owner 2 does not. Returns (spy, services)."""
     spy = SpyEngine(engine)
     ownership = OwnershipService(users)
@@ -53,6 +54,7 @@ async def _setup(engine, users):
             "workspaces": WorkspacesService(spy, users, ownership),
             "files": FilesService(spy, ownership),
             "execution": ExecutionService(spy, ownership),
+            "sessions": SessionsService(spy, sessions, ownership),
         },
     )()
     return spy, services
@@ -63,6 +65,7 @@ def _scoped_calls(services):
     w = services.workspaces
     f = services.files
     e = services.execution
+    s = services.sessions
     return {
         "workspaces.get": lambda: w.get(2, WS),
         "workspaces.patch": lambda: w.patch(2, WS, name="y"),
@@ -86,11 +89,19 @@ def _scoped_calls(services):
         "execution.stop_run": lambda: e.stop_run(2, WS, "run_x"),
         "execution.purge": lambda: e.purge(2, WS),
         "execution.delete_run": lambda: e.delete_run(2, WS, "run_x"),
+        "sessions.open": lambda: s.open(2, WS),
+        "sessions.list_for_workspace": lambda: s.list_for_workspace(2, WS),
+        "sessions.get": lambda: s.get(2, WS, "ses_x"),
+        "sessions.send_input": lambda: s.send_input(2, WS, "ses_x", "hi"),
+        "sessions.read_output": lambda: s.read_output(2, WS, "ses_x", 0),
+        "sessions.resize": lambda: s.resize(2, WS, "ses_x", cols=100, rows=40),
+        "sessions.signal": lambda: s.signal(2, WS, "ses_x", "INT"),
+        "sessions.close": lambda: s.close(2, WS, "ses_x"),
     }
 
 
-async def test_every_scoped_method_refuses_foreign_user(engine, users):
-    spy, services = await _setup(engine, users)
+async def test_every_scoped_method_refuses_foreign_user(engine, users, sessions):
+    spy, services = await _setup(engine, users, sessions)
     for label, factory in _scoped_calls(services).items():
         spy.calls.clear()
         with pytest.raises(NotOwned):
@@ -99,14 +110,14 @@ async def test_every_scoped_method_refuses_foreign_user(engine, users):
         assert spy.calls == [], f"{label} reached the engine while not owned: {spy.calls}"
 
 
-async def test_owner_can_reach(engine, users):
-    spy, services = await _setup(engine, users)
+async def test_owner_can_reach(engine, users, sessions):
+    spy, services = await _setup(engine, users, sessions)
     ws = await services.workspaces.get(1, WS)
     assert ws.owner_tg_id == 1
     assert "get_workspace" in spy.calls
 
 
-async def test_foreign_looks_like_missing(engine, users):
-    _spy, services = await _setup(engine, users)
+async def test_foreign_looks_like_missing(engine, users, sessions):
+    _spy, services = await _setup(engine, users, sessions)
     with pytest.raises(NotOwned):
         await services.workspaces.get(2, WorkspaceId("ws_00000000000000000000000000"))
