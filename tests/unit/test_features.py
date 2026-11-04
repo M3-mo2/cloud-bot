@@ -52,6 +52,64 @@ async def test_packages_install_failure_is_honest_without_net(services, users):
     assert outcome.result.output
 
 
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_install_screen_renders_nonzero_exit_as_failure(locale):
+    """The result screen must treat a non-zero exit_code as a FAILURE.
+
+    This is the screen-level guard the bite test flips: if the screen ignores
+    ``exit_code`` and always shows success, this goes red.
+    """
+    from cloudbot.domain.value_objects import InstallResult
+    from cloudbot.presentation.screens import packages as pkg_screens
+    from cloudbot.services.packages import InstallOutcome
+
+    failed = InstallOutcome(
+        result=InstallResult(
+            exit_code=1,
+            output="pip: error",
+            stdout="",
+            duration_ms=100,
+            timed_out=False,
+            truncated=False,
+            target="/opt/python/private",
+        ),
+        allow_net=False,
+    )
+    html = pkg_screens.install_result_screen(failed, "six", WS, locale).doc.html
+    ok_title = __import__("cloudbot.presentation.i18n.catalog", fromlist=["catalog"]).catalog.t(
+        "package.result_ok_title", locale
+    )
+    fail_title = __import__("cloudbot.presentation.i18n.catalog", fromlist=["catalog"]).catalog.t(
+        "package.result_failed_title", locale
+    )
+    assert fail_title in html, "a non-zero exit_code did not render as a failure"
+    assert ok_title not in html, "a failed install was rendered as success"
+    # The no-egress cause is explained in human words.
+    assert "internet" in html.lower() or "إنترنت" in html
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_install_screen_renders_zero_exit_as_success(locale):
+    from cloudbot.domain.value_objects import InstallResult
+    from cloudbot.presentation.screens import packages as pkg_screens
+    from cloudbot.services.packages import InstallOutcome
+
+    ok = InstallOutcome(
+        result=InstallResult(
+            exit_code=0,
+            output="ok",
+            stdout="ok",
+            duration_ms=100,
+            timed_out=False,
+            truncated=False,
+            target="/opt/python/private",
+        ),
+        allow_net=True,
+    )
+    html = pkg_screens.install_result_screen(ok, "six", WS, locale).doc.html
+    assert "✅" in html
+
+
 @pytest.mark.parametrize("bad", ["", "   ", "six;rm -rf /", "$(reboot)", "a b", "six|cat"])
 def test_package_name_validation_refuses_hostile_input(bad):
     with pytest.raises(InvalidInput):
