@@ -118,7 +118,13 @@ then `SELECT`) so concurrent first-messages cannot create duplicates.
 
 ### 4.2 `SessionStore` (Phase 1.5)
 
-`create`, `get`, `set_offset`, `list_for_user`, `delete`.
+`create`, `get`, `set_offset`, `update_size`, `list_for_user`,
+`list_for_workspace`, `delete`.
+
+`get`/`list` return the persisted handle with an `unknown` status; the engine
+remains the source of truth for a session's live status, and `SessionsService`
+merges the two. `update_size` records a PTY resize so the handle matches the
+engine.
 
 ---
 

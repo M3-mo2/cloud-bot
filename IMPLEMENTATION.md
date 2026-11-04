@@ -1,8 +1,8 @@
-# cloud-bot — Implementation notes (Phase 1)
+# cloud-bot — Implementation notes (Phase 1 + Phase 1.5)
 
-This document records what the Phase-1 implementation delivers, what it
-deliberately does not, how to run the tests, how to start the bot, and the known
-gaps. It follows `docs/` (authoritative) and the four measured briefs.
+This document records what the implementation delivers, what it deliberately does
+not, how to run the tests, how to start the bot, and the known gaps. It follows
+`docs/` (authoritative) and the four measured briefs.
 
 ## What is implemented
 
@@ -48,12 +48,46 @@ gaps. It follows `docs/` (authoritative) and the four measured briefs.
 - **Handlers / middleware / bootstrap**: thin aiogram routers, edge middleware
   (context, error guard, throttle, mode gate, observability, injection), and a
   composition root that wires everything; `python -m cloudbot` starts polling.
+- **Interactive terminal (Phase 1.5)** — the engine's **native sessions API**, not
+  a hand-rolled PTY:
+  - `SessionStore` (`adapters/persistence/sqlite_sessions.py`) maps
+    `tg_id ↔ ws_id/ses_id` plus the output offset cursor and PTY size.
+  - Engine calls in `adapters/cloud_service/engine.py`: `open_session`,
+    `list_sessions`, `get_session`, `session_input`, `session_output`,
+    `session_resize`, `session_signal`, `close_session`; the new codes
+    (`too_many_sessions`, `session_ended`, `session_needs_interpreter`) are wired
+    through the existing error translation.
+  - `services/sessions.py` enforces, in order, the **ownership gate**, the
+    **concurrency cap** (a `409 too_many_sessions` becomes the documented screen,
+    never a raw error), and the **signal allowlist** (`INT|TERM|QUIT|HUP`).
+  - Screens in `presentation/screens/terminal.py`: **my terminals**, the
+    **terminal view** (status heading, recent output in a `<pre>`, and the buttons
+    send-command / Ctrl-C / Ctrl-D / resize / close / my terminals), **resize**
+    (presets + a documented default `80×24`), the **ended** outcome, and the
+    **idle/lifetime notice** taken from the engine's session config.
+  - Input flows through the FSM state group `states/terminal_input.py`; a plain
+    message is sent with a newline appended, and a `/command` is never swallowed
+    as terminal input.
+  - Live output follows the **same offset protocol as run logs**, updating one
+    message in place, bounded by iteration count and a poll interval.
+
+## How to use the terminal
+
+1. Open a workspace → **🖥 Terminals** → **➕ Open terminal**.
+2. The terminal view shows the status and recent output. Tap **⌨️ Send a command**,
+   type (for example) `ls`, and it is sent with Enter; `cd`, `export`, aliases
+   survive because it is one long-lived shell.
+3. **Ctrl-C** sends `INT` to the foreground process group (it interrupts the
+   running command without ending the terminal). **Ctrl-D** sends the EOF byte to
+   the shell. **↔️ Resize** changes the PTY size (`stty size` reflects it).
+4. **⏹ Close** ends the terminal; later input reads as the documented
+   `session_ended` and the screen offers a new terminal.
+5. The view states when the terminal closes (idle and absolute lifetime), from the
+   engine's configuration — never a hardcoded number.
+
 
 ## What is deliberately not implemented (and why)
 
-- **Interactive terminals (sessions)** — Phase 1.5 (`docs/ROADMAP.md`). The
-  `SessionStore` port and table exist; the engine calls, screens and handlers
-  are not built.
 - **Packages, tunnels, ports, metrics, processes, subscriptions, archives** —
   Phase 2. Their error codes are already mapped and catalogued so the vocabulary
   cannot silently rot.
@@ -92,10 +126,22 @@ operator.
 
 ## Known gaps
 
-- The live-log tail loop (draft streaming until terminal) is not started
-  automatically; the offset-follow helper and screens are in place.
-- FSM storage is in-memory for all modes in Phase 1 (the tables and the port for
-  a SQLite/Redis swap exist).
+- **Live execution on this host is blocked by the engine's cgroup setup.** The
+  engine at `http://127.0.0.1:8098` creates workspaces (`201`) but refuses both
+  `POST .../exec` and `POST .../sessions` with
+  `503 {"code":"unavailable","message":"workspace cgroup unavailable: delegate
+  controllers into /sys/fs/cgroup/ws-…: write …/cgroup.subtree_control: no such
+  file or directory"}`. This is an environment limitation (cgroup delegation),
+  reproducible with `curl` against the engine and independent of this bot: the
+  pre-existing Phase-1 `exec` live test fails identically. The live tests are
+  left in place and documented per the task rule; they pass against an engine
+  whose cgroups are delegated.
+- The live-log/session tail loops update one message in place on a bounded
+  schedule; the ephemeral `send_rich_message_draft` preview is available on
+  `RichSender.draft` but the long-running draft loop is not started
+  automatically (it requires a live Telegram session to operate).
+- FSM storage is in-memory for all modes (the tables and the port for a
+  SQLite/Redis swap exist).
 - `edit_message_text` rich-edit behaviour and `send_rich_message_draft` are
   exercised against a fake `Bot`; a real Telegram round-trip was not performed
   (per the hard rule against starting a poller).

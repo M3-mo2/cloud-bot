@@ -182,6 +182,8 @@ mutually exclusive (`422` if both).
 | Domain | HTTP |
 | --- | --- |
 | `open_session` | `POST /v1/workspaces/{ws}/sessions` |
+| `list_sessions` | `GET /v1/workspaces/{ws}/sessions?status=&limit=&offset=` |
+| `get_session` | `GET /v1/workspaces/{ws}/sessions/{ses}` |
 | `session_input` | `POST /v1/workspaces/{ws}/sessions/{ses}/input` body `{data}` |
 | `session_output` | `GET /v1/workspaces/{ws}/sessions/{ses}/output?offset=&limit=` |
 | `session_resize` | `POST /v1/workspaces/{ws}/sessions/{ses}/resize` body `{cols, rows}` |
@@ -189,7 +191,10 @@ mutually exclusive (`422` if both).
 | `close_session` | `DELETE /v1/workspaces/{ws}/sessions/{ses}` |
 
 Signals limited to `INT|TERM|QUIT|HUP`. Output uses the same offset protocol as
-run logs.
+run logs. `close_session` returns `200` (not `204`) with `{session, changed}`;
+after a close, a read reports `409 session_ended`. These calls are implemented in
+`adapters/cloud_service/engine.py`; the terminal itself lives in
+`services/sessions.py` + `presentation/screens/terminal.py`.
 
 ### 4.6 Later phases
 

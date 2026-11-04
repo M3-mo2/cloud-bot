@@ -51,17 +51,28 @@ Engine endpoints used: `/v1/meta`, `/v1/workspaces*`, `/{id}/usage`,
 
 Goal: a real PTY in Telegram, using the engine's native sessions API.
 
+Status: **shipped** (the live engine on this host currently refuses `exec` and
+`sessions` with `503 workspace cgroup unavailable`, an environment limitation —
+see `IMPLEMENTATION.md` "Known gaps").
+
 Scope:
 
-1. `SessionStore` (offset cursor per session).
-2. Engine client: create/input/output/resize/signal/delete.
+1. `SessionStore` (offset cursor per session). — **done**
+   (`adapters/persistence/sqlite_sessions.py`, port in `domain/ports/sessions.py`).
+2. Engine client: create/input/output/resize/signal/delete. — **done**
+   (`adapters/cloud_service/engine.py`, DTOs in `dto.py`).
 3. Screens: open, terminal view (streamed via drafts or periodic edits), resize,
-   signal buttons, close; concurrency cap (`409 too_many_sessions`) handled.
-4. Output uses the **same offset protocol** as run logs.
-5. Timeouts surfaced before they happen (idle/lifetime).
+   signal buttons, close; concurrency cap (`409 too_many_sessions`) handled. —
+   **done** (`presentation/screens/terminal.py`); the live view follows the
+   offset cursor with bounded in-place edits.
+4. Output uses the **same offset protocol** as run logs. — **done** (the session
+   follower reads `{data, offset, next, eof, truncated}` and persists `next`).
+5. Timeouts surfaced before they happen (idle/lifetime). — **done** from the
+   engine's session configuration (`EngineMeta.sessions`), never hardcoded.
 
 Explicitly **not** doing: hand-rolled PTY over a run/FIFO
-(INTEGRATION-GUIDE §5.4 documents why it breaks).
+(INTEGRATION-GUIDE §5.4 documents why it breaks). Asserted by a test and by
+`scripts/verify.sh`.
 
 Exit criteria: `cd`, `export`, job control and interrupts work through the UI; a
 session ends and closes cleanly; ended sessions read as `session_ended`.
