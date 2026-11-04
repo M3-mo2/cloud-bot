@@ -1,0 +1,24 @@
+"""``UserRepository`` — the ownership registry port.
+
+Because a single Cloud Service key owns every workspace, this registry **is** the
+isolation boundary. ``owns`` is consulted by the ownership gate before any
+workspace-scoped engine call.
+"""
+
+from __future__ import annotations
+
+from typing import Protocol
+
+from cloudbot.core.locale import Locale
+from cloudbot.domain.entities import User
+from cloudbot.domain.value_objects import WorkspaceId
+
+
+class UserRepository(Protocol):
+    async def get_or_create(self, tg_id: int, *, default_locale: Locale) -> User: ...
+    async def get(self, tg_id: int) -> User | None: ...
+    async def set_locale(self, tg_id: int, locale: Locale) -> None: ...
+    async def add_workspace(self, tg_id: int, ws_id: WorkspaceId) -> None: ...
+    async def remove_workspace(self, tg_id: int, ws_id: WorkspaceId) -> None: ...
+    async def owned_workspaces(self, tg_id: int) -> list[WorkspaceId]: ...
+    async def owns(self, tg_id: int, ws_id: WorkspaceId) -> bool: ...
