@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from cloudbot.adapters.cloud_service import dto
-from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, Workspace
+from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, TerminalSession, Workspace
 from cloudbot.domain.meta import (
     ArchiveLimits,
     Archives,
@@ -16,6 +16,7 @@ from cloudbot.domain.meta import (
     Ports,
     ProfileInfo,
     Profiles,
+    SessionConfig,
     Subscriptions,
     Tunnels,
     WorkspaceLimits,
@@ -30,6 +31,8 @@ from cloudbot.domain.value_objects import (
     LogChunk,
     RunPage,
     RunStatus,
+    SessionPage,
+    SessionStatus,
     SummaryState,
     WorkspaceId,
     WorkspaceStatus,
@@ -180,6 +183,36 @@ def log_chunk_from_dto(d: dto.LogChunkDTO) -> LogChunk:
     return LogChunk(data=d.data, offset=d.offset, next=d.next, eof=d.eof, truncated=d.truncated)
 
 
+def session_from_dto(s: dto.SessionDTO, *, ws_id: WorkspaceId | None = None) -> TerminalSession:
+    resolved_ws = WorkspaceId(s.workspace_id) if s.workspace_id else ws_id
+    if resolved_ws is None:
+        raise ValueError("session DTO carries no workspace_id and none was supplied")
+    return TerminalSession(
+        id=s.id,
+        workspace_id=resolved_ws,
+        status=SessionStatus.parse(s.status),
+        cols=s.cols,
+        rows=s.rows,
+        out_offset=0,
+        created_at=_dt(s.created_at),
+        reason=s.reason,
+        diagnostic=s.diagnostic,
+        exit_code=s.exit_code,
+        output_truncated=s.output_truncated,
+    )
+
+
+def session_page_from_dto(
+    env: dto.SessionListEnvelope, *, ws_id: WorkspaceId | None = None, offset: int = 0, limit: int = 20
+) -> SessionPage:
+    return SessionPage(
+        sessions=tuple(session_from_dto(s, ws_id=ws_id) for s in env.sessions),
+        total=env.total,
+        limit=env.limit or limit,
+        offset=env.offset or offset,
+    )
+
+
 def lifecycle_from_dto(d: dto.LifecycleDTO) -> LifecycleResult:
     return LifecycleResult(
         changed=d.changed,
@@ -250,6 +283,7 @@ def meta_from_dict(data: dict) -> EngineMeta:
     metrics_raw = data.get("metrics") or {}
     subscriptions_raw = data.get("subscriptions") or {}
     tunnels_raw = data.get("tunnels") or {}
+    sessions_raw = data.get("sessions") or {}
     workspace_limits_raw = data.get("workspace_limits") or {}
     write_rate_raw = data.get("write_rate") or {}
     network_raw = data.get("network") or {}
@@ -295,6 +329,13 @@ def meta_from_dict(data: dict) -> EngineMeta:
             ready=bool(tunnels_raw.get("ready", False)),
             max_per_workspace=int(tunnels_raw.get("max_per_workspace", 2)),
             url_timeout_sec=int(tunnels_raw.get("url_timeout_sec", 60)),
+        ),
+        sessions=SessionConfig(
+            **{
+                k: sessions_raw[k]
+                for k in SessionConfig.__dataclass_fields__
+                if k in sessions_raw
+            }
         ),
         workspace_limits=WorkspaceLimits(
             enabled=bool(workspace_limits_raw.get("enabled", False)),

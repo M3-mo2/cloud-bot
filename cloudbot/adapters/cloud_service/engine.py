@@ -23,12 +23,14 @@ from cloudbot.adapters.cloud_service.mapping import (
     log_chunk_from_dto,
     run_from_dto,
     run_page_from_dto,
+    session_from_dto,
+    session_page_from_dto,
     usage_from_dto,
     workspace_from_dto,
 )
 from cloudbot.adapters.cloud_service.meta import MetaCache
 from cloudbot.core.errors import EngineRefused
-from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, Workspace
+from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, TerminalSession, Workspace
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.value_objects import (
     ExecResult,
@@ -38,6 +40,7 @@ from cloudbot.domain.value_objects import (
     Limits,
     LogChunk,
     RunPage,
+    SessionPage,
     WorkspaceId,
 )
 
@@ -365,6 +368,87 @@ class EngineAdapter:
 
     async def delete_run(self, ws_id: WorkspaceId, run_id: str) -> None:
         await self._client.delete(_ws_path(ws_id, f"/runs/{run_id}"))
+
+    # -- interactive terminal sessions (native engine PTY) -------------------
+    async def open_session(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        shell: str | None = None,
+        cwd: str | None = None,
+        cols: int = 80,
+        rows: int = 24,
+        timeout_sec: int | None = None,
+    ) -> TerminalSession:
+        body: dict[str, Any] = {"cols": cols, "rows": rows}
+        if shell is not None:
+            body["shell"] = shell
+        if cwd is not None:
+            body["cwd"] = cwd
+        if timeout_sec is not None:
+            body["timeout_sec"] = timeout_sec
+        response = await self._client.post(_ws_path(ws_id, "/sessions"), json=body)
+        env = dto.SessionEnvelope.model_validate(response.json())
+        return session_from_dto(env.session, ws_id=ws_id)
+
+    async def list_sessions(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        status: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> SessionPage:
+        params: dict[str, Any] = {"limit": limit, "offset": offset}
+        if status:
+            params["status"] = status
+        response = await self._client.get(_ws_path(ws_id, "/sessions"), params=params)
+        return session_page_from_dto(
+            dto.SessionListEnvelope.model_validate(response.json()),
+            ws_id=ws_id,
+            offset=offset,
+            limit=limit,
+        )
+
+    async def get_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession:
+        response = await self._client.get(_ws_path(ws_id, f"/sessions/{ses_id}"))
+        env = dto.SessionEnvelope.model_validate(response.json())
+        return session_from_dto(env.session, ws_id=ws_id)
+
+    async def session_input(self, ws_id: WorkspaceId, ses_id: str, data: str) -> None:
+        await self._client.post(
+            _ws_path(ws_id, f"/sessions/{ses_id}/input"), json={"data": data}
+        )
+
+    async def session_output(
+        self, ws_id: WorkspaceId, ses_id: str, *, offset: int = 0, limit: int = 65536
+    ) -> LogChunk:
+        response = await self._client.get(
+            _ws_path(ws_id, f"/sessions/{ses_id}/output"),
+            params={"offset": offset, "limit": limit},
+            timeout=10.0,
+        )
+        return log_chunk_from_dto(dto.LogChunkDTO.model_validate(response.json()))
+
+    async def session_resize(
+        self, ws_id: WorkspaceId, ses_id: str, *, cols: int, rows: int
+    ) -> None:
+        await self._client.post(
+            _ws_path(ws_id, f"/sessions/{ses_id}/resize"),
+            json={"cols": cols, "rows": rows},
+        )
+
+    async def session_signal(self, ws_id: WorkspaceId, ses_id: str, signal: str) -> None:
+        await self._client.post(
+            _ws_path(ws_id, f"/sessions/{ses_id}/signal"), json={"signal": signal}
+        )
+
+    async def close_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession:
+        response = await self._client.delete(_ws_path(ws_id, f"/sessions/{ses_id}"))
+        env = dto.CloseSessionEnvelope.model_validate(response.json())
+        if env.session is None:
+            raise EngineRefused("not_found")
+        return session_from_dto(env.session, ws_id=ws_id)
 
 
 def _basename(path: str) -> str:

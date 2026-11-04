@@ -194,6 +194,41 @@ class ExecResultDTO(_DTO):
     truncated: bool = False
 
 
+class SessionDTO(_DTO):
+    id: str
+    workspace_id: str = ""
+    shell: str = ""
+    cwd: str = ""
+    cols: int = 80
+    rows: int = 24
+    status: str = "running"
+    created_at: str = ""
+    last_activity_at: str = ""
+    started_at: str = ""
+    ended_at: str = ""
+    exit_code: int | None = None
+    output_bytes: int = 0
+    output_truncated: bool = False
+    reason: str = ""
+    diagnostic: str = ""
+
+
+class SessionEnvelope(_DTO):
+    session: SessionDTO
+
+
+class SessionListEnvelope(_DTO):
+    sessions: list[SessionDTO] = Field(default_factory=list)
+    total: int = 0
+    limit: int = 0
+    offset: int = 0
+
+
+class CloseSessionEnvelope(_DTO):
+    session: SessionDTO | None = None
+    changed: bool = True
+
+
 class UsageDTO(_DTO):
     workspace_id: str = ""
     status: str = ""

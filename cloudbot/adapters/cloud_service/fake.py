@@ -12,8 +12,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, AsyncIterator
 
 from cloudbot.core.errors import EngineRefused
-from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, Workspace
-from cloudbot.domain.meta import EngineMeta, Profiles, ProfileInfo
+from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, TerminalSession, Workspace
+from cloudbot.domain.meta import EngineMeta, Profiles, ProfileInfo, SessionConfig
 from cloudbot.domain.value_objects import (
     ExecResult,
     FileContent,
@@ -23,6 +23,8 @@ from cloudbot.domain.value_objects import (
     LogChunk,
     RunPage,
     RunStatus,
+    SessionPage,
+    SessionStatus,
     SummaryState,
     WorkspaceId,
     WorkspaceStatus,
@@ -66,6 +68,8 @@ class FakeEngine:
         self._runs: dict[str, Run] = {}
         self._run_logs: dict[str, tuple[str, str]] = {}
         self._run_ticks: dict[str, int] = {}
+        self._sessions: dict[str, TerminalSession] = {}
+        self._session_output: dict[str, str] = {}
         self._seq = 0
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK4", "demo", WorkspaceStatus.ACTIVE, active=1)
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK5", "scraper", WorkspaceStatus.SUSPENDED)
@@ -454,6 +458,130 @@ class FakeEngine:
 
     async def delete_run(self, ws_id: WorkspaceId, run_id: str) -> None:
         self._runs.pop(run_id, None)
+
+    # -- sessions ------------------------------------------------------------
+    async def open_session(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        shell: str | None = None,
+        cwd: str | None = None,
+        cols: int = 80,
+        rows: int = 24,
+        timeout_sec: int | None = None,
+    ) -> TerminalSession:
+        ws = await self.get_workspace(ws_id)
+        if ws.status is WorkspaceStatus.SUSPENDED:
+            raise EngineRefused("workspace_suspended")
+        live = [
+            s
+            for s in self._sessions.values()
+            if str(s.workspace_id) == str(ws_id) and s.status is SessionStatus.RUNNING
+        ]
+        if len(live) >= 4:
+            raise EngineRefused("too_many_sessions")
+        self._seq += 1
+        ses_id = f"ses_FAKE{self._seq:020d}"
+        session = TerminalSession(
+            id=ses_id,
+            workspace_id=ws_id,
+            status=SessionStatus.RUNNING,
+            cols=cols,
+            rows=rows,
+            created_at=_NOW,
+        )
+        self._sessions[ses_id] = session
+        self._session_output[ses_id] = ""
+        return session
+
+    async def list_sessions(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        status: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> SessionPage:
+        sessions = [s for s in self._sessions.values() if str(s.workspace_id) == str(ws_id)]
+        if status:
+            sessions = [s for s in sessions if s.status.value == status]
+        total = len(sessions)
+        return SessionPage(
+            sessions=tuple(sessions[offset : offset + limit]),
+            total=total,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def get_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession:
+        session = self._sessions.get(ses_id)
+        if session is None:
+            raise EngineRefused("not_found")
+        return session
+
+    async def session_input(self, ws_id: WorkspaceId, ses_id: str, data: str) -> None:
+        session = self._sessions.get(ses_id)
+        if session is None:
+            raise EngineRefused("not_found")
+        if session.status is not SessionStatus.RUNNING:
+            raise EngineRefused("session_ended", details={"status": session.status.value})
+        self._session_output[ses_id] = self._session_output.get(ses_id, "") + f"$ {data}"
+
+    async def session_output(
+        self, ws_id: WorkspaceId, ses_id: str, *, offset: int = 0, limit: int = 65536
+    ) -> LogChunk:
+        session = self._sessions.get(ses_id)
+        if session is None:
+            raise EngineRefused("not_found")
+        if session.status is SessionStatus.KILLED:
+            raise EngineRefused("session_ended", details={"status": "killed"})
+        data = self._session_output.get(ses_id, "")
+        chunk = data[offset : offset + limit]
+        return LogChunk(
+            data=chunk, offset=offset, next=offset + len(chunk), eof=True, truncated=False
+        )
+
+    async def session_resize(
+        self, ws_id: WorkspaceId, ses_id: str, *, cols: int, rows: int
+    ) -> None:
+        session = self._sessions.get(ses_id)
+        if session is None:
+            raise EngineRefused("not_found")
+        self._sessions[ses_id] = TerminalSession(
+            id=session.id,
+            workspace_id=session.workspace_id,
+            status=session.status,
+            cols=cols,
+            rows=rows,
+            created_at=session.created_at,
+            reason=session.reason,
+            diagnostic=session.diagnostic,
+        )
+
+    async def session_signal(self, ws_id: WorkspaceId, ses_id: str, signal: str) -> None:
+        session = self._sessions.get(ses_id)
+        if session is None:
+            raise EngineRefused("not_found")
+        if signal not in ("INT", "TERM", "QUIT", "HUP"):
+            raise EngineRefused("unprocessable", details={"field": "signal"})
+        if session.status is not SessionStatus.RUNNING:
+            raise EngineRefused("session_ended", details={"status": session.status.value})
+
+    async def close_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession:
+        session = self._sessions.get(ses_id)
+        if session is None:
+            raise EngineRefused("not_found")
+        closed = TerminalSession(
+            id=session.id,
+            workspace_id=session.workspace_id,
+            status=SessionStatus.KILLED,
+            cols=session.cols,
+            rows=session.rows,
+            created_at=session.created_at,
+            reason="user_closed",
+        )
+        self._sessions[ses_id] = closed
+        return closed
 
     async def sleep(self, seconds: float) -> None:  # pragma: no cover - helper
         await asyncio.sleep(seconds)
