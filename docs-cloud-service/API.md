@@ -1,8 +1,8 @@
 # API guide
 
 Human-friendly, self-sufficient reference for the sandboxd HTTP/JSON API
-(v0.0.18). The machine-readable contract is
-[api/openapi.yaml](../api/openapi.yaml); where the two disagree, **this document
+(v0.0.20). The machine-readable contract is
+[`api/openapi.yaml`](https://github.com/M3-mo2/cloud-service/blob/main/api/openapi.yaml); where the two disagree, **this document
 follows the implemented behaviour** and the disagreement is recorded in
 [Known discrepancies](#known-discrepancies) at the end.
 
@@ -14,7 +14,7 @@ follows the implemented behaviour** and the disagreement is recorded in
   `127.0.0.1:8080`). The service binds **loopback only** by default; expose it
   through a reverse proxy or change `server.addr` deliberately.
 - The versioned router prefix is `/v1` and is part of every versioned path
-  (declared in [`internal/api/router.go`](../internal/api/router.go) as
+  (declared in [`internal/api/router.go`](https://github.com/M3-mo2/cloud-service/blob/main/internal/api/router.go) as
   `r.Route("/v1", ...)`). There is no way to address a workspace without it.
 - Three probes are **unversioned**: `/healthz`, `/readyz`, `/metrics`.
 - All request/response bodies are JSON unless stated. All timestamps are
@@ -72,7 +72,7 @@ A hard cap breach or a malformed body is still reported through this envelope.
 ### Error codes
 
 Every error code constant defined in
-[`internal/model/errors.go`](../internal/model/errors.go), plus the one
+[`internal/model/errors.go`](https://github.com/M3-mo2/cloud-service/blob/main/internal/model/errors.go), plus the one
 additional code the router emits:
 
 | Code | HTTP | Meaning | Triggered by |
@@ -1702,12 +1702,12 @@ Run one command **synchronously** and return its output inline.
 - **Semantics:**
   - **Wall-clock cap:** synchronous exec has a hard cap of **60 s**, the
     constant `execHardCapSec` in
-    [`internal/service/exec.go`](../internal/service/exec.go). A requested
+    [`internal/service/exec.go`](https://github.com/M3-mo2/cloud-service/blob/main/internal/service/exec.go). A requested
     `timeout_sec` is ignored above it and defaulted to it below. This is *not*
     the same as the workspace `max_wall_time_sec` (default 300), which bounds
     asynchronous runs only.
   - **`cwd` rule:** resolved by `sandboxCwd` in
-    [`internal/executor/nsjail.go`](../internal/executor/nsjail.go). Empty ⇒
+    [`internal/executor/nsjail.go`](https://github.com/M3-mo2/cloud-service/blob/main/internal/executor/nsjail.go). Empty ⇒
     `/workspace`. A relative path is resolved against the workspace root; a
     leading `/` is treated as workspace-rooted (it is stripped, **not** treated
     as the host filesystem root); a `..` that climbs above the root is rejected
@@ -2502,7 +2502,7 @@ workspace ns --slirp(UNIX socket)--> relay ns --slirp(UNIX socket)--> host
   deliberately never published.
 - `allow_net:false` gets a private, **empty** namespace: no egress at all, and
   never the host network. Both states are measured by
-  [`scripts/tunnel-check.sh`](../scripts/tunnel-check.sh).
+  [`scripts/tunnel-check.sh`](https://github.com/M3-mo2/cloud-service/blob/main/scripts/tunnel-check.sh).
 
 > **Recorded hazard.** The abandoned first design created host `veth` pairs,
   addresses and routes, and took the target host off the network three times in
@@ -2943,7 +2943,7 @@ out-of-band changes cannot drift the quota.
   empty (no egress). With `allow_net:true` it is connected to the public internet
   through chained slirp4netns over UNIX sockets — the host network namespace is
   never shared, and the host LAN is blackholed. There is no host allowlist in
-  v0.0.18 (see [Quick tunnels and egress](#quick-tunnels-and-egress)).
+  v0.0.20 (see [Quick tunnels and egress](#quick-tunnels-and-egress)).
 - **Syscalls:** a default-allow seccomp policy KILLs a denylist of dangerous
   syscalls (`mount`, `ptrace`, `bpf`, `kexec_*`, `reboot`, `setns`, `unshare`,
   module loading, …). `cgroup v2` ceilings require the container to run with
@@ -2973,7 +2973,7 @@ curl -s $BASE/readyz
 # {"cgroups":true,"data_dir":true,"nsjail":true,"status":"ready"}
 
 curl -s -H "$AUTH" $BASE/v1/meta
-# {"version":"0.0.18","api_version":"v1", ... }
+# {"version":"0.0.20","api_version":"v1", ... }
 
 WS=$(curl -s -H "$AUTH" -H "$JSON" \
   -d '{"name":"demo","limits":{"memory_mb":256}}' \

@@ -38,6 +38,10 @@ English) presentation model.
 | 16 | [`ui/06-behavior.md`](ui/06-behavior.md) | Streaming, progress, busy states, dialogs, timers. |
 | 17 | [`DECISIONS.md`](DECISIONS.md) | Every call we made and why. |
 | 18 | [`ROADMAP.md`](ROADMAP.md) | Phase 0/1/1.5/2/3 scope and sequencing. |
+| 19 | [`../docs-aiogram-updates/aiogram-rich-messages-html.md`](../docs-aiogram-updates/aiogram-rich-messages-html.md) | The rich-message API the whole rendering contract depends on. |
+| 20 | [`../docs-aiogram-updates/keyboards-update-3.31.0.md`](../docs-aiogram-updates/keyboards-update-3.31.0.md) | What 3.31.0 added to keyboards (`disabled`, `force_reply`, `LINK`). |
+| 21 | [`../docs-aiogram-updates/aiogram-colored-buttons.md`](../docs-aiogram-updates/aiogram-colored-buttons.md) | Colored buttons and the `ButtonStyle` enum. |
+| 22 | [`../docs-cloud-service/REVIEW-sandboxd-v0.0.5.md`](../docs-cloud-service/REVIEW-sandboxd-v0.0.5.md) | Historical review of the engine at v0.0.5 (context for the decisions). |
 
 **Precedence.** If any document here ever conflicts with
 `docs-cloud-service/INTEGRATION-GUIDE.md`, the integration guide wins — it is the
@@ -65,6 +69,8 @@ authoritative usage contract for the engine (v0.0.20, API prefix `/v1`).
 ---
 
 ## AI agent quick-start
+
+The rules an automated agent must follow live in [`../AGENTS.md`](../AGENTS.md).
 
 - Stack: Python 3.12+, `aiogram==3.31.0`, `httpx`, `pydantic`/`pydantic-settings`,
   `aiosqlite`, `babel`, `structlog`.

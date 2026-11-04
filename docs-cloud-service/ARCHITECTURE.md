@@ -805,7 +805,7 @@ Consequences proven by the acceptance transcript: a jailed process cannot read
 `SIGSYS` if it calls `mount(2)` or `ptrace`. A workspace without `allow_net`
 cannot open a network socket (`OSError`); a workspace with `allow_net` can reach
 the public internet and a public resolver but not the host LAN (measured by
-[`scripts/tunnel-check.sh`](../scripts/tunnel-check.sh)).
+[`scripts/tunnel-check.sh`](https://github.com/M3-mo2/cloud-service/blob/main/scripts/tunnel-check.sh)).
 
 ### 5.3 UID/GID mapping — the trickiest part
 
@@ -905,7 +905,7 @@ without `allow_net` gets a private, empty namespace and no resolver. Render
 tests pin both directions
 (`TestRenderConfigMountsResolverWhenNetAllowed`,
 `TestRenderConfigOmitsResolverWhenNetDenied`); the live egress and isolation are
-measured by [`scripts/tunnel-check.sh`](../scripts/tunnel-check.sh); see
+measured by [`scripts/tunnel-check.sh`](https://github.com/M3-mo2/cloud-service/blob/main/scripts/tunnel-check.sh); see
 [VERIFICATION.md §8 and §9g](VERIFICATION.md).
 
 ### 5.7 Host-identity masking (the syscall view)
@@ -983,7 +983,7 @@ payload, never the real procfs). The *visibility* of the mechanism is closed
 (ADR 79); the narrower "no shim file at all" goal is open and measured
 (ADR 77/80). See [DECISIONS.md](DECISIONS.md) #71–#80,
 [VERIFICATION.md §10](VERIFICATION.md) for the measured numbers, and
-[`scripts/identity-check.sh`](../scripts/identity-check.sh) for the assertions.
+[`scripts/identity-check.sh`](https://github.com/M3-mo2/cloud-service/blob/main/scripts/identity-check.sh) for the assertions.
 
 ### 5.7b Per-workspace limits: the curated `/proc` and the real filesystem
 

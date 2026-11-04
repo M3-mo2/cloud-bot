@@ -7,7 +7,7 @@ behalf" with a service API key. End users never touch these APIs directly.
 **Scope:** this is a *usage contract*, not an endpoint index. It states, for each
 thing a product must do, the calls to make in order and the exact response fields
 to depend on. The per-endpoint reference is [`docs/API.md`](API.md); the OpenAPI
-document is [`api/openapi.yaml`](../api/openapi.yaml); measured transcripts for
+document is [`api/openapi.yaml`](https://github.com/M3-mo2/cloud-service/blob/main/api/openapi.yaml); measured transcripts for
 every flow below are in
 [`docs/INTEGRATION-VERIFICATION.md`](INTEGRATION-VERIFICATION.md).
 

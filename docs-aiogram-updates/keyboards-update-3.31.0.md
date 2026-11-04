@@ -35,10 +35,16 @@ from aiogram.enums import ButtonStyle
 
 async def send_keyboard_example(bot: Bot, chat_id: int):
     # Disabled button
+    # NOTE (measured on aiogram 3.31.0): `disabled=True` is NOT accepted — the field is typed
+    # `DisabledButton | None`, so a bool raises
+    #   pydantic ValidationError: Input should be a valid dictionary or instance of DisabledButton.
+    # Pass an instance instead. `bottom_text` is carried through as extra data and renders as an
+    # explanatory line under the button.
+    from aiogram.types import DisabledButton
     disabled_btn = InlineKeyboardButton(
         text="Disabled button",
         callback_data="disabled_action",
-        disabled=True  # Displayed but inactive
+        disabled=DisabledButton()  # Displayed but inactive
     )
 
     # Link-style button
