@@ -32,52 +32,73 @@ def reply_menu(locale: Locale):
     )
 
 
+def welcome_screen(locale: Locale) -> Screen:
+    """The first-run / empty board.
+
+    Shown whenever the user owns no workspaces: it states what the product is,
+    the promise in one line, and a single obvious action (Start).
+    """
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("welcome.title", locale))
+    doc.p(catalog.t("welcome.tagline", locale))
+    doc.p(catalog.t("welcome.body", locale))
+    doc.div()
+    doc.p(catalog.t("welcome.ready", locale))
+    doc.p(_raw(catalog.t("welcome.start_hint", locale)))
+    markup = inline_markup(
+        [
+            [inline(catalog.t("welcome.start", locale), "ws:new", intent=Intent.SUCCESS)],
+            [inline(catalog.t("welcome.how", locale), "nav:help", intent=Intent.PRIMARY)],
+        ]
+    )
+    return Screen(doc=doc, markup=markup)
+
+
 def main_menu(
     workspaces: list[Workspace],
     locale: Locale,
     *,
     display_name: str = "",
 ) -> Screen:
+    if not workspaces:
+        return welcome_screen(locale)
+
     doc = RichDoc(locale)
     doc.h(2, catalog.t("menu.title", locale))
     doc.p(catalog.t("menu.hello", locale, name=display_name))
     doc.div()
 
-    if workspaces:
-        doc.p(format_count("count.workspaces", len(workspaces), locale))
-        rows = []
-        for ws in workspaces[:5]:
-            label_key, emoji = display_state(ws.status, ws.summary.state)
-            status = f"{emoji} {catalog.t(label_key, locale)}"
-            runs = (
-                catalog.t("ws.runs.active", locale, n=_num(ws.summary.runs_active, locale))
-                if ws.summary.runs_active
-                else catalog.t("ws.runs.none", locale)
-            )
-            disk = format_bytes_pair(
-                ws.summary.disk_used_bytes,
-                ws.summary.disk_limit_bytes,
-                locale,
-            )
-            rows.append([ws.name, status, runs, disk])
-        doc.table(
-            [
-                catalog.t("menu.column.workspace", locale),
-                catalog.t("menu.column.status", locale),
-                catalog.t("menu.column.runs", locale),
-                catalog.t("menu.column.disk", locale),
-            ],
-            rows,
+    doc.p(format_count("count.workspaces", len(workspaces), locale))
+    rows = []
+    for ws in workspaces[:5]:
+        label_key, emoji = display_state(ws.status, ws.summary.state)
+        status = f"{emoji} {catalog.t(label_key, locale)}"
+        runs = (
+            catalog.t("ws.runs.active", locale, n=_num(ws.summary.runs_active, locale))
+            if ws.summary.runs_active
+            else catalog.t("ws.runs.none", locale)
         )
-        doc.p(_italic(catalog.t("menu.tap_hint", locale)))
-    else:
-        doc.p(catalog.t("menu.no_workspaces", locale))
+        disk = format_bytes_pair(
+            ws.summary.disk_used_bytes,
+            ws.summary.disk_limit_bytes,
+            locale,
+        )
+        rows.append([ws.name, status, runs, disk])
+    doc.table(
+        [
+            catalog.t("menu.column.workspace", locale),
+            catalog.t("menu.column.status", locale),
+            catalog.t("menu.column.runs", locale),
+            catalog.t("menu.column.disk", locale),
+        ],
+        rows,
+    )
+    doc.p(_italic(catalog.t("menu.tap_hint", locale)))
 
     rows_kb = [[inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)]]
-    if workspaces:
-        rows_kb.append(
-            [inline(catalog.t("menu.my_workspaces", locale), "ws:list", intent=Intent.PRIMARY)]
-        )
+    rows_kb.append(
+        [inline(catalog.t("menu.my_workspaces", locale), "ws:list", intent=Intent.PRIMARY)]
+    )
     rows_kb.append(
         [inline(catalog.t("menu.settings", locale), "nav:settings", intent=Intent.PRIMARY)]
     )

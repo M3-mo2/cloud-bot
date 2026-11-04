@@ -37,10 +37,18 @@ MESSAGES: dict[str, str] = {
     "lang.current_marker": "✓ {label}",
     "lang.change": "🌐 تغيير اللغة",
 
+    # -- welcome (first run, no workspaces) ---------------------------------
+    "welcome.title": "☁️ CloudBot",
+    "welcome.tagline": "بيئات تطوير واستضافة سحابية — من هاتفك بكل سهولة.",
+    "welcome.body": "أنشئ مساحة عمل، أضف مشروعك، واتركه يعمل في السحابة.\nبلا حاسوب، بلا إعدادات، بلا تعقيد.",
+    "welcome.ready": "جاهز للبدء؟",
+    "welcome.start_hint": "اضغط <b>ابدأ</b> وابدأ فورًا.",
+    "welcome.start": "▶️ ابدأ",
+    "welcome.how": "❓ كيف يعمل",
+
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
     "menu.hello": "مرحبًا، {name} 👋",
-    "menu.no_workspaces": "لا توجد مساحات بعد",
     "menu.tap_hint": "اضغط على مساحة لفتحها، أو أنشئ واحدة جديدة.",
     "menu.new_workspace": "➕ مساحة جديدة",
     "menu.my_workspaces": "📦 مساحاتي",

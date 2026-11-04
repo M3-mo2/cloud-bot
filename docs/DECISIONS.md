@@ -339,6 +339,42 @@ boundaries make that additive.
 
 ---
 
+## CB-23 — SQLite runs in autocommit; multi-statement writes are idempotent upserts
+
+**Decision.** One shared aiosqlite connection per process, opened with
+`isolation_level=None` (autocommit). No explicit `BEGIN`. Any operation that must
+touch several rows is expressed as `INSERT ... ON CONFLICT` upserts.
+
+**Why.** aiogram processes updates concurrently, so two handlers can overlap on
+the single connection. An explicit `BEGIN` in `get_or_create` raised
+`sqlite3.OperationalError: cannot start a transaction within a transaction`
+whenever a second first-message arrived mid-transaction — the live crash this
+fixed.
+
+**Consequences.** Each statement is individually atomic; cross-statement atomicity
+is replaced by idempotency (`ON CONFLICT DO NOTHING` / `DO UPDATE`). Moving to
+Postgres (or a connection pool) restores real transactions without changing the
+services.
+
+---
+
+## CB-24 — A rich message carries one markup; the empty board keeps its inline keys
+
+**Decision.** The first-run welcome board (no workspaces) is sent with its own
+**inline** keyboard (Start, How it works). The persistent **reply** menu is
+attached only once the user owns a workspace.
+
+**Why.** `send_rich_message` takes a single `reply_markup`; attaching the reply
+menu overwrote `screen.markup`, so the inline Start button never appeared. Inline
+keyboards cannot be introduced by an edit either, and the welcome board must be
+tappable immediately.
+
+**Consequences.** Onboarding is `[language card] → [welcome board] → tap Start →
+create wizard`. The reply menu arrives with the workspace menu. Nothing is lost:
+the welcome board's "How it works" opens `/help`, and Start opens the wizard.
+
+---
+
 ## Open questions deliberately left open
 
 - **Provisional:** exact plan/quota model and per-user rate limits (Phase 2;

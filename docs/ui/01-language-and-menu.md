@@ -110,10 +110,52 @@ the reply keyboard.
 | 🌐 اللغة | 🌐 Language | reply | primary | — |
 | ❓ مساعدة | ❓ Help | reply | primary | — |
 
-With no workspaces, the snapshot line reads "لا توجد مساحات بعد" / "No workspaces
-yet", and the inline "My Workspaces" button is **omitted** (not disabled) — the
-empty state is explained by the body text and the success "+ New Workspace" button
-is the obvious action.
+With no workspaces, the menu is replaced by the **welcome board** (§2.5).
+
+---
+
+## 2.5 The welcome board (first run / no workspaces)
+
+When the user owns no workspaces — a brand-new user, or one who deleted them
+all — the main menu is **not** shown. Instead a dedicated welcome board states
+what the product is, gives the promise in one line, and offers a single obvious
+action.
+
+### English
+
+```html
+<h2>☁️ CloudBot</h2>
+<p>Development environments and cloud hosting — right from your phone.</p>
+<p>Create a workspace, add your project, and keep it running in the cloud.
+No laptop. No setup. No hassle.</p>
+<hr>
+<p>Ready to begin?</p>
+<p>Press <b>Start</b> and you're in.</p>
+```
+
+### Arabic (`is_rtl=True`)
+
+```html
+<h2>☁️ CloudBot</h2>
+<p>بيئات تطوير واستضافة سحابية — من هاتفك بكل سهولة.</p>
+<p>أنشئ مساحة عمل، أضف مشروعك، واتركه يعمل في السحابة.
+بلا حاسوب، بلا إعدادات، بلا تعقيد.</p>
+<hr>
+<p>جاهز للبدء؟</p>
+<p>اضغط <b>ابدأ</b> وابدأ فورًا.</p>
+```
+
+### Keyboard
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| ▶️ ابدأ | ▶️ Start | inline | success | opens the create wizard (`ws:new`) |
+| ❓ كيف يعمل | ❓ How it works | inline | primary | opens `/help` (`nav:help`) |
+
+The board deliberately avoids architecture jargon (no "isolated", "sandbox",
+"secure"): it speaks to what the user gets, not how the engine works. The
+persistent reply menu is attached by a follow-up send, as on every menu entry.
+
 
 ---
 

@@ -44,11 +44,17 @@ async def on_start(
         events.user_new(tg_id=ctx.tg_id, name=ctx.display_name)
         await show_screen(message, language_card(ctx.locale), ctx=ctx, sender=sender)
         return
-    # Returning user: menu, with the persistent reply menu attached.
+    # Returning user: menu. A rich message carries a single reply_markup, so the
+    # persistent reply menu (a send) goes out only once there are workspaces; the
+    # welcome board keeps its own inline keyboard (the Start button).
     workspaces = await services.workspaces.list(ctx.tg_id)
     screen = menu_screens.main_menu(workspaces, user.locale, display_name=ctx.display_name)
-    markup = menu_screens.reply_menu(user.locale)
-    await sender.send(message.chat.id, screen.doc, markup=markup)
+    if workspaces:
+        await sender.send(
+            message.chat.id, screen.doc, markup=menu_screens.reply_menu(user.locale)
+        )
+    else:
+        await show_screen(message, screen, ctx=ctx, sender=sender)
 
 
 @router.message(Command("help"))
@@ -102,6 +108,11 @@ async def on_settings_cb(cb: CallbackQuery, ctx: UserContext, sender: RichSender
     await show_screen(cb, menu_screens.settings_screen(ctx.locale), ctx=ctx, sender=sender)
 
 
+@router.callback_query(F.data == "nav:help")
+async def on_help_cb(cb: CallbackQuery, ctx: UserContext, sender: RichSender) -> None:
+    await show_screen(cb, menu_screens.help_screen(ctx.locale), ctx=ctx, sender=sender)
+
+
 @router.callback_query(F.data == "nav:language")
 async def on_language_cb(cb: CallbackQuery, ctx: UserContext, sender: RichSender) -> None:
     await show_screen(cb, language_picker(ctx.locale), ctx=ctx, sender=sender)
@@ -119,8 +130,12 @@ async def on_language(
     await sender.answer_callback(cb)
     if cb.message is not None:
         await sender.edit(cb.message.chat.id, cb.message.message_id, screen.doc, markup=screen.markup)
-        # Reply keyboards can only be introduced by a send.
-        await sender.send(cb.message.chat.id, screen.doc, markup=menu_screens.reply_menu(target))
+        # Reply keyboards can only be introduced by a send; the welcome board
+        # keeps its inline Start button, so only the workspace menu re-sends.
+        if workspaces:
+            await sender.send(
+                cb.message.chat.id, screen.doc, markup=menu_screens.reply_menu(target)
+            )
 
 
 @router.callback_query(F.data == "nav:cancel")
