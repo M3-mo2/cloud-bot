@@ -492,4 +492,45 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty proofs passed"
+echo "== 31. bite test: the persisted session resume is load-bearing =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Make /start ignore the session (never resume): the resume test must go red;
+# restore the guard, and it is green again. This proves the column-not-FSM
+# session is what puts the user back inside.
+target = pathlib.Path("cloudbot/handlers/common.py")
+original = target.read_text(encoding="utf-8")
+guard = "    if inside is not None:\n"
+bitten = original.replace(
+    guard,
+    "    if inside is not None and False:  # BITE: /start ignores the session\n",
+    1,
+)
+assert bitten != original, "bite substitution did not apply (resume guard moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_session.py",
+       "-k", "start_while_inside_renders", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the resume test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: ignoring the session did not make /start lose the resume (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the resume did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-one proofs passed"
