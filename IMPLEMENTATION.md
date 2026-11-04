@@ -1,4 +1,4 @@
-# cloud-bot — Implementation notes (Phase 1 + Phase 1.5)
+# cloud-bot — Implementation notes (Phase 1 + Phase 1.5 + Phase 2a/2b/2c)
 
 This document records what the implementation delivers, what it deliberately does
 not, how to run the tests, how to start the bot, and the known gaps. It follows
@@ -84,9 +84,7 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
   - Live output follows the **same offset protocol as run logs**, updating one
     message in place, bounded by iteration count and a poll interval.
 
-## How to use the terminal
-
-1. Open a workspace → **🖥 Terminals** → **➕ Open terminal**.
+## How to use the terminal1. Open a workspace → **🖥 Terminals** → **➕ Open terminal**.
 2. The terminal view shows the status and recent output. Tap **⌨️ Send a command**,
    type (for example) `ls`, and it is sent with Enter; `cd`, `export`, aliases
    survive because it is one long-lived shell.
@@ -104,11 +102,51 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
    engine's configuration — never a hardcoded number.
 
 
+## Phase 2a/2b/2c — packages, tunnels, ports
+
+Added additively in the same shape as Phase 1/1.5 (port → adapter → service →
+screen → handler → catalogs):
+
+- **Adapter** (`adapters/cloud_service/`): DTOs, mapping and engine calls for
+  `GET/POST/DELETE /packages*`, `GET/POST/DELETE /tunnels*`, `GET /ports`. A pip
+  install is bounded by a 300 s client timeout and a tunnel create by 90 s
+  (`tunnels.url_timeout_sec` was measured at 45 s); neither creation `POST` is
+  auto-retried. `errors.py` now honours a **modelled code on a 5xx** — a `504
+  tunnel_url_unavailable` is a refusal with its own screen, not a generic
+  "unavailable" (and the code stays in `KNOWN_CODES`).
+- **Services** (`services/packages.py`, `services/tunnels.py`, `services/ports.py`)
+  behind the existing `EnginePort` protocol; each runs the **ownership gate
+  first** and validates locally (a package name cannot contain shell
+  metacharacters because it reaches `pip`; a port must be 1024–65535).
+  `PackagesService.install` returns an `InstallOutcome` carrying the workspace's
+  `allow_net` so the result screen can explain a no-egress failure in words; the
+  non-zero `exit_code` is the honest signal and is never turned into success.
+- **Screens** (`presentation/screens/{packages,tunnels,ports}.py`): the installed
+  list + shared tier; the install prompt / working state / **honest result**;
+  remove-one / remove-all confirmations; the active tunnels list with a `LINK`
+  button per URL and the three gate states; the publish-a-port chooser (detected
+  ports or typed); the listening-ports list with a **separate unix section**, the
+  **verbatim `reachability` blockquote**, a partial-view note on `complete:false`,
+  and a refresh.
+- **Wiring**: `handlers/features.py` (router registered before `admin`); a new
+  `states/feature_input.py` FSM group for the three text prompts; three entries on
+  the workspace-detail menu; and the workspace-create **advanced screen gained the
+  `allow_net` and `allow_tunnels` toggles** (the domain `Limits` already carried
+  them, so this was UI + handler wiring) — without it, 2b was unreachable.
+- **The ephemeral-URL rule** is enforced: no persistence table or query mentions a
+  tunnel; the URL exists only as a `LINK` button on the live screen. Asserted by
+  `scripts/verify.sh` proof 7.
+- **Catalog**: every new string in both `ar.py` and `en.py` (dotted keys, icons in
+  the string, Arabic `is_rtl=True`, digits via the formatters), plus three
+  field-specific `InvalidInput` messages (package/port) and three distinguished
+  `tunnels_disabled` messages (server / `allow_tunnels` / `allow_net`).
+
 ## What is deliberately not implemented (and why)
 
-- **Packages, tunnels, ports, metrics, processes, subscriptions, archives** —
-  Phase 2. Their error codes are already mapped and catalogued so the vocabulary
-  cannot silently rot.
+- **Packages, tunnels, ports** — Phase 2a/2b/2c, **now implemented** (see the
+  section above). **Metrics, processes, subscriptions, archives** — still Phase 2;
+  their error codes are already mapped and catalogued so the vocabulary cannot
+  silently rot.
 - **Per-user plans/quota/billing and real rate-limit tiers** — Phase 3; the seams
   (`services/*`, `users.plan`) exist. A simple token-bucket throttle is present.
 - **File delivery as Telegram documents** — deferred (CB-14); binary files show
@@ -126,7 +164,7 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
 ```bash
 /home/zerops/cloud-bot-venv/bin/python -m pytest -q                 # offline, no token, no network
 CLOUDBOT_LIVE_ENGINE=1 /home/zerops/cloud-bot-venv/bin/python -m pytest -q -m live   # real engine
-bash scripts/verify.sh                                             # the three key proofs
+bash scripts/verify.sh                                             # the nine key proofs
 ```
 
 ## How to start the bot

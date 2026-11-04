@@ -196,11 +196,32 @@ after a close, a read reports `409 session_ended`. These calls are implemented i
 `adapters/cloud_service/engine.py`; the terminal itself lives in
 `services/sessions.py` + `presentation/screens/terminal.py`.
 
-### 4.6 Later phases
+### 4.6 Packages, tunnels, ports (Phase 2a/2b/2c)
 
-Packages (`/packages`, `/packages/install`), tunnels (`/tunnels`), ports
-(`/ports`), metrics (`/metrics`, `/metrics/stream`), processes
-(`/processes`). Same adapter pattern; sequenced in [`../ROADMAP.md`](../ROADMAP.md).
+| Domain | HTTP |
+| --- | --- |
+| `list_packages` | `GET /v1/workspaces/{ws}/packages` |
+| `install_packages` | `POST /v1/workspaces/{ws}/packages/install` body `{packages:[...]}` |
+| `remove_package` | `DELETE /v1/workspaces/{ws}/packages?name=` |
+| `remove_all_packages` | `DELETE /v1/workspaces/{ws}/packages?all=true` |
+| `list_tunnels` | `GET /v1/workspaces/{ws}/tunnels` |
+| `create_tunnel` | `POST /v1/workspaces/{ws}/tunnels` body `{port}` |
+| `delete_tunnel` | `DELETE /v1/workspaces/{ws}/tunnels/{id}` |
+| `list_ports` | `GET /v1/workspaces/{ws}/ports` |
+
+An install returns `200` with `{exit_code, output, stdout, timed_out, truncated,
+duration_ms, target}`; **a non-zero `exit_code` is a failed install** and the
+`InstallResult` keeps the code so the screen can render it honestly. A tunnel
+create returns `201` with `{tunnel:{id, workspace_id, port, url, status,
+created_at}}`; the `url` is **ephemeral** and is never persisted or rendered as
+text (a `LINK` button only). Ports are a read-only report carrying a verbatim
+`reachability` sentence and a `complete` flag. Implemented in
+`adapters/cloud_service/engine.py`; the use-cases live in `services/packages.py`,
+`services/tunnels.py`, `services/ports.py` and the screens in
+`presentation/screens/{packages,tunnels,ports}.py`.
+
+Metrics (`/metrics`, `/metrics/stream`) and processes (`/processes`) remain for
+later phases; same adapter pattern, sequenced in [`../ROADMAP.md`](../ROADMAP.md).
 
 ---
 

@@ -86,13 +86,36 @@ Engine endpoints: `/v1/workspaces/{id}/sessions*`. (INTEGRATION-GUIDE §5.)
 Each item is additive (port → adapter → service → screen → handler → catalogs).
 
 - **2a. Python packages** — list, install (network-dependent, `exit_code`-honest),
-  remove one/all. (`/packages`, `/packages/install`.)
+  remove one/all. (`/packages`, `/packages/install`.) — **shipped**.
+  `services/packages.py` validates a package name before it can reach `pip` (a
+  name with shell metacharacters is refused locally). `install()` returns an
+  `InstallOutcome` carrying the workspace's `allow_net` alongside the engine
+  result, so a non-zero `exit_code` renders as a **failure screen** and, when the
+  cause is no egress, says so in human words ("this workspace has no internet, so
+  pip cannot reach an index") instead of only echoing pip. The raw pip output
+  rides the DEBUG+admin collapsed block. The account for an install is slow
+  (measured ~10 s) so the adapter bounds the call with a 300 s client timeout, and
+  the handler shows a working screen and awaits it; no update-loop block.
+  Screens: `presentation/screens/packages.py`.
 - **2b. Tunnels** — create/list/delete quick tunnels; URL is **ephemeral**, only
   shown to the user as a `LINK` button, never cached; `504
-  tunnel_url_unavailable` handled. (`/tunnels*`.)
+  tunnel_url_unavailable` handled. (`/tunnels*`.) — **shipped**.
+  `services/tunnels.py` validates the port (1024–65535) locally. The three gates
+  (`tunnels.enabled`, `limits.allow_tunnels`, `limits.allow_net`) each resolve to
+  their own sentence from the engine's `details.config`/`field`; the tunnels
+  screen states the off switch and disables *Publish* until all three hold. The
+  URL is placed **only** on a `LINK` button (asserted by `scripts/verify.sh`);
+  no persistence layer mentions a tunnel. The **workspace-create advanced screen
+  now carries an `allow_tunnels` toggle** (and one for `allow_net`), so publishing
+  is reachable at create time. Screens: `presentation/screens/tunnels.py`.
 - **2c. Port discovery** — list listening ports, with the engine's reachability
   disclaimer surfaced verbatim as a blockquote (they are **not** public).
-  (`/ports`.)
+  (`/ports`.) — **shipped**. `services/ports.py` is a read behind the ownership
+  gate. The screen shows port/protocol/scope/owner, a separate `unix` section
+  (a unix socket is not a port), a partial-view note when `complete:false`, never
+  invents `LISTEN` for a UDP entry's empty state, and reports an unattributed
+  socket instead of hiding or guessing the owner. Screens:
+  `presentation/screens/ports.py`.
 - **2d. Metrics** — one-shot `/{id}/metrics` and (optionally) the SSE stream for
   live resource display; `ram_percent`/`disk_percent`, `*_complete` honesty.
 - **2e. Processes** — list and stop individual process trees (complements
