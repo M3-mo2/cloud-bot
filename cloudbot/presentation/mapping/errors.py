@@ -100,6 +100,10 @@ def _unprocessable_message_key(details: dict) -> str:
         return "err.unprocessable.range"
     if field == "signal":
         return "err.unprocessable.signal"
+    if field == "package":
+        return "err.domain.invalid_input.package_invalid"
+    if field == "port":
+        return "err.domain.invalid_input.port_out_of_range"
     if field in (
         "cpu_cores",
         "memory_mb",
@@ -110,6 +114,24 @@ def _unprocessable_message_key(details: dict) -> str:
     ):
         return "err.unprocessable.limit"
     return "err.unprocessable.default"
+
+
+def _tunnels_disabled_message_key(details: dict) -> str:
+    """Which of the three tunnel switches is off, from ``details.config``/``field``.
+
+    The engine's ``422 tunnels_disabled`` names the switch that failed; each has
+    its own sentence and, where it belongs, its own fix. When the engine is silent
+    about which switch, the generic sentence is used.
+    """
+    field = str(details.get("field", "") or "").lower()
+    config = str(details.get("config", "") or "").lower()
+    if field == "allow_tunnels" or config.endswith("allow_tunnels"):
+        return "err.tunnels_disabled.allow_tunnels"
+    if field == "allow_net" or config.endswith("allow_net"):
+        return "err.tunnels_disabled.allow_net"
+    if "tunnels.enabled" in config or field == "enabled":
+        return "err.tunnels_disabled.server"
+    return "err.tunnels_disabled"
 
 
 def _extra_actions_for(code: str) -> tuple[tuple[str, str, Intent], ...]:
@@ -136,6 +158,8 @@ def view_for_error(err: DomainError) -> ErrorView:
         title_key, message_key = ERROR_KEYS[code]
         if code == "unprocessable":
             message_key = _unprocessable_message_key(err.details)
+        elif code == "tunnels_disabled":
+            message_key = _tunnels_disabled_message_key(err.details)
         return ErrorView(
             code=code,
             title_key=title_key,
@@ -161,7 +185,18 @@ def view_for_error(err: DomainError) -> ErrorView:
         return ErrorView("not_found", "err.not_found.title", "err.not_found", retryable=False)
     if isinstance(err, InvalidInput):
         key = "err.domain.invalid_input"
-        if err.reason == "too_long":
+        if err.field == "package":
+            key = (
+                "err.domain.invalid_input.package_empty"
+                if err.reason == "empty"
+                else "err.domain.invalid_input.package_invalid"
+            )
+        elif err.field == "port":
+            key = {
+                "empty": "err.domain.invalid_input.port_empty",
+                "out_of_range": "err.domain.invalid_input.port_out_of_range",
+            }.get(err.reason, "err.domain.invalid_input.port_invalid")
+        elif err.reason == "too_long":
             key = "err.domain.invalid_input.name_too_long"
         elif err.reason == "empty":
             key = "err.domain.invalid_input.name_empty"

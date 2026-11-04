@@ -21,7 +21,10 @@ from cloudbot.services.bundle import Services
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.ownership import OwnershipService
+from cloudbot.services.packages import PackagesService
+from cloudbot.services.ports import PortsService
 from cloudbot.services.sessions import SessionsService
+from cloudbot.services.tunnels import TunnelsService
 from cloudbot.services.workspaces import WorkspacesService
 
 
@@ -64,6 +67,9 @@ def build(settings: Settings) -> Container:
         execution=ExecutionService(engine, ownership),
         sessions=SessionsService(engine, sessions, ownership),
         ownership=ownership,
+        packages=PackagesService(engine, ownership),
+        tunnels=TunnelsService(engine, ownership),
+        ports=PortsService(engine, ownership),
     )
     return Container(
         settings=settings,
