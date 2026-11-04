@@ -452,4 +452,44 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all twenty-nine proofs passed"
+echo "== 30. bite test: the reply-keyboard guard is load-bearing =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Reintroduce a reply keyboard (a ReplyKeyboardMarkup tallied by the guard) into a
+# nav screen: the guard test must go red; restore, and it is green again.
+target = pathlib.Path("cloudbot/presentation/screens/nav.py")
+original = target.read_text(encoding="utf-8")
+bitten = original + (
+    "\n\n# BITE: a reply keyboard in disguise (must be refused)\n"
+    "def _bite_reply_keyboard():\n"
+    "    from aiogram.types import ReplyKeyboardMarkup\n"
+    "    return ReplyKeyboardMarkup(keyboard=[])\n"
+)
+assert bitten != original, "bite append did not apply"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/architecture/test_no_reply_keyboard.py",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the reply-keyboard guard was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: reintroducing a reply keyboard did not make the guard red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: removing the bite did not return the guard to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty proofs passed"
