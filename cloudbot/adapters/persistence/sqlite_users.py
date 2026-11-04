@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import aiosqlite
 
 from cloudbot.adapters.persistence.database import Database
@@ -45,6 +47,69 @@ class SqliteUserRepository:
         async with conn.execute("SELECT * FROM users WHERE tg_id = ?", (tg_id,)) as cur:
             row = await cur.fetchone()
         return row_to_user(row) if row is not None else None
+
+    async def set_display_name(self, tg_id: int, display_name: str) -> None:
+        conn = await self._db.connect()
+        await conn.execute(
+            "UPDATE users SET display_name = ?, last_seen_at = ? WHERE tg_id = ?",
+            (display_name, utc_now_iso(), tg_id),
+        )
+        await conn.commit()
+
+    async def list_users(
+        self,
+        *,
+        query: str = "",
+        offset: int = 0,
+        limit: int = 10,
+        since: "datetime | None" = None,
+    ) -> tuple[list[User], int]:
+        conn = await self._db.connect()
+        where = ""
+        params: list[object] = []
+        if query.strip():
+            where = " WHERE (CAST(tg_id AS TEXT) LIKE ? OR display_name LIKE ?)"
+            like = f"%{query.strip()}%"
+            params.extend([like, like])
+        if since is not None:
+            where = (where + " AND" if where else " WHERE") + " last_seen_at >= ?"
+            params.append(since.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"))
+        async with conn.execute(f"SELECT COUNT(*) AS n FROM users{where}", params) as cur:
+            total = int((await cur.fetchone())["n"])
+        async with conn.execute(
+            f"SELECT * FROM users{where} ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            [*params, limit, offset],
+        ) as cur:
+            rows = await cur.fetchall()
+        return [row_to_user(r) for r in rows], total
+
+    async def count_all(self) -> int:
+        conn = await self._db.connect()
+        async with conn.execute("SELECT COUNT(*) AS n FROM users") as cur:
+            return int((await cur.fetchone())["n"])
+
+    async def count_active_since(self, since: "datetime") -> int:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT COUNT(*) AS n FROM users WHERE last_seen_at >= ?",
+            (since.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),),
+        ) as cur:
+            return int((await cur.fetchone())["n"])
+
+    async def count_workspaces(self, tg_id: int) -> int:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT COUNT(*) AS n FROM user_workspaces WHERE tg_id = ?", (tg_id,)
+        ) as cur:
+            return int((await cur.fetchone())["n"])
+
+    async def workspace_owners(self, ws_id: WorkspaceId) -> list[int]:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT tg_id FROM user_workspaces WHERE ws_id = ?", (str(ws_id),)
+        ) as cur:
+            rows = await cur.fetchall()
+        return [int(r["tg_id"]) for r in rows]
 
     async def set_locale(self, tg_id: int, locale: Locale) -> None:
         conn = await self._db.connect()

@@ -30,6 +30,11 @@ class User:
     locale: Locale
     created_at: datetime
     plan: str = "free"
+    #: The Telegram username/full name captured at first contact; a reading aid
+    #: for the admin panel, never an identity.
+    display_name: str = ""
+    #: When the user was last seen (UTC); the admin's "active in 24 h" reads it.
+    last_seen_at: datetime | None = None
 
 
 @dataclass(frozen=True)

@@ -17,6 +17,9 @@ log = structlog.get_logger("cloudbot.persistence")
 _MIGRATIONS_DIR = Path(__file__).parent / "migrations"
 _MIGRATION_RE = re.compile(r"^(\d+)_")
 
+#: Public alias for tests and tooling that need to inspect the SQL files.
+MIGRATIONS_DIR = _MIGRATIONS_DIR
+
 
 def parse_sqlite_path(database_url: str) -> str:
     """Extract the on-disk path (or ``:memory:``) from a sqlite DSN.

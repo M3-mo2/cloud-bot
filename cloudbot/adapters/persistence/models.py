@@ -27,12 +27,51 @@ def parse_dt(value: str | None) -> datetime:
     return dt
 
 
+def _optional(row: Any, key: str) -> Any:
+    try:
+        return row[key]
+    except (KeyError, IndexError):
+        return None
+
+
 def row_to_user(row: Any) -> User:
+    last_seen = _optional(row, "last_seen_at")
     return User(
         tg_id=int(row["tg_id"]),
         locale=coerce_locale(row["locale"]),
         created_at=parse_dt(row["created_at"]),
         plan=str(row["plan"]),
+        display_name=str(_optional(row, "display_name") or ""),
+        last_seen_at=parse_dt(last_seen) if last_seen else None,
+    )
+
+
+def row_to_event(row: Any) -> "EventRecord":
+    import json
+
+    from cloudbot.domain.events import EventCategory, EventRecord, Severity
+
+    try:
+        params = json.loads(row["params"] or "{}")
+        if not isinstance(params, dict):
+            params = {}
+    except (ValueError, TypeError):
+        params = {}
+    category = EventCategory(str(row["category"]))
+    try:
+        severity = Severity(str(row["severity"]))
+    except ValueError:
+        severity = category.default_severity
+    return EventRecord(
+        id=int(row["id"]),
+        ts=parse_dt(row["ts"]),
+        category=category,
+        severity=severity,
+        tg_id=int(row["tg_id"]) if row["tg_id"] is not None else None,
+        ws_id=str(row["ws_id"]) if row["ws_id"] is not None else None,
+        summary_key=str(row["summary_key"]),
+        params=params,
+        actor=str(row["actor"]),
     )
 
 
