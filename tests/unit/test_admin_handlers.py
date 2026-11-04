@@ -22,8 +22,14 @@ class FakeBot:
 
     def __init__(self):
         self.sent: list[str] = []
+        self.deleted: list[int] = []
         #: When set, every edit raises it (to simulate Telegram's refusal).
         self.raise_on_edit = None
+
+    async def delete_message(self, chat_id, message_id):
+        """RichSender.delete() calls this for the one-time carrier."""
+        self.deleted.append(message_id)
+        return True
 
     async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
         self.sent.append(rich_message.html)

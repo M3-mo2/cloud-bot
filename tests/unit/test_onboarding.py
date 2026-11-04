@@ -24,12 +24,18 @@ class FakeBot:
 
     def __init__(self) -> None:
         self.sent: list[dict] = []
+        self.deleted: list[dict] = []
 
     async def send_rich_message(
         self, chat_id, rich_message, reply_markup=None, reply_parameters=None
     ):
         self.sent.append({"html": rich_message.html, "markup": reply_markup})
         return Message.model_construct(chat={"id": chat_id}, message_id=len(self.sent))
+
+    async def delete_message(self, chat_id, message_id):
+        """RichSender.delete() calls this for the one-time keyboard-removal carrier."""
+        self.deleted.append({"chat_id": chat_id, "message_id": message_id})
+        return True
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
         self.sent.append({"html": getattr(rich_message, "html", ""), "markup": reply_markup})
@@ -196,5 +202,79 @@ async def test_former_reply_button_texts_are_now_ordinary_and_do_nothing():
             # and must not trigger the special screen it used to open.
             await dispatcher.feed_update(bot, _message(uid, 555, text))
         assert bot.sent == [], "a former reply-button text still opened a screen"
+    finally:
+        await container.aclose()
+
+
+async def test_the_removal_carrier_is_deleted_so_no_blank_message_remains():
+    """The carrier's body is a zero-width space, so leaving it visible was a blank message.
+
+    Reported live: `/start` produced two messages, the first empty. The carrier must be
+    deleted immediately after it does its job.
+    """
+    container, engine = _container()
+    await container.database.migrate()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await container.users.get_or_create(222, default_locale=Locale.EN)
+        ws = (await engine.list_workspaces())[0]
+        await container.users.add_workspace(222, ws.id)
+        await dispatcher.feed_update(bot, _message(1, 222, "/start"))
+        removals = _removal_sends(bot.sent)
+        assert len(removals) == 1
+        # ...and the message that carried it was deleted.
+        assert bot.deleted, "the removal carrier was left in the chat as a blank message"
+    finally:
+        await container.aclose()
+
+
+async def test_the_removal_does_not_fire_again_on_a_later_start():
+    """Reported live: every `/start` sent the carrier again, forever.
+
+    Clearing a legacy reply keyboard is a one-time migration; it is recorded per user so a
+    restart cannot repeat it either.
+    """
+    container, engine = _container()
+    await container.database.migrate()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await container.users.get_or_create(222, default_locale=Locale.EN)
+        ws = (await engine.list_workspaces())[0]
+        await container.users.add_workspace(222, ws.id)
+        await dispatcher.feed_update(bot, _message(1, 222, "/start"))
+        assert len(_removal_sends(bot.sent)) == 1
+        # A second and third /start must not send it again.
+        await dispatcher.feed_update(bot, _message(2, 222, "/start"))
+        await dispatcher.feed_update(bot, _message(3, 222, "/start"))
+        assert len(_removal_sends(bot.sent)) == 1, "the one-time removal fired again"
+        assert await container.users.legacy_keyboard_cleared(222) is True
+    finally:
+        await container.aclose()
+
+
+async def test_a_second_start_sends_exactly_one_visible_message():
+    """The reported symptom: `/start` produced two messages, the first empty.
+
+    After the one-time migration is done, each `/start` must produce exactly ONE message.
+    """
+    container, engine = _container()
+    await container.database.migrate()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await container.users.get_or_create(222, default_locale=Locale.EN)
+        ws = (await engine.list_workspaces())[0]
+        await container.users.add_workspace(222, ws.id)
+        await dispatcher.feed_update(bot, _message(1, 222, "/start"))  # does the migration
+        before = len(bot.sent)
+        await dispatcher.feed_update(bot, _message(2, 222, "/start"))
+        sent_now = bot.sent[before:]
+        assert len(sent_now) == 1, "a second /start sent %d messages, not 1" % len(sent_now)
+        # And no message body is blank.
+        for entry in sent_now:
+            body = (entry.get("html") or "").replace("\u200b", "").strip()
+            assert body, "a /start produced a blank message"
     finally:
         await container.aclose()

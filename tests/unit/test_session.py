@@ -142,12 +142,18 @@ class FakeBot:
 
     def __init__(self) -> None:
         self.sent: list[dict] = []
+        self.deleted: list[dict] = []
 
     async def send_rich_message(
         self, chat_id, rich_message, reply_markup=None, reply_parameters=None
     ):
         self.sent.append({"html": rich_message.html, "markup": reply_markup})
         return Message.model_construct(chat={"id": chat_id}, message_id=len(self.sent))
+
+    async def delete_message(self, chat_id, message_id):
+        """RichSender.delete() calls this for the one-time keyboard-removal carrier."""
+        self.deleted.append({"chat_id": chat_id, "message_id": message_id})
+        return True
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
         self.sent.append({"html": getattr(rich_message, "html", ""), "markup": reply_markup})

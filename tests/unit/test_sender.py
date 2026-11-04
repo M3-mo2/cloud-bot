@@ -24,6 +24,7 @@ from cloudbot.presentation.rich.sender import RichSender
 class FakeBot:
     def __init__(self) -> None:
         self.sent: list[dict] = []
+        self.deleted: list[dict] = []
         self.edited: list[dict] = []
         self.drafted: list[dict] = []
         self.raise_on_edit: Exception | None = None
@@ -31,6 +32,11 @@ class FakeBot:
     async def send_rich_message(self, **kwargs: Any):
         self.sent.append(kwargs)
         return _Message(kwargs["chat_id"], 1)
+
+    async def delete_message(self, chat_id, message_id):
+        """RichSender.delete() calls this for the one-time keyboard-removal carrier."""
+        self.deleted.append({"chat_id": chat_id, "message_id": message_id})
+        return True
 
     async def edit_message_text(self, **kwargs: Any):
         if self.raise_on_edit is not None:

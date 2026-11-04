@@ -130,6 +130,12 @@ async def test_allowlisted_admin_health_works_in_production_end_to_end():
 
         def __init__(self):
             self.sent = []
+            self.deleted = []
+
+        async def delete_message(self, chat_id, message_id):
+            """RichSender.delete() calls this for the one-time carrier."""
+            self.deleted.append(message_id)
+            return True
 
         async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
             self.sent.append(rich_message.html)
