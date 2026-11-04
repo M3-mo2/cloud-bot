@@ -1,4 +1,4 @@
-# cloud-bot — Implementation notes (Phase 1 + Phase 1.5 + Phase 2a/2b/2c)
+# cloud-bot — Implementation notes (Phase 1 + Phase 1.5 + Phase 2a/2b/2c + 2d/2e/2g)
 
 This document records what the implementation delivers, what it deliberately does
 not, how to run the tests, how to start the bot, and the known gaps. It follows
@@ -141,16 +141,60 @@ screen → handler → catalogs):
   field-specific `InvalidInput` messages (package/port) and three distinguished
   `tunnels_disabled` messages (server / `allow_tunnels` / `allow_net`).
 
+## Phase 2d/2e/2g — metrics, processes, archives
+
+Added additively in the same shape (port → adapter → service → screen → handler →
+catalogs):
+
+- **Adapter** (`adapters/cloud_service/`): `GET /metrics` (one-shot),
+  `GET /processes`, `POST /processes/{id}/stop`, and the three archive routes.
+  The archive upload is **multipart** and the export returns **raw ZIP bytes** —
+  both bypass the JSON helper deliberately. `errors.py` already recognised every
+  archive refusal code; the new routes reuse it.
+- **Services** (`services/metrics.py`, `services/processes.py`,
+  `services/archives.py`) behind the `EnginePort`; each runs the **ownership gate
+  first** and validates locally: a metrics interval within the server's
+  `min_interval_sec`/`max_interval_sec`; a process id matching `proc_<hex>`; an
+  archive source path resolved through the existing file path rules; an upload
+  under `archives.limits.upload_mb`. `ProcessesService.stop` folds a repeat
+  stop's `404` back into the honest `gone` outcome.
+- **Screens** (`presentation/screens/{metrics,processes,archives}.py`): the
+  metrics panel renders a `*_complete:false` figure as **provisional with no
+  percentage** and an idle workspace (RAM 0, no cgroups) as a normal state; the
+  process inventory truncates+escapes `argv`, marks+explains `detached`, and the
+  stop `gone` result is its own success screen; the archives menu offers
+  upload+extract, extract-in-place and export, each with a **dry-run preview**,
+  and the result screen lists refused entries with their own sentences.
+- **Wiring**: `handlers/features.py` gained the metrics/processes/archives
+  callbacks and the archive FSM states (`states/feature_input.py`); the
+  workspace-detail menu exposes **📊 Resources**, **🧠 Processes** and
+  **🗜 Archives**. `RichSender.send_document`/`download_document` are the
+  **only** document seam, used solely by the exported ZIP and the uploaded
+  archive.
+- **The metrics "live" decision**: no SSE stream. A standing SSE connection does
+  not survive a Telegram update loop and the same transport was measured
+  unusable through the Cloudflare tunnel, so the panel is a one-shot snapshot
+  with an explicit refresh button ("live" only while the user is watching).
+- **RAR** is read-only by design: extract is supported; export is always ZIP and
+  no code path offers a RAR encoder (`scripts/verify.sh` proof 13).
+- Catalog: every new `metrics.*`, `process.*` and `archive.*` string plus the
+  new field-specific `InvalidInput` sentences, in both `ar.py` and `en.py`.
+
 ## What is deliberately not implemented (and why)
 
-- **Packages, tunnels, ports** — Phase 2a/2b/2c, **now implemented** (see the
-  section above). **Metrics, processes, subscriptions, archives** — still Phase 2;
-  their error codes are already mapped and catalogued so the vocabulary cannot
-  silently rot.
+- **Packages, tunnels, ports, metrics, processes, archives** — Phase 2a/2b/2c and
+  2d/2e/2g, **now implemented** (see the sections above). **Subscriptions (2f)**
+  are out of scope for this task — the operator is handling them himself; their
+  error codes are already mapped and catalogued so the vocabulary cannot silently
+  rot.
 - **Per-user plans/quota/billing and real rate-limit tiers** — Phase 3; the seams
   (`services/*`, `users.plan`) exist. A simple token-bucket throttle is present.
-- **File delivery as Telegram documents** — deferred (CB-14); binary files show
-  metadata plus a "preview not available" note.
+- **File delivery as Telegram documents** — deferred (CB-14) for *general* files;
+  binary files show metadata plus a "preview not available" note. The **only**
+  two document paths implemented in Phase 2g are the exported ZIP and the archive
+  the user uploads, through the single `RichSender` seam.
+- **The metrics SSE stream** — the one-shot snapshot is implemented; the stream
+  is deliberately not (see the metrics "live" decision above).
 - **Redis FSM / Postgres adapter / webhooks** — deferred behind the existing
   ports (CB-11/CB-12/CB-22).
 - **Live-log draft streaming loop** — the screens and the offset-follow service

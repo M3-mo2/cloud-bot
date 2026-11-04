@@ -9,6 +9,14 @@
 #   5. The offset protocol is followed: output is read by offset/next and a read
 #      after close surfaces `session_ended`.
 #
+# Phase 2d/2e/2g proofs:
+#  10. A figure whose *_complete is false is never rendered as an exact number.
+#  11. The process stop outcome is honest (stopped vs gone; a repeat 404 → gone).
+#  12. A dry run writes nothing, with a real-extract positive control.
+#  13. RAR is never offered as a create/export target.
+#  14. Every archive refusal code has its own sentence in both catalogs.
+#  15. A bite test that changes behaviour (metrics honesty guard), restored.
+#
 # Runs offline; no token, no network.
 set -euo pipefail
 
@@ -134,5 +142,172 @@ assert f"<blockquote>{SENTENCE}</blockquote>" in html, "reachability is not a ve
 print("OK: the reachability sentence is surfaced verbatim inside <blockquote>")
 PY
 
+echo "== 10. a figure whose *_complete is false is never an exact number =="
+"$PY" - <<'PY'
+from cloudbot.core.locale import Locale
+from cloudbot.domain.value_objects import WorkspaceId, WorkspaceMetrics
+from cloudbot.presentation.screens import metrics as met
+
+WS = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4")
+
+
+def frame(*, disk_complete, disk_percent):
+    return WorkspaceMetrics(
+        workspace_id=str(WS), timestamp="t", interval_seconds=3,
+        ram_used_bytes=0, ram_limit_bytes=512 * 1024 * 1024, ram_percent=0.0,
+        ram_complete=True, disk_used_bytes=0, disk_limit_bytes=1024 * 1024 * 1024,
+        disk_percent=disk_percent, disk_complete=disk_complete,
+        write_rate_limit_mb_s=0, live_runs=0, live_cgroups=0,
+    )
+
+
+incomplete = met.metrics_screen(frame(disk_complete=False, disk_percent=99.0), WS, Locale.EN).doc.html
+assert "99" not in incomplete, "an incomplete figure rendered as an exact percentage"
+assert "provisional" in incomplete.lower(), "the incomplete figure was not labelled"
+complete = met.metrics_screen(frame(disk_complete=True, disk_percent=99.0), WS, Locale.EN).doc.html
+assert "99%" in complete, "a complete figure did not render its percentage"
+print("OK: disk_complete:false renders provisional (no exact %); complete renders the number")
+PY
+
+echo "== 11. the stop outcome is honest (stopped vs gone; repeat 404 → gone) =="
+"$PY" - <<'PY'
+import asyncio
+from cloudbot.core.errors import EngineRefused
+from cloudbot.core.locale import Locale
+from cloudbot.adapters.cloud_service.fake import FakeEngine
+from cloudbot.domain.value_objects import ProcessStopResult, WorkspaceId
+from cloudbot.presentation.screens import processes as proc
+from cloudbot.services.ownership import OwnershipService
+from cloudbot.services.processes import ProcessesService
+
+WS = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4")
+
+stopped_html = proc.stop_result_screen(
+    ProcessStopResult(process_id="proc_x", status="stopped", stopped=True), WS, Locale.EN).doc.html
+gone_html = proc.stop_result_screen(
+    ProcessStopResult(process_id="proc_x", status="gone", stopped=False), WS, Locale.EN).doc.html
+assert stopped_html != gone_html, "stopped and gone render identically"
+assert "already" in gone_html.lower(), "gone is not explained as already gone"
+
+# A repeat stop is a 404 in the engine; the service folds it to 'gone'.
+class Users:
+    async def owns(self, tg_id, ws_id):
+        return True
+
+engine = FakeEngine()
+
+async def _not_found(ws_id, process_id):
+    raise EngineRefused("not_found")
+
+engine.stop_process = _not_found
+svc = ProcessesService(engine, OwnershipService(Users()))
+result = asyncio.run(svc.stop(1, WS, "proc_0123456789abcdef"))
+assert result.status == "gone" and result.gone, "a repeat 404 did not read as already gone"
+print("OK: stopped/gone are distinct; a repeat stop's 404 reads as already gone")
+PY
+
+echo "== 12. the dry run writes nothing (with a real-extract positive control) =="
+"$PY" - <<'PY'
+import asyncio
+from cloudbot.adapters.cloud_service.fake import FakeEngine
+from cloudbot.domain.value_objects import WorkspaceId
+
+WS = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4")
+
+
+async def main():
+    engine = FakeEngine()
+    before = (await engine.list_files(WS, "/out")).entries
+    dry = await engine.extract_archive(WS, path="/archive.zip", dest="/out", dry_run=True)
+    assert dry.bytes_written == 0, "a dry run reported bytes written"
+    mid = (await engine.list_files(WS, "/out")).entries
+    # Positive control: the same archive extracted for real DOES add files.
+    real = await engine.extract_archive(WS, path="/archive.zip", dest="/out", dry_run=False)
+    after = (await engine.list_files(WS, "/out")).entries
+    assert not before and not mid, "a dry run wrote files"
+    assert after, "the real extract wrote nothing (the control failed)"
+    assert real.bytes_written > 0
+    print("OK: dry run wrote nothing; the real extract added files (control)")
+
+
+asyncio.run(main())
+PY
+
+echo "== 13. RAR is never offered as a create/export target =="
+"$PY" - <<'PY'
+import pathlib, sys
+bad = []
+for p in pathlib.Path("cloudbot").rglob("*.py"):
+    text = p.read_text(encoding="utf-8").lower()
+    for token in ("format=rar", 'format="rar"', "rar_encoder", "create_rar", "encode_rar", "writestr.*rar"):
+        if token in text:
+            bad.append(f"{p}: {token}")
+from cloudbot.services.archives import ArchivesService
+if hasattr(ArchivesService, "create") or hasattr(ArchivesService, "encode"):
+    bad.append("ArchivesService exposes a create/encode method")
+if bad:
+    print("FAIL: rar is offered as a create target:", *bad, sep="\n  ")
+    sys.exit(1)
+print("OK: no code path offers rar as a create/export format; export is ZIP only")
+PY
+
+echo "== 14. every archive refusal code has its own sentence in both catalogs =="
+"$PY" - <<'PY'
+from cloudbot.core.locale import Locale
+from cloudbot.presentation.i18n.catalog import catalog
+
+CODES = [
+    "archive_entry_exists", "archive_too_large", "archive_too_many_entries",
+    "archive_ratio_exceeded", "payload_too_large", "unsupported_archive",
+    "archive_encrypted", "archive_multivolume", "archive_unsafe_entry",
+    "unprocessable", "insufficient_storage",
+]
+missing = []
+for code in CODES:
+    for loc in (Locale.EN, Locale.AR):
+        if not catalog.has(f"err.{code}", loc):
+            missing.append(f"{code}/{loc.value}")
+if missing:
+    print("FAIL: archive refusal codes without a sentence:", *missing, sep="\n  ")
+    import sys; sys.exit(1)
+# And the per-entry refusal mapping resolves every code to a real sentence.
+from cloudbot.presentation.screens.archives import _reason_sentence
+for code in CODES:
+    for loc in (Locale.EN, Locale.AR):
+        sentence = _reason_sentence(code, loc)
+        assert sentence and sentence != f"err.{code}", f"{code}/{loc.value}"
+print("OK: all 11 archive refusal codes have distinct sentences in ar and en")
+PY
+
+echo "== 15. bite test: the incomplete-metric guard is load-bearing =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+target = pathlib.Path("cloudbot/presentation/screens/metrics.py")
+original = target.read_text(encoding="utf-8")
+guard = "    if not complete:\n"
+bitten = original.replace(guard, "    if not complete and False:  # BITE\n", 1)
+assert bitten != original, "bite substitution did not apply (guard moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_phase2deg.py",
+       "-k", "incomplete", "--no-header", "-p", "no:cacheprovider"]
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if red.returncode == 0:
+    print("FAIL: the bite did not make the test red (it is not evidence)")
+    print(red.stdout[-800:])
+    sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the guard did not return the test to green")
+    print(green.stdout[-800:])
+    sys.exit(1)
+red_line = [l for l in red.stdout.splitlines() if "passed" in l or "failed" in l][-1:]
+green_line = [l for l in green.stdout.splitlines() if "passed" in l or "failed" in l][-1:]
+print("OK: bite ->", (red_line or ["red"])[0].strip(), "| restored ->", (green_line or ["green"])[0].strip())
+PY
+
 echo
-echo "all nine proofs passed"
+echo "all fifteen proofs passed"

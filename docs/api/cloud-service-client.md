@@ -220,8 +220,34 @@ text (a `LINK` button only). Ports are a read-only report carrying a verbatim
 `services/tunnels.py`, `services/ports.py` and the screens in
 `presentation/screens/{packages,tunnels,ports}.py`.
 
-Metrics (`/metrics`, `/metrics/stream`) and processes (`/processes`) remain for
-later phases; same adapter pattern, sequenced in [`../ROADMAP.md`](../ROADMAP.md).
+### 4.7 Metrics, processes, archives (Phase 2d/2e/2g)
+
+| Domain | HTTP |
+| --- | --- |
+| `workspace_metrics` | `GET /v1/workspaces/{ws}/metrics` |
+| `list_processes` | `GET /v1/workspaces/{ws}/processes` |
+| `stop_process` | `POST /v1/workspaces/{ws}/processes/{id}/stop` |
+| `upload_and_extract` | `POST /v1/workspaces/{ws}/files/archive` multipart `archive`+`path`+`overwrite`+`dry_run` |
+| `extract_archive` | `POST /v1/workspaces/{ws}/files/extract` body `{path, dest, overwrite, dry_run}` |
+| `export_archive` | `GET /v1/workspaces/{ws}/files/archive?path=` (**raw ZIP bytes**) |
+
+- **Metrics** is a one-shot snapshot whose frame carries `ram_*`, `disk_*`, the
+  `*_complete` honesty flags and `live_runs`/`live_cgroups`. The frame's
+  `interval_seconds` comes from the server; a client-supplied interval is
+  validated against `metrics.min_interval_sec`/`max_interval_sec` and a value
+  below the floor is refused locally (the engine would answer `422`). The SSE
+  stream exists but is **not** used — the panel is a snapshot the user refreshes.
+- **Processes**: the list is the inventory; `id` is the stable `proc_<hex>` the
+  stop accepts (a raw `pid` is never the address). Stop addresses the **tree**
+  through the sandbox cgroup; the client never signals a pid. A repeat stop is a
+  `404` and reads as "already gone", not an error.
+- **Archives**: the upload is **multipart** and the export returns **raw ZIP
+  bytes** — neither uses the JSON helper. The format is detected by the engine
+  from **magic bytes, never the filename**; **RAR is read-only** and export is
+  always ZIP. `dry_run:true` validates and writes nothing.
+
+Metrics (`/metrics/stream`) remains an optional live view; the same adapter
+pattern, sequenced in [`../ROADMAP.md`](../ROADMAP.md).
 
 ---
 

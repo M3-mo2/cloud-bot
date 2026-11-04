@@ -116,15 +116,42 @@ Each item is additive (port → adapter → service → screen → handler → c
   invents `LISTEN` for a UDP entry's empty state, and reports an unattributed
   socket instead of hiding or guessing the owner. Screens:
   `presentation/screens/ports.py`.
-- **2d. Metrics** — one-shot `/{id}/metrics` and (optionally) the SSE stream for
-  live resource display; `ram_percent`/`disk_percent`, `*_complete` honesty.
+- **2d. Metrics** — one-shot `/{id}/metrics` snapshot with `ram_percent`/
+  `disk_percent` and **`*_complete` honesty** (`/metrics`). — **shipped**.
+  `services/metrics.py` is a read behind the ownership gate and validates an
+  optional interval against the engine's `metrics.min_interval_sec`/
+  `max_interval_sec`. The screen renders a figure whose `*_complete` is false as
+  **provisional with no percentage** (a confident zero would be a lie) and shows
+  an explicit "nothing is running" state when `live_cgroups` is 0 — that is a
+  real state, not a warning. The **live SSE stream is deliberately not used**: a
+  standing connection does not survive a Telegram update loop and this transport
+  was measured unusable through the project's Cloudflare tunnel, so the panel is
+  a one-shot snapshot with an explicit refresh. Screens:
+  `presentation/screens/metrics.py`.
 - **2e. Processes** — list and stop individual process trees (complements
-  workspace stop-all). (`/processes*`.)
-- **2f. Subscriptions** — create/extend with the duration grammar; locked
-  workspaces show the renewal flow; `subscription_would_shorten` etc. handled.
-  (`/subscription/extend`.)
+  workspace stop-all). (`/processes*`.) — **shipped**. `services/processes.py`
+  gates on ownership, validates the `proc_<hex>` id locally (a raw pid is never
+  the address), and folds a repeat stop's `404` back into the honest `gone`
+  outcome. The screen shows `argv` (truncated and escaped), `kind`, the source
+  run/session, and a **first-class, explained `detached`** entry; stop is
+  confirmed and the `gone` result renders as its own success message. The engine
+  stops the cgroup tree; the client never signals a host pid. Screens:
+  `presentation/screens/processes.py`.
+- **2f. Subscriptions** — **out of scope for this task; the operator is
+  handling it himself.** The error codes are already mapped and catalogued so the
+  vocabulary cannot rot.
 - **2g. Archives** — upload-and-extract, in-place extract, export a directory;
-  every stable refusal code mapped. (`/files/archive`, `/files/extract`.)
+  every stable refusal code mapped. (`/files/archive`, `/files/extract`.) —
+  **shipped**. `services/archives.py` gates on ownership, resolves a source path
+  through the existing file path rules, and enforces `archives.limits.upload_mb`
+  **before** the call. The three entries each offer a **dry-run preview** before
+  anything is written; refused entries get their own StableCode sentence
+  (`entries_rejected` is a failure, `entries_skipped` is not). The upload is
+  **multipart** and the export is **raw ZIP bytes** (never through a JSON
+  helper). **RAR is read-only** — extract is supported, create is never offered.
+  Delivery is limited to the exported ZIP and the uploaded archive through the
+  existing transport seam; **general file delivery remains CB-14 (Phase 3)**.
+  Screens: `presentation/screens/archives.py`.
 
 ---
 
