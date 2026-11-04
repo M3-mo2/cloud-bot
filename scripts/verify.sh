@@ -359,3 +359,97 @@ PY
 
 echo
 echo "all twenty-three proofs passed"
+
+echo
+echo "== 24-27. Task 07 — the callback codec and the no-op edit (Bug A + Bug B) =="
+echo "-- 24. the adm: parser is total: short/malformed callbacks are invalid, never raising --"
+"$PY" -m pytest -q tests/unit/test_admin_callbacks.py
+echo "-- 25. contract: every admin screen's callback parses AND has a handler route --"
+"$PY" -m pytest -q tests/contract/test_admin_callback_contract.py
+echo "-- 26. the edit signature covers the full payload; 'not modified' is success --"
+"$PY" -m pytest -q tests/unit/test_sender.py -k "markup or rtl or modified or identical"
+echo "-- 27. the exact live path: resume then back to the owner page, no exception --"
+"$PY" -m pytest -q tests/unit/test_admin_handlers.py -k "not_modified or stale or short_audit or identical"
+
+echo
+echo "== 28. bite test: the full-payload edit signature is load-bearing =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+target = pathlib.Path("cloudbot/presentation/rich/sender.py")
+original = target.read_text(encoding="utf-8")
+guard = "        signature = (built.html, bool(built.is_rtl), _markup_signature(markup))\n"
+bitten = original.replace(
+    guard,
+    '        signature = (built.html, bool(built.is_rtl), "")  # BITE: ignore the keyboard\n',
+    1,
+)
+assert bitten != original, "bite substitution did not apply (signature moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_sender.py",
+       "-k", "different_markup", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: the bite did not make the test red (it is not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the signature did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "== 29. bite test: the total parser prevents the live IndexError =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+target = pathlib.Path("cloudbot/presentation/screens/admin/callbacks.py")
+original = target.read_text(encoding="utf-8")
+guard = (
+    "        if len(rest) != 2:\n"
+    '            return _invalid(data, "bad_arity", action)\n'
+    "        tg_id = _require_int(data, rest[0], action)\n"
+)
+bitten = original.replace(
+    guard,
+    "        tg_id = _require_int(data, rest[0], action)\n",
+    1,
+)
+assert bitten != original, "bite substitution did not apply (audit_user guard moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_admin_callbacks.py",
+       "-k", "malformed", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the malformed-callback test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: removing the arity guard did not make the parser raise (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the guard did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all twenty-nine proofs passed"
