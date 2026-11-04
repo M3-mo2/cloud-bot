@@ -156,3 +156,21 @@ class SqliteUserRepository:
         ) as cur:
             row = await cur.fetchone()
         return bool(row[0]) if row is not None else False
+
+    async def set_current_workspace(self, tg_id: int, ws_id: WorkspaceId | None) -> None:
+        conn = await self._db.connect()
+        await conn.execute(
+            "UPDATE users SET current_ws_id = ?, last_seen_at = ? WHERE tg_id = ?",
+            (str(ws_id) if ws_id is not None else None, utc_now_iso(), tg_id),
+        )
+        await conn.commit()
+
+    async def current_workspace(self, tg_id: int) -> WorkspaceId | None:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT current_ws_id FROM users WHERE tg_id = ?", (tg_id,)
+        ) as cur:
+            row = await cur.fetchone()
+        if row is None or row["current_ws_id"] in (None, ""):
+            return None
+        return WorkspaceId(str(row["current_ws_id"]))
