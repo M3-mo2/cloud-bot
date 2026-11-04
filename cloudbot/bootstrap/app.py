@@ -49,13 +49,14 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     dispatcher.update.outer_middleware(ModeGateMiddleware())
     dispatcher.update.middleware(ErrorGuardMiddleware(sender))
 
-    from cloudbot.handlers import admin, callbacks, common, execution, files, terminal, workspaces
+    from cloudbot.handlers import admin, callbacks, common, execution, features, files, terminal, workspaces
 
     dispatcher.include_router(common.router)
     dispatcher.include_router(callbacks.navigation.router)
     dispatcher.include_router(workspaces.router)
     dispatcher.include_router(files.router)
     dispatcher.include_router(execution.router)
+    dispatcher.include_router(features.router)
     dispatcher.include_router(admin.router)
     # Terminal last: a slash-command in the terminal FSM must reach the command
     # routers first; plain text falls through to the terminal message handler.

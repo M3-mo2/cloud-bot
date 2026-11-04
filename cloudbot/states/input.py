@@ -11,6 +11,7 @@ from aiogram.fsm.state import State, StatesGroup
 class Input(StatesGroup):
     waiting_name = State()
     waiting_profile = State()
+    waiting_advanced = State()
     waiting_mkdir_path = State()
     waiting_rename_path = State()
     waiting_rename_same = State()

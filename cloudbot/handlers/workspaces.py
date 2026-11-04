@@ -77,7 +77,25 @@ async def on_name(
         listing = [(p.name, p.name == meta.default_profile) for p in profiles]
         await show_screen(message, ws_screens.create_profile(listing, ctx.locale, meta.default_profile), ctx=ctx, sender=sender)
         return
-    await _do_create(message, ctx, services, sender, state, profile=meta.default_profile)
+    await state.update_data(ws_profile=meta.default_profile)
+    await _show_advanced(message, ctx, services, sender, state)
+
+
+async def _show_advanced(event, ctx, services, sender, state) -> None:
+    """Render the advanced create screen with the wizard's current toggles."""
+    meta = await services.workspaces.meta()
+    data = await state.get_data()
+    await state.set_state(Input.waiting_advanced)
+    limits = ws_screens.wizard_limits(meta.limits_defaults, data)
+    screen = ws_screens.create_advanced(
+        limits,
+        meta.limits_maxima,
+        ctx.locale,
+        selected_profile=data.get("ws_profile", meta.default_profile),
+        allow_net=limits.allow_net,
+        allow_tunnels=limits.allow_tunnels,
+    )
+    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
 
 
 @router.callback_query(F.data.startswith("ws:profile"))
@@ -86,28 +104,57 @@ async def on_profile(
 ) -> None:
     decoded = decode(cb.data)
     profile = decoded.key[0]
-    await _do_create(cb, ctx, services, sender, state, profile=profile)
+    await state.update_data(ws_profile=profile)
+    await _show_advanced(cb, ctx, services, sender, state)
 
 
 @router.message(Input.waiting_profile)
 async def on_profile_text(
     message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    await _do_create(message, ctx, services, sender, state, profile=message.text.strip())
+    await state.update_data(ws_profile=message.text.strip())
+    await _show_advanced(message, ctx, services, sender, state)
 
 
-async def _do_create(event, ctx, services, sender, state, *, profile: str) -> None:
+@router.callback_query(F.data.startswith("ws:tgl"))
+async def on_toggle(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    """Flip one boolean switch on the advanced create screen (net / tunnels)."""
+    which = decode(cb.data).key[0]
+    data = await state.get_data()
+    key = "ws_allow_net" if which == "net" else "ws_allow_tunnels"
+    await state.update_data(**{key: not bool(data.get(key, False))})
+    await _show_advanced(cb, ctx, services, sender, state)
+
+
+async def _do_create(event, ctx, services, sender, state, *, profile: str | None = None) -> None:
     data = await state.get_data()
     name = data.get("ws_name", "")
+    limits = await _wizard_limits(services, data)
+    profile = profile or data.get("ws_profile")
     await state.clear()
-    ws = await services.workspaces.create(ctx.tg_id, name, profile=profile)
+    ws = await services.workspaces.create(ctx.tg_id, name, profile=profile, limits=limits)
     screen = ws_screens.workspace_detail(
         ws, ctx.locale, confirmation=catalog.t("ws.create.ready", ctx.locale, name=ws.name)
     )
     await show_screen(event, screen, ctx=ctx, sender=sender, force_send=True)
 
 
+async def _wizard_limits(services: Services, data: dict):
+    meta = await services.workspaces.meta()
+    return ws_screens.wizard_limits(meta.limits_defaults, data)
+
+
 # -- lifecycle ---------------------------------------------------------------
+@router.callback_query(F.data.startswith("ws:create"))
+async def on_create(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    """Create from the advanced screen (the wizard's final step)."""
+    await _do_create(cb, ctx, services, sender, state)
+
+
 @router.callback_query(F.data.startswith("ws:delete_confirm"))
 async def on_delete_confirm(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     ws_id = decode(cb.data).key[0]
