@@ -42,6 +42,8 @@ English) presentation model.
 | 20 | [`../docs-aiogram-updates/keyboards-update-3.31.0.md`](../docs-aiogram-updates/keyboards-update-3.31.0.md) | What 3.31.0 added to keyboards (`disabled`, `force_reply`, `LINK`). |
 | 21 | [`../docs-aiogram-updates/aiogram-colored-buttons.md`](../docs-aiogram-updates/aiogram-colored-buttons.md) | Colored buttons and the `ButtonStyle` enum. |
 | 22 | [`../docs-cloud-service/REVIEW-sandboxd-v0.0.5.md`](../docs-cloud-service/REVIEW-sandboxd-v0.0.5.md) | Historical review of the engine at v0.0.5 (context for the decisions). |
+| 23 | [`ADMIN-PANEL.md`](ADMIN-PANEL.md) | The `/admin` panel: architecture and the extension guide. |
+| 24 | [`ui/07-admin-panel.md`](ui/07-admin-panel.md) | The admin panel's screens and behaviour. |
 
 **Precedence.** If any document here ever conflicts with
 `docs-cloud-service/INTEGRATION-GUIDE.md`, the integration guide wins — it is the

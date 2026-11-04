@@ -164,8 +164,16 @@ Each item is additive (port → adapter → service → screen → handler → c
 - **File delivery** — send results/files back as Telegram documents (CB-14),
   with size caps and a safe path.
 - **User timezones** — resolve CB-15's UTC-only display.
-- **Admin tooling** — re-adopt orphan workspaces (CB-13), audit views, `/diag`,
-  `/replay`.
+- **Admin tooling** — **delivered (Phase 3)**. The `/admin` panel is
+  identity-gated (`CLOUDBOT_ADMIN_IDS`), so it works in **PRODUCTION** where
+  `admin_commands` is off. It ships a registry-driven section menu, a users list
+  and a per-user page, the ability to **enter** a user's workspace (reusing the
+  existing user screens, with an entered-mode banner and an audit attributed to
+  the admin), a persisted **event log** with per-admin subscriptions, a coalescing
+  /capped/gap-aware **notifier** with a durable cursor, an audit trail, and a
+  written extension guide in [`ADMIN-PANEL.md`](ADMIN-PANEL.md). `/diag` and the
+  mode-gated DEV/DEBUG commands are unchanged; the panel is a separate identity
+  seam. Re-adopting orphan workspaces (CB-13) remains future work.
 - **Webhooks** — optional switch from polling (`bootstrap/app.py`).
 - **Postgres + Redis** — swap adapters for horizontal scale (CB-11/CB-22).
 
@@ -189,3 +197,4 @@ Each item is additive (port → adapter → service → screen → handler → c
 | 1.5 | UI 04/06 (sessions), client §4.5 | §5 |
 | 2 | UI/status docs extended per feature | §4.3, §7, §8.3–8.5, §6, client §4.6 |
 | 3 | DECISIONS CB-11/13/14/15/22 | SPEC §2.6.1 |
+| 3 (admin) | UI 07, ADMIN-PANEL | — |

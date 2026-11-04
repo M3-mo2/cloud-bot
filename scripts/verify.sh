@@ -311,3 +311,51 @@ PY
 
 echo
 echo "all fifteen proofs passed"
+echo
+echo "== 16-23. the admin panel (Phase 3) =="
+echo "-- 16. the gate is identity-based, not mode-based --"
+"$PY" -m pytest -q tests/unit/test_admin_gate.py -k "production or reaches"
+echo "-- 17. a non-admin cannot detect the panel --"
+"$PY" -m pytest -q tests/unit/test_admin_gate.py -k "swallow or indistinguish"
+echo "-- 18. the menu is registry-driven --"
+"$PY" -m pytest -q tests/unit/test_admin_registry.py
+echo "-- 19. the migration applies to an existing database --"
+"$PY" -m pytest -q tests/contract/test_admin_migration.py
+echo "-- 20. the notifier never loses or duplicates an event across a restart --"
+"$PY" -m pytest -q tests/unit/test_admin_notifier.py -k "restart or coalesce or cursor or clock or gap or paused or unsubscribed"
+echo "-- 21. the volume cap is honest (one message, real count) --"
+"$PY" -m pytest -q tests/unit/test_admin_notifier.py -k "cap or capped or dispatcher"
+echo "-- 22. an entered-mode action is attributed to the admin, not the user --"
+"$PY" -m pytest -q tests/unit/test_admin_events.py -k "entered"
+echo "-- 23. bite test: the gate is load-bearing (make it mode-based, red; restore, green) --"
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+target = pathlib.Path("cloudbot/middleware/admin_gate.py")
+original = target.read_text(encoding="utf-8")
+guard = "        if ctx is None or not ctx.is_admin:\n"
+bitten = original.replace(guard, "        if False:  # BITE: gate disabled (mode-based identity removed)\n", 1)
+assert bitten != original, "bite substitution did not apply (gate moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_admin_gate.py",
+       "-k", "swallow", "--no-header", "-p", "no:cacheprovider"]
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if red.returncode == 0:
+    print("FAIL: the bite did not make the gate test red (it is not evidence)")
+    print(red.stdout[-800:])
+    sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the gate did not return the test to green")
+    print(green.stdout[-800:])
+    sys.exit(1)
+red_line = [l for l in red.stdout.splitlines() if "passed" in l or "failed" in l][-1:]
+green_line = [l for l in green.stdout.splitlines() if "passed" in l or "failed" in l][-1:]
+print("OK: bite ->", (red_line or ["red"])[0].strip(), "| restored ->", (green_line or ["green"])[0].strip())
+PY
+
+echo
+echo "all twenty-three proofs passed"

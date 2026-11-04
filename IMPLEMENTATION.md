@@ -180,6 +180,73 @@ catalogs):
 - Catalog: every new `metrics.*`, `process.*` and `archive.*` string plus the
   new field-specific `InvalidInput` sentences, in both `ar.py` and `en.py`.
 
+## Phase 3 — the admin panel (`/admin`)
+
+Delivered as an additive layer (migration → ports → services → screens →
+handlers → catalogs), with the architecture the task's "قابلة للتوسع" asks for:
+
+- **The gate is identity-based, not mode-based.** `cloudbot/middleware/admin_gate.py`
+  is the single seam: a non-empty `Settings.admin_ids` (i.e. `is_admin(tg_id)`)
+  opens the panel in **PRODUCTION**, where `admin_commands` is False. The gate is
+  attached to the `message`/`callback_query` observers (an update-level middleware
+  never sees a `Message`); a non-admin's `/admin` or `adm:` callback is swallowed
+  and produces nothing — indistinguishable from an unknown command. The
+  `ModeGateMiddleware` and the existing `/diag`/`/health` behaviour are left
+  untouched; the identity gate recognises only the new panel commands (`/admin`,
+  `/notifications`) and the `adm:` callbacks.
+- **A section registry** (`presentation/screens/admin/section.py`): sections are
+  data descriptors registered under `admin/`; the overview menu is generated from
+  `registry.menu()`. Adding a section is one module plus one import — proven by
+  `tests/unit/test_admin_registry.py`.
+- **Screens are pure**: an `AdminView` read model (`domain/admin.py`) is built by
+  `AdminService`; the screens are pure functions of it.
+- **Actions are data** (`admin/actions.py`): `key`, label key, `Intent`,
+  `dangerous`/`confirm`; a dangerous action's confirmation is generated from the
+  same declaration and always names the subject by name and id.
+- **D1 — migration `0002_admin.sql`**: the `events` table (indexed on `ts` and
+  `tg_id`), `event_subscriptions`, `admin_notify_state` (cursor + pause + optional
+  per-user scope) and `admin_mode` (persisted entered mode), plus a
+  `users.display_name` column. Forward-only, idempotent, fail-fast; proven against
+  an existing Phase-1 database in `tests/contract/test_admin_migration.py`.
+- **D2 — services behind ports**: `AdminService` (read models + actions) and
+  `NotifierService`, depending on `UserRepository`, `EnginePort`, `EventLog` and
+  `AdminStateStore`. The admin ownership exemption is one named method,
+  `OwnershipService.assert_admin_override`, called only from `AdminService`
+  (asserted by an architecture test).
+- **D3 — one event seam**: `EventSourceMiddleware` gives every update a
+  `RequestEvents` intent buffer and flushes it after the handler succeeds;
+  `EventsService` is the only writer. Handlers record *intents*
+  (`events.workspace_created(...)`, `events.run_started(...)`, ...); the error
+  guard turns a transient engine failure into `engine.unreachable` into the same
+  buffer. Adding a category is a `domain/events.py` member plus one method — the
+  dispatcher never changes.
+- **D4/D5 — screens + registry + actions**: overview (honest "engine
+  unreachable = unknown, not zero"), users list (paged + search + honest empty),
+  user page (identity, workspaces + live usage from `/{id}/usage`, actions,
+  notification scope, recent activity), entered-workspace view (reuses the user's
+  workspace-detail screen; a persistent banner and a Leave button are added by the
+  render seam so every reached screen is marked), notification settings
+  (per-category toggles, all switch, pause, cursor, per-user scope), the audit log
+  (paged, filterable), and the generated confirmations — every one in both
+  locales, Arabic `is_rtl=True`, numbers/dates through the formatters.
+- **Entered mode + audit attribution**: while entered, the admin's subject
+  (`ctx.tg_id`) is the owner so the ordinary ownership gate passes and the right
+  data is shown, while `ctx.admin_tg_id` is the admin. Every interaction is logged
+  as `admin.action` with `actor = admin:<id>` and the subject `tg_id`/`ws_id` kept
+  separate.
+- **Notifications**: a persisted event log; per-admin subscriptions; a durable
+  per-admin cursor; a dispatcher (in `bootstrap/notify.py`, the one place that may
+  touch both the service and presentation layers) that renders a plan and commits
+  the cursor only after delivery. The notifier coalesces per (admin, category) in
+  a 60 s window, caps deliveries per flush and reports the real suppressed **event**
+  count in one message, summarises a large backlog (or one accumulated while
+  paused) in one gap message, and resets a cursor that is ahead of the log
+  (backwards clock) with a warning. A `NotificationPoller` runs inside the bot
+  process (started in `__main__`, stopped on shutdown) — never a separate
+  long-poller.
+- **D7 — docs**: `docs/ADMIN-PANEL.md` (the extension guide), `docs/ui/07-admin-panel.md`,
+  this section, and the roadmap entry.
+
 ## What is deliberately not implemented (and why)
 
 - **Packages, tunnels, ports, metrics, processes, archives** — Phase 2a/2b/2c and
