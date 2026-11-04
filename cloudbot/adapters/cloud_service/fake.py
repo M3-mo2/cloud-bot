@@ -15,6 +15,8 @@ from cloudbot.core.errors import EngineRefused
 from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, TerminalSession, Workspace
 from cloudbot.domain.meta import EngineMeta, Profiles, ProfileInfo, SessionConfig
 from cloudbot.domain.value_objects import (
+    ArchiveEntry,
+    ArchiveResult,
     ExecResult,
     FileContent,
     FilePage,
@@ -26,6 +28,9 @@ from cloudbot.domain.value_objects import (
     PackageList,
     PortEntry,
     PortReport,
+    ProcessEntry,
+    ProcessList,
+    ProcessStopResult,
     RunPage,
     RunStatus,
     SessionPage,
@@ -35,6 +40,7 @@ from cloudbot.domain.value_objects import (
     TunnelList,
     UnixSocket,
     WorkspaceId,
+    WorkspaceMetrics,
     WorkspaceStatus,
     WorkspaceSummary,
 )
@@ -721,6 +727,151 @@ class FakeEngine:
                 "this does not mean they are reachable from outside. Publishing a port "
                 "requires a tunnel (limits.allow_tunnels and tunnels.enabled)."
             ),
+        )
+
+    # -- metrics (Phase 2d) --------------------------------------------------
+    async def workspace_metrics(self, ws_id: WorkspaceId) -> WorkspaceMetrics:
+        ws = await self.get_workspace(ws_id)
+        active = ws.summary.runs_active
+        return WorkspaceMetrics(
+            workspace_id=str(ws_id),
+            timestamp=_NOW.isoformat(),
+            interval_seconds=3,
+            ram_used_bytes=18_874_368 if active else 0,
+            ram_limit_bytes=ws.limits.memory_mb * 1024 * 1024,
+            ram_percent=3.5 if active else 0.0,
+            ram_complete=True,
+            disk_used_bytes=ws.summary.disk_used_bytes,
+            disk_limit_bytes=ws.summary.disk_limit_bytes,
+            disk_percent=0.9,
+            disk_complete=True,
+            write_rate_limit_mb_s=0,
+            live_runs=active,
+            live_cgroups=active,
+        )
+
+    # -- processes (Phase 2e) ------------------------------------------------
+    async def list_processes(self, ws_id: WorkspaceId) -> ProcessList:
+        await self.get_workspace(ws_id)
+        processes = (
+            ProcessEntry(
+                id="proc_0123456789abcdef",
+                pid=179173,
+                ppid=179172,
+                argv=("python3", "bot.py"),
+                kind="session",
+                source_id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+                started_at=_NOW,
+            ),
+            ProcessEntry(
+                id="proc_fedcba9876543210",
+                pid=179200,
+                ppid=1,
+                argv=("sleep", "600"),
+                kind="detached",
+                source_id="",
+                started_at=_NOW,
+            ),
+        )
+        return ProcessList(processes=processes, count=len(processes))
+
+    async def stop_process(
+        self, ws_id: WorkspaceId, process_id: str
+    ) -> ProcessStopResult:
+        await self.get_workspace(ws_id)
+        # A known fake id is stopped; anything else reads as already gone.
+        if process_id == "proc_0123456789abcdef":
+            return ProcessStopResult(
+                process_id=process_id, status="stopped", stopped=True, stopped_at=_NOW
+            )
+        return ProcessStopResult(
+            process_id=process_id, status="gone", stopped=False, stopped_at=_NOW
+        )
+
+    # -- archives (Phase 2g) -------------------------------------------------
+    async def upload_and_extract(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        filename: str,
+        data: bytes,
+        path: str = "/",
+        overwrite: bool = False,
+        dry_run: bool = False,
+    ) -> ArchiveResult:
+        ws = await self.get_workspace(ws_id)
+        return self._fake_archive_result(
+            ws, path or "/", dry_run=dry_run, real_size=len(data)
+        )
+
+    async def extract_archive(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        path: str,
+        dest: str = "",
+        overwrite: bool = False,
+        dry_run: bool = False,
+    ) -> ArchiveResult:
+        ws = await self.get_workspace(ws_id)
+        return self._fake_archive_result(ws, dest or "/", dry_run=dry_run, real_size=15)
+
+    async def export_archive(self, ws_id: WorkspaceId, path: str) -> bytes:
+        await self.get_workspace(ws_id)
+        # Minimal valid ZIP local-file-header magic so a caller can sanity-check.
+        return b"PK\x03\x04" + b"\x00" * 16
+
+    def _fake_archive_result(
+        self, ws: Workspace, destination: str, *, dry_run: bool, real_size: int
+    ) -> ArchiveResult:
+        """Model the honest split: a dry run reports what *would* extract but
+        writes **nothing** (``bytes_written`` 0, no files added); a real extract
+        adds the entries and reports the bytes written."""
+        base = destination.rstrip("/")
+        file_entry = ArchiveEntry(
+            name="src/main.py",
+            path=f"{base}/src/main.py" or "/src/main.py",
+            type="file",
+            size=15,
+            mode="-rw-r--r--",
+            rejected=False,
+            skipped=False,
+        )
+        junk_entry = ArchiveEntry(
+            name="__MACOSX/._x",
+            path=f"{base}/__MACOSX/._x",
+            type="file",
+            size=0,
+            mode="-rw-r--r--",
+            rejected=False,
+            skipped=True,
+            skip_reason="junk",
+        )
+        if not dry_run:
+            self._files.setdefault(str(ws.id), []).append(
+                FileEntry(
+                    file_entry.path,
+                    file_entry.name.rsplit("/", 1)[-1],
+                    "file",
+                    file_entry.size,
+                    file_entry.mode,
+                    _NOW,
+                    None,
+                )
+            )
+        return ArchiveResult(
+            format="zip",
+            destination=destination,
+            entries_total=2,
+            # A dry run reports how many entries *would* be extracted (the real
+            # engine reports the same count); the honesty signal for "nothing
+            # written" is ``bytes_written`` and the file list, never this count.
+            entries_extracted=2,
+            entries_skipped=1,
+            entries_rejected=0,
+            bytes_written=0 if dry_run else max(real_size, 15),
+            dry_run=dry_run,
+            entries=(file_entry, junk_entry),
         )
 
     async def sleep(self, seconds: float) -> None:  # pragma: no cover - helper

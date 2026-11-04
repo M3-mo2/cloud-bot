@@ -373,3 +373,118 @@ class PortReport:
     pids_scanned: int
     fds_scanned: int
     reachability: str
+
+
+# -- Phase 2d: workspace resource metrics ------------------------------------
+@dataclass(frozen=True)
+class WorkspaceMetrics:
+    """One workspace's resource frame from ``GET /{id}/metrics``.
+
+    ``ram_complete``/``disk_complete`` are **honesty flags**: when false the
+    corresponding figure is a lower bound (a cgroup or mount read did not
+    succeed) and must never be rendered as an exact number. A workspace with no
+    live cgroup legitimately reports RAM ``0`` (``live_cgroups: 0``) — that is
+    "nothing running", not an error.
+    """
+
+    workspace_id: str
+    timestamp: str
+    interval_seconds: int
+    ram_used_bytes: int
+    ram_limit_bytes: int
+    ram_percent: float
+    ram_complete: bool
+    disk_used_bytes: int
+    disk_limit_bytes: int
+    disk_percent: float
+    disk_complete: bool
+    write_rate_limit_mb_s: int
+    live_runs: int
+    live_cgroups: int
+
+
+# -- Phase 2e: process inventory ---------------------------------------------
+@dataclass(frozen=True)
+class ProcessEntry:
+    """A live process in the workspace (``GET /{id}/processes``).
+
+    ``id`` is the stable ``proc_<hex>`` the stop accepts; a raw ``pid`` is never
+    the address (it can be reused). ``kind`` is ``run``/``session``/``detached``;
+    a ``detached`` process carries no ``source_id`` and is reported, never hidden.
+    """
+
+    id: str
+    pid: int
+    ppid: int
+    argv: tuple[str, ...]
+    kind: str
+    source_id: str
+    started_at: datetime | None = None
+
+    @property
+    def command_display(self) -> str:
+        return " ".join(self.argv)
+
+
+@dataclass(frozen=True)
+class ProcessList:
+    processes: tuple[ProcessEntry, ...]
+    count: int
+
+    @property
+    def empty(self) -> bool:
+        return not self.processes
+
+
+@dataclass(frozen=True)
+class ProcessStopResult:
+    """The outcome of ``POST /{id}/processes/{processID}/stop``.
+
+    ``status: "stopped"`` with ``stopped: true`` means a live tree was signalled;
+    ``status: "gone"`` with ``stopped: false`` means it had already exited. Both
+    are success and render differently.
+    """
+
+    process_id: str
+    status: str
+    stopped: bool
+    stopped_at: datetime | None = None
+
+    @property
+    def gone(self) -> bool:
+        return self.status == "gone"
+
+
+# -- Phase 2g: archives ------------------------------------------------------
+@dataclass(frozen=True)
+class ArchiveEntry:
+    """One entry in an archive result.
+
+    A rejected entry adds ``reason`` (a stable refusal code); a skipped one adds
+    ``skip_reason``. ``entries_skipped`` is not a failure; ``entries_rejected`` is.
+    """
+
+    name: str
+    path: str
+    type: str
+    size: int
+    mode: str
+    rejected: bool
+    skipped: bool
+    reason: str = ""
+    skip_reason: str = ""
+
+
+@dataclass(frozen=True)
+class ArchiveResult:
+    """The engine's ``archiveResult`` from an extract/upload-and-extract call."""
+
+    format: str
+    destination: str
+    entries_total: int
+    entries_extracted: int
+    entries_skipped: int
+    entries_rejected: int
+    bytes_written: int
+    dry_run: bool
+    entries: tuple[ArchiveEntry, ...] = ()

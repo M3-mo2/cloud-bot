@@ -326,3 +326,74 @@ class PortReportEnvelope(_DTO):
     pids_scanned: int = 0
     fds_scanned: int = 0
     reachability: str = ""
+
+
+# -- Phase 2d: workspace resource metrics ------------------------------------
+class WorkspaceMetricsDTO(_DTO):
+    workspace_id: str = ""
+    ram_used_bytes: int = 0
+    ram_limit_bytes: int = 0
+    ram_percent: float = 0.0
+    ram_complete: bool = True
+    disk_used_bytes: int = 0
+    disk_limit_bytes: int = 0
+    disk_percent: float = 0.0
+    disk_complete: bool = True
+    write_rate_limit_mb_s: int = 0
+    live_runs: int = 0
+    live_cgroups: int = 0
+
+
+class MetricsEnvelope(_DTO):
+    timestamp: str = ""
+    interval_seconds: int = 3
+    workspaces: list[WorkspaceMetricsDTO] = Field(default_factory=list)
+    sampler: dict[str, Any] = Field(default_factory=dict)
+
+
+# -- Phase 2e: process inventory ---------------------------------------------
+class ProcessDTO(_DTO):
+    id: str = ""
+    pid: int = 0
+    ppid: int = 0
+    argv: list[str] = Field(default_factory=list)
+    kind: str = ""
+    source_id: str = ""
+    started_at: str = ""
+
+
+class ProcessListEnvelope(_DTO):
+    processes: list[ProcessDTO] = Field(default_factory=list)
+    count: int = 0
+
+
+class ProcessStopEnvelope(_DTO):
+    process_id: str = ""
+    status: str = ""
+    stopped: bool = False
+    stopped_at: str = ""
+
+
+# -- Phase 2g: archives ------------------------------------------------------
+class ArchiveEntryDTO(_DTO):
+    name: str = ""
+    path: str = ""
+    type: str = "file"
+    size: int = 0
+    mode: str = ""
+    rejected: bool = False
+    skipped: bool = False
+    reason: str = ""
+    skip_reason: str = ""
+
+
+class ArchiveResultDTO(_DTO):
+    format: str = ""
+    destination: str = ""
+    entries_total: int = 0
+    entries_extracted: int = 0
+    entries_skipped: int = 0
+    entries_rejected: int = 0
+    bytes_written: int = 0
+    dry_run: bool = False
+    entries: list[ArchiveEntryDTO] = Field(default_factory=list)

@@ -23,6 +23,8 @@ from cloudbot.domain.meta import (
     WriteRate,
 )
 from cloudbot.domain.value_objects import (
+    ArchiveEntry,
+    ArchiveResult,
     ExecResult,
     FileContent,
     FilePage,
@@ -34,6 +36,9 @@ from cloudbot.domain.value_objects import (
     PackageList,
     PortEntry,
     PortReport,
+    ProcessEntry,
+    ProcessList,
+    ProcessStopResult,
     RunPage,
     RunStatus,
     SessionPage,
@@ -43,6 +48,7 @@ from cloudbot.domain.value_objects import (
     TunnelList,
     UnixSocket,
     WorkspaceId,
+    WorkspaceMetrics,
     WorkspaceStatus,
     WorkspaceSummary,
 )
@@ -444,4 +450,89 @@ def port_report_from_dto(env: dto.PortReportEnvelope) -> PortReport:
         pids_scanned=env.pids_scanned,
         fds_scanned=env.fds_scanned,
         reachability=env.reachability,
+    )
+
+
+# -- Phase 2d: workspace resource metrics ------------------------------------
+def workspace_metrics_from_dto(
+    env: dto.MetricsEnvelope, *, ws_id: WorkspaceId
+) -> WorkspaceMetrics:
+    # The endpoint is scoped to one workspace, so its ``workspaces`` list carries
+    # exactly one entry; fall back to zeroed figures if a frame is unexpectedly
+    # empty rather than crash the screen.
+    frame = next(
+        (w for w in env.workspaces if w.workspace_id == str(ws_id)),
+        env.workspaces[0] if env.workspaces else dto.WorkspaceMetricsDTO(workspace_id=str(ws_id)),
+    )
+    return WorkspaceMetrics(
+        workspace_id=frame.workspace_id or str(ws_id),
+        timestamp=env.timestamp,
+        interval_seconds=env.interval_seconds,
+        ram_used_bytes=frame.ram_used_bytes,
+        ram_limit_bytes=frame.ram_limit_bytes,
+        ram_percent=frame.ram_percent,
+        ram_complete=frame.ram_complete,
+        disk_used_bytes=frame.disk_used_bytes,
+        disk_limit_bytes=frame.disk_limit_bytes,
+        disk_percent=frame.disk_percent,
+        disk_complete=frame.disk_complete,
+        write_rate_limit_mb_s=frame.write_rate_limit_mb_s,
+        live_runs=frame.live_runs,
+        live_cgroups=frame.live_cgroups,
+    )
+
+
+# -- Phase 2e: process inventory ---------------------------------------------
+def process_entry_from_dto(p: dto.ProcessDTO) -> ProcessEntry:
+    return ProcessEntry(
+        id=p.id,
+        pid=p.pid,
+        ppid=p.ppid,
+        argv=tuple(p.argv),
+        kind=p.kind,
+        source_id=p.source_id,
+        started_at=_dt(p.started_at),
+    )
+
+
+def process_list_from_dto(env: dto.ProcessListEnvelope) -> ProcessList:
+    processes = tuple(process_entry_from_dto(p) for p in env.processes)
+    return ProcessList(processes=processes, count=env.count or len(processes))
+
+
+def process_stop_from_dto(env: dto.ProcessStopEnvelope) -> ProcessStopResult:
+    return ProcessStopResult(
+        process_id=env.process_id,
+        status=env.status or ("stopped" if env.stopped else "gone"),
+        stopped=env.stopped,
+        stopped_at=_dt(env.stopped_at),
+    )
+
+
+# -- Phase 2g: archives ------------------------------------------------------
+def archive_entry_from_dto(e: dto.ArchiveEntryDTO) -> ArchiveEntry:
+    return ArchiveEntry(
+        name=e.name,
+        path=e.path,
+        type=e.type,
+        size=e.size,
+        mode=e.mode,
+        rejected=e.rejected,
+        skipped=e.skipped,
+        reason=e.reason,
+        skip_reason=e.skip_reason,
+    )
+
+
+def archive_result_from_dto(env: dto.ArchiveResultDTO) -> ArchiveResult:
+    return ArchiveResult(
+        format=env.format,
+        destination=env.destination,
+        entries_total=env.entries_total,
+        entries_extracted=env.entries_extracted,
+        entries_skipped=env.entries_skipped,
+        entries_rejected=env.entries_rejected,
+        bytes_written=env.bytes_written,
+        dry_run=env.dry_run,
+        entries=tuple(archive_entry_from_dto(e) for e in env.entries),
     )

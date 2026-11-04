@@ -15,6 +15,7 @@ import httpx
 from cloudbot.adapters.cloud_service import dto
 from cloudbot.adapters.cloud_service.client import EngineClient
 from cloudbot.adapters.cloud_service.mapping import (
+    archive_result_from_dto,
     exec_result_from_dto,
     file_content_from_dto,
     file_page_from_dto,
@@ -24,6 +25,8 @@ from cloudbot.adapters.cloud_service.mapping import (
     log_chunk_from_dto,
     package_list_from_dto,
     port_report_from_dto,
+    process_list_from_dto,
+    process_stop_from_dto,
     run_from_dto,
     run_page_from_dto,
     session_from_dto,
@@ -32,12 +35,14 @@ from cloudbot.adapters.cloud_service.mapping import (
     tunnel_list_from_dto,
     usage_from_dto,
     workspace_from_dto,
+    workspace_metrics_from_dto,
 )
 from cloudbot.adapters.cloud_service.meta import MetaCache
 from cloudbot.core.errors import EngineRefused
 from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, TerminalSession, Workspace
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.value_objects import (
+    ArchiveResult,
     ExecResult,
     FileContent,
     FilePage,
@@ -47,11 +52,14 @@ from cloudbot.domain.value_objects import (
     LogChunk,
     PackageList,
     PortReport,
+    ProcessList,
+    ProcessStopResult,
     RunPage,
     SessionPage,
     Tunnel,
     TunnelList,
     WorkspaceId,
+    WorkspaceMetrics,
 )
 
 #: exec is hard-capped at 60 s by the engine.
@@ -66,6 +74,9 @@ PACKAGE_INSTALL_TIMEOUT_S = 300.0
 TUNNEL_TIMEOUT_S = 90.0
 #: A bounded port scan reads /proc for the workspace's pids and fds.
 PORTS_TIMEOUT_S = 30.0
+#: An archive extract/export is bounded by the streaming budget but a large
+#: (up to ``archives.upload_mb``) upload and a slow export need room.
+ARCHIVE_TIMEOUT_S = 120.0
 
 
 def _ws_path(ws_id: WorkspaceId, suffix: str = "") -> str:
@@ -525,6 +536,90 @@ class EngineAdapter:
         return port_report_from_dto(
             dto.PortReportEnvelope.model_validate(response.json())
         )
+
+    # -- metrics (Phase 2d) --------------------------------------------------
+    async def workspace_metrics(self, ws_id: WorkspaceId) -> WorkspaceMetrics:
+        response = await self._client.get(_ws_path(ws_id, "/metrics"))
+        return workspace_metrics_from_dto(
+            dto.MetricsEnvelope.model_validate(response.json()), ws_id=ws_id
+        )
+
+    # -- processes (Phase 2e) ------------------------------------------------
+    async def list_processes(self, ws_id: WorkspaceId) -> ProcessList:
+        response = await self._client.get(_ws_path(ws_id, "/processes"))
+        return process_list_from_dto(
+            dto.ProcessListEnvelope.model_validate(response.json())
+        )
+
+    async def stop_process(
+        self, ws_id: WorkspaceId, process_id: str
+    ) -> ProcessStopResult:
+        # A second stop of the same id is a 404 (the process left the inventory);
+        # it is a creation POST so it is never auto-retried.
+        response = await self._client.post(
+            _ws_path(ws_id, f"/processes/{process_id}/stop")
+        )
+        return process_stop_from_dto(
+            dto.ProcessStopEnvelope.model_validate(response.json())
+        )
+
+    # -- archives (Phase 2g: the one multipart + one raw-bytes route) --------
+    async def upload_and_extract(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        filename: str,
+        data: bytes,
+        path: str = "/",
+        overwrite: bool = False,
+        dry_run: bool = False,
+    ) -> ArchiveResult:
+        # Multipart: the archive is untrusted input, detected from magic bytes.
+        # Never routed through the JSON helper.
+        form = {"path": path}
+        if overwrite:
+            form["overwrite"] = "true"
+        if dry_run:
+            form["dry_run"] = "true"
+        response = await self._client.post(
+            _ws_path(ws_id, "/files/archive"),
+            data=form,
+            files={"archive": (filename, data)},
+            timeout=ARCHIVE_TIMEOUT_S,
+        )
+        return archive_result_from_dto(
+            dto.ArchiveResultDTO.model_validate(response.json())
+        )
+
+    async def extract_archive(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        path: str,
+        dest: str = "",
+        overwrite: bool = False,
+        dry_run: bool = False,
+    ) -> ArchiveResult:
+        body: dict[str, Any] = {"path": path, "overwrite": overwrite, "dry_run": dry_run}
+        if dest:
+            body["dest"] = dest
+        response = await self._client.post(
+            _ws_path(ws_id, "/files/extract"),
+            json=body,
+            timeout=ARCHIVE_TIMEOUT_S,
+        )
+        return archive_result_from_dto(
+            dto.ArchiveResultDTO.model_validate(response.json())
+        )
+
+    async def export_archive(self, ws_id: WorkspaceId, path: str) -> bytes:
+        # The export streams ZIP bytes; read them raw, never through JSON.
+        response = await self._client.get(
+            _ws_path(ws_id, "/files/archive"),
+            params={"path": path},
+            timeout=ARCHIVE_TIMEOUT_S,
+        )
+        return response.content
 
 
 def _basename(path: str) -> str:

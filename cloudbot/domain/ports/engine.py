@@ -12,6 +12,7 @@ from typing import Any, AsyncIterator, Protocol
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession, Workspace
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.value_objects import (
+    ArchiveResult,
     ExecResult,
     FileContent,
     FilePage,
@@ -21,12 +22,15 @@ from cloudbot.domain.value_objects import (
     LogChunk,
     PackageList,
     PortReport,
+    ProcessList,
+    ProcessStopResult,
     ResourceUsage,
     RunPage,
     SessionPage,
     Tunnel,
     TunnelList,
     WorkspaceId,
+    WorkspaceMetrics,
 )
 
 
@@ -169,3 +173,34 @@ class EnginePort(Protocol):
 
     # -- port discovery (Phase 2c, read-only introspection) ------------------
     async def list_ports(self, ws_id: WorkspaceId) -> PortReport: ...
+
+    # -- metrics (Phase 2d, one-shot snapshot) -------------------------------
+    async def workspace_metrics(self, ws_id: WorkspaceId) -> WorkspaceMetrics: ...
+
+    # -- processes (Phase 2e, inventory + cgroup-tree stop) ------------------
+    async def list_processes(self, ws_id: WorkspaceId) -> ProcessList: ...
+    async def stop_process(
+        self, ws_id: WorkspaceId, process_id: str
+    ) -> ProcessStopResult: ...
+
+    # -- archives (Phase 2g: upload-extract, in-place extract, export) -------
+    async def upload_and_extract(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        filename: str,
+        data: bytes,
+        path: str = "/",
+        overwrite: bool = False,
+        dry_run: bool = False,
+    ) -> ArchiveResult: ...
+    async def extract_archive(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        path: str,
+        dest: str = "",
+        overwrite: bool = False,
+        dry_run: bool = False,
+    ) -> ArchiveResult: ...
+    async def export_archive(self, ws_id: WorkspaceId, path: str) -> bytes: ...
