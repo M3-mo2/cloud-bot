@@ -38,6 +38,9 @@ async def _run() -> int:
     from cloudbot.bootstrap import app as app_module
     from cloudbot.bootstrap import lifecycle
     from cloudbot.bootstrap.container import build
+    from cloudbot.bootstrap.notify import NotificationDispatcher, NotificationPoller
+    from cloudbot.core.locale import Locale
+    from cloudbot.presentation.rich.sender import RichSender
 
     container = build(settings)
     bot = app_module.build_bot(settings)
@@ -50,10 +53,30 @@ async def _run() -> int:
         await container.aclose()
         return 3
 
+    # The notification delivery runs inside this same process (never a second
+    # long-poller); it is stopped when the bot stops.
+    sender = RichSender(bot)
+
+    async def _send(admin_id: int, doc) -> None:
+        await sender.send(admin_id, doc)
+
+    async def _locale_for(admin_id: int) -> Locale:
+        return settings.default_locale
+
+    notify = NotificationDispatcher(
+        container.services.notifier,
+        admin_ids=lambda: sorted(settings.admin_ids),
+        send=_send,
+        locale_for=_locale_for,
+    )
+    poller = NotificationPoller(notify)
+
     try:
         await app_module.set_commands(bot, settings)
+        poller.start()
         await dispatcher.start_polling(bot)
     finally:
+        await poller.stop()
         await lifecycle.shutdown(container)
     return 0
 

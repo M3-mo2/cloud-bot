@@ -13,6 +13,7 @@ from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import run as run_screens
 from cloudbot.presentation.screens import run_logs as history_screens
 from cloudbot.services.bundle import Services
+from cloudbot.services.events import RequestEvents
 from cloudbot.states.input import Input
 
 router = Router(name="execution")
@@ -44,13 +45,20 @@ async def on_exec_prompt(cb: CallbackQuery, ctx: UserContext, sender: RichSender
 
 @router.message(Input.waiting_exec_command)
 async def on_exec_command(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+    message: Message,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
 ) -> None:
     data = await state.get_data()
     ws_id = _wid(data["ws_id"])
     command = (message.text or "").strip()
     await state.clear()
     result = await services.execution.exec(ctx.tg_id, ws_id, command)
+    if result.exit_code != 0:
+        events.run_failed(tg_id=ctx.tg_id, ws_id=str(ws_id), name=command)
     await show_screen(message, run_screens.exec_result(result, ws_id, ctx.locale), ctx=ctx, sender=sender, force_send=True)
 
 
@@ -84,13 +92,19 @@ async def on_run_file(cb: CallbackQuery, ctx: UserContext, sender: RichSender, s
 
 @router.message(Input.waiting_job_command)
 async def on_job_command(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+    message: Message,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
 ) -> None:
     data = await state.get_data()
     ws_id = _wid(data["ws_id"])
     command = (message.text or "").strip()
     await state.clear()
     run = await services.execution.run_command(ctx.tg_id, ws_id, command.split())
+    events.run_started(tg_id=ctx.tg_id, ws_id=str(ws_id), name=command)
     await show_screen(message, run_screens.run_started(run, ctx.locale), ctx=ctx, sender=sender, force_send=True)
 
 

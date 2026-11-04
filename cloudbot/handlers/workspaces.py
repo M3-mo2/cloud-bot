@@ -14,6 +14,7 @@ from cloudbot.presentation.keyboards.callbacks import decode
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.services.bundle import Services
+from cloudbot.services.events import RequestEvents
 from cloudbot.states.input import Input
 
 router = Router(name="workspaces")
@@ -128,13 +129,15 @@ async def on_toggle(
     await _show_advanced(cb, ctx, services, sender, state)
 
 
-async def _do_create(event, ctx, services, sender, state, *, profile: str | None = None) -> None:
+async def _do_create(event, ctx, services, sender, state, *, profile: str | None = None, events=None) -> None:
     data = await state.get_data()
     name = data.get("ws_name", "")
     limits = await _wizard_limits(services, data)
     profile = profile or data.get("ws_profile")
     await state.clear()
     ws = await services.workspaces.create(ctx.tg_id, name, profile=profile, limits=limits)
+    if events is not None:
+        events.workspace_created(tg_id=ctx.tg_id, ws_id=str(ws.id), name=ws.name)
     screen = ws_screens.workspace_detail(
         ws, ctx.locale, confirmation=catalog.t("ws.create.ready", ctx.locale, name=ws.name)
     )
@@ -149,10 +152,15 @@ async def _wizard_limits(services: Services, data: dict):
 # -- lifecycle ---------------------------------------------------------------
 @router.callback_query(F.data.startswith("ws:create"))
 async def on_create(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
 ) -> None:
     """Create from the advanced screen (the wizard's final step)."""
-    await _do_create(cb, ctx, services, sender, state)
+    await _do_create(cb, ctx, services, sender, state, events=events)
 
 
 @router.callback_query(F.data.startswith("ws:delete_confirm"))
@@ -163,10 +171,17 @@ async def on_delete_confirm(cb: CallbackQuery, ctx: UserContext, services: Servi
 
 
 @router.callback_query(F.data.startswith("ws:delete"))
-async def on_delete(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_delete(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    events: RequestEvents,
+) -> None:
     ws_id = decode(cb.data).key[0]
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     await services.workspaces.delete(ctx.tg_id, _wid(ws_id))
+    events.workspace_deleted(tg_id=ctx.tg_id, ws_id=str(ws_id), name=ws.name)
     from cloudbot.core.locale import Locale
 
     doc = _result_doc(ctx.locale, catalog.t("ws.delete.done", ctx.locale, name=ws.name))
@@ -206,7 +221,13 @@ async def on_stop(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 
 
 @router.callback_query(F.data.startswith("ws:suspend"))
-async def on_suspend(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_suspend(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    events: RequestEvents,
+) -> None:
     decoded = decode(cb.data)
     # Distinguish "suspend" (do it) from "suspend_confirm" (show confirm): the
     # content-addressed token differs, so compare the action string.
@@ -217,6 +238,7 @@ async def on_suspend(cb: CallbackQuery, ctx: UserContext, services: Services, se
     ws_id = decoded.key[0]
     await services.workspaces.suspend(ctx.tg_id, _wid(ws_id))
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
+    events.workspace_suspended(tg_id=ctx.tg_id, ws_id=str(ws_id), name=ws.name)
     await show_screen(cb, ws_screens.lifecycle_result(ws, ctx.locale, kind="suspend"), ctx=ctx, sender=sender)
 
 

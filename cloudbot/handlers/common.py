@@ -13,6 +13,7 @@ from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import menu as menu_screens
 from cloudbot.presentation.screens.language import language_card, language_picker
 from cloudbot.services.bundle import Services
+from cloudbot.services.events import RequestEvents
 
 router = Router(name="common")
 
@@ -29,11 +30,18 @@ async def _open_menu(
 
 
 @router.message(Command("start"))
-async def on_start(message: Message, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_start(
+    message: Message,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    events: RequestEvents,
+) -> None:
     user, is_new = await services.account.onboard(
         ctx.tg_id, default_locale=ctx.locale
     )
     if is_new:
+        events.user_new(tg_id=ctx.tg_id, name=ctx.display_name)
         await show_screen(message, language_card(ctx.locale), ctx=ctx, sender=sender)
         return
     # Returning user: menu, with the persistent reply menu attached.

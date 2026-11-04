@@ -34,6 +34,7 @@ from cloudbot.presentation.screens import ports as port_screens
 from cloudbot.presentation.screens import processes as proc_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.services.bundle import Services
+from cloudbot.services.events import RequestEvents
 from cloudbot.services.packages import parse_package_input
 from cloudbot.services.tunnels import parse_port
 from cloudbot.states.feature_input import FeatureInput
@@ -69,7 +70,12 @@ async def on_install_prompt(
 
 @router.message(FeatureInput.awaiting_package_install)
 async def on_install_text(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+    message: Message,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
 ) -> None:
     data = await state.get_data()
     await state.clear()
@@ -88,6 +94,8 @@ async def on_install_text(
     # then await the (bounded) call before rendering the honest result.
     await show_screen(message, pkg_screens.installing_screen(ws_id, ctx.locale), ctx=ctx, sender=sender, force_send=True)
     outcome = await services.packages.install(ctx.tg_id, ws_id, names)
+    if not outcome.ok:
+        events.package_install_failed(tg_id=ctx.tg_id, ws_id=str(ws_id), names=" ".join(names))
     await show_screen(
         message,
         pkg_screens.install_result_screen(
@@ -195,23 +203,23 @@ async def on_publish_custom(
 
 @router.message(FeatureInput.awaiting_port)
 async def on_port_text(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext, events: RequestEvents
 ) -> None:
     data = await state.get_data()
     await state.clear()
     ws_id = _wid(data["ws_id"])
-    await _publish(message, ctx, services, sender, ws_id, parse_port(message.text or ""))
+    await _publish(message, ctx, services, sender, ws_id, parse_port(message.text or ""), events)
 
 
 @router.callback_query(F.data.startswith("tnl:port"))
-async def on_port_pick(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_port_pick(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, events: RequestEvents) -> None:
     decoded = decode(cb.data)
     ws_id = _wid(decoded.key[0])
     port = int(decoded.key[1])
-    await _publish(cb, ctx, services, sender, ws_id, port)
+    await _publish(cb, ctx, services, sender, ws_id, port, events)
 
 
-async def _publish(event, ctx: UserContext, services: Services, sender: RichSender, ws_id, port: int) -> None:
+async def _publish(event, ctx: UserContext, services: Services, sender: RichSender, ws_id, port: int, events: RequestEvents) -> None:
     await show_screen(event, tnl_screens.publishing_screen(ws_id, ctx.locale), ctx=ctx, sender=sender, force_send=isinstance(event, Message))
     try:
         await services.tunnels.publish(ctx.tg_id, ws_id, port)
@@ -224,6 +232,7 @@ async def _publish(event, ctx: UserContext, services: Services, sender: RichSend
         screen = await _tunnels_screen(ctx, services, ws_id)
         await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
         return
+    events.tunnel_created(tg_id=ctx.tg_id, ws_id=str(ws_id), port=port)
     screen = await _tunnels_screen(ctx, services, ws_id)
     await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
 
