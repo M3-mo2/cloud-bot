@@ -255,11 +255,31 @@ class SessionsService:
     async def close(
         self, tg_id: int, ws_id: WorkspaceId, ses_id: str
     ) -> TerminalSession:
+        """End the session on the engine but **keep** the handle.
+
+        Dropping the handle here would make the very next call hit
+        ``_assert_tracked`` and raise ``NotOwned`` — a closed session would read
+        as "not yours", which is the isolation answer and must never be produced
+        by a session the caller owned. The engine keeps the ended record
+        (``status: killed``) and reports ``409 session_ended`` on a later read,
+        so keeping the handle lets ``_merge`` surface the documented terminal
+        status. The handle is removed explicitly with :meth:`forget`.
+        """
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_tracked(tg_id, ses_id)
-        session = await self._engine.close_session(ws_id, ses_id)
+        return await self._engine.close_session(ws_id, ses_id)
+
+    async def forget(self, tg_id: int, ws_id: WorkspaceId, ses_id: str) -> None:
+        """Drop the bot-side handle for a session the caller owns.
+
+        This is the only path that removes a terminal row. Ownership and
+        tracking are enforced first, so a foreign or unknown id still raises
+        ``NotOwned``. The engine record is untouched (the engine removes it with
+        the workspace); the terminal simply leaves *my terminals*.
+        """
+        await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_tracked(tg_id, ses_id)
         await self._store.delete(tg_id, SessionId(ses_id))
-        return session
 
     # -- validation ----------------------------------------------------------
     @staticmethod

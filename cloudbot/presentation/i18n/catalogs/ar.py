@@ -449,6 +449,7 @@ MESSAGES: dict[str, str] = {
     "terminal.ended_title": "🖥 أُغلقت الطرفية",
     "terminal.ended_body": "أُغلقت هذه الطرفية.",
     "terminal.open_done": "🖥 تم فتح الطرفية.",
+    "terminal.forget": "🗑 إزالة من القائمة",
 
     # -- session end reasons (UI 05 §5) --------------------------------------
     "session.reason.workspace_stopped": "أُوقفت مساحة العمل.",

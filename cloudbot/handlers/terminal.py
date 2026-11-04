@@ -277,6 +277,18 @@ async def on_close(cb: CallbackQuery, ctx: UserContext, services: Services, send
     await show_screen(cb, term_screens.ended_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
 
+# -- forget (drop the bot-side handle) ---------------------------------------
+@router.callback_query(F.data.startswith("term:forget"))
+async def on_forget(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """Remove an ended terminal from *my terminals* without touching the engine."""
+    decoded = decode(cb.data)
+    ws_id = _wid(decoded.key[0])
+    ses_id = decoded.key[1]
+    await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
+    sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
+    await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
+
+
 def _parse_size(spec: str) -> tuple[int, int]:
     text = (spec or "").strip().lower().replace("×", "x")
     for sep in ("x", ",", " "):

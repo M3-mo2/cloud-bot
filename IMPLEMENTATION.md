@@ -60,6 +60,19 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
   - `services/sessions.py` enforces, in order, the **ownership gate**, the
     **concurrency cap** (a `409 too_many_sessions` becomes the documented screen,
     never a raw error), and the **signal allowlist** (`INT|TERM|QUIT|HUP`).
+  - **A closed session stays known to its owner.** `close()` ends the session on
+    the engine but **keeps** the bot-side handle, so a later read surfaces the
+    engine's documented `409 session_ended` (not `NotOwned`): the isolation
+    answer is reserved for ids the caller never owned. A terminal session does
+    not count against the cap.
+  - **Closed-session removal — explicit, not automatic.** Ended rows are not
+    auto-purged (they are the owner's record of a session that ended, so they
+    read correctly and never masquerade as "not yours"). They leave *my
+    terminals* only through an explicit **🗑 Remove from list** action
+    (`term:forget` → `SessionsService.forget`, catalog `terminal.forget` in both
+    locales), offered on the ended screen and on the view of any terminal
+    session. The engine record is untouched (the engine drops it with the
+    workspace).
   - Screens in `presentation/screens/terminal.py`: **my terminals**, the
     **terminal view** (status heading, recent output in a `<pre>`, and the buttons
     send-command / Ctrl-C / Ctrl-D / resize / close / my terminals), **resize**
@@ -84,8 +97,9 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
    (running its exit traps) instead of being killed; the session then reads as
    `exited`/`shell_exit`. **↔️ Resize** changes the PTY size (`stty size`
    reflects it).
-4. **⏹ Close** ends the terminal; later input reads as the documented
-   `session_ended` and the screen offers a new terminal.
+4. **⏹ Close** ends the terminal; the session stays listed as ended, later input
+   reads as the documented `session_ended`, and the screen offers a new terminal
+   or **🗑 Remove from list** to drop the ended row from *my terminals*.
 5. The view states when the terminal closes (idle and absolute lifetime), from the
    engine's configuration — never a hardcoded number.
 

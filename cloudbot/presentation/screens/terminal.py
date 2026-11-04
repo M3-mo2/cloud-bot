@@ -176,6 +176,18 @@ def terminal_view(
 
 def terminal_view_markup(session: TerminalSession, ws_id: WorkspaceId, locale: Locale):
     ses_id = session.id
+    if session.status.is_terminal:
+        # A terminal session never accepts input/signal/resize; offer a new one
+        # and a way to drop the bot-side handle from *my terminals* instead.
+        rows = [
+            [
+                inline(catalog.t("terminal.new", locale), _cb("term:open", ws_id), intent=Intent.SUCCESS),
+                inline(catalog.t("terminal.forget", locale), _cb("term:forget", ws_id, ses_id), intent=Intent.PRIMARY),
+            ],
+            [inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY)],
+            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
+        ]
+        return inline_markup(rows)
     rows = [
         [
             inline(catalog.t("terminal.send_command", locale), _cb("term:cmd", ws_id, ses_id), intent=Intent.PRIMARY),
@@ -257,6 +269,7 @@ def ended_screen(session: TerminalSession, ws_id: WorkspaceId, locale: Locale) -
     markup = inline_markup(
         [
             [inline(catalog.t("terminal.new", locale), _cb("term:open", ws_id), intent=Intent.SUCCESS)],
+            [inline(catalog.t("terminal.forget", locale), _cb("term:forget", ws_id, session.id), intent=Intent.PRIMARY)],
             [inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY)],
             [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
         ]

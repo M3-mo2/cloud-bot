@@ -94,14 +94,85 @@ async def test_resize_validates_bounds(engine, users, sessions):
     await svc.resize(1, WS, session.id, cols=120, rows=40)
 
 
-async def test_close_marks_deleted_and_removes_handle(engine, users, sessions):
+async def test_close_keeps_handle_and_marks_terminal(engine, users, sessions):
+    """Closing keeps the bot-side handle so the owner can still see the session.
+
+    Removing the handle here would make the next call raise ``NotOwned`` — a
+    closed session would read as "not yours", the isolation answer. The row must
+    stay, with a terminal status.
+    """
     from cloudbot.domain.value_objects import SessionId
 
     svc = await _service(engine, users, sessions)
     session = await svc.open(1, WS)
     closed = await svc.close(1, WS, session.id)
     assert closed.status is SessionStatus.KILLED
+    handle = await sessions.get(1, SessionId(session.id))
+    assert handle is not None, "the handle must be KEPT after close"
+    assert handle.id == session.id
+
+
+async def test_read_after_close_is_session_ended_not_not_owned(engine, users, sessions):
+    """The documented contract: a read after close is ``session_ended``.
+
+    The engine keeps the record (``status: killed``) and reports 409
+    ``session_ended``; because the handle is kept, ``_assert_tracked`` passes and
+    the refusal surfaces as the domain error carrying ``session_ended`` — never
+    the isolation answer.
+    """
+    svc = await _service(engine, users, sessions)
+    session = await svc.open(1, WS)
+    await svc.close(1, WS, session.id)
+    with pytest.raises(EngineRefused) as exc:
+        await svc.read_output(1, WS, session.id, 0)
+    assert exc.value.engine_code == "session_ended"
+
+
+async def test_unknown_session_id_is_still_not_owned(engine, users, sessions):
+    """The isolation answer must be reserved for what it means.
+
+    An id the caller never owned (or that never existed) is ``NotOwned``. This is
+    kept apart from the closed-session case on purpose: collapsing the two is the
+    tempting shortcut that caused the defect.
+    """
+    svc = await _service(engine, users, sessions)
+    with pytest.raises(NotOwned):
+        await svc.read_output(1, WS, "ses_NEVEROWNED0000000000000", 0)
+
+
+async def test_closed_session_does_not_count_against_the_cap(engine, users, sessions):
+    """A terminal session frees a slot; opening again must succeed."""
+    svc = await _service(engine, users, sessions)
+    cap = (await svc.meta()).sessions.max_per_workspace
+    opened = [await svc.open(1, WS) for _ in range(cap)]
+    with pytest.raises(EngineRefused) as exc:
+        await svc.open(1, WS)
+    assert exc.value.engine_code == "too_many_sessions"
+
+    await svc.close(1, WS, opened[0].id)
+
+    # The closed session is still listed (handle kept) with a terminal status...
+    listed = await svc.list_for_workspace(1, WS)
+    closed = next(s for s in listed if s.id == opened[0].id)
+    assert closed.status.is_terminal
+    # ...and it does not count, so a new terminal can be opened.
+    reopened = await svc.open(1, WS)
+    assert reopened.status is SessionStatus.RUNNING
+
+
+async def test_forget_removes_the_handle_without_touching_the_engine(engine, users, sessions):
+    """``forget`` is the only path that drops a handle; ownership is enforced."""
+    from cloudbot.domain.value_objects import SessionId
+
+    svc = await _service(engine, users, sessions)
+    session = await svc.open(1, WS)
+    await svc.close(1, WS, session.id)
+    await svc.forget(1, WS, session.id)
     assert await sessions.get(1, SessionId(session.id)) is None
+    # A foreign caller cannot forget someone else's session.
+    other = await svc.open(1, WS)
+    with pytest.raises(NotOwned):
+        await svc.forget(2, WS, other.id)
 
 
 async def test_offset_cursor_is_persisted(engine, users, sessions):
