@@ -48,12 +48,16 @@ def workspace_list(
     page: int = 0,
     total_pages: int = 1,
     has_more: bool = False,
+    inside: Workspace | None = None,
+    confirmation: str | None = None,
 ) -> Screen:
     if not workspaces:
-        return empty_workspaces(locale)
+        return empty_workspaces(locale, inside=inside)
 
     doc = RichDoc(locale)
     doc.h(2, catalog.t("ws.list.title", locale))
+    if confirmation:
+        doc.blockquote(_raw(confirmation))
     doc.p(format_count("count.workspaces", len(workspaces), locale))
     rows = []
     for ws in workspaces:
@@ -88,17 +92,17 @@ def workspace_list(
             [inline(catalog.t("common.load_more", locale), _cb("ws:list", page + 1), intent=Intent.PRIMARY)]
         )
     # The shared bottom nav block, with Workspaces muted (we are already here).
-    kb_rows += nav.nav_rows(locale, "workspaces")
+    kb_rows += nav.nav_rows(locale, "workspaces", inside=inside)
     return Screen(doc=doc, markup=inline_markup(kb_rows))
 
 
-def empty_workspaces(locale: Locale) -> Screen:
+def empty_workspaces(locale: Locale, *, inside: Workspace | None = None) -> Screen:
     doc = RichDoc(locale)
     doc.h(2, catalog.t("ws.list.empty_title", locale))
     doc.p(catalog.t("ws.list.empty_line1", locale))
     doc.p(catalog.t("ws.list.empty_line2", locale))
     rows = [[inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)]]
-    rows += nav.nav_rows(locale, "workspaces")
+    rows += nav.nav_rows(locale, "workspaces", inside=inside)
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
@@ -111,6 +115,7 @@ def workspace_detail(
     active_run: bool = False,
     confirmation: str | None = None,
     mode: RunMode = RunMode.PRODUCTION,
+    session: bool = True,
 ) -> Screen:
     doc = RichDoc(locale)
     doc.h(2, f"📦 {ws.name}")
@@ -161,13 +166,20 @@ def workspace_detail(
 
     doc.div()
     doc.p(_raw(f"<b>{catalog.t('ws.detail.id', locale)}</b> <code>{ws.id}</code>"))
+    if session:
+        doc.p(italic(catalog.t("ws.session.inside", locale)))
     if confirmation:
         doc.blockquote(_raw(confirmation))
 
-    return Screen(doc=doc, markup=workspace_detail_markup(ws, locale, active_run=active_run))
+    return Screen(
+        doc=doc,
+        markup=workspace_detail_markup(ws, locale, active_run=active_run, session=session),
+    )
 
 
-def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool = False):
+def workspace_detail_markup(
+    ws: Workspace, locale: Locale, *, active_run: bool = False, session: bool = True
+):
     ws_id = ws.id
     rows: list[list] = []
     if ws.status is WorkspaceStatus.ACTIVE:
@@ -240,6 +252,10 @@ def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool =
     else:
         rows.append([inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)])
 
+    if session:
+        rows.append(
+            [inline(catalog.t("ws.logout", locale), _cb("ws:logout", ws_id), intent=Intent.PRIMARY)]
+        )
     rows.append(
         [
             inline(catalog.t("ws.stop_all", locale), _cb("ws:stop_confirm", ws_id), intent=Intent.DANGER),

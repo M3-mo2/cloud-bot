@@ -34,7 +34,7 @@ def language_card(locale: Locale) -> Screen:
     return Screen(doc=doc, markup=markup, send_new=True)
 
 
-def language_picker(locale: Locale) -> Screen:
+def language_picker(locale: Locale, *, inside=None) -> Screen:
     """Mid-session picker: shows the current language disabled, plus Back."""
     doc = RichDoc(locale)
     doc.h(2, catalog.t("lang.title", locale))
@@ -50,7 +50,7 @@ def language_picker(locale: Locale) -> Screen:
     markup = inline_markup(
         [
             [lang_button(Locale.AR), lang_button(Locale.EN)],
-            *nav.nav_rows(locale, "language"),
+            *nav.nav_rows(locale, "language", inside=inside),
         ]
     )
     return Screen(doc=doc, markup=markup)

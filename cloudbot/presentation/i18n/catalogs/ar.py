@@ -116,6 +116,13 @@ MESSAGES: dict[str, str] = {
     "ws.run_active_caption": "هناك تشغيل جارٍ بالفعل.",
     "ws.locked_banner": "⏳ انتهت صلاحية خطتك. جدّد لتشغيل الأكواد مجددًا.\nملفاتك آمنة.",
 
+    # -- workspace session (task 10) ----------------------------------------
+    "ws.session.inside": "🔓 أنت داخل مساحة العمل هذه.",
+    "ws.logout": "🚪 تسجيل الخروج من مساحة العمل",
+    "ws.logout.done": "🚪 لقد خرجت من مساحة العمل.",
+    "nav.workspace_home": "🏠 الرئيسية",
+    "nav.workspace_home_named": "🏠 {name}",
+
     # -- workspaces: create --------------------------------------------------
     "ws.create.title": "➕ مساحة جديدة",
     "ws.create.prompt": "أرسل لي اسمًا لمساحة العمل.",

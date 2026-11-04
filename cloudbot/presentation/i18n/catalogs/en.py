@@ -116,6 +116,13 @@ MESSAGES: dict[str, str] = {
     "ws.run_active_caption": "A run is already in progress.",
     "ws.locked_banner": "⏳ Your plan has expired. Renew to run code again.\nYour files are safe.",
 
+    # -- workspace session (task 10) ----------------------------------------
+    "ws.session.inside": "🔓 You're inside this workspace.",
+    "ws.logout": "🚪 Log out of workspace",
+    "ws.logout.done": "🚪 You've left the workspace.",
+    "nav.workspace_home": "🏠 Workspace home",
+    "nav.workspace_home_named": "🏠 {name}",
+
     # -- workspaces: create --------------------------------------------------
     "ws.create.title": "➕ New Workspace",
     "ws.create.prompt": "Send me a name for your workspace.",

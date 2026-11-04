@@ -22,12 +22,18 @@ router = Router(name="workspaces")
 
 async def _show_list(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, page: int = 0) -> None:
     workspaces = await services.workspaces.list(ctx.tg_id)
+    inside = await services.session.current(ctx.tg_id)
     page_size = ws_screens.PAGE_SIZE
     start = page * page_size
     window = workspaces[start : start + page_size]
     total_pages = max(1, (len(workspaces) + page_size - 1) // page_size)
     screen = ws_screens.workspace_list(
-        window, ctx.locale, page=page, total_pages=total_pages, has_more=(start + page_size) < len(workspaces)
+        window,
+        ctx.locale,
+        page=page,
+        total_pages=total_pages,
+        has_more=(start + page_size) < len(workspaces),
+        inside=inside,
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
@@ -43,9 +49,36 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     decoded = decode(cb.data)
     ws_id = decoded.key[0]
+    # Opening a workspace is entering it, like a login (task 10): persist the
+    # session before rendering, so this detail screen is an "inside" screen.
+    await services.session.enter(ctx.tg_id, _wid(ws_id))
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     screen = ws_screens.workspace_detail(
         ws, ctx.locale, active_run=ws.summary.runs_active > 0, mode=ctx.mode
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+
+@router.callback_query(F.data == "ws:home")
+async def on_home(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """The nav block's "workspace home" entry: render the workspace we are inside."""
+    inside = await services.session.current(ctx.tg_id)
+    if inside is None:
+        await _show_list(cb, ctx, services, sender)
+        return
+    screen = ws_screens.workspace_detail(
+        inside, ctx.locale, active_run=inside.summary.runs_active > 0, mode=ctx.mode
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+
+@router.callback_query(F.data.startswith("ws:logout"))
+async def on_logout(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """Leave the workspace and return to the chooser (the list)."""
+    await services.session.leave(ctx.tg_id)
+    workspaces = await services.workspaces.list(ctx.tg_id)
+    screen = ws_screens.workspace_list(
+        workspaces, ctx.locale, confirmation=catalog.t("ws.logout.done", ctx.locale)
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 

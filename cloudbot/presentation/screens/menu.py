@@ -15,7 +15,7 @@ from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
 
 
-def welcome_screen(locale: Locale) -> Screen:
+def welcome_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
     """The first-run / empty board.
 
     Shown whenever the user owns no workspaces: it states what the product is,
@@ -29,7 +29,7 @@ def welcome_screen(locale: Locale) -> Screen:
     doc.p(catalog.t("welcome.ready", locale))
     doc.p(_raw(catalog.t("welcome.start_hint", locale)))
     rows = [[inline(catalog.t("welcome.start", locale), "ws:new", intent=Intent.SUCCESS)]]
-    rows += nav.nav_rows(locale, "menu")
+    rows += nav.nav_rows(locale, "menu", inside=inside)
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
@@ -38,9 +38,10 @@ def main_menu(
     locale: Locale,
     *,
     display_name: str = "",
+    inside: Workspace | None = None,
 ) -> Screen:
     if not workspaces:
-        return welcome_screen(locale)
+        return welcome_screen(locale, inside=inside)
 
     doc = RichDoc(locale)
     doc.h(2, catalog.t("menu.title", locale))
@@ -76,11 +77,11 @@ def main_menu(
 
     # Full-width primary action, then the shared 2×2 nav block below it.
     rows_kb = [[inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)]]
-    rows_kb += nav.nav_rows(locale, "menu")
+    rows_kb += nav.nav_rows(locale, "menu", inside=inside)
     return Screen(doc=doc, markup=inline_markup(rows_kb))
 
 
-def help_screen(locale: Locale) -> Screen:
+def help_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
     doc = RichDoc(locale)
     doc.h(2, catalog.t("help.title", locale))
     doc.p(catalog.t("help.body", locale))
@@ -102,17 +103,17 @@ def help_screen(locale: Locale) -> Screen:
         + "</ul></details>"
     )
     doc.p(_italic(catalog.t("help.footer", locale)))
-    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "help")))
+    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "help", inside=inside)))
 
 
-def settings_screen(locale: Locale, *, plan: str = "free") -> Screen:
+def settings_screen(locale: Locale, *, plan: str = "free", inside: Workspace | None = None) -> Screen:
     doc = RichDoc(locale)
     doc.h(2, catalog.t("settings.title", locale))
     doc.p(_raw(f"<b>{catalog.t('settings.language', locale)}</b> {LOCALE_LABELS[locale]}"))
     doc.p(_raw(f"<b>{catalog.t('settings.plan', locale)}</b> {catalog.t(f'plan.{plan}', locale)}"))
     doc.div()
     doc.p(catalog.t("settings.choose", locale))
-    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "settings")))
+    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "settings", inside=inside)))
 
 
 def _italic(text: str):

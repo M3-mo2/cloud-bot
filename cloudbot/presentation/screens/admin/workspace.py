@@ -36,8 +36,11 @@ def entered_workspace_screen(view: AdminView) -> Screen:
         )
 
     ws = entered.workspace
-    # Reuse the user's workspace-detail screen (feature navigation included).
-    screen = ws_screens.workspace_detail(ws, locale, now=view.now)
+    # Reuse the user's workspace-detail screen (feature navigation included). The
+    # user session UI is suppressed here: the admin's entered mode has its own
+    # banner and leave control (the rendering seam), and a "log out" button would
+    # log out the *owner*, not the admin.
+    screen = ws_screens.workspace_detail(ws, locale, now=view.now, session=False)
     rows = [list(r) for r in screen.markup.inline_keyboard]
     rows.append(
         [inline(catalog.t("admin.entered.leave", locale), admin_cb.leave(), intent=Intent.PRIMARY)]
