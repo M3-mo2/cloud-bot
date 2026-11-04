@@ -174,3 +174,21 @@ class SqliteUserRepository:
         if row is None or row["current_ws_id"] in (None, ""):
             return None
         return WorkspaceId(str(row["current_ws_id"]))
+
+    async def legacy_keyboard_cleared(self, tg_id: int) -> bool:
+        """Whether the one-time reply-keyboard removal already ran for this user."""
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT legacy_keyboard_cleared_at FROM users WHERE tg_id = ?", (tg_id,)
+        ) as cur:
+            row = await cur.fetchone()
+        return row is not None and row["legacy_keyboard_cleared_at"] not in (None, "")
+
+    async def mark_legacy_keyboard_cleared(self, tg_id: int) -> None:
+        """Record that the one-time reply-keyboard removal ran for this user."""
+        conn = await self._db.connect()
+        await conn.execute(
+            "UPDATE users SET legacy_keyboard_cleared_at = ? WHERE tg_id = ?",
+            (utc_now_iso(), tg_id),
+        )
+        await conn.commit()

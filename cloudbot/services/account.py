@@ -30,3 +30,11 @@ class AccountService:
 
     async def profile(self, tg_id: int, *, default_locale: Locale) -> User:
         return await self._users.get_or_create(tg_id, default_locale=default_locale)
+
+    async def legacy_keyboard_cleared(self, tg_id: int) -> bool:
+        """Whether the one-time reply-keyboard removal already ran for this user."""
+        return await self._users.legacy_keyboard_cleared(tg_id)
+
+    async def mark_legacy_keyboard_cleared(self, tg_id: int) -> None:
+        """Record that the one-time reply-keyboard removal ran for this user."""
+        await self._users.mark_legacy_keyboard_cleared(tg_id)
