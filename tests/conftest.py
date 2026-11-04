@@ -6,17 +6,57 @@ from datetime import datetime, timezone
 
 import pytest
 
+
+@pytest.fixture(autouse=True)
+def _reset_global_routers():
+    """Handler routers are process-global modules; detach them before each test so
+    a second ``build_dispatcher`` does not trip aiogram's 'already attached' guard.
+    Test scaffolding only — production builds the dispatcher once."""
+    from cloudbot.handlers import (
+        admin,
+        admin_panel,
+        common,
+        execution,
+        features,
+        files,
+        terminal,
+        workspaces,
+    )
+    from cloudbot.handlers.callbacks import navigation
+
+    for module in (
+        common,
+        navigation,
+        admin_panel,
+        workspaces,
+        files,
+        execution,
+        features,
+        admin,
+        terminal,
+    ):
+        module.router._parent_router = None
+    yield
+
 from cloudbot.adapters.cloud_service.fake import FakeEngine
 from cloudbot.adapters.persistence.database import Database
+from cloudbot.adapters.persistence.sqlite_events import (
+    SqliteAdminStateStore,
+    SqliteEventLog,
+)
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.core.locale import Locale
+from cloudbot.core.runtime import BotRuntime
 from cloudbot.services.account import AccountService
+from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
 from cloudbot.services.bundle import Services
+from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.metrics import MetricsService
+from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
 from cloudbot.services.ports import PortsService
@@ -48,12 +88,22 @@ async def sessions(database):
 
 
 @pytest.fixture
+async def event_log(database):
+    return SqliteEventLog(database)
+
+
+@pytest.fixture
+async def admin_state(database):
+    return SqliteAdminStateStore(database)
+
+
+@pytest.fixture
 def engine():
     return FakeEngine()
 
 
 @pytest.fixture
-async def services(engine, users, sessions):
+async def services(engine, users, sessions, event_log, admin_state):
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
@@ -68,6 +118,11 @@ async def services(engine, users, sessions):
         metrics=MetricsService(engine, ownership),
         processes=ProcessesService(engine, ownership),
         archives=ArchivesService(engine, ownership),
+        events=EventsService(event_log),
+        admin=AdminService(
+            users, engine, event_log, admin_state, ownership, BotRuntime(FROZEN_NOW)
+        ),
+        notifier=NotifierService(event_log, admin_state),
     )
 
 

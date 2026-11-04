@@ -33,6 +33,7 @@ from cloudbot.domain.value_objects import (
     ProcessStopResult,
     RunPage,
     RunStatus,
+    ResourceUsage,
     SummaryState,
     Tunnel,
     TunnelList,
@@ -43,7 +44,36 @@ from cloudbot.domain.value_objects import (
 )
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession
 from cloudbot.domain.meta import EngineMeta
+from cloudbot.domain.admin import (
+    AdminOverview,
+    AdminView,
+    AuditPage,
+    EngineHealthView,
+    EnteredWorkspace,
+    UserListPage,
+    UserPage,
+    UserSummary,
+    WorkspaceWithUsage,
+)
+from cloudbot.domain.events import (
+    EventCategory,
+    EventRecord,
+    NotificationMessage,
+    Severity,
+)
 from cloudbot.presentation.mapping import errors as error_mapping
+from cloudbot.presentation.screens.admin import audit as admin_audit
+from cloudbot.presentation.screens.admin import notifications as admin_notify
+from cloudbot.presentation.screens.admin import overview as admin_overview
+from cloudbot.presentation.screens.admin import user_page as admin_user
+from cloudbot.presentation.screens.admin import users as admin_users
+from cloudbot.presentation.screens.admin import workspace as admin_workspace
+from cloudbot.presentation.screens.admin.actions import confirmation_screen, action
+from cloudbot.presentation.screens.admin.notification_message import (
+    gap_message,
+    notification_message,
+    suppression_message,
+)
 from cloudbot.presentation.screens import archives as arc_screens
 from cloudbot.presentation.screens import files as file_screens
 from cloudbot.presentation.screens import menu as menu_screens
@@ -57,6 +87,7 @@ from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.presentation.screens import run_logs as history_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.presentation.screens.language import language_card, language_picker
+from cloudbot.presentation.screens.screen import Screen
 from cloudbot.presentation.keyboards.callbacks import CallbackCodec
 from cloudbot.domain.value_objects import SessionStatus
 from cloudbot.services.packages import InstallOutcome
@@ -423,6 +454,72 @@ def _fixtures():
     )
 
 
+def _admin_view(locale, *, entered=False) -> AdminView:
+    ws = _fixtures()["ws"]
+    user = UserSummary(
+        tg_id=6508129575,
+        display_name="Mohamed",
+        locale=locale,
+        plan="free",
+        created_at=NOW,
+        last_seen_at=NOW,
+        workspace_count=2,
+    )
+    page = UserPage(
+        user=user,
+        workspaces=[
+            WorkspaceWithUsage(workspace=ws, usage=ResourceUsage(
+                disk_bytes=2_400_000, disk_limit_bytes=268_435_456,
+                disk_percent=0.9, runs_total=3, active_runs=1, max_runs=8)),
+        ],
+    )
+    overview = AdminOverview(
+        total_users=3,
+        active_24h=2,
+        workspaces_by_status={"active": 2, "suspended": 1},
+        live_runs=2,
+        live_sessions=1,
+        engine=EngineHealthView(
+            reachable=True, health_status="ok", ready_status="ready",
+            version="0.0.20", api_version="v1",
+        ),
+        uptime_seconds=3725.0,
+        queue_state="ok",
+    )
+    event = EventRecord(
+        id=7,
+        ts=NOW,
+        category=EventCategory.ADMIN_ACTION,
+        severity=Severity.INFO,
+        tg_id=6508129575,
+        ws_id=str(ws.id),
+        summary_key="event.summary.admin.action",
+        params={"action": "suspend"},
+        actor="admin:999",
+    )
+    return AdminView(
+        locale=locale,
+        now=NOW,
+        overview=overview,
+        users_page=UserListPage(users=[user], total=1, offset=0, limit=10),
+        user_page=page,
+        audit_page=AuditPage(events=[event], total=1, offset=0, limit=20),
+        recent_events=[event],
+        subscriptions={EventCategory.RUN_STARTED.value: True, EventCategory.RUN_FAILED.value: False},
+        notify_paused=False,
+        notification_cursor=42,
+        entered=EnteredWorkspace(
+            ws_id=str(ws.id), owner_tg_id=6508129575, workspace=ws, owner_name="Mohamed"
+        )
+        if entered
+        else None,
+    )
+
+
+def _admin_entered_view(locale) -> AdminView:
+    return _admin_view(locale, entered=True)
+
+
 SCREEN_BUILDERS = {
     "language_card": lambda f, loc: language_card(loc),
     "language_picker": lambda f, loc: language_picker(loc),
@@ -523,6 +620,52 @@ SCREEN_BUILDERS = {
     "archive_export_done": lambda f, loc: arc_screens.export_done_screen(
         "project.zip", 4096, f["ws"].id, loc
     ),
+    # -- admin panel ---------------------------------------------------------
+    "admin_overview": lambda f, loc: admin_overview.overview_screen(_admin_view(loc)),
+    "admin_overview_unreachable": lambda f, loc: admin_overview.overview_screen(
+        AdminView(
+            locale=loc,
+            now=NOW,
+            overview=AdminOverview(
+                total_users=1, active_24h=0, engine=EngineHealthView(reachable=False)
+            ),
+        )
+    ),
+    "admin_users": lambda f, loc: admin_users.users_screen(_admin_view(loc)),
+    "admin_users_empty": lambda f, loc: admin_users.users_screen(
+        AdminView(
+            locale=loc, users_page=UserListPage(users=[], total=0)
+        )
+    ),
+    "admin_user": lambda f, loc: admin_user.user_screen(_admin_view(loc)),
+    "admin_notifications": lambda f, loc: admin_notify.notifications_screen(_admin_view(loc)),
+    "admin_audit": lambda f, loc: admin_audit.audit_screen(_admin_view(loc)),
+    "admin_entered": lambda f, loc: admin_workspace.entered_workspace_screen(
+        _admin_entered_view(loc)
+    ),
+    "admin_confirm_suspend": lambda f, loc: confirmation_screen(
+        action("suspend"), "demo (ws_01M6HJASCWM9Z1PF755GT89NK4)",
+        "ws_01M6HJASCWM9Z1PF755GT89NK4", loc
+    ),
+    "admin_confirm_delete": lambda f, loc: confirmation_screen(
+        action("delete"), "demo (ws_01M6HJASCWM9Z1PF755GT89NK4)",
+        "ws_01M6HJASCWM9Z1PF755GT89NK4", loc
+    ),
+    "admin_notify_message": lambda f, loc: Screen(doc=notification_message(
+        NotificationMessage(
+            category=EventCategory.WORKSPACE_CREATED,
+            severity=Severity.INFO,
+            count=3,
+            first_event_id=1,
+            last_event_id=3,
+            summary_key="event.summary.workspace.created",
+            params={"name": "demo"},
+            event_ids=(1, 2, 3),
+        ),
+        loc,
+    )),
+    "admin_notify_gap": lambda f, loc: Screen(doc=gap_message(250, loc)),
+    "admin_notify_capped": lambda f, loc: Screen(doc=suppression_message(27, loc)),
 }
 
 
