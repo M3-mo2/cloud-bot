@@ -509,8 +509,6 @@ MESSAGES: dict[str, str] = {
     "package.remove_all_title": "🧹 Remove all packages?",
     "package.remove_all_body": "Every package in <b>{name}</b> will be uninstalled.",
     "package.remove_all_warning": "⚠️ This cannot be undone.",
-    "package.remove_all_done": "🧹 All packages were removed.",
-    "package.remove_done": "🗑 Removed <b>{name}</b>.",
     "package.truncated": "⚠️ Showing only the first 1000 packages.",
 
     # -- install result (Phase 2a) ------------------------------------------
@@ -522,7 +520,6 @@ MESSAGES: dict[str, str] = {
     "package.result_no_net_title": "🌐 No internet access",
     "package.result_timed_out": "⏱️ The install timed out.",
     "package.result_truncated": "⚠️ Install output was shortened.",
-    "package.result_output": "Install output",
     "package.result_duration": "Took {duration}",
     "package.result_target": "Installed into",
     "package.result_retry": "🔁 Try again",
@@ -546,12 +543,10 @@ MESSAGES: dict[str, str] = {
     "tunnel.publish_custom": "✏️ Type a port",
     "tunnel.publish_custom_prompt": "Send the port number to publish (1024–65535).",
     "tunnel.port_hint": "Ports 1024–65535 can be published.",
-    "tunnel.created": "✅ Published a link on port {port}.",
     "tunnel.publishing": "⏳ Publishing… cloudflared is finding a URL.",
     "tunnel.gate.allow_tunnels": "Publishing is turned off for this workspace. Enable <b>public links</b> when you create the workspace.",
     "tunnel.gate.allow_net": "This workspace has no internet access, so it can't be published. Enable network access first.",
     "tunnel.gate.server": "Publishing is unavailable on this server right now.",
-    "tunnel.gate.too_many": "You've reached the limit of public links for this workspace. Remove one first.",
 
     # -- ports (Phase 2c) ----------------------------------------------------
     "port.title": "🔌 Listening ports",
@@ -582,7 +577,6 @@ MESSAGES: dict[str, str] = {
     "port.scanned": "Scanned {pids} processes and {fds} file descriptors.",
     "port.refresh": "🔄 Refresh",
     "port.publish": "🌐 Publish a port",
-    "port.reachability_label": "Reachability",
 
     # -- workspace detail entries (Phase 2) ---------------------------------
     "ws.packages": "🐍 Packages",
@@ -594,7 +588,6 @@ MESSAGES: dict[str, str] = {
     "ws.create.tunnels_label": "Public links",
     "ws.create.toggle_on": "🌐 {label}: On",
     "ws.create.toggle_off": "🌐 {label}: Off",
-    "ws.create.advanced_open": "Advanced ⚙️",
 
     # -- misc ----------------------------------------------------------------
     "raw.admin_summary": "🧪 Raw engine response (admin)",

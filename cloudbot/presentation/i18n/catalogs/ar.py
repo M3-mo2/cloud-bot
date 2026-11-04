@@ -509,8 +509,6 @@ MESSAGES: dict[str, str] = {
     "package.remove_all_title": "🧹 إزالة كل الحزم؟",
     "package.remove_all_body": "ستُزال كل الحزم من <b>{name}</b>.",
     "package.remove_all_warning": "⚠️ لا يمكن التراجع عن هذا الإجراء.",
-    "package.remove_all_done": "🧹 تمت إزالة كل الحزم.",
-    "package.remove_done": "🗑 تمت إزالة <b>{name}</b>.",
     "package.truncated": "⚠️ يتم عرض أول ١٠٠٠ حزمة فقط.",
 
     # -- install result (Phase 2a) ------------------------------------------
@@ -522,7 +520,6 @@ MESSAGES: dict[str, str] = {
     "package.result_no_net_title": "🌐 لا يوجد اتصال بالإنترنت",
     "package.result_timed_out": "⏱️ انتهت مهلة التثبيت.",
     "package.result_truncated": "⚠️ تم اختصار مخرجات التثبيت.",
-    "package.result_output": "مخرجات التثبيت",
     "package.result_duration": "استغرق {duration}",
     "package.result_target": "تم التثبيت في",
     "package.result_retry": "🔁 حاول مجددًا",
@@ -546,12 +543,10 @@ MESSAGES: dict[str, str] = {
     "tunnel.publish_custom": "✏️ كتابة منفذ",
     "tunnel.publish_custom_prompt": "أرسل رقم المنفذ لنشره (١٠٢٤–٦٥٥٣٥).",
     "tunnel.port_hint": "يمكن نشر المنافذ من ١٠٢٤ إلى ٦٥٥٣٥.",
-    "tunnel.created": "✅ تم نشر رابط على المنفذ {port}.",
     "tunnel.publishing": "⏳ جارٍ النشر… يبحث cloudflared عن رابط.",
     "tunnel.gate.allow_tunnels": "النشر معطّل لهذه المساحة. فعّل <b>الروابط العامة</b> عند إنشاء مساحة العمل.",
     "tunnel.gate.allow_net": "لا تتوفر اتصال بالإنترنت لهذه المساحة لذا لا يمكن نشرها. فعّل الاتصال بالشبكة أولًا.",
     "tunnel.gate.server": "النشر غير متاح على هذا الخادم حاليًا.",
-    "tunnel.gate.too_many": "وصلت إلى الحد الأقصى للروابط العامة لهذه المساحة. احذف رابطًا أولًا.",
 
     # -- ports (Phase 2c) ----------------------------------------------------
     "port.title": "🔌 المنافذ المستمِعة",
@@ -582,7 +577,6 @@ MESSAGES: dict[str, str] = {
     "port.scanned": "تم فحص {pids} عملية و{fds} واصف ملف.",
     "port.refresh": "🔄 تحديث",
     "port.publish": "🌐 نشر منفذ",
-    "port.reachability_label": "إمكانية الوصول",
 
     # -- workspace detail entries (Phase 2) ---------------------------------
     "ws.packages": "🐍 الحزم",
@@ -594,7 +588,6 @@ MESSAGES: dict[str, str] = {
     "ws.create.tunnels_label": "الروابط العامة",
     "ws.create.toggle_on": "🌐 {label}: مفعّلة",
     "ws.create.toggle_off": "🌐 {label}: معطّلة",
-    "ws.create.advanced_open": "متقدّم ⚙️",
 
     # -- misc ----------------------------------------------------------------
     "raw.admin_summary": "🧪 استجابة المحرك الخام (مشرف)",
