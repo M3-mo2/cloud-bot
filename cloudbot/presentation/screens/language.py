@@ -12,6 +12,7 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
+from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
 
 
@@ -49,7 +50,7 @@ def language_picker(locale: Locale) -> Screen:
     markup = inline_markup(
         [
             [lang_button(Locale.AR), lang_button(Locale.EN)],
-            [inline(catalog.t("common.back", locale), "nav:settings", intent=Intent.PRIMARY)],
+            *nav.nav_rows(locale, "language"),
         ]
     )
     return Screen(doc=doc, markup=markup)

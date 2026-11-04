@@ -26,6 +26,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.mapping.statuses import display_state
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, fragment, italic
+from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
 
 PAGE_SIZE = 10
@@ -86,7 +87,8 @@ def workspace_list(
         kb_rows.append(
             [inline(catalog.t("common.load_more", locale), _cb("ws:list", page + 1), intent=Intent.PRIMARY)]
         )
-    kb_rows.append([inline(catalog.t("common.menu", locale), "nav:menu", intent=Intent.PRIMARY)])
+    # The shared bottom nav block, with Workspaces muted (we are already here).
+    kb_rows += nav.nav_rows(locale, "workspaces")
     return Screen(doc=doc, markup=inline_markup(kb_rows))
 
 
@@ -95,13 +97,9 @@ def empty_workspaces(locale: Locale) -> Screen:
     doc.h(2, catalog.t("ws.list.empty_title", locale))
     doc.p(catalog.t("ws.list.empty_line1", locale))
     doc.p(catalog.t("ws.list.empty_line2", locale))
-    markup = inline_markup(
-        [
-            [inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)],
-            [inline(catalog.t("common.menu", locale), "nav:menu", intent=Intent.PRIMARY)],
-        ]
-    )
-    return Screen(doc=doc, markup=markup)
+    rows = [[inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)]]
+    rows += nav.nav_rows(locale, "workspaces")
+    return Screen(doc=doc, markup=inline_markup(rows))
 
 
 # -- detail ------------------------------------------------------------------

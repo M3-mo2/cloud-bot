@@ -2,34 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from cloudbot.core.locale import LOCALE_LABELS, Locale
-from cloudbot.domain.entities import User, Workspace
+from cloudbot.domain.entities import Workspace
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_bytes_pair, format_count
-from cloudbot.presentation.keyboards.buttons import inline, reply
-from cloudbot.presentation.keyboards.markup import inline_markup, reply_markup
+from cloudbot.presentation.keyboards.buttons import inline
+from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.mapping.statuses import display_state, workspace_status_label
 from cloudbot.presentation.rich.document import RichDoc
+from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
-
-
-def reply_menu(locale: Locale):
-    return reply_markup(
-        [
-            [
-                reply(catalog.t("menu.workspaces", locale), intent=Intent.PRIMARY),
-                reply(catalog.t("menu.settings", locale), intent=Intent.PRIMARY),
-            ],
-            [
-                reply(catalog.t("menu.language", locale), intent=Intent.PRIMARY),
-                reply(catalog.t("menu.help", locale), intent=Intent.PRIMARY),
-            ],
-        ],
-        placeholder=catalog.t("menu.placeholder", locale),
-    )
 
 
 def welcome_screen(locale: Locale) -> Screen:
@@ -45,13 +28,9 @@ def welcome_screen(locale: Locale) -> Screen:
     doc.div()
     doc.p(catalog.t("welcome.ready", locale))
     doc.p(_raw(catalog.t("welcome.start_hint", locale)))
-    markup = inline_markup(
-        [
-            [inline(catalog.t("welcome.start", locale), "ws:new", intent=Intent.SUCCESS)],
-            [inline(catalog.t("welcome.how", locale), "nav:help", intent=Intent.PRIMARY)],
-        ]
-    )
-    return Screen(doc=doc, markup=markup)
+    rows = [[inline(catalog.t("welcome.start", locale), "ws:new", intent=Intent.SUCCESS)]]
+    rows += nav.nav_rows(locale, "menu")
+    return Screen(doc=doc, markup=inline_markup(rows))
 
 
 def main_menu(
@@ -95,13 +74,9 @@ def main_menu(
     )
     doc.p(_italic(catalog.t("menu.tap_hint", locale)))
 
+    # Full-width primary action, then the shared 2×2 nav block below it.
     rows_kb = [[inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)]]
-    rows_kb.append(
-        [inline(catalog.t("menu.my_workspaces", locale), "ws:list", intent=Intent.PRIMARY)]
-    )
-    rows_kb.append(
-        [inline(catalog.t("menu.settings", locale), "nav:settings", intent=Intent.PRIMARY)]
-    )
+    rows_kb += nav.nav_rows(locale, "menu")
     return Screen(doc=doc, markup=inline_markup(rows_kb))
 
 
@@ -127,10 +102,7 @@ def help_screen(locale: Locale) -> Screen:
         + "</ul></details>"
     )
     doc.p(_italic(catalog.t("help.footer", locale)))
-    markup = inline_markup(
-        [[inline(catalog.t("common.menu", locale), "nav:menu", intent=Intent.PRIMARY)]]
-    )
-    return Screen(doc=doc, markup=markup)
+    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "help")))
 
 
 def settings_screen(locale: Locale, *, plan: str = "free") -> Screen:
@@ -140,13 +112,7 @@ def settings_screen(locale: Locale, *, plan: str = "free") -> Screen:
     doc.p(_raw(f"<b>{catalog.t('settings.plan', locale)}</b> {catalog.t(f'plan.{plan}', locale)}"))
     doc.div()
     doc.p(catalog.t("settings.choose", locale))
-    markup = inline_markup(
-        [
-            [inline(catalog.t("lang.change", locale), "nav:language", intent=Intent.PRIMARY)],
-            [inline(catalog.t("common.back", locale), "nav:menu", intent=Intent.PRIMARY)],
-        ]
-    )
-    return Screen(doc=doc, markup=markup)
+    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "settings")))
 
 
 def _italic(text: str):
