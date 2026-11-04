@@ -89,12 +89,21 @@ class FilesService:
         await self._engine.upload_file(ws_id, path, filename, stream)
 
 
-def _normalize_path(path: str) -> str:
+def normalize_path(path: str) -> str:
+    """Resolve a user-typed workspace path to an absolute one (``/`` root).
+
+    Shared by the file and archive services so an archive source path obeys the
+    same rules a file path does.
+    """
     if not path:
         return "/"
     if not path.startswith("/"):
         path = "/" + path
     return path
+
+
+def _normalize_path(path: str) -> str:
+    return normalize_path(path)
 
 
 def tail_preview(text: str, max_bytes: int = MAX_PREVIEW_BYTES) -> tuple[str, bool]:
