@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from aiogram.types import InputRichMessage, Message
+from aiogram.types import InputRichMessage, Message, ReplyParameters
 
 from cloudbot.presentation.rich.document import RichDoc
 
@@ -34,7 +34,10 @@ class RichSender:
             chat_id=chat_id,
             rich_message=doc.build(),
             reply_markup=markup,
-            reply_to_message_id=reply_to,
+            # aiogram's rich API takes reply_parameters (a ReplyParameters object); there is no
+            # reply_to_message_id here — that name belongs to send_message. Measured against
+            # aiogram 3.31.0's own signature, and bound by tests/contract/test_sender_signatures.py.
+            reply_parameters=ReplyParameters(message_id=reply_to) if reply_to is not None else None,
         )
 
     async def edit(
