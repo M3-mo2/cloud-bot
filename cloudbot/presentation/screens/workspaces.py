@@ -192,6 +192,17 @@ def workspace_detail_markup(ws: Workspace, locale: Locale, *, active_run: bool =
         )
         rows.append(
             [
+                inline(catalog.t("ws.packages", locale), _cb("pkg:list", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("ws.public_links", locale), _cb("tnl:list", ws_id), intent=Intent.PRIMARY),
+            ]
+        )
+        rows.append(
+            [
+                inline(catalog.t("ws.ports", locale), _cb("port:list", ws_id), intent=Intent.PRIMARY),
+            ]
+        )
+        rows.append(
+            [
                 inline(catalog.t("ws.suspend", locale), _cb("ws:suspend_confirm", ws_id), intent=Intent.PRIMARY),
             ]
         )
@@ -283,7 +294,19 @@ def create_advanced(
     locale: Locale,
     *,
     selected_profile: str,
+    allow_net: bool | None = None,
+    allow_tunnels: bool | None = None,
 ) -> Screen:
+    """Advanced create options: numeric limits plus the two boolean switches.
+
+    ``allow_net`` and ``allow_tunnels`` were already on the domain ``Limits``;
+    this screen makes them reachable (a user could not enable publishing at all
+    before). Each is a toggle button whose callback flips the value in the wizard
+    state and re-renders this screen.
+    """
+    net = limits.allow_net if allow_net is None else allow_net
+    tunnels = limits.allow_tunnels if allow_tunnels is None else allow_tunnels
+
     doc = RichDoc(locale)
     doc.h(2, catalog.t("ws.create.advanced_title", locale))
     cpu_line = catalog.t(
@@ -303,7 +326,7 @@ def create_advanced(
                         "ws.create.limit_value",
                         locale,
                         n=_num(limits.memory_mb, locale),
-                        unit=catalog.t("file.column.size", locale) if False else "MB",
+                        unit="MB",
                         max=_num(maxima.memory_mb, locale),
                     )
                 ),
@@ -321,21 +344,58 @@ def create_advanced(
                 ),
             ],
             [
-                _th("Network" if locale is Locale.EN else "الشبكة"),
-                catalog.t("ws.create.network_on" if limits.allow_net else "ws.create.network_off", locale),
+                _th(catalog.t("ws.create.network_label", locale)),
+                catalog.t("ws.create.network_on" if net else "ws.create.network_off", locale),
+            ],
+            [
+                _th(catalog.t("ws.create.tunnels_label", locale)),
+                catalog.t("ws.create.network_on" if tunnels else "ws.create.network_off", locale),
             ],
         ],
     )
     doc.p(italic(catalog.t("ws.create.advanced_hint", locale)))
+
+    def _toggle(active: bool, label: str, action: str):
+        text = catalog.t(
+            "ws.create.toggle_on" if active else "ws.create.toggle_off",
+            locale,
+            label=label,
+        )
+        return inline(text, action, intent=Intent.SUCCESS if active else Intent.MUTED)
+
     markup = inline_markup(
         [
             [
+                _toggle(net, catalog.t("ws.create.network_label", locale), _cb("ws:tgl", "net")),
+                _toggle(tunnels, catalog.t("ws.create.tunnels_label", locale), _cb("ws:tgl", "tnl")),
+            ],
+            [
                 inline(catalog.t("common.create", locale), _cb("ws:create", selected_profile), intent=Intent.SUCCESS),
                 inline(catalog.t("common.cancel", locale), "nav:cancel", intent=Intent.PRIMARY),
-            ]
+            ],
         ]
     )
     return Screen(doc=doc, markup=markup)
+
+
+def wizard_limits(defaults: Limits, data: dict) -> Limits:
+    """Build the create wizard's limits from the FSM data, defaulting safely.
+
+    Only the two boolean switches are user-toggled today; the numeric values come
+    from the engine's ``limits_defaults``. ``allow_tunnels`` is shown here so a
+    user can actually enable publishing at create time.
+    """
+    return Limits(
+        cpu_cores=defaults.cpu_cores,
+        memory_mb=defaults.memory_mb,
+        disk_mb=defaults.disk_mb,
+        max_wall_time_sec=defaults.max_wall_time_sec,
+        max_runs=defaults.max_runs,
+        allow_net=bool(data.get("ws_allow_net", defaults.allow_net)),
+        allow_unlimited_runs=defaults.allow_unlimited_runs,
+        allow_tunnels=bool(data.get("ws_allow_tunnels", defaults.allow_tunnels)),
+        write_rate_mb_s=defaults.write_rate_mb_s,
+    )
 
 
 # -- lifecycle confirms / results -------------------------------------------
