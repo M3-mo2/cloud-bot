@@ -116,6 +116,27 @@ class SessionStatus(str, Enum):
         except ValueError:
             return cls.UNKNOWN
 
+    @property
+    def is_terminal(self) -> bool:
+        """A session in this status will never run again."""
+        return self in _TERMINAL_SESSION_STATUSES
+
+
+#: Terminal session statuses (API.md §"Session statuses"). ``UNKNOWN`` is not
+#: terminal: an unrecognised value keeps the view polling rather than freezing.
+_TERMINAL_SESSION_STATUSES: frozenset["SessionStatus"] = frozenset(
+    {
+        SessionStatus.EXITED,
+        SessionStatus.KILLED,
+        SessionStatus.TIMED_OUT,
+        SessionStatus.FAILED,
+    }
+)
+
+#: The signals the engine accepts (INT|TERM|QUIT|HUP). Anything else must be
+#: refused by the domain before it reaches the engine (INTEGRATION-GUIDE §5.2).
+SESSION_SIGNALS: frozenset[str] = frozenset({"INT", "TERM", "QUIT", "HUP"})
+
 
 @dataclass(frozen=True)
 class Limits:
@@ -232,6 +253,14 @@ class RunPage:
     total: int
     limit: int
     offset: int
+
+
+@dataclass(frozen=True)
+class SessionPage:
+    sessions: tuple["TerminalSession", ...]
+    total: int
+    limit: int = 20
+    offset: int = 0
 
 
 @dataclass(frozen=True)

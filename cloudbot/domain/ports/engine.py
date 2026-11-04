@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, AsyncIterator, Protocol
 
-from cloudbot.domain.entities import FileEntry, Run, Workspace
+from cloudbot.domain.entities import FileEntry, Run, TerminalSession, Workspace
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.value_objects import (
     ExecResult,
@@ -20,6 +20,7 @@ from cloudbot.domain.value_objects import (
     LogChunk,
     ResourceUsage,
     RunPage,
+    SessionPage,
     WorkspaceId,
 )
 
@@ -119,3 +120,31 @@ class EnginePort(Protocol):
     async def stop_run(self, ws_id: WorkspaceId, run_id: str) -> None: ...
     async def purge_runs(self, ws_id: WorkspaceId) -> int: ...
     async def delete_run(self, ws_id: WorkspaceId, run_id: str) -> None: ...
+
+    # -- interactive terminal sessions (Phase 1.5, native engine PTY) --------
+    async def open_session(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        shell: str | None = None,
+        cwd: str | None = None,
+        cols: int = 80,
+        rows: int = 24,
+        timeout_sec: int | None = None,
+    ) -> TerminalSession: ...
+    async def list_sessions(
+        self,
+        ws_id: WorkspaceId,
+        *,
+        status: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> SessionPage: ...
+    async def get_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession: ...
+    async def session_input(self, ws_id: WorkspaceId, ses_id: str, data: str) -> None: ...
+    async def session_output(
+        self, ws_id: WorkspaceId, ses_id: str, *, offset: int = 0, limit: int = 65536
+    ) -> LogChunk: ...
+    async def session_resize(self, ws_id: WorkspaceId, ses_id: str, *, cols: int, rows: int) -> None: ...
+    async def session_signal(self, ws_id: WorkspaceId, ses_id: str, signal: str) -> None: ...
+    async def close_session(self, ws_id: WorkspaceId, ses_id: str) -> TerminalSession: ...

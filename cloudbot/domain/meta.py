@@ -89,6 +89,25 @@ class WorkspaceLimits:
 
 
 @dataclass(frozen=True)
+class SessionConfig:
+    """The engine's session limits (``sessions:`` config).
+
+    The engine's ``/v1/meta`` does not currently advertise these, so the values
+    are the documented defaults (API.md §"Session limits and config"). A real
+    ``sessions`` block, if the engine ever emits one, overrides them.
+    """
+
+    max_per_workspace: int = 4
+    idle_timeout_sec: int = 900
+    lifetime_sec: int = 3600
+    output_kb: int = 1024
+    max_input_kb: int = 64
+    shell: str = "/bin/sh"
+    cols_default: int = 80
+    rows_default: int = 24
+
+
+@dataclass(frozen=True)
 class WriteRate:
     enabled: bool = False
     server_max_mb_s: int = 0
@@ -118,6 +137,7 @@ class EngineMeta:
     archives: Archives = field(default_factory=Archives)
     subscriptions: Subscriptions = field(default_factory=Subscriptions)
     tunnels: Tunnels = field(default_factory=Tunnels)
+    sessions: SessionConfig = field(default_factory=SessionConfig)
     workspace_limits: WorkspaceLimits = field(default_factory=WorkspaceLimits)
     write_rate: WriteRate = field(default_factory=WriteRate)
     egress_decoy: Capability = field(default_factory=Capability)

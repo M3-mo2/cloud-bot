@@ -89,6 +89,13 @@ class TerminalSession:
     rows: int = 24
     out_offset: int = 0
     created_at: datetime | None = None
+    #: Human-facing copy is derived from ``status`` + ``reason`` in presentation.
+    reason: str = ""
+    #: ``diagnostic`` is engine-internal (a failed launch); it must NEVER be
+    #: rendered to a normal user — DEBUG+admin only, collapsed.
+    diagnostic: str = ""
+    exit_code: int | None = None
+    output_truncated: bool = False
 
 
 @dataclass(frozen=True)
