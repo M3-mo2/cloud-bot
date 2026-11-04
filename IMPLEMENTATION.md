@@ -246,6 +246,22 @@ handlers → catalogs), with the architecture the task's "قابلة للتوس�
   long-poller.
 - **D7 — docs**: `docs/ADMIN-PANEL.md` (the extension guide), `docs/ui/07-admin-panel.md`,
   this section, and the roadmap entry.
+- **Task 07 — two live bugs, fixed structurally.** (a) The `adm:` callback shape
+  is now owned by **one codec**, `presentation/screens/admin/callbacks.py`, with
+  one typed builder and one total parser per action. Every producer (screen)
+  builds callbacks through it and every consumer (`handlers/admin_panel.py`)
+  parses through it; no handler does `cb.data.split(":")[n]` (asserted by
+  `tests/contract/test_admin_callback_contract.py`). The parser returns an
+  `InvalidAdminCallback` for a short/malformed callback instead of raising, and
+  the handler answers it with the correctable stale screen — the live
+  `adm:audit_user:<tg_id>` (no page) `IndexError` can no longer happen. The same
+  audit also found and fixed two other raw-callback producers (`file:ls`/`file:cd`
+  breadcrumbs and the run-mode cancel) that bypassed the codec. (b)
+  `RichSender.edit` now suppresses only on the **full payload** — rich body, RTL
+  flag and reply markup — so a changed keyboard with unchanged text is still
+  sent, and it treats a `message is not modified` `TelegramBadRequest` as success
+  (the payload is already on screen). Any other `TelegramBadRequest` propagates.
+  Both fixes have bite tests in `scripts/verify.sh` (proofs 28–29).
 
 ## What is deliberately not implemented (and why)
 

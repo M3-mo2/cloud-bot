@@ -20,6 +20,22 @@ The panel is **identity-gated**, not mode-gated. Only a Telegram id listed in
    no I/O, no engine, no DB. `AdminService` builds the `AdminView` read model;
    screens only render it. This is what keeps them snapshot-testable.
 
+Two further rules were added after a live incident (TASK 07); both are enforced by
+tests so a new section is safe *by construction*:
+
+- **Callbacks go through the codec.** `adm:` callback data is built and parsed in
+  exactly one module, `cloudbot/presentation/screens/admin/callbacks.py`. A screen
+  uses a typed builder (`admin_cb.audit_user(tg_id, page)`); a handler uses the
+  total parser (`admin_cb.parse(data)`). No screen writes an `adm:` f-string and
+  no handler does `cb.data.split(":")[n]`. The contract test
+  `tests/contract/test_admin_callback_contract.py` drives every admin screen and
+  fails if any button it produces cannot be parsed **and** routed.
+- **Screens must be safe to re-render.** Returning to a page can reproduce the
+  exact payload that is already on screen; Telegram then answers
+  `message is not modified`. `RichSender.edit` suppresses an edit whose **full
+  payload** (rich body + reply markup + RTL flag) is unchanged and treats a
+  `not modified` `TelegramBadRequest` as success, so a re-render never raises.
+
 A non-admin must not be able to tell the panel exists: `/admin` for a non-admin
 is swallowed by the gate and produces nothing — the same response as any unknown
 command.
@@ -31,6 +47,36 @@ loosening of them.
 
 ---
 
+## The callback codec (`adm:`)
+
+`cloudbot/presentation/screens/admin/callbacks.py` is the **only** place `adm:`
+callback data is created and read. It offers one typed builder and one parser
+result per action. The wire shape is `adm:<action>[:<arg>...]`; the parser knows
+the exact arity of every action.
+
+```python
+from cloudbot.presentation.screens.admin import callbacks as admin_cb
+
+data = admin_cb.audit_user(6508129575, 0)   # "adm:audit_user:6508129575:0"
+parsed = admin_cb.parse(data)               # AdminCallback(action="audit_user", args=("6508129575", "0"))
+parsed.valid                                # True
+parsed.arg_int(1)                           # 0
+
+bad = admin_cb.parse("adm:audit_user:6508129575")   # the short callback that used to IndexError
+bad.valid                                            # False  (an InvalidAdminCallback)
+```
+
+`parse` is **total and defensive**: a malformed, short or unknown callback returns
+an `InvalidAdminCallback` instead of raising. The dispatcher
+(`handlers/admin_panel.py::on_admin_callback`) answers any invalid result with a
+correctable screen (`_stale`: “this button is out of date — reopen the panel”). A
+stale button therefore never crashes and never silently does nothing.
+
+**Adding a callback** is one builder plus one parser branch (both in the codec)
+and one entry in `_ROUTES`. The contract test fails until all three exist.
+
+---
+
 ## How to add a **section**
 
 A section is data, not an `if` branch. The main menu is generated from the
@@ -38,6 +84,7 @@ registry, so adding a section touches no menu code.
 
 1. Create `cloudbot/presentation/screens/admin/<name>.py`.
 2. Build a pure screen function `def my_screen(view: AdminView) -> Screen:`.
+   Any button on it must use a codec builder (never an `adm:` f-string).
 3. Register it:
 
    ```python
@@ -45,7 +92,7 @@ registry, so adding a section touches no menu code.
 
    register(
        AdminSection(
-           key="my_section",          # unique; used in the ``adm:sec:my_section`` callback
+           key="my_section",          # unique; the menu button uses admin_cb.section(key)
            title_key="admin.section.my_section",  # a catalog key, both locales
            order=50,                  # menu order
            icon="🧩",
@@ -57,10 +104,14 @@ registry, so adding a section touches no menu code.
 4. Import the module in `cloudbot/presentation/screens/admin/__init__.py` (that
    import is what registers it).
 5. Add `admin.section.my_section` to **both** `en.py` and `ar.py`.
+6. If the section has its own callbacks, add builders + parser branches in
+   `callbacks.py` and a route in `handlers/admin_panel.py::_ROUTES`.
 
 That is the whole change. The menu (`overview.py::_menu_markup`) reads
 `registry.menu()`; `tests/unit/test_admin_registry.py` proves a newly registered
-section appears without touching menu code.
+section appears without touching menu code, and
+`tests/contract/test_admin_callback_contract.py` proves its buttons are parseable
+and routable.
 
 If the section needs data, add a field to `AdminView` (in
 `cloudbot/domain/admin.py`) and populate it in the handler's `_view(...)` helper /
@@ -70,7 +121,7 @@ If the section needs data, add a field to `AdminView` (in
 
 ## How to add an **action**
 
-Actions are data too. A new action is one entry plus one handler — no screen code
+Actions are data too. A new action is one entry plus one route — no screen code
 and no bespoke confirmation screen.
 
 1. Add an entry to `ACTIONS` in
@@ -78,7 +129,7 @@ and no bespoke confirmation screen.
 
    ```python
    AdminAction(
-       key="restart",                    # ``adm:restart:<subject>`` / ``adm:ask:restart:<subject>``
+       key="restart",                    # callback: admin_cb.action("restart", subject)
        label_key="admin.action.restart",
        intent=Intent.PRIMARY,
        confirm=True,                     # dangerous ⇒ a confirmation is generated
@@ -91,21 +142,23 @@ and no bespoke confirmation screen.
    `...confirm_body`) to both catalogs.
 3. Put a button on a screen with
    `action_button(action("restart"), subject, locale)`.
-4. Add the handler in `cloudbot/handlers/admin_panel.py`:
+4. Add the handler route in `handlers/admin_panel.py` and wire it in `_ROUTES`:
 
    ```python
-   @router.callback_query(F.data.startswith("adm:restart:"))
-   async def on_restart(cb, ctx, services, sender, events):
-       ws_id = cb.data.split(":", 2)[2]
+   async def _route_restart(cb, parsed, ctx, services, sender, state, events):
+       ws_id = parsed.subject          # already parsed by the codec — never split by hand
        owner = await services.admin.owner_of(WorkspaceId(ws_id))
        await services.admin.restart_workspace(WorkspaceId(ws_id))
        events.admin_action(admin_id=ctx.actor_tg_id, action="restart", ws_id=ws_id, owner_tg_id=owner)
        ...
+
+   _ROUTES["restart"] = _route_restart
    ```
 
 A **dangerous** action (`dangerous=True`) gets its confirmation screen generated
 from the same declaration by `confirmation_screen(...)`, and the confirmation
-always names *whose* data it affects.
+always names *whose* data it affects. The `confirm=True` path uses
+`admin_cb.ask(key, subject)`; the codec's parser has a matching branch.
 
 ---
 
