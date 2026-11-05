@@ -621,6 +621,7 @@ SCREEN_BUILDERS = {
     "terminal_view_ended": lambda f, loc: term_screens.terminal_view(f["ended_session"], f["ws"].id, loc, output="$ echo hi\nhi\n$ "),
     "terminal_view_failed": lambda f, loc: term_screens.terminal_view(f["failed_session"], f["ws"].id, loc),
     "terminal_resize": lambda f, loc: term_screens.resize_screen(f["running_session"], f["ws"].id, loc),
+    "terminal_stale": lambda f, loc: term_screens.stale_screen(loc),
     "terminal_ended": lambda f, loc: term_screens.ended_screen(f["ended_session"], f["ws"].id, loc),
     "terminal_command": lambda f, loc: term_screens.command_prompt(f["ws"].id, f["running_session"].id, loc),
     "err_unavailable": lambda f, loc: error_mapping.error_code_screen("unavailable", loc),
