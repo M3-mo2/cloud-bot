@@ -478,6 +478,9 @@ MESSAGES: dict[str, str] = {
     "terminal.ended_body": "That terminal has closed.",
     "terminal.open_done": "🖥 Terminal opened.",
     "terminal.forget": "🗑 Remove from list",
+    "terminal.stale.title": "♻️ This button is out of date",
+    "terminal.stale.body": "The terminal changed since this button was drawn. Open it again from your terminals.",
+    "terminal.stale.reopen": "📦 My workspaces",
 
     # -- session end reasons (UI 05 §5) --------------------------------------
     "session.reason.workspace_stopped": "The workspace was stopped.",

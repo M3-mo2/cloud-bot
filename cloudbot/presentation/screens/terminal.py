@@ -30,6 +30,7 @@ from cloudbot.presentation.mapping.statuses import (
 )
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
+from cloudbot.presentation.screens import terminal_callbacks as _term
 from cloudbot.presentation.screens.screen import Screen
 
 #: The engine's PTY-size bounds (API.md §POST /sessions).
@@ -123,8 +124,8 @@ def my_terminals_markup(sessions: list[TerminalSession], ws_id: WorkspaceId, loc
     rows = []
     for session in sessions:
         label = f"🖥 {_short(session.id)}"
-        rows.append([inline(label, _cb("term:view", ws_id, session.id), intent=Intent.PRIMARY)])
-    rows.append([inline(catalog.t("terminal.open", locale), _cb("term:open", ws_id), intent=Intent.SUCCESS)])
+        rows.append([inline(label, _term.view(ws_id, session.id), intent=Intent.PRIMARY)])
+    rows.append([inline(catalog.t("terminal.open", locale), _term.open_terminal(ws_id), intent=Intent.SUCCESS)])
     rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
     return inline_markup(rows)
 
@@ -194,10 +195,10 @@ def terminal_view_markup(
         # and a way to drop the bot-side handle from *my terminals* instead.
         rows = [
             [
-                inline(catalog.t("terminal.new", locale), _cb("term:open", ws_id), intent=Intent.SUCCESS),
-                inline(catalog.t("terminal.forget", locale), _cb("term:forget", ws_id, ses_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.new", locale), _term.open_terminal(ws_id), intent=Intent.SUCCESS),
+                inline(catalog.t("terminal.forget", locale), _term.forget(ws_id, ses_id), intent=Intent.PRIMARY),
             ],
-            [inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY)],
+            [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
             [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
         ]
         return inline_markup(rows)
@@ -206,35 +207,35 @@ def terminal_view_markup(
         # adds the one-tap exit (R3), so the state is always escapable.
         rows = [
             [
-                inline(catalog.t("terminal.send_command", locale), _cb("term:cmd", ws_id, ses_id), intent=Intent.PRIMARY),
-                inline(catalog.t("terminal.stop_typing", locale), _cb("term:exit", ws_id, ses_id), intent=Intent.DANGER),
+                inline(catalog.t("terminal.send_command", locale), _term.cmd(ws_id, ses_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.stop_typing", locale), _term.exit_(ws_id, ses_id), intent=Intent.DANGER),
             ],
             [
-                inline(catalog.t("terminal.ctrl_c", locale), _cb("term:signal", ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
-                inline(catalog.t("terminal.ctrl_d", locale), _cb("term:ctrl_d", ws_id, ses_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.ctrl_c", locale), _term.signal(ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.ctrl_d", locale), _term.ctrl_d(ws_id, ses_id), intent=Intent.PRIMARY),
             ],
             [
-                inline(catalog.t("terminal.resize", locale), _cb("term:resize", ws_id, ses_id), intent=Intent.PRIMARY),
-                inline(catalog.t("terminal.close", locale), _cb("term:close", ws_id, ses_id), intent=Intent.DANGER),
+                inline(catalog.t("terminal.resize", locale), _term.resize(ws_id, ses_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER),
             ],
             [
-                inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY),
                 inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
             ],
         ]
         return inline_markup(rows)
     rows = [
         [
-            inline(catalog.t("terminal.send_command", locale), _cb("term:cmd", ws_id, ses_id), intent=Intent.PRIMARY),
-            inline(catalog.t("terminal.ctrl_c", locale), _cb("term:signal", ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
+            inline(catalog.t("terminal.send_command", locale), _term.cmd(ws_id, ses_id), intent=Intent.PRIMARY),
+            inline(catalog.t("terminal.ctrl_c", locale), _term.signal(ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
         ],
         [
-            inline(catalog.t("terminal.ctrl_d", locale), _cb("term:ctrl_d", ws_id, ses_id), intent=Intent.PRIMARY),
-            inline(catalog.t("terminal.resize", locale), _cb("term:resize", ws_id, ses_id), intent=Intent.PRIMARY),
+            inline(catalog.t("terminal.ctrl_d", locale), _term.ctrl_d(ws_id, ses_id), intent=Intent.PRIMARY),
+            inline(catalog.t("terminal.resize", locale), _term.resize(ws_id, ses_id), intent=Intent.PRIMARY),
         ],
         [
-            inline(catalog.t("terminal.close", locale), _cb("term:close", ws_id, ses_id), intent=Intent.DANGER),
-            inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
+            inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER),
+            inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY),
         ],
         [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
     ]
@@ -248,7 +249,7 @@ def command_prompt(ws_id: WorkspaceId, ses_id: str, locale: Locale) -> Screen:
     doc.p(catalog.t("terminal.command_prompt", locale))
     doc.p(italic(catalog.t("terminal.command_hint", locale)))
     markup = inline_markup(
-        [[inline(catalog.t("common.cancel", locale), _cb("term:view", ws_id, ses_id), intent=Intent.PRIMARY)]],
+        [[inline(catalog.t("common.cancel", locale), _term.view(ws_id, ses_id), intent=Intent.PRIMARY)]],
         force_reply=True,
     )
     return Screen(doc=doc, markup=markup, send_new=True)
@@ -272,14 +273,14 @@ def resize_markup(session: TerminalSession, ws_id: WorkspaceId, locale: Locale):
             [
                 inline(
                     label,
-                    _cb("term:rsz", ws_id, session.id, f"{cols}x{rowsn}"),
+                    _term.rsz(ws_id, session.id, f"{cols}x{rowsn}"),
                     intent=Intent.PRIMARY if not current else Intent.MUTED,
                     disabled=current,
                 )
             ]
         )
-    rows.append([inline(catalog.t("terminal.resize_custom", locale), _cb("term:rsz_custom", ws_id, session.id), intent=Intent.PRIMARY)])
-    rows.append([inline(catalog.t("common.back", locale), _cb("term:view", ws_id, session.id), intent=Intent.PRIMARY)])
+    rows.append([inline(catalog.t("terminal.resize_custom", locale), _term.rsz_custom(ws_id, session.id), intent=Intent.PRIMARY)])
+    rows.append([inline(catalog.t("common.back", locale), _term.view(ws_id, session.id), intent=Intent.PRIMARY)])
     return inline_markup(rows)
 
 
@@ -288,10 +289,28 @@ def resize_custom_prompt(ws_id: WorkspaceId, ses_id: str, locale: Locale) -> Scr
     doc.h(2, catalog.t("terminal.resize_title", locale))
     doc.p(_raw(catalog.t("terminal.resize_custom_prompt", locale)))
     markup = inline_markup(
-        [[inline(catalog.t("common.cancel", locale), _cb("term:resize", ws_id, ses_id), intent=Intent.PRIMARY)]],
+        [[inline(catalog.t("common.cancel", locale), _term.resize(ws_id, ses_id), intent=Intent.PRIMARY)]],
         force_reply=True,
     )
     return Screen(doc=doc, markup=markup, send_new=True)
+
+
+# -- stale / out-of-date button ----------------------------------------------
+def stale_screen(locale: Locale) -> Screen:
+    """A ``term:`` callback this process cannot resolve (stale or malformed).
+
+    The full key parts of a terminal callback live in a process-global in-memory
+    registry (CB-8); after a restart that registry is empty, so a button drawn by
+    the previous process decodes to no key parts. The handler must answer with a
+    correctable screen — never an ``IndexError`` and never nothing.
+    """
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("terminal.stale.title", locale))
+    doc.p(catalog.t("terminal.stale.body", locale))
+    markup = inline_markup(
+        [[inline(catalog.t("terminal.stale.reopen", locale), _cb("ws:list"), intent=Intent.PRIMARY)]]
+    )
+    return Screen(doc=doc, markup=markup)
 
 
 # -- ended -------------------------------------------------------------------
@@ -303,9 +322,9 @@ def ended_screen(session: TerminalSession, ws_id: WorkspaceId, locale: Locale) -
         doc.p(italic(session_reason_label(session.reason, locale)))
     markup = inline_markup(
         [
-            [inline(catalog.t("terminal.new", locale), _cb("term:open", ws_id), intent=Intent.SUCCESS)],
-            [inline(catalog.t("terminal.forget", locale), _cb("term:forget", ws_id, session.id), intent=Intent.PRIMARY)],
-            [inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY)],
+            [inline(catalog.t("terminal.new", locale), _term.open_terminal(ws_id), intent=Intent.SUCCESS)],
+            [inline(catalog.t("terminal.forget", locale), _term.forget(ws_id, session.id), intent=Intent.PRIMARY)],
+            [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
             [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
         ]
     )
@@ -324,6 +343,7 @@ __all__ = [
     "resize_custom_prompt",
     "resize_markup",
     "resize_screen",
+    "stale_screen",
     "terminal_view",
     "terminal_view_markup",
     "timeout_notice",
