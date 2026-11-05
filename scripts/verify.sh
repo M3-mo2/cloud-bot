@@ -28,6 +28,11 @@
 # Runs offline; no token, no network.
 set -euo pipefail
 
+# this script's own absolute path — resolved BEFORE the cd below moves the shell,
+# so the proof ledger still finds its own file from any working directory.
+# shellcheck disable=SC2034
+SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+
 cd "$(dirname "$0")/.."
 PY="${PYTHON:-/home/zerops/cloud-bot-venv/bin/python}"
 
@@ -864,9 +869,9 @@ echo
 # "thirty-eight proofs passed" while only 26 existed (the ids jumped 15 → 28).
 # The count is now derived from this same file, so the claim and what actually
 # ran cannot disagree.
-N_TOTAL=$(grep -oE '== ?[0-9]+\. ' "$0" | grep -oE '[0-9]+' | sort -un | wc -l)
-N_LAST=$(grep -oE '== ?[0-9]+\. ' "$0" | grep -oE '[0-9]+' | sort -un | tail -1)
-N_LINES=$(grep -cE '^echo "== [0-9]+\.' "$0")
+N_TOTAL=$(grep -oE '== ?[0-9]+\. ' "$SELF" | grep -oE '[0-9]+' | sort -un | wc -l)
+N_LAST=$(grep -oE '== ?[0-9]+\. ' "$SELF" | grep -oE '[0-9]+' | sort -un | tail -1)
+N_LINES=$(grep -cE '^echo "== [0-9]+\.' "$SELF")
 echo
 echo "proof ledger: declared=$N_TOTAL highest_id=$N_LAST title_lines=$N_LINES"
 if [ "$N_TOTAL" != "$N_LAST" ]; then
