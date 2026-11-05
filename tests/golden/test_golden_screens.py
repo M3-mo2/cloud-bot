@@ -62,6 +62,8 @@ from cloudbot.domain.events import (
     Severity,
 )
 from cloudbot.presentation.mapping import errors as error_mapping
+from cloudbot.presentation.i18n.catalog import catalog
+from cloudbot.presentation.i18n.formatters import localize_digits
 from cloudbot.presentation.screens.admin import audit as admin_audit
 from cloudbot.presentation.screens.admin import notifications as admin_notify
 from cloudbot.presentation.screens.admin import overview as admin_overview
@@ -636,6 +638,20 @@ SCREEN_BUILDERS = {
     "tunnel_publish": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[8080]),
     "tunnel_publish_none": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[]),
     "tunnel_publish_custom": lambda f, loc: tnl_screens.publish_custom_prompt(f["ws"].id, loc),
+    # F-02: the progress indication is the message that will carry the result
+    # (no orphan); keep its exact body locked in both locales.
+    "tunnel_publishing": lambda f, loc: tnl_screens.publishing_screen(f["ws"].id, loc),
+    # F-03: a port that already has a tunnel surfaces the existing link with a
+    # sentence instead of a duplicate.
+    "tunnel_already_published": lambda f, loc: tnl_screens.tunnels_screen(
+        f["tunnel_list"],
+        f["ws"].id,
+        loc,
+        max_tunnels=2,
+        note=catalog.t(
+            "tunnel.already_published", loc, port=localize_digits("8080", loc)
+        ),
+    ),
     "tunnel_publish_confirm_unlistened": lambda f, loc: tnl_screens.publish_confirm(
         9000, f["ws"].id, loc,
         warning="Nothing is listening on this port yet. The link will only work once something listens on it.",

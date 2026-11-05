@@ -23,7 +23,7 @@ from cloudbot.core.errors import EngineRefused
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.i18n.formatters import format_bytes
+from cloudbot.presentation.i18n.formatters import format_bytes, localize_digits
 from cloudbot.presentation.keyboards.callbacks import decode
 from cloudbot.presentation.mapping.errors import error_screen
 from cloudbot.presentation.rich.sender import RichSender
@@ -36,7 +36,7 @@ from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import RequestEvents
 from cloudbot.services.packages import parse_package_input
-from cloudbot.services.tunnels import parse_port
+from cloudbot.services.tunnels import TunnelAlreadyPublished, parse_port
 from cloudbot.states.feature_input import FeatureInput
 
 log = structlog.get_logger("cloudbot.features")
@@ -185,7 +185,7 @@ def _unlistened_warning(port: int, detected: list[int], locale) -> str | None:
     return catalog.t("tunnel.publish_unlistened", locale)
 
 
-async def _tunnels_screen(ctx: UserContext, services: Services, ws_id):
+async def _tunnels_screen(ctx: UserContext, services: Services, ws_id, *, note: str | None = None):
     """Render the tunnels screen with the workspace's gate state and ceiling."""
     tunnels = await services.tunnels.list(ctx.tg_id, ws_id)
     meta = await services.tunnels.meta()
@@ -198,6 +198,7 @@ async def _tunnels_screen(ctx: UserContext, services: Services, ws_id):
         allow_net=ws.limits.allow_net,
         server_enabled=meta.tunnels.enabled,
         max_tunnels=meta.tunnels.max_per_workspace,
+        note=note,
     )
 
 
@@ -277,9 +278,39 @@ async def on_port_pick(cb: CallbackQuery, ctx: UserContext, services: Services, 
 
 
 async def _publish(event, ctx: UserContext, services: Services, sender: RichSender, ws_id, port: int, events: RequestEvents) -> None:
-    await show_screen(event, tnl_screens.publishing_screen(ws_id, ctx.locale), ctx=ctx, sender=sender, force_send=isinstance(event, Message))
+    # The progress indication must end up as the message that carries the result
+    # (F-02): send it for a message-originated publish, or reuse the originating
+    # callback message when it already exists. Every later render edits that same
+    # message, so no orphaned "Publishing…" is left behind on success or refusal.
+    progress = await show_screen(
+        event,
+        tnl_screens.publishing_screen(ws_id, ctx.locale),
+        ctx=ctx,
+        sender=sender,
+        force_send=isinstance(event, Message),
+    )
+    result_id = None
+    if isinstance(event, Message):
+        result_id = progress.message_id if progress is not None else None
     try:
         await services.tunnels.publish(ctx.tg_id, ws_id, port)
+    except TunnelAlreadyPublished as exc:
+        # Idempotency (F-03): a tunnel already exists for this port. Surface it
+        # with a sentence instead of creating a duplicate.
+        log.info("tunnel.publish_already_exists", port=port, tunnel_id=exc.tunnel.id)
+        events.tunnel_created(tg_id=ctx.tg_id, ws_id=str(ws_id), port=port)
+        screen = await _tunnels_screen(
+            ctx,
+            services,
+            ws_id,
+            note=catalog.t(
+                "tunnel.already_published",
+                ctx.locale,
+                port=localize_digits(str(port), ctx.locale),
+            ),
+        )
+        await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message), edit_id=result_id)
+        return
     except EngineRefused as exc:
         # Every refusal on this path renders a sentence; an unmapped code is
         # re-raised to the error screen rather than silently redrawing (R1).
@@ -287,11 +318,11 @@ async def _publish(event, ctx: UserContext, services: Services, sender: RichSend
         if screen is None:
             raise
         log.info("tunnel.publish_refused", code=exc.engine_code)
-        await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
+        await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message), edit_id=result_id)
         return
     events.tunnel_created(tg_id=ctx.tg_id, ws_id=str(ws_id), port=port)
     screen = await _tunnels_screen(ctx, services, ws_id)
-    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
+    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message), edit_id=result_id)
 
 
 @router.callback_query(F.data.startswith("tnl:remove_confirm"))

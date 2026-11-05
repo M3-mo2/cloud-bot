@@ -49,16 +49,22 @@ def tunnels_screen(
     allow_net: bool = True,
     server_enabled: bool = True,
     max_tunnels: int | None = None,
+    note: str | None = None,
 ) -> Screen:
     """The public-links list, its gate, and (when known) its own ceiling.
 
     ``max_tunnels`` comes from the engine meta (``tunnels.max_per_workspace``) —
     never a hardcoded constant. When the cap is reached the publish entry is
-    muted with a reason so the ceiling is visible *before* it is hit.
+    muted with a reason so the ceiling is visible *before* it is hit. ``note`` is
+    a one-line, already-localized explanation (e.g. a port already has a tunnel,
+    F-03).
     """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.title", locale))
     at_cap = max_tunnels is not None and tunnels.count >= max_tunnels
+
+    if note:
+        doc.blockquote(note)
 
     if not tunnels.tunnels:
         doc.p(catalog.t("tunnel.empty", locale))
@@ -266,7 +272,9 @@ def publishing_screen(ws_id: WorkspaceId, locale: Locale) -> Screen:
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.publish_title", locale))
     doc.p(catalog.t("tunnel.publishing", locale))
-    return Screen(doc=doc, send_new=True)
+    # No ``send_new``: the progress indicator edits the message that will carry
+    # the result (F-02) instead of leaving an orphaned "Publishing…" behind.
+    return Screen(doc=doc)
 
 
 def publish_refused_screen(

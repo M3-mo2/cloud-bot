@@ -20,6 +20,8 @@
 #  35. A bite test that makes too_many_tunnels silently redraw again, restored.
 #  36. A bite test that restores the old state.clear() after a terminal command,
 #      so sticky input breaks again, restored.
+#  37. A bite test that drops the error guard's Update unwrap so refusals render
+#      nothing again (F-01), restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -755,3 +757,46 @@ PY
 
 echo
 echo "all thirty-six proofs passed"
+
+echo
+echo "== 37. bite test: the error guard's Update unwrap is load-bearing (F-01) =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Reintroduce F-01: drop the Update unwrap so ``_render`` receives the Update,
+# falls through both isinstance branches, and renders nothing. The F-01 callback
+# test must go red; restore the unwrap, and it is green again. This proves the
+# one-line unwrap is the fix for the critical silent-death defect, not decoration.
+target = pathlib.Path("cloudbot/middleware/error_guard.py")
+original = target.read_text(encoding="utf-8")
+guard = "        if isinstance(event, Update):\n"
+bite = "        if False:  # BITE: the un-wrap is gone (an Update reaches _render)\n"
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (unwrap guard moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q",
+       "tests/unit/test_port_publishing_fixes.py",
+       "-k", "f01_domain_error_on_a_callback", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the F-01 test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: dropping the unwrap did not make the F-01 test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the unwrap did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-seven proofs passed"

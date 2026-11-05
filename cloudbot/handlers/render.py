@@ -18,12 +18,16 @@ async def show_screen(
     ctx: UserContext,
     sender: RichSender,
     force_send: bool = False,
-) -> None:
+    edit_id: int | None = None,
+) -> Message:
     """Edit the originating message in place, or send when required.
 
     Sends (rather than edits) when: the screen needs a reply keyboard or
     ``force_reply`` (edits cannot carry them), the result should be kept
-    (``force_send``), or the event is a plain message.
+    (``force_send``), or the event is a plain message. ``edit_id`` forces the
+    render to land on an explicit message (used by the publish flow so the
+    progress message becomes the result — no orphan). Returns the message that
+    now carries the screen, so a caller can update it in place later.
 
     While an admin is in entered mode the persistent banner is added here — one
     seam, so every screen they reach is marked, including reused user screens.
@@ -32,15 +36,17 @@ async def show_screen(
         from cloudbot.presentation.screens.admin._helpers import prepend_banner
 
         prepend_banner(screen, ctx)
-    if isinstance(event, CallbackQuery) and event.message is not None and not (
-        screen.send_new or force_send
-    ):
+    is_callback = isinstance(event, CallbackQuery)
+    chat_id = event.message.chat.id if is_callback else event.chat.id
+    if edit_id is not None:
+        if is_callback:
+            await sender.answer_callback(event)
+        return await sender.edit(chat_id, edit_id, screen.doc, markup=screen.markup)
+    if is_callback and event.message is not None and not (screen.send_new or force_send):
         await sender.answer_callback(event)
-        await sender.edit(
+        return await sender.edit(
             event.message.chat.id, event.message.message_id, screen.doc, markup=screen.markup
         )
-        return
-    chat_id = event.chat.id if isinstance(event, Message) else event.message.chat.id
-    if isinstance(event, CallbackQuery):
+    if is_callback:
         await sender.answer_callback(event)
-    await sender.send(chat_id, screen.doc, markup=screen.markup)
+    return await sender.send(chat_id, screen.doc, markup=screen.markup)

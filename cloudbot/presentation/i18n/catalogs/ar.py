@@ -565,6 +565,7 @@ MESSAGES: dict[str, str] = {
     "tunnel.publish_none_hint": "ابدأ خادمك أولًا، أو اكتب المنفذ الذي سيستخدمه.",
     "tunnel.port_hint": "يمكن نشر المنافذ من ١٠٢٤ إلى ٦٥٥٣٥.",
     "tunnel.publishing": "⏳ جارٍ النشر… يبحث cloudflared عن رابط.",
+    "tunnel.already_published": "المنفذ {port} له رابط عام بالفعل — لم يُنشأ رابط جديد.",
     "tunnel.limit_title": "⚠️ بلغت حد الروابط",
     "tunnel.timeout_title": "⏳ تعذّر الحصول على رابط",
     "tunnel.usage": "الروابط المنشورة: {used} من {max}",

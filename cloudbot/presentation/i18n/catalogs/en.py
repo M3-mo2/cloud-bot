@@ -565,6 +565,7 @@ MESSAGES: dict[str, str] = {
     "tunnel.publish_none_hint": "Start your server first, or type the port it will use.",
     "tunnel.port_hint": "Ports 1024–65535 can be published.",
     "tunnel.publishing": "⏳ Publishing… cloudflared is finding a URL.",
+    "tunnel.already_published": "Port {port} already has a public link — no new link was created.",
     "tunnel.limit_title": "⚠️ Link limit reached",
     "tunnel.timeout_title": "⏳ Couldn't get a link",
     "tunnel.usage": "Links published: {used} of {max}",

@@ -6,7 +6,7 @@ from typing import Any, Awaitable, Callable
 
 import structlog
 from aiogram import BaseMiddleware
-from aiogram.types import CallbackQuery, Message, TelegramObject
+from aiogram.types import CallbackQuery, Message, TelegramObject, Update
 
 from cloudbot.core.errors import DomainError, EngineUnavailable
 from cloudbot.core.modes import RunMode
@@ -50,6 +50,16 @@ class ErrorGuardMiddleware(BaseMiddleware):
             pass
 
     async def _render(self, event: TelegramObject, data: dict[str, Any], exc: DomainError) -> None:
+        # The guard is registered once, at the **update** level (``bootstrap/app.py``)
+        # so it wraps the whole router and catches a DomainError raised anywhere
+        # below. An update-level aiogram 3.x middleware therefore receives an
+        # ``Update``, not the ``Message``/``CallbackQuery`` it wraps: unwrap it here
+        # so a re-raised refusal always renders exactly one screen (F-01). Keeping
+        # one registration (rather than adding the guard to both observers) avoids
+        # double-wrapping and keeps the "single outermost catch" property.
+        target: TelegramObject = event
+        if isinstance(event, Update):
+            target = event.callback_query or event.message or event
         ctx: UserContext | None = data.get("ctx")
         if ctx is None:
             log.error("error.no_context", code=type(exc).__name__)
@@ -71,12 +81,12 @@ class ErrorGuardMiddleware(BaseMiddleware):
             raw_payload=_raw_payload(exc) if ctx.is_admin else None,
         )
         try:
-            if isinstance(event, CallbackQuery) and event.message is not None:
+            if isinstance(target, CallbackQuery) and target.message is not None:
                 await self._sender.edit(
-                    event.message.chat.id, event.message.message_id, screen.doc, markup=screen.markup
+                    target.message.chat.id, target.message.message_id, screen.doc, markup=screen.markup
                 )
-            elif isinstance(event, Message):
-                await self._sender.send(event.chat.id, screen.doc, markup=screen.markup)
+            elif isinstance(target, Message):
+                await self._sender.send(target.chat.id, screen.doc, markup=screen.markup)
         except Exception:  # noqa: BLE001
             log.error("error.render_failed", code=type(exc).__name__)
 
