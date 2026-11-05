@@ -2,4 +2,6 @@
 ▶️ Run [run:choose:4cbx57pb] disabled | 🖥 Terminals [term:list:4cbx57pb] disabled
 🚪 Log out of workspace [ws:logout:4cbx57pb] enabled
 🛑 Stop All [ws:stop_confirm:4cbx57pb] enabled | 🗑 Delete [ws:delete_confirm:4cbx57pb] enabled
-⬅️ Back [ws:list:9zs7qoq3] enabled
+🏠 scraper [ws:home] disabled | 📦 Workspaces [ws:list] enabled
+⚙️ Settings [nav:settings] enabled | 🌐 Language [nav:language] enabled
+❓ Help [nav:help] enabled | 🏠 Menu [nav:menu] enabled
