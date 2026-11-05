@@ -575,3 +575,52 @@ PY
 
 echo
 echo "all thirty-two proofs passed"
+
+echo
+echo "== 33. bite test: the inside nav block is the session's, not the account's =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Put the four account destinations (Settings/Language/Help + Menu) back into the
+# inside branch of the ONE helper: the task-13 test must go red; restore, and it
+# is green again. This proves the two-entry inside block is load-bearing.
+target = pathlib.Path("cloudbot/presentation/screens/nav.py")
+original = target.read_text(encoding="utf-8")
+guard = "        return [buttons]\n"
+bite = (
+    "        # BITE: the account destinations are back in the inside block\n"
+    "        for _key, _label_key, _action in DESTINATIONS:\n"
+    "            buttons.append(inline(catalog.t(_label_key, locale), _action, intent=Intent.PRIMARY))\n"
+    "        if current != \"menu\":\n"
+    "            buttons.append(inline(catalog.t(\"common.menu\", locale), \"nav:menu\", intent=Intent.PRIMARY))\n"
+    "        return [buttons[index : index + 2] for index in range(0, len(buttons), 2)]\n"
+)
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (inside branch moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_inside_nav_session.py",
+       "-k", "exactly_home_and_workspaces or one_row_of_two",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the inside-block test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: restoring the account destinations did not make the test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: removing the bite did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-three proofs passed"
