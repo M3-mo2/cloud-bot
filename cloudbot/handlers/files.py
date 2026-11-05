@@ -193,15 +193,14 @@ async def on_upload_document(
         await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)
         return
     target = f"{path.rstrip('/')}/{document.file_name}"
-    buffer = message.bot.download(document)
+    # ``Bot.download`` is a coroutine returning a plain ``BinaryIO`` (a BytesIO when
+    # ``destination`` is None), not an async context manager. Await it and read the
+    # buffer in chunks from the async generator (mirrors ``RichSender.download_document``).
+    buffer = await message.bot.download(document)
 
     async def _stream():
-        async with buffer as reader:
-            while True:
-                chunk = await reader.read(64 * 1024)
-                if not chunk:
-                    break
-                yield chunk
+        while chunk := buffer.read(64 * 1024):
+            yield chunk
 
     await services.files.upload(
         ctx.tg_id, ws_id, target, document.file_name, _stream(), size_bytes=document.file_size
