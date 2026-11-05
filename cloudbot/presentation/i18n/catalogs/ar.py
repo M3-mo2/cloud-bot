@@ -468,6 +468,7 @@ MESSAGES: dict[str, str] = {
     "terminal.command_prompt": "أرسل أمرًا لتشغيله في هذه الطرفية.",
     "terminal.command_hint": "يُرسل إلى الطرفية مع Enter، وترى النتيجة بالأسفل.",
     "terminal.input_active": "هذه الطرفية نشِطة. أرسل أمرًا، أو استخدم الأزرار بالأسفل.",
+    "terminal.stop_typing": "⏹ إيقاف الكتابة",
     "terminal.resize_title": "↔️ تغيير الحجم",
     "terminal.resize_body": "اختر حجمًا. يتم إبلاغ الصدفة بالأبعاد الجديدة (مثلًا <code>stty size</code>).",
     "terminal.resize_custom": "✏️ مخصص",

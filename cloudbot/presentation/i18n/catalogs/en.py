@@ -468,6 +468,7 @@ MESSAGES: dict[str, str] = {
     "terminal.command_prompt": "Send a command to run in this terminal.",
     "terminal.command_hint": "It is sent to the terminal with Enter; you'll see the result below.",
     "terminal.input_active": "This terminal is active. Send a command, or use the buttons below.",
+    "terminal.stop_typing": "⏹ Stop typing",
     "terminal.resize_title": "↔️ Resize",
     "terminal.resize_body": "Choose a size. The shell is told the new dimensions (for example for <code>stty size</code>).",
     "terminal.resize_custom": "✏️ Custom",

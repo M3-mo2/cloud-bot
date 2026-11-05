@@ -138,7 +138,15 @@ def terminal_view(
     output: str = "",
     truncated: bool = False,
     meta: EngineMeta | None = None,
+    typing: bool = False,
 ) -> Screen:
+    """The live terminal view.
+
+    ``typing`` is set while the sticky input state is active for this session
+    (R1/R3): the screen then says the user is typing straight into the terminal
+    and carries the one-tap **stop typing** control, so the state never traps
+    anyone.
+    """
     doc = RichDoc(locale)
     emoji = SESSION_STATUS_EMOJI.get(session.status, "—")
     status = f"{emoji} {session_status_label(session.status, locale)}"
@@ -168,13 +176,18 @@ def terminal_view(
     if session.status is SessionStatus.RUNNING and meta is not None:
         doc.p(italic(timeout_notice(meta, locale)))
 
+    if typing and not session.status.is_terminal:
+        doc.p(italic(catalog.t("terminal.input_active", locale)))
+
     return Screen(
         doc=doc,
-        markup=terminal_view_markup(session, ws_id, locale),
+        markup=terminal_view_markup(session, ws_id, locale, typing=typing),
     )
 
 
-def terminal_view_markup(session: TerminalSession, ws_id: WorkspaceId, locale: Locale):
+def terminal_view_markup(
+    session: TerminalSession, ws_id: WorkspaceId, locale: Locale, *, typing: bool = False
+):
     ses_id = session.id
     if session.status.is_terminal:
         # A terminal session never accepts input/signal/resize; offer a new one
@@ -186,6 +199,28 @@ def terminal_view_markup(session: TerminalSession, ws_id: WorkspaceId, locale: L
             ],
             [inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY)],
             [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
+        ]
+        return inline_markup(rows)
+    if typing:
+        # Sticky command mode: the live view keeps every terminal button (R2) and
+        # adds the one-tap exit (R3), so the state is always escapable.
+        rows = [
+            [
+                inline(catalog.t("terminal.send_command", locale), _cb("term:cmd", ws_id, ses_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.stop_typing", locale), _cb("term:exit", ws_id, ses_id), intent=Intent.DANGER),
+            ],
+            [
+                inline(catalog.t("terminal.ctrl_c", locale), _cb("term:signal", ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.ctrl_d", locale), _cb("term:ctrl_d", ws_id, ses_id), intent=Intent.PRIMARY),
+            ],
+            [
+                inline(catalog.t("terminal.resize", locale), _cb("term:resize", ws_id, ses_id), intent=Intent.PRIMARY),
+                inline(catalog.t("terminal.close", locale), _cb("term:close", ws_id, ses_id), intent=Intent.DANGER),
+            ],
+            [
+                inline(catalog.t("terminal.my_title", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
+            ],
         ]
         return inline_markup(rows)
     rows = [

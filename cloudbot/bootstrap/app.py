@@ -23,6 +23,7 @@ from cloudbot.middleware.events_source import EventSourceMiddleware
 from cloudbot.middleware.inject import InjectMiddleware
 from cloudbot.middleware.mode_gate import ModeGateMiddleware
 from cloudbot.middleware.observability import ObservabilityMiddleware
+from cloudbot.middleware.terminal_sticky import TerminalStickyMiddleware
 from cloudbot.middleware.throttle import ThrottleMiddleware
 from cloudbot.presentation.rich.sender import RichSender
 
@@ -63,6 +64,9 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     # so ``/admin`` and ``adm:`` callbacks reveal nothing.
     dispatcher.message.outer_middleware(AdminGateMiddleware())
     dispatcher.callback_query.outer_middleware(AdminGateMiddleware())
+    # A known slash-command must leave the sticky terminal state (R4). Registered
+    # after the admin gate so the gate still decides identity first.
+    dispatcher.message.outer_middleware(TerminalStickyMiddleware())
 
     from cloudbot.handlers import (
         admin,

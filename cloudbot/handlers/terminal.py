@@ -3,6 +3,20 @@
 Thin aiogram routers: parse → call the ``sessions`` service → render one screen
 → send. The live view follows the engine's offset protocol through the service
 helper; it is bounded and paced, and it never builds a FIFO or a run-based PTY.
+
+**Sticky input.** Entering the terminal's command mode is sticky: after the user
+taps *Send a command* once, plain text messages keep going to that session until
+they explicitly stop (the ``term:exit`` control) or a known slash-command leaves
+the mode. A known command is cleared by ``TerminalStickyMiddleware`` before the
+routers run, so a sticky state can never swallow ``/start``, ``/help``,
+``/settings`` or ``/admin``.
+
+**R7 — cut short on idle, supersede on a new command.** A follow stops once the
+session goes quiet (no new output for ``FOLLOW_IDLE_INTERVALS`` polls) instead of
+pacing over an idle PTY for the whole budget. A *new* command while a follow is
+still running **supersedes** the in-flight follow: the older follower notices at
+its next tick that it is no longer current and stops before its next engine read,
+so two commands never fight over one message and the engine is not polled by both.
 """
 
 from __future__ import annotations
@@ -12,7 +26,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from cloudbot.core.errors import EngineRefused, InvalidInput
+from cloudbot.core.errors import EngineRefused, InvalidInput, NotOwned
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.keyboards.callbacks import decode
@@ -30,6 +44,29 @@ router = Router(name="terminal")
 FOLLOW_MAX_ITERATIONS = 30
 FOLLOW_POLL_INTERVAL = 1.0
 
+#: R7 — the follow is cut short once the session is **idle**: this many consecutive
+#: polls with no new output mean the command the user just sent has produced all it
+#: is going to for now, so the follower stops instead of burning the whole iteration
+#: budget (measured live: a full 30 × 1 s pass per command). A newer plain message
+#: is a fresh command and claims a new generation, superseding any follower still in
+#: flight, so a long-running command's view is never displaced — it is replaced,
+#: which is exactly what typing the next command means.
+FOLLOW_IDLE_INTERVALS = 2
+
+#: The generation of the active follow per session. A newer command for the same
+#: session raises this number; the older follower stops at its next tick (R7).
+_follow_generation: dict[tuple[int, str, str], int] = {}
+
+
+def _begin_follow(key: tuple[int, str, str]) -> int:
+    generation = _follow_generation.get(key, 0) + 1
+    _follow_generation[key] = generation
+    return generation
+
+
+def _follow_is_current(key: tuple[int, str, str], generation: int) -> bool:
+    return _follow_generation.get(key) == generation
+
 
 def _wid(text: str):
     from cloudbot.domain.value_objects import WorkspaceId
@@ -38,8 +75,18 @@ def _wid(text: str):
 
 
 def _is_command(text: str) -> bool:
-    """A slash-command is never swallowed as terminal input (D5)."""
+    """A slash-command is never swallowed as terminal input (D5/R4)."""
     return text.startswith("/")
+
+
+async def _is_typing_here(state: FSMContext | None, ws_id, ses_id: str) -> bool:
+    """True when the sticky command state points at this exact session (R2)."""
+    if state is None:
+        return False
+    if await state.get_state() != TerminalInput.awaiting_command.state:
+        return False
+    data = await state.get_data()
+    return str(data.get("ws_id")) == str(ws_id) and data.get("ses_id") == ses_id
 
 
 # -- my terminals ------------------------------------------------------------
@@ -52,7 +99,7 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 
 # -- open --------------------------------------------------------------------
 @router.callback_query(F.data.startswith("term:open"))
-async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext) -> None:
     ws_id = _wid(decode(cb.data).key[0])
     try:
         session = await services.sessions.open(ctx.tg_id, ws_id)
@@ -63,22 +110,33 @@ async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sende
         sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
         await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
         return
-    await _show_view(cb, ctx, services, sender, ws_id, session.id)
+    await _show_view(cb, ctx, services, sender, ws_id, session.id, state=state)
 
 
 # -- view / refresh ----------------------------------------------------------
 @router.callback_query(F.data.startswith("term:refresh"))
 @router.callback_query(F.data.startswith("term:view"))
-async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_view(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+) -> None:
     decoded = decode(cb.data)
     ws_id = _wid(decoded.key[0])
     ses_id = decoded.key[1]
-    await _show_view(cb, ctx, services, sender, ws_id, ses_id)
+    await _show_view(cb, ctx, services, sender, ws_id, ses_id, state=state)
 
 
-async def _show_view(cb, ctx, services, sender, ws_id, ses_id) -> None:
+async def _show_view(cb, ctx, services, sender, ws_id, ses_id, *, state: FSMContext | None = None) -> None:
     session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
     meta = await services.sessions.meta()
+    if session.status.is_terminal and state is not None:
+        # The terminal ended under a sticky state: clear it so the mode does not
+        # outlive the session it pointed at (R5).
+        await state.clear()
+    typing = await _is_typing_here(state, ws_id, ses_id)
     output = ""
     truncated = False
     if session.status.value != "unknown":
@@ -89,20 +147,50 @@ async def _show_view(cb, ctx, services, sender, ws_id, ses_id) -> None:
             if exc.engine_code != "session_ended":
                 raise
     screen = term_screens.terminal_view(
-        session, ws_id, ctx.locale, output=output, truncated=truncated, meta=meta
+        session, ws_id, ctx.locale, output=output, truncated=truncated, meta=meta, typing=typing
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
-# -- send a command ----------------------------------------------------------
+# -- send a command (sticky) -------------------------------------------------
 @router.callback_query(F.data.startswith("term:cmd"))
-async def on_cmd(cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext) -> None:
+async def on_cmd(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+) -> None:
+    """Enter sticky command mode and show the live view carrying the exit.
+
+    The screen is the terminal view itself (in place), not a separate prompt, so
+    the sticky state is always paired with the terminal buttons and the one-tap
+    **stop typing** control (R2/R3). Plain text messages then keep going to this
+    session until the user stops or a known slash-command takes over (R1/R4).
+    """
     decoded = decode(cb.data)
     ws_id = decoded.key[0]
     ses_id = decoded.key[1]
     await state.set_state(TerminalInput.awaiting_command)
-    await state.update_data(ws_id=ws_id, ses_id=ses_id)
-    await show_screen(cb, term_screens.command_prompt(_wid(ws_id), ses_id, ctx.locale), ctx=ctx, sender=sender)
+    await state.update_data(ws_id=str(ws_id), ses_id=str(ses_id))
+    await _show_view(cb, ctx, services, sender, _wid(ws_id), ses_id, state=state)
+
+
+# -- stop typing (the one-tap exit; R3) --------------------------------------
+@router.callback_query(F.data.startswith("term:exit"))
+async def on_exit(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+) -> None:
+    """Clear the sticky state and return to the ordinary terminal view."""
+    decoded = decode(cb.data)
+    ws_id = decoded.key[0]
+    ses_id = decoded.key[1]
+    await state.clear()
+    await _show_view(cb, ctx, services, sender, _wid(ws_id), ses_id, state=state)
 
 
 @router.message(TerminalInput.awaiting_command)
@@ -111,56 +199,116 @@ async def on_command_text(
 ) -> None:
     text = message.text or ""
     data = await state.get_data()
-    await state.clear()
     ws_id = _wid(data["ws_id"])
     ses_id = data["ses_id"]
     if _is_command(text):
-        # A slash-command is never terminal input. Known commands are handled by
-        # an earlier router; an unknown one lands here and simply re-renders the
-        # terminal so the user stays focused with the buttons available.
+        # A slash-command is never terminal input. *Known* commands are handled by
+        # an earlier router (``TerminalStickyMiddleware`` cleared the state first
+        # so the command does its own thing, R4); an unknown one lands here and
+        # simply re-renders the terminal so the user stays focused with the
+        # buttons available — the sticky state is kept.
         log.info("terminal.command_not_input", command=text.split()[0])
-        await _show_view(message, ctx, services, sender, ws_id, ses_id)
+        await state.set_state(TerminalInput.awaiting_command)
+        await state.update_data(ws_id=str(ws_id), ses_id=ses_id)
+        await _show_view(message, ctx, services, sender, ws_id, ses_id, state=state)
         return
     try:
         await services.sessions.send_line(ctx.tg_id, ws_id, ses_id, text)
+    except NotOwned:
+        # The state must never be a way to reach someone else's session (R5):
+        # drop it and let the error guard render the safe "not found" board.
+        await state.clear()
+        raise
     except EngineRefused as exc:
-        if exc.engine_code != "session_ended":
+        # An ended — or engine-forgotten — session renders the ended screen and
+        # clears the state rather than raising (R5).
+        if exc.engine_code not in ("session_ended", "not_found"):
             raise
+        await state.clear()
         session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
-        await show_screen(message, term_screens.ended_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender, force_send=True)
+        await show_screen(
+            message,
+            term_screens.ended_screen(session, ws_id, ctx.locale),
+            ctx=ctx,
+            sender=sender,
+            force_send=True,
+        )
         return
-    await _follow(message, ctx, services, sender, ws_id, ses_id, force_send=True)
+    # Sticky (R1): keep the same state so the very next plain message is another
+    # command — no re-tap per command.
+    await state.set_state(TerminalInput.awaiting_command)
+    await state.update_data(ws_id=str(ws_id), ses_id=ses_id)
+    await _follow(message, ctx, services, sender, ws_id, ses_id, force_send=True, typing=True)
 
 
-async def _read_all(services: Services, tg_id: int, ws_id, ses_id) -> tuple[str, bool]:
+async def _read_all(services: Services, tg_id: int, ws_id, ses_id) -> tuple[str, bool, int]:
     try:
         read = await services.sessions.read_output(tg_id, ws_id, ses_id, 0)
-        return read.data, read.truncated
+        return read.data, read.truncated, read.next
     except EngineRefused as exc:
         if exc.engine_code != "session_ended":
             raise
-        return "", False
+        return "", False, 0
 
 
 async def _stream(
-    event, ctx, services: Services, sender: RichSender, ws_id, ses_id, *, force_send: bool = False
+    event,
+    ctx,
+    services: Services,
+    sender: RichSender,
+    ws_id,
+    ses_id,
+    *,
+    force_send: bool = False,
+    typing: bool = False,
+    generation: int | None = None,
 ) -> None:
     """Follow the offset cursor, updating one message in place until terminal.
 
     Bounded by ``FOLLOW_MAX_ITERATIONS`` and paced by ``FOLLOW_POLL_INTERVAL`` so
     the engine is never hammered (the same shape as the run-log follower).
+
+    **R7 — cut short on idle, supersede on a new command.** Each iteration checks
+    two things first. (1) If this follow is no longer the current one for the
+    session, a newer command has claimed the session's generation: stop *before*
+    the next engine read, so two followers never poll at once. (2) If the session
+    has produced no new output for ``FOLLOW_IDLE_INTERVALS`` consecutive polls, the
+    command is quiescent: stop, rather than spend the whole iteration budget pacing
+    over an idle PTY (measured live at 30 s per command). Both are checked before
+    the read, so the engine is polled at most once per tick and never unnecessarily.
     """
     import asyncio
 
+    key = (ctx.tg_id, str(ws_id), ses_id)
     meta = await services.sessions.meta()
     first = True
     chat_id = None
     message_id = None
+    last_next: int | None = None
+    idle_ticks = 0
     for _ in range(FOLLOW_MAX_ITERATIONS):
+        if generation is not None and not _follow_is_current(key, generation):
+            log.info("terminal.follow_superseded", ws_id=str(ws_id), ses_id=ses_id)
+            return
         session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
-        output, truncated = await _read_all(services, ctx.tg_id, ws_id, ses_id)
+        output, truncated, next_offset = await _read_all(services, ctx.tg_id, ws_id, ses_id)
+        if not session.status.is_terminal:
+            if last_next is not None and next_offset == last_next:
+                idle_ticks += 1
+                if idle_ticks >= FOLLOW_IDLE_INTERVALS:
+                    log.info("terminal.follow_idle_stop", ws_id=str(ws_id), ses_id=ses_id)
+                    return
+            else:
+                idle_ticks = 0
+            last_next = next_offset
         screen = term_screens.terminal_view(
-            session, ws_id, ctx.locale, output=output, truncated=truncated, meta=meta
+            session,
+            ws_id,
+            ctx.locale,
+            output=output,
+            truncated=truncated,
+            meta=meta,
+            typing=typing,
         )
         if first:
             if isinstance(event, CallbackQuery) and event.message is not None and not force_send:
@@ -182,14 +330,34 @@ async def _stream(
         await asyncio.sleep(FOLLOW_POLL_INTERVAL)
 
 
-async def _follow(event, ctx, services, sender, ws_id, ses_id, *, force_send: bool = False) -> None:
-    """Stream output until a terminal status, bounded and paced."""
-    await _stream(event, ctx, services, sender, ws_id, ses_id, force_send=force_send)
+async def _follow(
+    event, ctx, services, sender, ws_id, ses_id, *, force_send: bool = False, typing: bool = False
+) -> None:
+    """Stream output until a terminal status, bounded and paced.
+
+    Starting a follow claims this session's generation, superseding any follower
+    still in flight for the same session (R7).
+    """
+    key = (ctx.tg_id, str(ws_id), ses_id)
+    generation = _begin_follow(key)
+    await _stream(
+        event,
+        ctx,
+        services,
+        sender,
+        ws_id,
+        ses_id,
+        force_send=force_send,
+        typing=typing,
+        generation=generation,
+    )
 
 
 # -- signals -----------------------------------------------------------------
 @router.callback_query(F.data.startswith("term:signal"))
-async def on_signal(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_signal(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
     decoded = decode(cb.data)
     ws_id = _wid(decoded.key[0])
     ses_id = decoded.key[1]
@@ -198,15 +366,18 @@ async def on_signal(cb: CallbackQuery, ctx: UserContext, services: Services, sen
         await services.sessions.signal(ctx.tg_id, ws_id, ses_id, signal)
     except EngineRefused as exc:
         if exc.engine_code == "session_ended":
+            await state.clear()
             session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
             await show_screen(cb, term_screens.ended_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
             return
         raise
-    await _show_view(cb, ctx, services, sender, ws_id, ses_id)
+    await _show_view(cb, ctx, services, sender, ws_id, ses_id, state=state)
 
 
 @router.callback_query(F.data.startswith("term:ctrl_d"))
-async def on_ctrl_d(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_ctrl_d(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
     decoded = decode(cb.data)
     ws_id = _wid(decoded.key[0])
     ses_id = decoded.key[1]
@@ -214,11 +385,12 @@ async def on_ctrl_d(cb: CallbackQuery, ctx: UserContext, services: Services, sen
         await services.sessions.send_input(ctx.tg_id, ws_id, ses_id, CTRL_D)
     except EngineRefused as exc:
         if exc.engine_code == "session_ended":
+            await state.clear()
             session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
             await show_screen(cb, term_screens.ended_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
             return
         raise
-    await _show_view(cb, ctx, services, sender, ws_id, ses_id)
+    await _show_view(cb, ctx, services, sender, ws_id, ses_id, state=state)
 
 
 # -- resize ------------------------------------------------------------------
@@ -261,10 +433,13 @@ async def on_resize_text(
 
 # -- close -------------------------------------------------------------------
 @router.callback_query(F.data.startswith("term:close"))
-async def on_close(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_close(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
     decoded = decode(cb.data)
     ws_id = _wid(decoded.key[0])
     ses_id = decoded.key[1]
+    await state.clear()
     try:
         session = await services.sessions.close(ctx.tg_id, ws_id, ses_id)
     except EngineRefused as exc:
@@ -279,11 +454,14 @@ async def on_close(cb: CallbackQuery, ctx: UserContext, services: Services, send
 
 # -- forget (drop the bot-side handle) ---------------------------------------
 @router.callback_query(F.data.startswith("term:forget"))
-async def on_forget(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+async def on_forget(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
     """Remove an ended terminal from *my terminals* without touching the engine."""
     decoded = decode(cb.data)
     ws_id = _wid(decoded.key[0])
     ses_id = decoded.key[1]
+    await state.clear()
     await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
     sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
     await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
