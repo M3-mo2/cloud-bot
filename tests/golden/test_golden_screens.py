@@ -724,9 +724,13 @@ KB_AFFECTED = {
     "menu_inside",
     "language_picker",
     # Task 10: the workspace home carries the log-out row in every status branch.
+    # Task 11: it lost the redundant bottom Back row and ends in the shared nav block.
     "ws_detail",
     "ws_detail_suspended",
     "ws_detail_locked",
+    # The admin's entered screen reuses the user workspace home (session=False), so
+    # its keyboard changed with it; lock it here too.
+    "admin_entered",
 }
 
 
