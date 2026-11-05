@@ -28,7 +28,7 @@ LOCALES = (Locale.EN, Locale.AR)
 
 
 def _admin_screen_builders():
-    from tests.golden.test_golden_screens import SCREEN_BUILDERS
+    from cloudbot.presentation.catalog import SCREEN_BUILDERS
 
     return {name: b for name, b in SCREEN_BUILDERS.items() if name.startswith("admin_")}
 
@@ -45,9 +45,9 @@ def _buttons(screen):
 def test_every_admin_screen_callback_parses_and_is_routable(locale):
     builders = _admin_screen_builders()
     assert builders, "no admin screens found — the contract test would be vacuous"
-    from tests.golden.test_golden_screens import _fixtures
+    from cloudbot.presentation.catalog import fixtures
 
-    fixtures = _fixtures()
+    fixtures = fixtures()
     checked = 0
     for name, build in builders.items():
         screen = build(fixtures, locale)

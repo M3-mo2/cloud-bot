@@ -98,12 +98,12 @@ def test_no_screen_sends_a_style_telegram_rejects():
     covered four workspace screens; this one covers all of them, including the
     tunnel screens that carried the bad value.
     """
-    from tests.golden.test_golden_screens import SCREEN_BUILDERS, _fixtures
+    from cloudbot.presentation import catalog as screen_catalog
 
     checked = 0
-    for name in sorted(SCREEN_BUILDERS):
+    for name in sorted(screen_catalog.SCREEN_BUILDERS):
         for locale in (Locale.EN, Locale.AR):
-            screen = SCREEN_BUILDERS[name](_fixtures(), locale)
+            screen = screen_catalog.build(name, locale)
             for button in _buttons(screen.markup):
                 style = getattr(button, "style", None)
                 if style is not None:
@@ -117,12 +117,12 @@ def test_no_screen_sends_a_style_telegram_rejects():
 
 def test_a_url_button_never_carries_a_style():
     """The specific value Telegram rejects on a URL button is ``"link"``."""
-    from tests.golden.test_golden_screens import SCREEN_BUILDERS, _fixtures
+    from cloudbot.presentation import catalog as screen_catalog
 
     url_buttons = 0
-    for name in sorted(SCREEN_BUILDERS):
+    for name in sorted(screen_catalog.SCREEN_BUILDERS):
         for locale in (Locale.EN, Locale.AR):
-            screen = SCREEN_BUILDERS[name](_fixtures(), locale)
+            screen = screen_catalog.build(name, locale)
             for button in _buttons(screen.markup):
                 if getattr(button, "url", None):
                     url_buttons += 1

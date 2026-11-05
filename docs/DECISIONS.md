@@ -722,3 +722,34 @@ invisible to every local gate.
 bogus chat id, so nothing is delivered) and asserts Telegram parses it — the only instrument that can catch a
 server-side contract, since no local rule knows what the server accepts. Plus a per-button guard over every screen
 in `SCREEN_BUILDERS`, and `verify.sh` proof 27 (a bite test that reintroduces `style or "link"`).
+
+## CB-34 — The screen catalog lives in the product, and one walk serves the tool and the tests
+
+**Decision.** The registry of every screen, its **section** grouping, and the fixed fixtures its builders need
+live in **production code** (`cloudbot/presentation/catalog.py`) — not in a test. The verdict logic that walks a
+screen's buttons and classifies each one lives there too, with the caller supplying the real dispatcher's own
+routing as a predicate. The golden test, the button contract tests, the keyboard tests and the new admin-only
+`/dev` inspector all **consume** this one catalog.
+
+**Why.** The 111-screen catalog *existed* but was buried in `tests/golden/test_golden_screens.py`. Consequences:
+the product could not render a screen it did not know a name for; the only thing that walked every screen was a
+golden test; and anything wanting a catalog view had to import a test module. Worse, every past defect lived in
+the gap between "the builder is fine" and "the real button works" (`style="link"`, the callback registry,
+`term:resize` with no handler, the 30 s terminal stall) — and no tool could see that gap from inside the bot.
+Promoting the catalog makes adding a screen **one registry entry**, after which it is automatically covered by
+the goldens, by the button walk and by the tool; and a `presentation` module that imports `tests/` would be an
+architectural inversion, so the catalog is product code and a test asserts no product module imports the suite.
+
+**Consequences.** `presentation.catalog` is the single source of truth for screens (grep proves no duplicated
+screen list remains). The verdict walk is one implementation with two callers — the tool and the contract tests —
+so they cannot drift. A `Section` is a first-class value (not a name prefix), the tool navigates it, and the
+tests iterate it. The module stays dependency-pure: `presentation` may not import `adapters`, so the fixtures are
+rebuilt from the domain entities rather than importing the fake engine's `_ws`. `/dev` is admin-gated **and**
+behind an explicit `CLOUDBOT_DEV_TOOLS` switch, off by default (`middleware/admin_gate.py` checks the switch
+before identity, so a disabled tool is invisible to everyone). `verify.sh` proof 31 (a bite test reintroducing a
+dead button) shows the tool's own catalog check goes red.
+
+**Alternatives rejected.** Keeping the catalog in the test and importing it from the tool: the product would
+depend on `tests/`, and a production tool could not exist without the test suite. A second, tool-only screen list:
+exactly the duplication that rots. Classifying verdicts in the handler: the tool and the tests would drift, which
+is the maintainability failure the user named.

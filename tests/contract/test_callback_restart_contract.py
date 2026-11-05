@@ -35,7 +35,7 @@ from cloudbot.presentation.keyboards.callbacks import codec
 TG = 777
 LOCALES = (Locale.EN, Locale.AR)
 
-#: The fixture workspace ids the golden suite renders (its ``_fixtures`` seed and
+#: The fixture workspace ids the catalog renders (its ``fixtures`` seed and
 #: ``FakeEngine``'s own seeds). The walk must own every one of them so a scoped
 #: handler reaches its service instead of the isolation gate.
 FIXTURE_WS = (
@@ -45,33 +45,8 @@ FIXTURE_WS = (
 )
 
 
-class FakeBot:
-    id = 42
-
-    def __init__(self) -> None:
-        self.sent: list[dict] = []
-
-    async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
-        self.sent.append({"html": rich_message.html, "markup": reply_markup})
-        return Message.model_construct(chat={"id": chat_id}, message_id=len(self.sent))
-
-    async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
-        self.sent.append({"html": getattr(rich_message, "html", ""), "markup": reply_markup})
-        return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
-
-    async def delete_message(self, chat_id, message_id):
-        return True
-
-    async def send_document(self, chat_id, document, reply_parameters=None):
-        return Message.model_construct(chat={"id": chat_id}, message_id=1)
-
-    async def download(self, document):
-        import io
-
-        return io.BytesIO(b"data")
-
-    async def __call__(self, method):
-        return True
+#: The one bot double, shared with the dev tool and the other contract tests.
+from cloudbot.handlers.dev_sandbox import FakeBot  # noqa: E402
 
 
 def _update(uid: int, user_id: int, data: str) -> Update:
@@ -102,7 +77,7 @@ def _buttons(screen) -> list:
 
 
 def _screen_builders() -> dict:
-    from tests.golden.test_golden_screens import SCREEN_BUILDERS
+    from cloudbot.presentation.catalog import SCREEN_BUILDERS
 
     return SCREEN_BUILDERS
 
@@ -174,12 +149,12 @@ async def _walk(warm: bool) -> tuple[int, list[tuple[str, str]]]:
     screen is rendered and **before** its buttons are tapped — the restart.
     Returns (buttons checked, (name, locale) for any that rendered nothing).
     """
-    from tests.golden.test_golden_screens import _fixtures
+    from cloudbot.presentation.catalog import fixtures
 
     container = await _container()
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
-    fixtures = _fixtures()
+    fixtures_data = fixtures()
     checked = 0
     silent: list[tuple[str, str]] = []
     try:
@@ -187,7 +162,7 @@ async def _walk(warm: bool) -> tuple[int, list[tuple[str, str]]]:
         for locale in LOCALES:
             for name, builder in sorted(_screen_builders().items()):
                 await _reset_state(container)
-                screen = builder(fixtures, locale)
+                screen = builder(fixtures_data, locale)
                 if not warm:
                     # A restart: the token registry that mapped a token back to its
                     # key parts died with the previous process.
