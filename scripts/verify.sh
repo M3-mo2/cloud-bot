@@ -24,6 +24,12 @@
 #      nothing again (F-01), restored.
 #  26. A bite test that hides an unattributed listening port from the picker
 #      (F-06), restored.
+#  27. A bite test that puts a style Telegram rejects back on a URL button,
+#      restored.
+#  28. A bite test that drops the `await` on Bot.download, so the document upload
+#      raises again and never reaches the engine (Task 22 D1), restored.
+#  29. A bite test that makes the terminal callback index a possibly-lost token
+#      key again, so the stale button raises IndexError (Task 22 D2), restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -912,6 +918,101 @@ def line(r):
 
 print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
 PYEOF
+
+echo
+
+echo
+echo "== 28. bite test: the upload awaits Bot.download and reads a BinaryIO (D1) =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Reintroduce the live defect: drop the ``await`` so the handler holds a coroutine,
+# then feeds it to ``services.files.upload`` — the engine never receives the bytes
+# and the user sees nothing (the exact production traceback). The upload test must
+# go red; restore the await, and it is green again.
+target = pathlib.Path("cloudbot/handlers/files.py")
+original = target.read_text(encoding="utf-8")
+guard = "    buffer = await message.bot.download(document)\n"
+bite = "    buffer = message.bot.download(document)  # BITE: no await\n"
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (the download call moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_file_upload.py",
+       "-k", "reaches_the_engine", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the upload test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: dropping the await did not make the upload test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the await did not return the upload test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+
+echo
+echo "== 29. bite test: a terminal button never indexes a lost callback key (D2) =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Reintroduce the live IndexError: make the stale-button path index the decoded
+# key unconditionally (as the original ``decode(cb.data).key[0]`` did), so a button
+# drawn before a restart (empty token registry → key=()) raises instead of
+# rendering the stale screen. The stale-button test must go red; restore the codec
+# parse, and it is green again.
+target = pathlib.Path("cloudbot/handlers/terminal.py")
+original = target.read_text(encoding="utf-8")
+guard = (
+    "    parsed = _term.parse(cb.data)\n"
+    "    if not parsed.valid:\n"
+    "        await show_screen(cb, term_screens.stale_screen(ctx.locale), ctx=ctx, sender=sender)\n"
+    "        return None\n"
+    "    return parsed\n"
+)
+
+bite = (
+    "    from cloudbot.presentation.keyboards.callbacks import decode  # BITE\n"
+    "    _ = decode(cb.data).key[0]  # BITE: the old IndexError on a lost token\n"
+    "    return _term.parse(cb.data)\n"
+)
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (the codec parse moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_terminal_callbacks.py",
+       "-k", "live_indexerror_callback_now_renders_a_screen",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the stale-button test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: indexing a lost key did not make the stale-button test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the total parse did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
 
 # ── the proof ledger counts itself ─────────────────────────────────────────────
 # The declared total used to be hand-written, and it drifted: it once claimed
