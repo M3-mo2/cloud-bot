@@ -262,7 +262,12 @@ def workspace_detail_markup(
             inline(catalog.t("ws.delete", locale), _cb("ws:delete_confirm", ws_id), intent=Intent.DANGER),
         ]
     )
-    rows.append([inline(catalog.t("common.back", locale), _cb("ws:list", 0), intent=Intent.PRIMARY)])
+    # The workspace home has exactly one *exit* — the explicit log-out above — and
+    # no redundant bottom "Back" row: leaving and going "back" to the list were the
+    # same destination. Switching workspaces (without leaving the session first) is
+    # the shared nav block's job, so it sits last, at the bottom, as everywhere else.
+    if session:
+        rows += nav.nav_rows(locale, "workspace_home", inside=ws)
     return inline_markup(rows)
 
 
