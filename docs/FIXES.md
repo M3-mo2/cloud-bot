@@ -96,3 +96,58 @@ of the whole screen set also found a **second** dead button, `term:resize` (the
 
 **Catalog strings** for the stale screen were added in both locales
 (`terminal.stale.title` / `.body` / `.reopen`).
+
+---
+
+## F-23.1 — the callback registry died with the process, so *every* keyed button could raise
+
+**Reported.** Tapping the **⬅️ Back** button on the terminal view produced no
+screen. The same report had already produced two point fixes (the `adm:` fix and
+the `term:` fix); this is the **root cause** of the whole family.
+
+**Measurement.** Driving the real terminal screen through the real dispatcher,
+resetting the codec registry (exactly what a process restart does), then tapping
+every button:
+
+```
+⌨️ Send a command   ⇒ ✅ a screen
+Ctrl-C              ⇒ ⚠️ no response
+Ctrl-D (EOF)        ⇒ ⚠️ no response
+↔️ Resize           ⇒ ⚠️ no response
+⏹ Close            ⇒ ⚠️ no response
+🖥 My terminals      ⇒ ⚠️ no response
+⬅️ Back             ⇒ ❌ IndexError: tuple index out of range
+```
+
+**What was wrong.** `presentation/keyboards/callbacks.py` routed **every**
+key-bearing callback through a **process-global, in-memory** token registry
+(CB-8). After a restart the registry is empty, `decode` returned `key=()`, and a
+handler's `decode(cb.data).key[0]` raised. The `term:` fix (F-22.2) and the
+`adm:` fix (Task 07) each only covered **their own prefix**: the terminal view's
+**⬅️ Back** is `ws:view:<ws_id>` — a `ws:` action — so it still died, as did
+`file:`, `run:`, `port:`, `nav:` wherever they carried ids.
+
+**What now pins it.**
+
+* Key parts are encoded **inline** (`action:a:b`) whenever they fit the 64-byte
+  cap — the common case — so they are restart-proof with no registry at all. Only
+  a callback that genuinely cannot fit (a workspace **and** a session id, a run
+  log, a file path with colons) falls back to the in-memory token, and the handler
+  is written to survive its loss.
+* `decode` is **total** (never raises; always returns an action and a key tuple),
+  and a handler that needs key parts calls `decode_required(data, arity)`, which
+  raises `StaleCallback`. The error guard maps that to the correctable
+  `err.stale.*` screen — **never an `IndexError` and never silence**, whatever the
+  prefix.
+* `tests/contract/test_callback_restart_contract.py` walks **every** button of
+  **every** screen through the **real dispatcher** with the token registry
+  **reset** (and again warm), asserting no tap raises and none renders nothing —
+  the single test that makes the class impossible, independent of prefix or
+  handler. It also pins the three named prefixes (`ws:`, `file:`, `term:`)
+  directly.
+* `scripts/verify.sh` proof 30 reintroduces the root cause (the unguarded
+  `decode_required`) and shows the contract test go red; proof 29 still covers the
+  terminal stale screen.
+
+**Catalog strings** for the generic stale screen were added in both locales
+(`err.stale.title` / `err.stale.body`).

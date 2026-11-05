@@ -137,16 +137,38 @@ the table and that every `DANGER` button is behind a confirm.
 
 ---
 
-## CB-8 — Callbacks carry tokens, not entity ids
+## CB-8 — Callbacks carry their key parts inline; a token only when they cannot
 
-**Decision.** `callback_data` is `action:token:extra` with a compact token
-indexing FSM context; full `ws_`/`run_` ids live in state.
+**Decision.** A callback is `action` (= `prefix:name`) plus its key parts: inline
+as `action:part:part` when that fits Telegram's **64-byte** cap, and only as
+`action:~token` (a short content-addressed hash) when it truly does not. There is
+no other encoding.
 
-**Why.** Telegram caps `callback_data` at **64 bytes**; a naive id-bearing callback
-(`run:logs:<ws>:<run>:stdout:0`) overflows because `ws_`+ULID is ~29 bytes.
+**Why.** Telegram caps `callback_data` at 64 bytes, and an earlier version of this
+rule routed **every** key-bearing callback through a token held in a
+**process-global, in-memory** registry. That registry dies with the process, so a
+button drawn before a restart decoded to `key=()` and the handler's
+`decode(cb.data).key[0]` raised `IndexError` — for *every* prefix (`ws:`, `file:`,
+`term:`, `run:`, …). The 64-byte cap is exactly why most callbacks should travel
+inline: `ws:view:ws_…` is ~38 bytes, well under it. Inline callbacks are
+**restart-proof by construction**; only a callback that genuinely overflows (a
+workspace **and** a session id, `run:logs:<ws>:<run>`, a file path with colons)
+falls back to the token.
 
-**Consequences.** A small context stack per user; the codec asserts ≤ 64 bytes at
-build (raises in DEV/DEBUG, safe-truncates + logs in PRODUCTION).
+**Consequences.**
+
+* `decode` is **total**: it never raises, and always returns the action (read from
+  the callback's own first two segments) plus a key tuple — empty when an inline
+  key is missing or a token is unknown. A handler that *needs* key parts calls
+  `decode_required(data, arity)`, which raises `StaleCallback` instead of letting
+  the handler index `key[0]`. The error guard maps `StaleCallback` to the
+  correctable `err.stale.*` screen, so a stale button always renders something.
+* The codec asserts ≤ 64 bytes at build (raises in DEV/DEBUG, safe-truncates +
+  logs in PRODUCTION).
+* A callback is only tokenised when inline is impossible, so a restart can no
+  longer kill navigation. `tests/contract/test_callback_restart_contract.py`
+  walks every screen's every button through the real dispatcher with the registry
+  **reset** (and warm) and asserts no tap raises and none renders nothing.
 
 ---
 
