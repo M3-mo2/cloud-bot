@@ -17,6 +17,7 @@
 #  14. Every archive refusal code has its own sentence in both catalogs.
 #  15. A bite test that changes behaviour (metrics honesty guard), restored.
 #  34. A bite test that puts a self-referential nav entry back (R1), restored.
+#  35. A bite test that makes too_many_tunnels silently redraw again, restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -664,4 +665,43 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-four proofs passed"
+echo "== 35. bite test: too_many_tunnels is not a silent redraw =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Map the refusal back onto the gate kind, so ``too_many_tunnels`` silently
+# redraws the list again (the exact live bug): the task-15 test must go red;
+# restore, and it is green again. This proves the dedicated refusal screen is
+# load-bearing, not decoration.
+target = pathlib.Path("cloudbot/handlers/features.py")
+original = target.read_text(encoding="utf-8")
+guard = '    "too_many_tunnels": "limit",\n'
+bite = '    "too_many_tunnels": "gate",  # BITE: silently redraw the list\n'
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (refusal map moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_tunnel_handlers.py",
+       "-k", "silent_redraw", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the no-silent-redraw test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: making too_many_tunnels silent did not make the test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the refusal screen did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-five proofs passed"
