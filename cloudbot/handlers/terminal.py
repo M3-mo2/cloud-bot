@@ -29,9 +29,9 @@ from aiogram.types import CallbackQuery, Message
 from cloudbot.core.errors import EngineRefused, InvalidInput, NotOwned
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
-from cloudbot.presentation.keyboards.callbacks import decode
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import terminal as term_screens
+from cloudbot.presentation.screens import terminal_callbacks as _term
 from cloudbot.services.bundle import Services
 from cloudbot.services.sessions import CTRL_D
 from cloudbot.states.terminal_input import TerminalInput
@@ -79,6 +79,16 @@ def _is_command(text: str) -> bool:
     return text.startswith("/")
 
 
+async def _parse_callback(cb: CallbackQuery, ctx: UserContext, sender: RichSender):
+    """Parse a ``term:`` callback through the total codec; render the stale screen
+    and return ``None`` when it is stale or malformed (never index a lost key)."""
+    parsed = _term.parse(cb.data)
+    if not parsed.valid:
+        await show_screen(cb, term_screens.stale_screen(ctx.locale), ctx=ctx, sender=sender)
+        return None
+    return parsed
+
+
 async def _is_typing_here(state: FSMContext | None, ws_id, ses_id: str) -> bool:
     """True when the sticky command state points at this exact session (R2)."""
     if state is None:
@@ -92,7 +102,10 @@ async def _is_typing_here(state: FSMContext | None, ws_id, ses_id: str) -> bool:
 # -- my terminals ------------------------------------------------------------
 @router.callback_query(F.data.startswith("term:list"))
 async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
     sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
     await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
@@ -100,7 +113,10 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 # -- open --------------------------------------------------------------------
 @router.callback_query(F.data.startswith("term:open"))
 async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
     try:
         session = await services.sessions.open(ctx.tg_id, ws_id)
     except EngineRefused as exc:
@@ -123,9 +139,11 @@ async def on_view(
     sender: RichSender,
     state: FSMContext,
 ) -> None:
-    decoded = decode(cb.data)
-    ws_id = _wid(decoded.key[0])
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
     await _show_view(cb, ctx, services, sender, ws_id, ses_id, state=state)
 
 
@@ -168,9 +186,11 @@ async def on_cmd(
     **stop typing** control (R2/R3). Plain text messages then keep going to this
     session until the user stops or a known slash-command takes over (R1/R4).
     """
-    decoded = decode(cb.data)
-    ws_id = decoded.key[0]
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = parsed.ws_id
+    ses_id = parsed.ses_id
     await state.set_state(TerminalInput.awaiting_command)
     await state.update_data(ws_id=str(ws_id), ses_id=str(ses_id))
     await _show_view(cb, ctx, services, sender, _wid(ws_id), ses_id, state=state)
@@ -186,9 +206,11 @@ async def on_exit(
     state: FSMContext,
 ) -> None:
     """Clear the sticky state and return to the ordinary terminal view."""
-    decoded = decode(cb.data)
-    ws_id = decoded.key[0]
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = parsed.ws_id
+    ses_id = parsed.ses_id
     await state.clear()
     await _show_view(cb, ctx, services, sender, _wid(ws_id), ses_id, state=state)
 
@@ -358,10 +380,12 @@ async def _follow(
 async def on_signal(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    decoded = decode(cb.data)
-    ws_id = _wid(decoded.key[0])
-    ses_id = decoded.key[1]
-    signal = decoded.key[2]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
+    signal = parsed.args[2]
     try:
         await services.sessions.signal(ctx.tg_id, ws_id, ses_id, signal)
     except EngineRefused as exc:
@@ -378,9 +402,11 @@ async def on_signal(
 async def on_ctrl_d(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    decoded = decode(cb.data)
-    ws_id = _wid(decoded.key[0])
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
     try:
         await services.sessions.send_input(ctx.tg_id, ws_id, ses_id, CTRL_D)
     except EngineRefused as exc:
@@ -394,13 +420,33 @@ async def on_ctrl_d(
 
 
 # -- resize ------------------------------------------------------------------
+@router.callback_query(F.data.startswith("term:resize"))
+async def on_resize_menu(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """Open the resize picker.
+
+    The terminal view emits ``term:resize`` for its **↔️ Resize** button, but no
+    handler matched it: the button was live and dead at once (a producer/consumer
+    mismatch of the same family as the ``IndexError``). The every-screen contract
+    test catches it.
+    """
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
+    session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
+    await show_screen(cb, term_screens.resize_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
+
+
 @router.callback_query(F.data.startswith("term:rsz_custom"))
 async def on_resize_custom(
     cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
 ) -> None:
-    decoded = decode(cb.data)
-    ws_id = decoded.key[0]
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = parsed.ws_id
+    ses_id = parsed.ses_id
     await state.set_state(TerminalInput.awaiting_resize)
     await state.update_data(ws_id=ws_id, ses_id=ses_id)
     await show_screen(cb, term_screens.resize_custom_prompt(_wid(ws_id), ses_id, ctx.locale), ctx=ctx, sender=sender)
@@ -408,10 +454,12 @@ async def on_resize_custom(
 
 @router.callback_query(F.data.startswith("term:rsz"))
 async def on_resize(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
-    ws_id = _wid(decoded.key[0])
-    ses_id = decoded.key[1]
-    spec = decoded.key[2]  # "COLSxROWS"
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
+    spec = parsed.args[2]  # "COLSxROWS"
     cols, rows = _parse_size(spec)
     await services.sessions.resize(ctx.tg_id, ws_id, ses_id, cols=cols, rows=rows)
     session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
@@ -436,9 +484,11 @@ async def on_resize_text(
 async def on_close(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    decoded = decode(cb.data)
-    ws_id = _wid(decoded.key[0])
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
     await state.clear()
     try:
         session = await services.sessions.close(ctx.tg_id, ws_id, ses_id)
@@ -458,9 +508,11 @@ async def on_forget(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
     """Remove an ended terminal from *my terminals* without touching the engine."""
-    decoded = decode(cb.data)
-    ws_id = _wid(decoded.key[0])
-    ses_id = decoded.key[1]
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    ses_id = parsed.ses_id
     await state.clear()
     await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
     sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
