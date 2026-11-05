@@ -13,7 +13,7 @@ from typing import Any, AsyncIterator
 
 from cloudbot.core.errors import EngineRefused
 from cloudbot.domain.entities import FileEntry, ResourceUsage, Run, TerminalSession, Workspace
-from cloudbot.domain.meta import EngineMeta, Profiles, ProfileInfo, SessionConfig
+from cloudbot.domain.meta import EngineMeta, Profiles, ProfileInfo, SessionConfig, Tunnels
 from cloudbot.domain.value_objects import (
     ArchiveEntry,
     ArchiveResult,
@@ -86,6 +86,9 @@ class FakeEngine:
         self._session_output: dict[str, str] = {}
         self._tunnels: dict[str, Tunnel] = {}
         self._seq = 0
+        #: The engine's per-workspace tunnel cap. Tests override it to prove
+        #: nothing hardcodes the number; the real value lives in ``/v1/meta``.
+        self.max_tunnels = 2
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK4", "demo", WorkspaceStatus.ACTIVE, active=1)
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK5", "scraper", WorkspaceStatus.SUSPENDED)
 
@@ -137,6 +140,12 @@ class FakeEngine:
             ),
             limits_defaults=Limits(),
             limits_maxima=Limits(cpu_cores=8, memory_mb=8192, disk_mb=51200, max_wall_time_sec=3600),
+            tunnels=Tunnels(
+                enabled=True,
+                ready=True,
+                max_per_workspace=self.max_tunnels,
+                url_timeout_sec=45,
+            ),
         )
 
     async def health(self) -> dict[str, Any]:
@@ -658,6 +667,13 @@ class FakeEngine:
             raise EngineRefused(
                 "tunnels_disabled",
                 details={"config": "limits.allow_tunnels", "field": "allow_tunnels"},
+            )
+        # The per-workspace cap the real engine enforces (``tunnels.max_per_workspace``).
+        existing = [t for t in self._tunnels.values() if t.workspace_id == str(ws_id)]
+        if len(existing) >= self.max_tunnels:
+            raise EngineRefused(
+                "too_many_tunnels",
+                details={"max_per_workspace": self.max_tunnels},
             )
         self._seq += 1
         tunnel = Tunnel(

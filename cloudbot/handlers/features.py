@@ -152,8 +152,41 @@ async def on_remove_text(
 
 
 # ============================================================ tunnels (2b) ====
+#: Engine refusals this path renders a dedicated, explanatory screen for. Any
+#: other refusal is **re-raised** to the error screen (R1) — a refusal is never
+#: swallowed into a silent redraw, and a new engine code cannot slip through
+#: unmapped.
+TUNNEL_REFUSAL_KINDS: dict[str, str] = {
+    "too_many_tunnels": "limit",
+    "tunnel_url_unavailable": "timeout",
+    "tunnels_disabled": "gate",
+}
+
+
+async def _detected_ports(ctx: UserContext, services: Services, ws_id) -> list[int]:
+    """The workspace's attributed listening ports, or ``[]`` when ports are off."""
+    try:
+        report = await services.ports.list(ctx.tg_id, ws_id)
+    except EngineRefused as exc:
+        if exc.engine_code != "ports_disabled":
+            raise
+        return []
+    return [p.port for p in report.ports if p.attributed]
+
+
+def _unlistened_warning(port: int, detected: list[int], locale) -> str | None:
+    """The one-sentence warning for a port nothing is listening on (R3), or None.
+
+    A detected port gets no warning; a port outside the detected set gets the
+    sentence but is never blocked.
+    """
+    if port in detected:
+        return None
+    return catalog.t("tunnel.publish_unlistened", locale)
+
+
 async def _tunnels_screen(ctx: UserContext, services: Services, ws_id):
-    """Render the tunnels screen with the workspace's gate state resolved."""
+    """Render the tunnels screen with the workspace's gate state and ceiling."""
     tunnels = await services.tunnels.list(ctx.tg_id, ws_id)
     meta = await services.tunnels.meta()
     ws = await services.workspaces.get(ctx.tg_id, ws_id)
@@ -164,7 +197,25 @@ async def _tunnels_screen(ctx: UserContext, services: Services, ws_id):
         allow_tunnels=ws.limits.allow_tunnels,
         allow_net=ws.limits.allow_net,
         server_enabled=meta.tunnels.enabled,
+        max_tunnels=meta.tunnels.max_per_workspace,
     )
+
+
+async def _tunnel_refusal_screen(
+    exc: EngineRefused, ctx: UserContext, services: Services, ws_id, port: int
+):
+    """A rendered sentence for a known tunnel refusal, or ``None`` to re-raise."""
+    kind = TUNNEL_REFUSAL_KINDS.get(exc.engine_code)
+    if kind == "limit":
+        limit = await services.tunnels.limit()
+        return tnl_screens.publish_refused_screen(
+            port, ws_id, ctx.locale, max_tunnels=limit
+        )
+    if kind == "timeout":
+        return tnl_screens.tunnel_timeout_screen(port, ws_id, ctx.locale)
+    if kind == "gate":
+        return await _tunnels_screen(ctx, services, ws_id)
+    return None
 
 
 @router.callback_query(F.data.startswith("tnl:list"))
@@ -179,13 +230,7 @@ async def on_publish(
 ) -> None:
     ws_id = _wid(decode(cb.data).key[0])
     # Offer the discovered ports (best) plus a "type one" path.
-    detected: list[int] = []
-    try:
-        report = await services.ports.list(ctx.tg_id, ws_id)
-        detected = [p.port for p in report.ports if p.attributed]
-    except EngineRefused as exc:
-        if exc.engine_code != "ports_disabled":
-            raise
+    detected = await _detected_ports(ctx, services, ws_id)
     await show_screen(
         cb, tnl_screens.publish_port_screen(ws_id, ctx.locale, detected=detected), ctx=ctx, sender=sender
     )
@@ -203,12 +248,24 @@ async def on_publish_custom(
 
 @router.message(FeatureInput.awaiting_port)
 async def on_port_text(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext, events: RequestEvents
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
     data = await state.get_data()
     await state.clear()
     ws_id = _wid(data["ws_id"])
-    await _publish(message, ctx, services, sender, ws_id, parse_port(message.text or ""), events)
+    port = parse_port(message.text or "")
+    # R3: a port that is not in the detected set gets a plain warning before
+    # publishing — it is never blocked (starting a server after publishing is
+    # legitimate), so this is a confirm, not a refusal.
+    detected = await _detected_ports(ctx, services, ws_id)
+    warning = _unlistened_warning(port, detected, ctx.locale)
+    await show_screen(
+        message,
+        tnl_screens.publish_confirm(port, ws_id, ctx.locale, warning=warning),
+        ctx=ctx,
+        sender=sender,
+        force_send=True,
+    )
 
 
 @router.callback_query(F.data.startswith("tnl:port"))
@@ -224,12 +281,12 @@ async def _publish(event, ctx: UserContext, services: Services, sender: RichSend
     try:
         await services.tunnels.publish(ctx.tg_id, ws_id, port)
     except EngineRefused as exc:
-        if exc.engine_code not in ("tunnels_disabled", "too_many_tunnels"):
+        # Every refusal on this path renders a sentence; an unmapped code is
+        # re-raised to the error screen rather than silently redrawing (R1).
+        screen = await _tunnel_refusal_screen(exc, ctx, services, ws_id, port)
+        if screen is None:
             raise
-        # A gate refusal: re-render the tunnels screen, which names the off switch
-        # and offers the fix (the actionable state the roadmap requires).
         log.info("tunnel.publish_refused", code=exc.engine_code)
-        screen = await _tunnels_screen(ctx, services, ws_id)
         await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
         return
     events.tunnel_created(tg_id=ctx.tg_id, ws_id=str(ws_id), port=port)

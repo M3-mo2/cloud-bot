@@ -48,9 +48,17 @@ def tunnels_screen(
     allow_tunnels: bool = True,
     allow_net: bool = True,
     server_enabled: bool = True,
+    max_tunnels: int | None = None,
 ) -> Screen:
+    """The public-links list, its gate, and (when known) its own ceiling.
+
+    ``max_tunnels`` comes from the engine meta (``tunnels.max_per_workspace``) —
+    never a hardcoded constant. When the cap is reached the publish entry is
+    muted with a reason so the ceiling is visible *before* it is hit.
+    """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.title", locale))
+    at_cap = max_tunnels is not None and tunnels.count >= max_tunnels
 
     if not tunnels.tunnels:
         doc.p(catalog.t("tunnel.empty", locale))
@@ -74,6 +82,21 @@ def tunnels_screen(
         # The URL is ephemeral; say so and never print it as text.
         doc.blockquote(catalog.t("tunnel.ephemeral", locale))
 
+    # The ceiling is always stated when the engine reports one (R2).
+    if max_tunnels is not None:
+        doc.p(
+            catalog.t(
+                "tunnel.usage",
+                locale,
+                used=_num(tunnels.count, locale),
+                max=_num(max_tunnels, locale),
+            )
+        )
+        if at_cap:
+            doc.blockquote(
+                catalog.t("tunnel.limit_note", locale, max=_num(max_tunnels, locale))
+            )
+
     gate = _gate_note(locale, allow_tunnels=allow_tunnels, allow_net=allow_net, server_enabled=server_enabled)
     if gate is not None:
         doc.blockquote(gate)
@@ -87,6 +110,7 @@ def tunnels_screen(
             allow_tunnels=allow_tunnels,
             allow_net=allow_net,
             server_enabled=server_enabled,
+            max_tunnels=max_tunnels,
         ),
     )
 
@@ -99,6 +123,7 @@ def tunnels_markup(
     allow_tunnels: bool = True,
     allow_net: bool = True,
     server_enabled: bool = True,
+    max_tunnels: int | None = None,
 ):
     rows: list[list] = []
     # A LINK button per URL — the only place the ephemeral URL appears.
@@ -113,17 +138,31 @@ def tunnels_markup(
                     )
                 ]
             )
+    at_cap = max_tunnels is not None and tunnels.count >= max_tunnels
     publishable = server_enabled and allow_tunnels and allow_net
-    rows.append(
-        [
-            inline(
-                catalog.t("tunnel.publish", locale),
-                _cb("tnl:publish", ws_id),
-                intent=Intent.SUCCESS if publishable else Intent.MUTED,
-                disabled=not publishable,
-            )
-        ]
-    )
+    if at_cap:
+        # Disabled-with-reason: the label itself names the ceiling (R2).
+        rows.append(
+            [
+                inline(
+                    catalog.t("tunnel.publish_full", locale),
+                    _cb("tnl:publish", ws_id),
+                    intent=Intent.MUTED,
+                    disabled=True,
+                )
+            ]
+        )
+    else:
+        rows.append(
+            [
+                inline(
+                    catalog.t("tunnel.publish", locale),
+                    _cb("tnl:publish", ws_id),
+                    intent=Intent.SUCCESS if publishable else Intent.MUTED,
+                    disabled=not publishable,
+                )
+            ]
+        )
     for tunnel in tunnels.tunnels:
         rows.append(
             [
@@ -165,6 +204,8 @@ def publish_port_screen(
     *,
     detected: list[int] | None = None,
 ) -> Screen:
+    """Pick a port to publish. Only *detected* ports become instant-publish
+    buttons; a non-listening port goes through the confirm warning (R3)."""
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.publish_title", locale))
     doc.p(catalog.t("tunnel.publish_body", locale))
@@ -174,6 +215,7 @@ def publish_port_screen(
         doc.ul([_raw(f"<code>{_num(p, locale)}</code>") for p in detected])
     else:
         doc.p(italic(catalog.t("tunnel.publish_none", locale)))
+        doc.p(italic(catalog.t("tunnel.publish_none_hint", locale)))
     doc.p(italic(catalog.t("tunnel.port_hint", locale)))
 
     rows: list[list] = []
@@ -198,11 +240,81 @@ def publish_custom_prompt(ws_id: WorkspaceId, locale: Locale) -> Screen:
     return Screen(doc=doc, markup=markup, send_new=True)
 
 
+def publish_confirm(port: int, ws_id: WorkspaceId, locale: Locale, *, warning: str | None = None) -> Screen:
+    """Confirm a typed port before publishing (R5: nothing fires from a prompt).
+
+    ``warning`` is the non-listening sentence, shown when the port is not in the
+    workspace's detected set (R3); it never blocks — starting a server later is
+    legitimate.
+    """
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("tunnel.publish_title", locale))
+    doc.p(catalog.t("tunnel.confirm_body", locale, port=_num(port, locale)))
+    if warning:
+        doc.blockquote(warning)
+    doc.p(italic(catalog.t("tunnel.port_hint", locale)))
+    markup = inline_markup(
+        [
+            [inline(catalog.t("common.confirm", locale), _cb("tnl:port", ws_id, port), intent=Intent.SUCCESS)],
+            [inline(catalog.t("common.cancel", locale), _cb("tnl:publish", ws_id), intent=Intent.PRIMARY)],
+        ]
+    )
+    return Screen(doc=doc, markup=markup)
+
+
 def publishing_screen(ws_id: WorkspaceId, locale: Locale) -> Screen:
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.publish_title", locale))
     doc.p(catalog.t("tunnel.publishing", locale))
     return Screen(doc=doc, send_new=True)
+
+
+def publish_refused_screen(
+    port: int,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    max_tunnels: int | None = None,
+) -> Screen:
+    """The screen shown when the engine refuses with ``too_many_tunnels`` (R1).
+
+    It states the limit **with the actual number** and offers the fix: a button
+    that opens the list/removal path. It is deliberately **not** the plain list,
+    so the refusal is never a silent redraw.
+    """
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("tunnel.limit_title", locale))
+    if max_tunnels is not None:
+        doc.p(catalog.t("tunnel.limit_reached", locale, max=_num(max_tunnels, locale)))
+    else:
+        doc.p(catalog.t("err.too_many_tunnels", locale))
+    doc.p(_raw(f"<code>{_num(port, locale)}</code>"))
+    markup = inline_markup(
+        [
+            # The fix: go to the list and remove one. ``tnl:list`` is the same
+            # action the list's own remove buttons live on, so removal is one tap.
+            [inline(catalog.t("tunnel.remove_one", locale), _cb("tnl:list", ws_id), intent=Intent.DANGER)],
+            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
+        ]
+    )
+    return Screen(doc=doc, markup=markup)
+
+
+def tunnel_timeout_screen(port: int, ws_id: WorkspaceId, locale: Locale) -> Screen:
+    """The ``tunnel_url_unavailable`` screen: explain the cause and retry (R4)."""
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("tunnel.timeout_title", locale))
+    doc.p(catalog.t("err.tunnel_url_unavailable", locale))
+    doc.p(catalog.t("tunnel.timeout_explain", locale))
+    doc.p(_raw(f"<code>{_num(port, locale)}</code>"))
+    markup = inline_markup(
+        [
+            # Retry the same port — never dump the user back to a list.
+            [inline(catalog.t("tunnel.retry", locale, port=_num(port, locale)), _cb("tnl:port", ws_id, port), intent=Intent.SUCCESS)],
+            [inline(catalog.t("common.back", locale), _cb("tnl:list", ws_id), intent=Intent.PRIMARY)],
+        ]
+    )
+    return Screen(doc=doc, markup=markup)
 
 
 def remove_confirm(tunnel: Tunnel, ws_id: WorkspaceId, locale: Locale) -> Screen:

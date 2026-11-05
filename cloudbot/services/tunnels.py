@@ -27,9 +27,19 @@ class TunnelsService:
     def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
         self._engine = engine
         self._ownership = ownership
+        #: ``/v1/meta`` is the same for every workspace and changes rarely; cache
+        #: it so rendering the ceiling (``tunnels.max_per_workspace``) is not a new
+        #: engine call on every screen. The adapter's own meta cache backs this up.
+        self._meta: EngineMeta | None = None
 
-    async def meta(self) -> EngineMeta:
-        return await self._engine.meta()
+    async def meta(self, refresh: bool = False) -> EngineMeta:
+        if self._meta is None or refresh:
+            self._meta = await self._engine.meta(refresh=refresh)
+        return self._meta
+
+    async def limit(self) -> int:
+        """The engine's per-workspace tunnel cap (never hardcoded)."""
+        return (await self.meta()).tunnels.max_per_workspace
 
     async def list(self, tg_id: int, ws_id: WorkspaceId) -> TunnelList:
         await self._ownership.assert_owned(tg_id, ws_id)
