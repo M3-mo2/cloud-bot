@@ -24,7 +24,14 @@ log = structlog.get_logger("cloudbot.admin_gate")
 #: The commands that open the panel. Only the NEW panel commands are recognised
 #: here; the existing DEV/DEBUG diagnostics (``/diag``, ``/health``, ``/raw``,
 #: ``/mode``, ``/replay``) are left exactly as they are, gated by the mode table.
-ADMIN_COMMANDS: frozenset[str] = frozenset({"/admin", "/notifications"})
+#: ``/dev`` is the in-bot developer tools entry point; it is gated here (admin
+#: identity) AND behind the explicit ``CLOUDBOT_DEV_TOOLS`` switch.
+ADMIN_COMMANDS: frozenset[str] = frozenset({"/admin", "/notifications", "/dev"})
+
+#: The developer-tools commands/callbacks. These carry a second switch on top of
+#: the identity gate: even an admin reaches them only when ``dev_tools`` is on.
+DEV_COMMANDS: frozenset[str] = frozenset({"/dev"})
+DEV_CALLBACK_PREFIX = "dev:"
 
 
 def admin_command(text: str) -> str | None:
@@ -33,6 +40,25 @@ def admin_command(text: str) -> str | None:
         return None
     command = text.split()[0].split("@")[0].lower()
     return command if command in ADMIN_COMMANDS else None
+
+
+def _wants_admin(event: TelegramObject) -> bool:
+    if isinstance(event, Message) and event.text:
+        if admin_command(event.text) is not None:
+            return True
+    if isinstance(event, CallbackQuery) and event.data:
+        if event.data.startswith("adm:") or event.data.startswith(DEV_CALLBACK_PREFIX):
+            return True
+    return False
+
+
+def _wants_dev(event: TelegramObject) -> bool:
+    """True when the event targets the developer tools (which need the switch)."""
+    if isinstance(event, Message) and event.text:
+        return admin_command(event.text) in DEV_COMMANDS
+    if isinstance(event, CallbackQuery) and event.data:
+        return event.data.startswith(DEV_CALLBACK_PREFIX)
+    return False
 
 
 class AdminGateMiddleware(BaseMiddleware):
@@ -47,19 +73,17 @@ class AdminGateMiddleware(BaseMiddleware):
         ctx: UserContext | None = data.get("ctx")
         if not _wants_admin(event):
             return await handler(event, data)
+        # The developer tools are OFF unless explicitly enabled. This check runs
+        # before the identity check so a disabled tool is invisible to everyone,
+        # admins included.
+        if _wants_dev(event):
+            settings = data.get("settings")
+            if settings is None or not getattr(settings, "dev_tools", False):
+                log.info("admin.gate.dev_disabled")
+                return None
         if ctx is None or not ctx.is_admin:
             # Indistinguishable from an unknown command / dead callback: swallow
             # it, send nothing, so the panel's existence is never revealed.
             log.info("admin.gate.refused")
             return None
         return await handler(event, data)
-
-
-def _wants_admin(event: TelegramObject) -> bool:
-    if isinstance(event, Message) and event.text:
-        if admin_command(event.text) is not None:
-            return True
-    if isinstance(event, CallbackQuery) and event.data:
-        if event.data.startswith("adm:"):
-            return True
-    return False

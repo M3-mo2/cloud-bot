@@ -33,6 +33,8 @@
 #  30. A bite test that makes ``decode_required`` hand back the bare decoded key
 #      again, so a handler indexes an empty tuple after a restart (the root cause
 #      of the whole family, TASK 23), restored.
+#  31. A bite test that reintroduces a dead button, so the dev tool's own catalog
+#      check reports it (TASK 24), restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -1063,6 +1065,47 @@ if red.returncode == 0:
     print(red.stdout[-800:]); sys.exit(1)
 if green.returncode != 0:
     print("FAIL: restoring the total read did not return the contract test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "== 31. bite test: the dev tool's catalog check bites (TASK 24) =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# The dev tool walks the one product catalog and classifies every button. Prove
+# the walk is load-bearing by reintroducing a DEAD BUTTON: point the "New
+# workspace" button at a callback no handler can route. The tool's own catalog
+# check (shared with the contract test) reports it — the walk finds a no-handler
+# verdict — and the check goes red. Restore, and it is green again.
+target = pathlib.Path("cloudbot/presentation/screens/workspaces.py")
+original = target.read_text(encoding="utf-8")
+guard = 'inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)])\n'
+bite = 'inline(catalog.t("menu.new_workspace", locale), "zzz:dead", intent=Intent.SUCCESS)])  # BITE: a dead button\n'
+assert guard in original, "the New-workspace button moved; update this proof"
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "the bite substitution did not apply"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_dev_tools.py",
+       "-k", "catalog_walk", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the dev tool's catalog check was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: a dead button did not make the tool's own check red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: removing the dead button did not return the check to green")
     print(green.stdout[-800:]); sys.exit(1)
 def line(r):
     ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]

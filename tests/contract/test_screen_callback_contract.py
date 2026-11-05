@@ -94,7 +94,7 @@ def _buttons(screen) -> list:
 
 
 def _screen_builders():
-    from tests.golden.test_golden_screens import SCREEN_BUILDERS
+    from cloudbot.presentation.catalog import SCREEN_BUILDERS
 
     return SCREEN_BUILDERS
 
@@ -114,10 +114,10 @@ async def handlers():
 
 async def test_the_contract_walk_finds_handlers_and_buttons(handlers):
     """A walk that finds no handlers or no buttons would pass vacuously."""
-    from tests.golden.test_golden_screens import _fixtures
+    from cloudbot.presentation.catalog import fixtures as catalog_fixtures
 
     assert handlers, "no callback handlers found — the contract test is vacuous"
-    fixtures = _fixtures()
+    fixtures = catalog_fixtures()
     found = sum(
         len(_buttons(builder(fixtures, Locale.EN)))
         for builder in _screen_builders().values()
@@ -127,9 +127,9 @@ async def test_the_contract_walk_finds_handlers_and_buttons(handlers):
 
 @pytest.mark.parametrize("locale", LOCALES)
 async def test_every_screen_button_is_routable(handlers, locale):
-    from tests.golden.test_golden_screens import _fixtures
+    from cloudbot.presentation.catalog import fixtures as catalog_fixtures
 
-    fixtures = _fixtures()
+    fixtures = catalog_fixtures()
     checked = 0
     unroutable: list[tuple[str, str]] = []
     for name, build in sorted(_screen_builders().items()):
@@ -156,9 +156,9 @@ async def test_every_terminal_button_parses_through_the_term_codec(handlers, loc
     The codec's parser is total: a producer that omits a key part (or an unknown
     action) is rejected here rather than by an ``IndexError`` at tap time.
     """
-    from tests.golden.test_golden_screens import _fixtures
+    from cloudbot.presentation.catalog import fixtures as catalog_fixtures
 
-    fixtures = _fixtures()
+    fixtures = catalog_fixtures()
     checked = 0
     for name, build in sorted(_screen_builders().items()):
         CallbackCodec()

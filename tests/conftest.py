@@ -16,6 +16,7 @@ def _reset_global_routers():
         admin,
         admin_panel,
         common,
+        dev,
         execution,
         features,
         files,
@@ -33,6 +34,7 @@ def _reset_global_routers():
         execution,
         features,
         admin,
+        dev,
         terminal,
     ):
         module.router._parent_router = None

@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     log_level: str = ""
     debug_show_raw: bool = False
     mock_engine: bool = False
+    #: The in-bot developer tools (``/dev``). OFF by default: the tool can render
+    #: every screen and inspect every live button, so it must be opted into
+    #: explicitly. It is additionally admin-gated (``is_admin``) — see
+    #: ``middleware/admin_gate.py`` — so it can never be reached by a non-admin.
+    dev_tools: bool = False
 
     @field_validator("mode", mode="before")
     @classmethod

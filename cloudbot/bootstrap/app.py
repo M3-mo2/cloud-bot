@@ -90,6 +90,13 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     dispatcher.include_router(execution.router)
     dispatcher.include_router(features.router)
     dispatcher.include_router(admin.router)
+    # Developer tools: a second, explicit opt-in on top of the admin gate. The
+    # router is only attached when the switch is on, so no route exists at all in
+    # production, and the gate is the outer seam that would refuse it anyway.
+    if settings.dev_tools:
+        from cloudbot.handlers import dev
+
+        dispatcher.include_router(dev.router)
     # Terminal last: a slash-command in the terminal FSM must reach the command
     # routers first; plain text falls through to the terminal message handler.
     dispatcher.include_router(terminal.router)
