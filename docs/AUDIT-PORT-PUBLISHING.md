@@ -14,6 +14,37 @@ handlers re-raise therefore dies silently. See F-01.
 
 ---
 
+## Fixed
+
+The three high-severity findings below were fixed in commit
+`02b7e32` (`fix(tunnels): render re-raised refusals, stop orphaned progress,
+guard double-publish`). The original finding text is kept verbatim further down
+— an audit is a record, not a rewrite.
+
+* **F-01 (critical)** — fixed. `ErrorGuardMiddleware._render` now unwraps a
+  `TelegramObject` `Update` to its `callback_query`/`message` before the
+  `isinstance` checks, so a re-raised `DomainError` on any event level renders
+  exactly one screen. `NotOwned` and a genuinely missing workspace id render the
+  **byte-identical** "not found" board (the isolation rule holds); an unmapped
+  code renders the generic board, never silence. The guard stays registered once,
+  at the update level (see `docs/DECISIONS.md`, CB-29).
+* **F-02 (high)** — fixed. The publish progress indication now becomes the
+  message that carries the result: for a callback it edits the originating
+  message; for a typed port it sends the progress message and edits *that* one.
+  No orphaned "Publishing…" is left on success, refusal or timeout.
+* **F-03 (high)** — fixed. `TunnelsService.publish` short-circuits when a tunnel
+  already exists for the port (surfacing it with a sentence) and serialises
+  concurrent creates per `(user, workspace, port)` with an `asyncio.Lock`, so a
+  double-tap makes one engine create. A failed create releases the lock (see
+  `docs/DECISIONS.md`, CB-30).
+
+Proofs: `tests/unit/test_port_publishing_fixes.py` (15 tests, driven through the
+real dispatcher + fake engine), `scripts/verify.sh` proof 37 (a bite test that
+reintroduces the F-01 silence), and goldens for the publishing /
+already-published screens in both locales.
+
+---
+
 ## F-01 · Re-raised refusals render nothing: the error guard receives an `Update`, not the callback/message
 
 [severity: critical]

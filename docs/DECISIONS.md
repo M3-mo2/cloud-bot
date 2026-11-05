@@ -532,6 +532,78 @@ stranded.
 
 ---
 
+## CB-29 — The error guard stays registered once, at the update level, and unwraps the `Update`
+
+**Decision.** `ErrorGuardMiddleware` remains a **single** middleware on
+`dispatcher.update` (not duplicated onto the `message` and `callback_query`
+observers). Because an update-level aiogram 3.x middleware receives the
+`TelegramObject` `Update`, `_render` **unwraps** it
+(`event.callback_query or event.message`) before its `isinstance` checks, then
+edits a callback's message or sends to a message's chat.
+
+**Why.** The audit (F-01) measured that the guard rendered *zero* screens for a
+re-raised `DomainError`, because `_render` was written for the per-event object
+while the guard was fed an `Update`. Two shapes fix it: unwrap in `_render`, or
+register the guard on both observers (as `AdminGateMiddleware` is). The unwrap
+keeps a single outermost catch: one registration means a `DomainError` raised
+anywhere below the update is caught exactly once and rendered exactly once,
+whereas two observer registrations would wrap two nested delivery paths and
+invite a double render (or a missed one) whenever the two disagree. It is also
+the smaller diff and keeps the guard's own `_render` unit-testable without a
+dispatcher.
+
+**Consequences.** Every refusal (invalid input, `NotOwned`, an unmapped engine
+code) now renders one screen on both callbacks and messages. The isolation rule
+is preserved: `NotOwned` and a missing id both map through
+`mapping/errors.view_for_error` to the **same** `not_found` board, asserted
+byte-identical in `tests/unit/test_port_publishing_fixes.py`. Proof 37 in
+`scripts/verify.sh` drops the unwrap and shows the F-01 test go red.
+
+**Alternatives rejected.** Registering on both observers: two seams, and a
+genuine risk of double-rendering the same refusal. A new `DomainError` mapping
+per event type: the guard is the one place a `DomainError` becomes a screen
+(CB-27), and that must not be duplicated.
+
+---
+
+## CB-30 — The tunnel publish guard lives in the service; it de-dups a port and serialises creates
+
+**Decision.** `TunnelsService.publish` is **idempotent per port** and
+**serialised per `(tg_id, ws_id, port)`**. Under an `asyncio.Lock` keyed by that
+triple it first lists the workspace's tunnels; if one already carries the port it
+raises `TunnelAlreadyPublished(existing)` (a plain exception, not a `DomainError`
+— it is a legitimate idempotency outcome, not a refusal) instead of calling
+`create_tunnel`. Only when no tunnel holds the port does it create one. The
+handler renders the existing link with a one-sentence note
+(`tunnel.already_published`, both locales). A failed create exits the `async
+with` block, releasing the lock, so a retry works.
+
+**Why.** The audit (F-03) confirmed on the real engine that a double-tap of the
+same publish button creates a **second** tunnel on the same port; the cap is
+`tunnels.max_per_workspace: 2`, so one port burns the whole allowance. The fix
+is at the **service** layer, not only the UI, so it also covers a retried
+callback and any other caller. A per-user-per-workspace key means the guard
+cannot leak across users or workspaces, and the lock covers a create that is
+*already in flight* (a create is slow — `url_timeout_sec`, 45 s — so the two
+taps genuinely overlap). The list-then-create under the lock is the client-side
+half of the idempotency the engine itself does not offer (INTEGRATION-GUIDE has
+no per-port de-dup).
+
+**Consequences.** Two rapid publishes produce one engine create; a sequential
+second publish surfaces the existing link; a failed create is retryable; two
+different ports still create two tunnels; two users do not interfere. Pinned by
+`tests/unit/test_port_publishing_fixes.py` (both at the service layer and
+through the real dispatcher).
+
+**Alternatives rejected.** A UI-only disabled button: does not cover a retried
+callback or a second tap before the first repaint. A global lock: would serialise
+unrelated workspaces and users. Checking existence without the lock: a
+time-of-check/time-of-use race between the two overlapping creates. Making
+`TunnelAlreadyPublished` a `DomainError`: it would route through the error guard
+and read as a refusal, when the request genuinely succeeded (the link exists).
+
+---
+
 ## Open questions deliberately left open
 
 - **Provisional:** exact plan/quota model and per-user rate limits (Phase 2;
