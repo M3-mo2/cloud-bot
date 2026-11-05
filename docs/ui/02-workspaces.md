@@ -53,6 +53,13 @@ The list shows up to 10 per page, then a **Load more** button (primary), which
 requests the next page (the engine's offset pagination). When there are no more
 pages, the button is omitted.
 
+**The nav block depends on whether the user is inside a workspace.** When the
+list is shown *outside* a session (from the menu, or after logging out) it ends
+in the account block — Workspaces (muted, we are here), Settings, Language, Help
+and Menu. When the list is shown *inside* a session the block is the session's
+(§2.5.2): `🏠 <workspace>` and `📦 Workspaces` (muted, we are here), and the
+account destinations are absent.
+
 ### 1.4 Empty state
 
 English:
@@ -195,6 +202,31 @@ Your files are safe.</blockquote>
 <blockquote>⏳ انتهت صلاحية خطتك. جدّد لتشغيل الأكواد مجددًا.
 ملفاتك آمنة.</blockquote>
 ```
+
+#### 2.5.2 The session nav block — inside is not the account
+
+**While the user is inside a workspace the nav block belongs to the session, not
+to the account.** On every screen reachable from a session — the workspace home,
+the workspace list, help, settings and the language picker — the shared block is
+**exactly two entries**:
+
+| Label (AR) | Label (EN) | Callback | Notes |
+| --- | --- | --- | --- |
+| 🏠 demo | 🏠 demo | `ws:home` | the workspace home; **muted** while already on it |
+| 📦 المساحات | 📦 Workspaces | `ws:list` | browse / **switch** to another workspace |
+
+The **account destinations — Settings, Language, Help and Menu — are removed
+from the block whenever the user is inside a workspace.** A place the user has
+*entered* should not re-offer the account's own screens; that is what made the
+workspace home feel cluttered (reported live: the top-level menu appeared at the
+very bottom of the session home). They remain reachable exactly as before — the
+`/settings` and `/help` commands, and by leaving the workspace. Note this means
+the docs must not rely on the inside block for the account menu; that is the
+point of the change.
+
+This took the inside block from six entries (home + four destinations + menu) to
+two, and the workspace home from **20 buttons to 16** (11 rows to 9 in the AR/EN
+keyboard grids), comfortably inside the ≤2-columns, ≤3-rows layout rule.
 
 ### 2.6 "Run" disabled while a run is active
 

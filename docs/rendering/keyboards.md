@@ -80,12 +80,15 @@ everywhere: every user-facing button is inline.
 ## 3a. The shared bottom navigation block
 
 One helper (`presentation/screens/nav.py`) renders the same nav block at the
-bottom of every top-level screen: Workspaces (`ws:list`), Settings
-(`nav:settings`), Language (`nav:language`), Help (`nav:help`), plus Menu
-(`nav:menu`) where the screen is not the menu. **At most two buttons per row,
-at most three rows**; a screen's primary action (e.g. `➕ New Workspace`) sits full
-width above it. The destination the user is already on is `MUTED` (disabled) —
-visible, not tappable.
+bottom of every top-level screen. Its content depends on **whether the user is
+inside a workspace** (the helper's `inside` argument):
+
+**Not inside a workspace** — the block is the *account's*: Workspaces
+(`ws:list`), Settings (`nav:settings`), Language (`nav:language`), Help
+(`nav:help`), plus Menu (`nav:menu`) where the screen is not the menu. **At most
+two buttons per row, at most three rows**; a screen's primary action (e.g.
+`➕ New Workspace`) sits full width above it. The destination the user is already
+on is `MUTED` (disabled) — visible, not tappable.
 
 ```
 [ 📦 المساحات ] [ ⚙️ الإعدادات ]
@@ -93,18 +96,35 @@ visible, not tappable.
 [ 🏠 القائمة ]                      ← only where the screen is not the menu
 ```
 
+**Inside a workspace** (task 13) — the block is the *session's*, **not the
+account's**: exactly two entries, the workspace home (`ws:home`, `MUTED` while
+already on it) and Workspaces (`ws:list`, to switch), on one row.
+
+```
+[ 🏠 demo ] [ 📦 المساحات ]
+```
+
+The **account destinations — Settings, Language, Help and Menu — are removed
+from the block whenever `inside` is set.** A screen the user has *entered* should
+not re-offer the account's own surfaces; that was the reported clutter (the
+top-level menu appearing at the bottom of the workspace home). They stay
+reachable exactly as before: the `/settings` and `/help` commands, and leaving
+the workspace. This is the one place the account block disappears, and it is
+deliberate — do not "restore" it while fixing a later bug.
+
 ```python
 from cloudbot.presentation.screens import nav
 
 rows  = [[inline("menu.new_workspace", "ws:new", intent=SUCCESS)]]
-rows += nav.nav_rows(locale, "menu")     # current surface
+rows += nav.nav_rows(locale, "menu")            # not inside: account block
+rows += nav.nav_rows(locale, "workspace_home", inside=ws)  # inside: session block
 ```
 
 The old per-screen **Back** buttons remain on *inner* screens (files, runs,
 settings forms); the nav block is the top-level pattern. The **workspace home**
 (task 11) is a session home, not an inner page: it carries the shared nav block
 and takes its single exit from the explicit log-out — no `⬅️ Back` row (see
-`../ui/02-workspaces.md` §2.5.1).
+`../ui/02-workspaces.md` §2.5.1–2.5.2).
 
 ---
 
@@ -233,7 +253,9 @@ Action namespaces:
 1. Colors come **only** from `Intent`; a screen never names a `ButtonStyle`.
 2. Every destructive action is `DANGER` **and** requires an explicit confirm.
 3. Every top-level screen ends with the shared inline nav block (§3a); inner
-   screens carry a **Back** (primary) button. There is no reply keyboard.
+   screens carry a **Back** (primary) button. There is no reply keyboard. While
+   inside a workspace the block is the session's (two entries) — the account
+   destinations are not offered there (§3a).
 4. Button text always comes from the catalog, in the user's locale — never a
    hardcoded English string.
 5. Icons are part of the catalog string (`"🗑 حذف"` / `"🗑 Delete"`), so both
@@ -251,7 +273,8 @@ Action namespaces:
 
 | Screen element | Type | Intent | Flags |
 | --- | --- | --- | --- |
-| Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one `MUTED` |
+| Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one `MUTED`; **not inside** only |
+| Session nav (🏠 home / 📦 Workspaces) | inline | primary | current one `MUTED`; **inside** only, two entries |
 | Back (inner screens) | inline | primary | — |
 | Open workspace | inline | primary | — |
 | Create workspace | inline | success | — |
