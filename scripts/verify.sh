@@ -18,6 +18,8 @@
 #  15. A bite test that changes behaviour (metrics honesty guard), restored.
 #  34. A bite test that puts a self-referential nav entry back (R1), restored.
 #  35. A bite test that makes too_many_tunnels silently redraw again, restored.
+#  36. A bite test that restores the old state.clear() after a terminal command,
+#      so sticky input breaks again, restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -705,3 +707,51 @@ PY
 
 echo
 echo "all thirty-five proofs passed"
+
+echo
+echo "== 36. bite test: sticky terminal input is load-bearing =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Restore the OLD behaviour — `await state.clear()` after a command — so the very
+# next plain message no longer reaches the session (the reported bug, verbatim:
+# *«مش كل مره ادوس ارسال امر»*). The sticky test must go red; restore the re-set,
+# and it is green again. This proves the sticky rule is the fix, not decoration.
+target = pathlib.Path("cloudbot/handlers/terminal.py")
+original = target.read_text(encoding="utf-8")
+guard = (
+    "    # Sticky (R1): keep the same state so the very next plain message is another\n"
+    "    # command — no re-tap per command.\n"
+    "    await state.set_state(TerminalInput.awaiting_command)\n"
+    "    await state.update_data(ws_id=str(ws_id), ses_id=ses_id)\n"
+)
+bite = "    # BITE: the old behaviour — clear the sticky state after one command\n    await state.clear()\n"
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (sticky re-set moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_terminal_sticky.py",
+       "-k", "one_tap_then_three or state_is_not_cleared",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the sticky test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: restoring the old clear did not make the sticky test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the sticky re-set did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-six proofs passed"
