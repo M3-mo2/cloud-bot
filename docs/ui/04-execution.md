@@ -435,3 +435,102 @@ Keyboard: **⏹ إيقاف الكل / ⏹ Stop all** (danger), **⬅️ رجوع
 | Workspace | "Runs" | history |
 | History | a row | that run's final screen |
 | History | "Purge" | confirm → (refused if live) |
+
+---
+
+## 7. Interactive terminal — sticky input (Phase 1.5, task 16)
+
+A workspace's **🖥 Terminals** opens the engine's native PTY sessions (never a
+hand-rolled FIFO; INTEGRATION-GUIDE §5.4). Each command used to need a fresh tap
+on **⌨️ Send a command** — the user reported it verbatim:
+*«عايز الترمنال اقدر اكتب فيها علطول مش كل مره ادوس ارسال امر»*.
+
+**The rule: entering command mode is sticky.** One tap on **⌨️ Send a command**
+enters it; from then on **plain text messages keep going to that session** until
+the user explicitly stops. There is no re-tap per command.
+
+### 7.1 Entering and the live view
+
+Tapping **⌨️ Send a command** does **not** open a separate prompt: it enters the
+sticky state and (re)renders the **terminal view itself**, so the state is always
+paired with the visible terminal buttons. While the user is typing, the view
+adds one italic line and one button:
+
+English:
+
+```html
+<h2>🖥 Terminal</h2>
+<p><b>Status:</b> 🟢 Running</p>
+<p><b>Size:</b> 80×24</p>
+<pre><code class="language-text">$ </code></pre>
+<p><i>This terminal closes after 15m 00s idle, or 1h 00m 00s after it opens.</i></p>
+<p><i>This terminal is active. Send a command, or use the buttons below.</i></p>
+```
+
+Arabic (`is_rtl=True`):
+
+```html
+<h2>🖥 الطرفية</h2>
+<p><b>الحالة:</b> 🟢 قيد التشغيل</p>
+<p><b>الحجم:</b> ٨٠×٢٤</p>
+<pre><code class="language-text">$ </code></pre>
+<p><i>تُغلق هذه الطرفية بعد ١٥ د ٠٠ ث من الخمول، أو ١ س ٠٠ د ٠٠ ث من فتحها.</i></p>
+<p><i>هذه الطرفية نشِطة. أرسل أمرًا، أو استخدم الأزرار بالأسفل.</i></p>
+```
+
+### 7.2 Keyboard (sticky)
+
+Every button the terminal view normally carries is **kept**, plus the one-tap
+exit. A plain message in this state is the command (sent with Enter).
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| ⌨️ إرسال أمر | ⌨️ Send a command | inline | primary | keeps the mode |
+| ⏹ إيقاف الكتابة | ⏹ Stop typing | inline | danger | **exits the mode** (R3) |
+| Ctrl-C | Ctrl-C | inline | primary | — |
+| Ctrl-D (نهاية الملف) | Ctrl-D (EOF) | inline | primary | — |
+| ↔️ تغيير الحجم | ↔️ Resize | inline | primary | — |
+| ⏹ إغلاق | ⏹ Close | inline | danger | — |
+| 🖥 طرفياتي | 🖥 My terminals | inline | primary | — |
+| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+
+### 7.3 Leaving the mode — three ways, none of them a dead end
+
+1. **⏹ Stop typing** (danger) clears the state and returns to the ordinary
+   terminal view. This is the primary exit.
+2. **A known slash-command** (`/start`, `/help`, `/settings`, `/admin`, …) clears
+   the state *before* the routers run, so a sticky state can never swallow a
+   command — it always does its own thing (R4).
+3. **The session ending** (close, Ctrl-D, idle/lifetime, workspace stop) clears
+   the state and renders the ended screen, so the mode never outlives the session
+   it pointed at (R5).
+
+An **unknown** slash-command is deliberately *not* sent into the session: it
+re-renders the terminal and the sticky state is kept, so it neither vanishes nor
+becomes terminal input.
+
+### 7.4 One command, one follow — cut short on idle, supersede on the next
+
+Each plain message sends the line and then follows the session's output by the
+same offset protocol as run logs, updating one message in place. The follower is
+**bounded and paced** (an iteration cap and a poll interval), so the engine is
+never hammered. Two rules make the follow behave under sticky input:
+
+- **Cut short on idle.** The follower stops once the session produces no new
+  output for a couple of consecutive polls; a quiescent command is done. (Before
+  this, each command spent the whole budget pacing — measured live at ~30 s per
+  command, which made typing a second command wait for the first to finish.)
+- **Supersede on a new command.** A newer plain message claims a new follow
+  generation; an older follower notices this at its next tick and stops *before*
+  its next engine read. Two commands never fight over one message, and the engine
+  is never polled by two followers at once.
+
+The state survives because the FSM is per user/chat; a foreign user's message is
+refused by the ownership gate and clears the state, and can never reach the
+session (R5/R6).
+
+### 7.5 `command_prompt` is retired
+
+The separate **⌨️ Send a command** prompt screen is no longer shown on this path:
+the sticky mode edits the terminal view in place instead. (The catalog keys
+remain, but the handler no longer routes here.)

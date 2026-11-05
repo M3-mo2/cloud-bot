@@ -81,13 +81,27 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
   - Input flows through the FSM state group `states/terminal_input.py`; a plain
     message is sent with a newline appended, and a `/command` is never swallowed
     as terminal input.
+  - **Sticky input (task 16):** one tap on **⌨️ Send a command** enters the mode,
+    and every following plain message is another command to the same session — no
+    re-tap. The one-tap **⏹ Stop typing** control (danger), a **known
+    slash-command**, or the session **ending** leaves the mode. A known command is
+    cleared by `TerminalStickyMiddleware` *before* the routers run, so the sticky
+    state can never swallow `/start`, `/help`, `/settings` or `/admin`.
   - Live output follows the **same offset protocol as run logs**, updating one
-    message in place, bounded by iteration count and a poll interval.
+    message in place, bounded by iteration count and a poll interval. The follow
+    **cuts short on idle** (no new output for a couple of polls) and a newer
+    command **supersedes** an in-flight follow (a per-session generation), so a
+    second command never waits behind a ~30 s stall and the engine is never polled
+    by two followers at once.
 
-## How to use the terminal1. Open a workspace → **🖥 Terminals** → **➕ Open terminal**.
-2. The terminal view shows the status and recent output. Tap **⌨️ Send a command**,
-   type (for example) `ls`, and it is sent with Enter; `cd`, `export`, aliases
-   survive because it is one long-lived shell.
+## How to use the terminal
+
+1. Open a workspace → **🖥 Terminals** → **➕ Open terminal**.
+2. The terminal view shows the status and recent output. Tap **⌨️ Send a command**
+   once, then type (for example) `ls`; it is sent with Enter. **The mode is
+   sticky** — keep typing commands; `cd`, `export`, aliases survive because it is
+   one long-lived shell. Tap **⏹ Stop typing** (or send `/start`) to leave; a known
+   command always leaves the mode.
 3. **Ctrl-C** sends `INT` to the foreground process group (it interrupts the
    running command without ending the terminal). **Ctrl-D** sends the EOF byte
    (`0x04`) to the shell — chosen over a `TERM` signal because it is the

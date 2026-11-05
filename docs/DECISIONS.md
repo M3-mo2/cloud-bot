@@ -471,6 +471,67 @@ running is a legitimate workflow.
 
 ---
 
+## CB-28 — Terminal input is sticky; the follow is cut short on idle and superseded by the next command
+
+**Decision.** Entering the interactive terminal's command mode is **sticky**: one
+tap on **⌨️ Send a command** and plain text messages keep going to that session
+until the user leaves. There are exactly three exits — the one-tap **⏹ Stop
+typing** control, a **known slash-command** (which is cleared *before* the
+routers run, so it can never be swallowed), and the **session ending** (which
+clears the state and renders the ended screen). While a command's output is being
+followed, a newer plain message **supersedes** the in-flight follow: it claims a
+new generation and the older follower stops at its next tick, *before* its next
+engine read. Independently, a follow **cuts short on idle** — once the session
+produces no new output for a couple of consecutive polls, it stops.
+
+**Why.** He reported it verbatim: *«عايز الترمنال اقدر اكتب فيها علطول مش كل مره
+ادوس ارسال امر»* — the old handler ran `await state.clear()` after the first text
+message, so every command cost a re-tap. Measured by the previous run: one tap,
+then three consecutive plain messages each reached `send_line`. The R7 choice was
+forced by a **measurement**: each follow was bounded by
+`FOLLOW_MAX_ITERATIONS × FOLLOW_POLL_INTERVAL` (30 × 1 s) and a PTY rarely emits
+for the whole window, so a plain message took **~30 s** to handle
+(`duration_ms=30089` in the log). With sticky input the user types the next
+command while the bot streams the first, so that stall is a UX defect, not
+theory. *Cut short on idle* fixes the common case without weakening the
+bounded-engine discipline; *supersede* keeps a user's newer command authoritative
+when a follow is still in flight, so a command with long-running output is never
+displaced by the follower of an older one, and the engine is never polled by two
+followers at once.
+
+**Consequences.** `_read_all` now also returns the offset `next`, and `_stream`
+tracks it to detect idle; both follow-limit checks sit *before* the read. Tests
+pin: three consecutive messages after one tap; the state not cleared after a
+command; `/start` and `/help` clearing the state without reaching the session;
+the stop-typing control; a foreign user refused (`NotOwned` clears the state); an
+ended session rendering the ended screen, clearing the state and not raising; the
+view still carrying its buttons; the idle cut-short (a stale follower makes **no**
+read); and the new-command supersede (the two followers stay near one budget).
+Proof 36 in `scripts/verify.sh` restores the old `state.clear()` and shows the
+sticky test go red. The async failure path question — that aiogram's default
+`handle_as_tasks=True` means updates for one chat overlap — is *why* the
+generation map exists at all.
+
+**Alternatives rejected.** *Serialise* (queue commands behind the running
+follow): it keeps the 30 s stall and hides it, and would need a "bot is busy"
+affordance. *Cancelling* the in-flight follow with an `asyncio.Task.cancel()`:
+the generation check is simpler, needs no task bookkeeping, and is testable
+without scheduling. *Unbounded streaming until the PTY goes quiet for a long
+time*: it risks a long hold on a session whose command is interactive (an editor
+waiting at a prompt), so the idle window stays deliberately short.
+
+**Why the FSM is not persisted, so the way back in must stay easy.** The sticky
+state lives in aiogram's `MemoryStorage` ("DEV/DEBUG use memory FSM; PRODUCTION
+would use SQLite", `bootstrap/app.py`). It therefore does **not** survive a
+restart or redeploy — by design, since it is transient input focus, not product
+data (the *workspace session* is the column-not-FSM record of CB-16). The
+consequence is deliberate: because the mode can vanish silently on a restart,
+the way back in must be **one tap** from the ordinary terminal view, and every
+screen the mode shows keeps the terminal buttons, so no one is ever trapped or
+stranded.
+
+---
+
 ## Open questions deliberately left open
 
 - **Provisional:** exact plan/quota model and per-user rate limits (Phase 2;
