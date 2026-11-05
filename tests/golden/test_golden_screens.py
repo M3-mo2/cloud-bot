@@ -263,6 +263,26 @@ def _fixtures():
         )
     )
     empty_tunnel_list = TunnelList(tunnels=())
+    full_tunnel_list = TunnelList(
+        tunnels=(
+            Tunnel(
+                id="tnl_01M6HJASCWM9Z1PF755GT89NK4",
+                workspace_id=str(ws.id),
+                port=8080,
+                url="https://example-abc.trycloudflare.com",
+                status="active",
+                created_at=NOW,
+            ),
+            Tunnel(
+                id="tnl_01M6HJASCWM9Z1PF755GT89NK5",
+                workspace_id=str(ws.id),
+                port=8081,
+                url="https://example-def.trycloudflare.com",
+                status="active",
+                created_at=NOW,
+            ),
+        )
+    )
     port_report = PortReport(
         workspace_id=str(ws.id),
         ports=(
@@ -441,6 +461,7 @@ def _fixtures():
         install_failed_no_net=install_failed_no_net,
         tunnel_list=tunnel_list,
         empty_tunnel_list=empty_tunnel_list,
+        full_tunnel_list=full_tunnel_list,
         port_report=port_report,
         partial_port_report=partial_port_report,
         metrics=metrics,
@@ -591,19 +612,35 @@ SCREEN_BUILDERS = {
     "package_remove_prompt": lambda f, loc: pkg_screens.remove_prompt(f["ws"].id, loc),
     "package_remove_all_confirm": lambda f, loc: pkg_screens.remove_all_confirm("demo", f["ws"].id, loc),
     # -- Phase 2b: tunnels ---------------------------------------------------
-    "tunnel_list": lambda f, loc: tnl_screens.tunnels_screen(f["tunnel_list"], f["ws"].id, loc),
-    "tunnel_list_empty": lambda f, loc: tnl_screens.tunnels_screen(f["empty_tunnel_list"], f["ws"].id, loc),
+    "tunnel_list": lambda f, loc: tnl_screens.tunnels_screen(
+        f["tunnel_list"], f["ws"].id, loc, max_tunnels=2
+    ),
+    "tunnel_list_empty": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, max_tunnels=2
+    ),
+    "tunnel_list_at_cap": lambda f, loc: tnl_screens.tunnels_screen(
+        f["full_tunnel_list"], f["ws"].id, loc, max_tunnels=2
+    ),
     "tunnel_gate_allow_tunnels": lambda f, loc: tnl_screens.tunnels_screen(
-        f["empty_tunnel_list"], f["ws"].id, loc, allow_tunnels=False
+        f["empty_tunnel_list"], f["ws"].id, loc, allow_tunnels=False, max_tunnels=2
     ),
     "tunnel_gate_allow_net": lambda f, loc: tnl_screens.tunnels_screen(
-        f["empty_tunnel_list"], f["ws"].id, loc, allow_net=False
+        f["empty_tunnel_list"], f["ws"].id, loc, allow_net=False, max_tunnels=2
     ),
     "tunnel_gate_server": lambda f, loc: tnl_screens.tunnels_screen(
-        f["empty_tunnel_list"], f["ws"].id, loc, server_enabled=False
+        f["empty_tunnel_list"], f["ws"].id, loc, server_enabled=False, max_tunnels=2
     ),
     "tunnel_publish": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[8080]),
+    "tunnel_publish_none": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[]),
     "tunnel_publish_custom": lambda f, loc: tnl_screens.publish_custom_prompt(f["ws"].id, loc),
+    "tunnel_publish_confirm_unlistened": lambda f, loc: tnl_screens.publish_confirm(
+        9000, f["ws"].id, loc,
+        warning="Nothing is listening on this port yet. The link will only work once something listens on it.",
+    ),
+    "tunnel_limit_reached": lambda f, loc: tnl_screens.publish_refused_screen(
+        8082, f["ws"].id, loc, max_tunnels=2
+    ),
+    "tunnel_timeout": lambda f, loc: tnl_screens.tunnel_timeout_screen(8080, f["ws"].id, loc),
     "tunnel_remove_confirm": lambda f, loc: tnl_screens.remove_confirm(f["tunnel_list"].tunnels[0], f["ws"].id, loc),
     # -- Phase 2c: ports -----------------------------------------------------
     "port_list": lambda f, loc: port_screens.ports_screen(f["port_report"], f["ws"].id, loc),
