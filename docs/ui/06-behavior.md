@@ -192,3 +192,39 @@ rendered as a `[████░░░░] 50%` line inside `<code>` (visual, lan
 | Confirm destructive | Danger button on its own screen. |
 | No raw output | Human sentences only; raw collapsed in DEBUG+admin. |
 | Honest truncation | Every dropped byte is disclosed. |
+
+---
+
+## 14. Tunnels / ports — every refusal explains itself (task 15)
+
+Publishing a public link is the sharpest path in the bot: a tunnel create is slow
+(cloudflared waits up to `tunnels.url_timeout_sec`), it is capped per workspace
+(`tunnels.max_per_workspace`), and a link only works once something is LISTENING
+on the port. The rules that keep it honest:
+
+- **No silent branch.** Every engine refusal on the publish path maps to a
+  rendered sentence. `too_many_tunnels` renders a dedicated *Link limit reached*
+  screen that names the **actual** limit and offers **Remove a link** (the
+  list/removal path); `tunnel_url_unavailable` renders a *Couldn't get a link*
+  screen that explains the usual cause (no egress / `allow_net`) and offers
+  **Retry {port}** on the same port; `tunnels_disabled` re-renders the tunnels
+  screen with the off switch named. An **unmapped** code is re-raised to the
+  error screen — it is never swallowed into a redraw.
+- **The ceiling is reported, never hardcoded.** The tunnels screen shows
+  «الروابط المنشورة: N من M» / "Links published: N of M", where M is
+  `tunnels.max_per_workspace` read from `/v1/meta`. At the cap the publish entry
+  is a **disabled** button whose own label says the limit was reached — a
+  button-shaped no-op reads better than an action that silently fails.
+- **A non-listening port is a warning, not a block.** The publish screen lists
+  the detected ports as one-tap buttons; a typed port that is **not** detected
+  first shows a confirm screen carrying one sentence — the link will only work
+  once something listens on that port. Starting a server *after* publishing is
+  legitimate, so it is never refused. When no port is detected at all, the screen
+  says so and adds one line naming what to do (start the server, or type its
+  port).
+- **Never a dead end.** The list, the publish picker, the confirm, the refusal
+  and the timeout screens each keep a back path (`⬅️ Back`), and the tunnels
+  list always returns to the workspace home.
+- **Still ephemeral.** The URL continues to appear only as a `LINK` button on the
+  live screen; it is never persisted and never rendered as text.
+

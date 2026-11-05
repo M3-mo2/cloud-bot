@@ -433,6 +433,44 @@ is a harmless no-op. The removal is guarded by tests (fires on `/start`, not on
 
 ---
 
+## CB-27 — Every refusal renders a sentence; the tunnel limit is reported, not hardcoded
+
+**Decision.** On the publish path, **no engine refusal is silently swallowed**.
+Each known `engine_code` (`too_many_tunnels`, `tunnel_url_unavailable`,
+`tunnels_disabled`) maps to a dedicated, rendered screen with the cause, the fix
+or the retry, and a back path; an **unmapped** code is re-raised to the error
+screen. The per-workspace cap is read from `/v1/meta`
+(`tunnels.max_per_workspace`) and displayed ("N of M") — it is never a constant
+in the bot. At the cap the publish entry is a disabled button whose label names
+the reason. A non-listening port gets a one-sentence warning in a confirm, never
+a block.
+
+**Why.** Measured live: publishing a third tunnel against the real engine
+(`tunnels.max_per_workspace: 2`) produced `too_many_tunnels`, which the handler
+folded into a plain list re-render — the catalog sentence existed but was never
+shown. The user saw the publishing screen and then the list, with no explanation
+("بيقولي انه بيجيب رابط بس مش بيحصل حاجه"). Two more defects compounded it: the
+screen never stated the ceiling (so it was invisible until hit), and nothing said
+a link only works once something listens on the port. The general rule the user
+asked for — *every* refusal must explain itself — turns a dead end into a
+recoverable one, and a data-driven test over the refusal codes stops a future
+code from regressing to silence.
+
+**Consequences.** The refusal/publish logic moved behind two functions
+(`_unlistened_warning`, `_tunnel_refusal_screen`) so the mapping is testable
+without a dispatcher; `TunnelsService` caches `/v1/meta` (one call, not one per
+render) and exposes the cap. Goldens cover the list below/at the cap, the refusal
+and timeout screens, and the warning confirm, in both locales. A bite test
+(proof 35) proves the dedicated refusal screen is load-bearing.
+
+**Alternatives rejected.** A toast-only refusal: the rule is that the *screen*
+carries the full explanation. Hardcoding `2`: the engine's cap is
+config (`config.yaml`), and the integration guide says never hardcode
+limits/versions. Blocking a non-listening port: publishing before the server is
+running is a legitimate workflow.
+
+---
+
 ## Open questions deliberately left open
 
 - **Provisional:** exact plan/quota model and per-user rate limits (Phase 2;

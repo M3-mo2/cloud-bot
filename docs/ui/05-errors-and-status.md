@@ -311,6 +311,14 @@ Rendered (AR):
 | Notes | Phase 2. |
 | Buttons | Back (primary) |
 
+**`too_many_tunnels` is never a silent redraw (task 15, R1).** It renders a
+dedicated screen (`tunnel.limit_title`) whose sentence carries the **actual**
+limit from `/v1/meta` (`tunnels.max_per_workspace`, e.g. "You've reached the
+maximum of 2 published links") and offers the fix — a **Remove a link** button
+that opens the list/removal path. The tunnels list states its own ceiling
+("Links published: N of M") and, at the cap, the publish entry is **muted with
+the reason on its own label**. The limit is reported, never hardcoded.
+
 ### 1.21 422 — archive encrypted / multivolume / unsafe
 
 | Field | Value |
@@ -383,6 +391,12 @@ Appended **only** in DEBUG, admin-only, collapsed:
 | AR | "تعذّر نشر الرابط. يرجى المحاولة مرة أخرى." |
 | Notes | Phase 2; includes Cloudflare rate-limiting. |
 | Buttons | 🔄 Retry (primary), Back (primary) |
+
+**The timeout explains itself (task 15, R4).** On the tunnel path this code
+renders a dedicated screen (`tunnel.timeout_title`) that adds what usually causes
+it — cloudflared could not reach Cloudflare, so the workspace needs egress
+(`allow_net`) / public links — and offers **Retry on the same port**
+(`🔁 Retry {port}`), never dumping the user back to the list.
 
 ### 1.26 507 — insufficient storage
 
