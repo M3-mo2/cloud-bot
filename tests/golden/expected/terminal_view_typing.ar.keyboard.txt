@@ -1,0 +1,4 @@
+⌨️ إرسال أمر [term:cmd:5vfbvvg2] enabled | ⏹ إيقاف الكتابة [term:exit:5vfbvvg2] enabled
+Ctrl-C [term:signal:dv4b8zrz] enabled | Ctrl-D (نهاية الملف) [term:ctrl_d:5vfbvvg2] enabled
+↔️ تغيير الحجم [term:resize:5vfbvvg2] enabled | ⏹ إغلاق [term:close:5vfbvvg2] enabled
+🖥 طرفياتي [term:list:4xt1tp8g] enabled | ⬅️ رجوع [ws:view:4xt1tp8g] enabled

@@ -591,6 +591,9 @@ SCREEN_BUILDERS = {
     "terminal_view_running": lambda f, loc: term_screens.terminal_view(
         f["running_session"], f["ws"].id, loc, output="$ ls\nmain.py  README.md\n$ ", meta=f["meta"]
     ),
+    "terminal_view_typing": lambda f, loc: term_screens.terminal_view(
+        f["running_session"], f["ws"].id, loc, output="$ ls\nmain.py  README.md\n$ ", meta=f["meta"], typing=True
+    ),
     "terminal_view_ended": lambda f, loc: term_screens.terminal_view(f["ended_session"], f["ws"].id, loc, output="$ echo hi\nhi\n$ "),
     "terminal_view_failed": lambda f, loc: term_screens.terminal_view(f["failed_session"], f["ws"].id, loc),
     "terminal_resize": lambda f, loc: term_screens.resize_screen(f["running_session"], f["ws"].id, loc),
@@ -777,6 +780,9 @@ KB_AFFECTED = {
     # The admin's entered screen reuses the user workspace home (session=False), so
     # its keyboard changed with it; lock it here too.
     "admin_entered",
+    # Task 16/17: the sticky terminal view (typing=True) is the changed keyboard —
+    # it keeps every terminal button and adds the one-tap "stop typing" exit (R2/R3).
+    "terminal_view_typing",
 }
 
 
