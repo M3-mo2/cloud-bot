@@ -529,7 +529,10 @@ SCREEN_BUILDERS = {
         [f["ws"], f["suspended"]], loc, display_name="sara", inside=f["ws"]
     ),
     "help": lambda f, loc: menu_screens.help_screen(loc),
+    "help_inside": lambda f, loc: menu_screens.help_screen(loc, inside=f["ws"]),
     "settings": lambda f, loc: menu_screens.settings_screen(loc),
+    "settings_inside": lambda f, loc: menu_screens.settings_screen(loc, inside=f["ws"]),
+    "language_picker_inside": lambda f, loc: language_picker(loc, inside=f["ws"]),
     "ws_list": lambda f, loc: ws_screens.workspace_list([f["ws"], f["suspended"]], loc),
     "ws_list_empty": lambda f, loc: ws_screens.workspace_list([], loc),
     "ws_list_inside": lambda f, loc: ws_screens.workspace_list(
@@ -723,6 +726,12 @@ KB_AFFECTED = {
     "ws_list_inside",
     "menu_inside",
     "language_picker",
+    # Task 13: while inside, the nav block is the session's (ws:home + ws:list);
+    # the account destinations are gone. Lock the inside variants of the screens
+    # that are reachable while inside so the rule is visible in the goldens.
+    "help_inside",
+    "settings_inside",
+    "language_picker_inside",
     # Task 10: the workspace home carries the log-out row in every status branch.
     # Task 11: it lost the redundant bottom Back row and ends in the shared nav block.
     "ws_detail",

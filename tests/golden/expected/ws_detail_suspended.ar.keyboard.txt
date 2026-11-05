@@ -3,5 +3,3 @@
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:4cbx57pb] enabled
 🛑 إيقاف الكل [ws:stop_confirm:4cbx57pb] enabled | 🗑 حذف [ws:delete_confirm:4cbx57pb] enabled
 🏠 scraper [ws:home] disabled | 📦 المساحات [ws:list] enabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-❓ مساعدة [nav:help] enabled | 🏠 القائمة [nav:menu] enabled

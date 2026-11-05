@@ -3,5 +3,3 @@
 🚪 Log out of workspace [ws:logout:3xnpl67c] enabled
 🛑 Stop All [ws:stop_confirm:3xnpl67c] enabled | 🗑 Delete [ws:delete_confirm:3xnpl67c] enabled
 🏠 legacy [ws:home] disabled | 📦 Workspaces [ws:list] enabled
-⚙️ Settings [nav:settings] enabled | 🌐 Language [nav:language] enabled
-❓ Help [nav:help] enabled | 🏠 Menu [nav:menu] enabled

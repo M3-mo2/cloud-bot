@@ -2,5 +2,3 @@
 📦 scraper [ws:view:4cbx57pb] enabled
 ➕ مساحة جديدة [ws:new] enabled
 🏠 demo [ws:home] enabled | 📦 المساحات [ws:list] disabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-❓ مساعدة [nav:help] enabled | 🏠 القائمة [nav:menu] enabled

@@ -1,0 +1,2 @@
+✓ العربية [lang:ar] disabled | English [lang:en] enabled
+🏠 demo [ws:home] enabled | 📦 المساحات [ws:list] enabled

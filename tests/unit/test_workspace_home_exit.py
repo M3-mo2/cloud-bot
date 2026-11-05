@@ -67,12 +67,17 @@ def test_home_has_no_redundant_back_row_but_keeps_logout(name, status, locale):
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
 @pytest.mark.parametrize("name,status", BRANCHES)
 def test_every_status_branch_still_has_a_way_out(name, status, locale):
-    """No branch is a trap: an explicit log-out *and* the nav block are present."""
+    """No branch is a trap: an explicit log-out *and* the session nav block are present.
+
+    Task 13 removed the account destinations (Settings/Language/Help/Menu) from
+    the inside block, so the workspace home is no longer a route to the account
+    menu — but it still reaches the list, another workspace and out of the session.
+    """
     screen = _screen(status, locale)
     actions = _actions(screen)
     assert any(a.startswith("ws:logout") for a in actions), f"{name}/{locale}: cannot leave"
     assert any(a.startswith("ws:list") for a in actions), f"{name}/{locale}: cannot switch"
-    assert any(a.startswith("nav:menu") for a in actions), f"{name}/{locale}: no menu"
+    assert any(a == "ws:home" for a in actions), f"{name}/{locale}: no workspace home entry"
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])

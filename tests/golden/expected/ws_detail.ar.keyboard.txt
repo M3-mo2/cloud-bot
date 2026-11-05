@@ -7,5 +7,3 @@
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:4xt1tp8g] enabled
 🛑 إيقاف الكل [ws:stop_confirm:4xt1tp8g] enabled | 🗑 حذف [ws:delete_confirm:4xt1tp8g] enabled
 🏠 demo [ws:home] disabled | 📦 المساحات [ws:list] enabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-❓ مساعدة [nav:help] enabled | 🏠 القائمة [nav:menu] enabled

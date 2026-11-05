@@ -3,5 +3,3 @@
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:3xnpl67c] enabled
 🛑 إيقاف الكل [ws:stop_confirm:3xnpl67c] enabled | 🗑 حذف [ws:delete_confirm:3xnpl67c] enabled
 🏠 legacy [ws:home] disabled | 📦 المساحات [ws:list] enabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-❓ مساعدة [nav:help] enabled | 🏠 القائمة [nav:menu] enabled

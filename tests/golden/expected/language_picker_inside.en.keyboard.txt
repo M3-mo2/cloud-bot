@@ -1,0 +1,2 @@
+العربية [lang:ar] enabled | ✓ English [lang:en] disabled
+🏠 demo [ws:home] enabled | 📦 Workspaces [ws:list] enabled
