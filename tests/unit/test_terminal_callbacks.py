@@ -31,7 +31,7 @@ from cloudbot.bootstrap.app import build_dispatcher
 from cloudbot.bootstrap.container import build
 from cloudbot.core.config import Settings
 from cloudbot.core.locale import Locale
-from cloudbot.presentation.keyboards.callbacks import CallbackCodec, codec
+from cloudbot.presentation.keyboards.callbacks import codec
 from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import terminal_callbacks as term_cb
 from cloudbot.presentation.screens.terminal_callbacks import (
@@ -85,32 +85,42 @@ def test_the_parsed_keys_the_handlers_read_are_present():
 
 # -- the total, defensive parser ---------------------------------------------
 def test_a_lost_token_is_stale_not_an_index_error(the_token_is_lost):
-    """The exact live defect: a button drawn before a restart decodes to no key.
+    """The exact live defect: a button whose key cannot be resolved in this process.
 
-    ``decode`` (the global codec) returns ``key=()``; the parser must reject it with
-    a reason, and the handler must never reach ``key[0]``.
+    Only a callback that cannot fit the 64-byte cap is tokenised; the token lives
+    in an in-memory registry that dies with the process. After a restart ``decode``
+    returns ``key=()``; the parser must reject it with a reason, and the handler
+    must never reach ``key[0]``.
     """
-    data = the_token_is_lost  # e.g. "term:list:<token no longer registered>"
-    assert data.startswith("term:list:")
+    data = the_token_is_lost  # e.g. "term:view:~<token no longer registered>"
+    assert data.startswith("term:view:")
     parsed = term_cb.parse(data)
     assert isinstance(parsed, InvalidTermCallback)
     assert parsed.valid is False
     assert parsed.reason == "stale"
-    assert parsed.action == "list"
-
+    assert parsed.action == "view"
 
 @pytest.fixture
 def the_token_is_lost():
-    """Produce a real ``term:list`` callback, then simulate a restart (empty registry)."""
-    fresh = CallbackCodec()
-    data = fresh.encode("term:list", WS)
-    # A new process: the registry that mapped the token back to its key parts is gone.
+    """Produce a real, overflow-length ``term:view`` callback, then simulate a
+    restart (empty registry).
+
+    A workspace id (~29 B) plus a session id (~30 B) does not fit the 64-byte cap,
+    so this action is tokenised. After ``codec.reset()`` the token no longer
+    resolves — exactly what a restart does.
+    """
+    ws = "ws_01M6HJASCWM9Z1PF755GT89NK4"
+    ses = "ses_01M6HJATZTFXTWXWBG8A5KWYS99XYZ"
+    data = codec.encode("term:view", ws, ses)
+    assert data.startswith("term:view:")
+    assert codec.decode(data).key == (ws, ses)
     codec.reset()
     try:
         assert codec.decode(data).key == (), "the restart simulation did not clear the registry"
         yield data
     finally:
         codec.reset()
+
 
 
 MALFORMED = [
@@ -201,15 +211,22 @@ async def _container():
 
 
 async def test_the_live_indexerror_callback_now_renders_a_screen():
-    """The exact live path: a stale ``term:list`` button must render the stale
-    screen instead of raising ``IndexError`` (and must not send nothing)."""
+    """The exact live path: a stale ``term:`` button must render a correctable
+    screen instead of raising ``IndexError`` (and must not send nothing).
+
+    A callback that cannot fit the 64-byte cap is tokenised; a restart empties the
+    token registry, so the button is out of date. This is the button the log shows
+    a user tapping after the 14:38:03 restart.
+    """
     container, ws = await _container()
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
         # ``workspaces.create`` already registered ownership for TG.
-        # Build the callback while the registry is warm, then lose it (a restart).
-        data = codec.encode("term:list", ws.id)
+        # A ws+session pair overflows the cap, so the key is tokenised. Build the
+        # callback while the registry is warm, then lose it (a restart).
+        ses = "ses_01M6HJATZTFXTWXWBG8A5KWYS8"
+        data = codec.encode("term:view", ws.id, ses)
         codec.reset()
         before = len(bot.sent)
         await dispatcher.feed_update(bot, _callback(1, TG, data))

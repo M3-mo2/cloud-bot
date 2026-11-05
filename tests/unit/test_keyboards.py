@@ -8,7 +8,11 @@ from aiogram.types import DisabledButton, InlineKeyboardButton
 from cloudbot.core.locale import Locale
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.keyboards.buttons import MAX_CALLBACK_BYTES, inline
-from cloudbot.presentation.keyboards.callbacks import CallbackCodec
+from cloudbot.presentation.keyboards.callbacks import (
+    CallbackCodec,
+    StaleCallback,
+    decode_required,
+)
 from cloudbot.presentation.keyboards.styles import (
     ALLOWED_STYLES,
     Intent,
@@ -110,3 +114,55 @@ def test_callback_codec_raises_in_dev():
     codec = CallbackCodec(mode=RunMode.DEV, max_bytes=4)
     with pytest.raises(Exception):
         codec.encode("toolongaction")
+
+
+def test_callback_codec_inlines_short_keys_and_survives_a_restart():
+    """A callback that fits the cap carries its key parts inline (CB-8, TASK 23).
+
+    Inline means the key parts travel in the callback itself, so a restart — which
+    empties the token registry — cannot affect them.
+    """
+    codec = CallbackCodec()
+    data = codec.encode("ws:view", "ws_01M6HJASCWM9Z1PF755GT89NK4")
+    assert data == "ws:view:ws_01M6HJASCWM9Z1PF755GT89NK4", data
+    assert "~" not in data, "a short callback must not use the token registry"
+    codec.reset()  # the restart
+    decoded = codec.decode(data)
+    assert decoded.action == "ws:view"
+    assert decoded.key == ("ws_01M6HJASCWM9Z1PF755GT89NK4",)
+
+
+def test_callback_codec_tokens_only_what_cannot_fit():
+    """A callback too long to inline falls back to a token; after a reset the key
+    is gone (and ``decode`` is total: it returns ``()``, it does not raise)."""
+    from cloudbot.presentation.keyboards.callbacks import codec as global_codec
+
+    global_codec.reset()
+    ws = "ws_01M6HJASCWM9Z1PF755GT89NK4"
+    ses = "ses_01M6HJATZTFXTWXWBG8A5KWYS8"
+    data = global_codec.encode("term:view", ws, ses)
+    assert data.startswith("term:view:~"), data
+    assert len(data.encode("utf-8")) <= MAX_CALLBACK_BYTES
+    assert global_codec.decode(data).key == (ws, ses)
+    global_codec.reset()
+    assert global_codec.decode(data).key == ()
+    # ``decode`` stayed total; the guarded read raises instead of indexing.
+    with pytest.raises(StaleCallback):
+        decode_required(data, 2)
+
+
+def test_decode_required_raises_stale_for_a_short_or_unknown_callback():
+    with pytest.raises(StaleCallback):
+        decode_required("ws:view", 1)  # no key part at all
+    with pytest.raises(StaleCallback):
+        decode_required("term:view:~deadbeef", 2)  # unknown token (a restart)
+
+
+def test_stale_callback_maps_to_a_correctable_screen_both_locales():
+    """The guard renders the stale screen — never an ``IndexError`` and never
+    silence, in either locale."""
+    from cloudbot.presentation.mapping.errors import error_screen
+
+    for locale, marker in ((Locale.EN, "out of date"), (Locale.AR, "قديم")):
+        screen = error_screen(StaleCallback("term:view:~deadbeef"), locale)
+        assert marker in screen.doc.html, (locale, screen.doc.html[:120])
