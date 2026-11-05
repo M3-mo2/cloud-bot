@@ -100,8 +100,11 @@ rows  = [[inline("menu.new_workspace", "ws:new", intent=SUCCESS)]]
 rows += nav.nav_rows(locale, "menu")     # current surface
 ```
 
-The old per-screen **Back** buttons remain on *inner* screens (workspace detail,
-files, runs); the nav block is the top-level pattern.
+The old per-screen **Back** buttons remain on *inner* screens (files, runs,
+settings forms); the nav block is the top-level pattern. The **workspace home**
+(task 11) is a session home, not an inner page: it carries the shared nav block
+and takes its single exit from the explicit log-out — no `⬅️ Back` row (see
+`../ui/02-workspaces.md` §2.5.1).
 
 ---
 

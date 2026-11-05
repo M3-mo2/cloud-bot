@@ -126,9 +126,10 @@ Keyboard: **➕ New Workspace** (inline, success), **🏠 Menu** (inline, primar
 | ▶️ تشغيل | ▶️ Run | inline | success | `disabled` if a run is active |
 | 📜 التشغيلات | 📜 Runs | inline | primary | — |
 | ⏸️ إيقاف مؤقت | ⏸️ Suspend | inline | primary | — |
+| 🚪 تسجيل الخروج من مساحة العمل | 🚪 Log out of workspace | inline | primary | leaves the session |
 | 🛑 إيقاف الكل | 🛑 Stop All | inline | danger | confirm |
 | 🗑 حذف | 🗑 Delete | inline | danger | confirm |
-| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+| … | … | inline | — | the shared nav block (see below) |
 
 ### 2.4 Keyboard — `suspended` workspace
 
@@ -141,8 +142,9 @@ action.
 | ▶️ استئناف | ▶️ Resume | inline | success | — |
 | 📁 الملفات | 📁 Files | inline | primary | read-only ops work |
 | ▶️ تشغيل | ▶️ Run | inline | — | **disabled** |
+| 🚪 تسجيل الخروج من مساحة العمل | 🚪 Log out of workspace | inline | primary | leaves the session |
 | 🗑 حذف | 🗑 Delete | inline | danger | confirm |
-| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+| … | … | inline | — | the shared nav block (see below) |
 
 ### 2.5 Keyboard — `locked` workspace (subscription lapsed)
 
@@ -154,8 +156,34 @@ reads and delete are allowed. The bot shows a renewal action.
 | 🔄 تجديد | 🔄 Renew | inline | success | Phase 2 |
 | 📁 الملفات | 📁 Files | inline | primary | read-only |
 | ▶️ تشغيل | ▶️ Run | inline | — | **disabled** |
+| 🚪 تسجيل الخروج من مساحة العمل | 🚪 Log out of workspace | inline | primary | leaves the session |
 | 🗑 حذف | 🗑 Delete | inline | danger | confirm |
-| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+| … | … | inline | — | the shared nav block (see below) |
+
+#### 2.5.1 The one exit rule
+
+**The workspace home has exactly one *exit*, and it is the explicit log-out;
+navigation lives in the shared nav block.** There is **no bottom `⬅️ Back` row**
+on this screen, because "back" and "log out" landed on the same destination (the
+workspace list) and offering both was pure duplication. The distinction that
+remains is by intent:
+
+* **`🚪 Log out of workspace`** (`ws:logout`) *ends the session* — it calls
+  `leave` and returns to the list with an acknowledgement. It is present in
+  **every** status branch, because being unable to leave a suspended or locked
+  workspace would be a trap. It never uses `DANGER` (leaving harms nothing).
+* **`📦 Workspaces`** in the shared nav block (`ws:list`) *browses/switches* to
+  another workspace **without** leaving the session first.
+
+The two labels already read differently (`ws.logout` "تسجيل الخروج من مساحة العمل /
+Log out of workspace" vs `menu.workspaces` "📦 المساحات / 📦 Workspaces"), so no
+new wording is needed. The nav block sits **last** (below the destructive row),
+following the shared bottom-placement rule (§0 of `01-language-and-menu.md`) and
+its ≤2-columns, ≤3-rows limit.
+
+> **Only the workspace home changes.** Every *inner* screen — a file browser, a
+> run history, a settings form, a confirm — keeps its own `⬅️ رجوع`/`🏠 القائمة`;
+> those are not duplicating anything and are deliberately untouched.
 
 A banner line is added when locked:
 
@@ -416,4 +444,6 @@ Result:
 | Detail | Resume | active detail |
 | Detail | Stop All | confirm → active detail + counts |
 | Detail | Delete | confirm → list |
-| Any | Back | previous screen (inline edit) |
+| Detail | Log out of workspace | leaves the session → list (with an acknowledgement) |
+| Detail | 📦 Workspaces (nav block) | list, staying inside the session |
+| Any | Back | previous screen (inline edit; inner screens only — the home has no Back row) |

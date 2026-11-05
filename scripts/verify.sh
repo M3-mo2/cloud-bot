@@ -533,4 +533,45 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-one proofs passed"
+echo "== 32. bite test: the removed workspace-home Back row stays removed =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Restore the redundant bottom "Back" row on the workspace home (it lands on the
+# same list as the log-out): the dead-end/duplication test must go red; restore,
+# and it is green again. This proves D2's assertion is load-bearing.
+target = pathlib.Path("cloudbot/presentation/screens/workspaces.py")
+original = target.read_text(encoding="utf-8")
+guard = '    if session:\n        rows += nav.nav_rows(locale, "workspace_home", inside=ws)\n'
+back_row = (
+    '    rows.append([inline(catalog.t("common.back", locale), '
+    '_cb("ws:list", 0), intent=Intent.PRIMARY)])\n'
+)
+bitten = original.replace(guard, back_row + guard, 1)
+assert bitten != original, "bite substitution did not apply (workspace-home exit moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_workspace_home_exit.py",
+       "-k", "redundant", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the no-redundant-back-row test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: restoring the Back row did not make the test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: removing the bite did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-two proofs passed"
