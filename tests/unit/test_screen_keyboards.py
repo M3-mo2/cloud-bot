@@ -84,3 +84,50 @@ def test_locked_detail_shows_renew_and_banner():
     locked = mk("ws_lock", "legacy", WorkspaceStatus.LOCKED)
     screen = ws_screens.workspace_detail(locked, Locale.AR, now=NOW)
     assert "plan has expired" in screen.doc.html or "انتهت صلاحية خطتك" in screen.doc.html
+
+
+# -- every documented screen, every button (the "link" defect's regression guard) ----
+
+def test_no_screen_sends_a_style_telegram_rejects():
+    """Walk EVERY screen the golden suite knows about and assert the style rule.
+
+    A button whose ``style`` is not one of the three accepted values makes Telegram
+    refuse the entire message ("can't parse InlineKeyboardButton: Invalid button
+    style specified"), so the user sees nothing at all — the defect behind
+    "a tunnel is published but no link appears". The per-screen test above only
+    covered four workspace screens; this one covers all of them, including the
+    tunnel screens that carried the bad value.
+    """
+    from tests.golden.test_golden_screens import SCREEN_BUILDERS, _fixtures
+
+    checked = 0
+    for name in sorted(SCREEN_BUILDERS):
+        for locale in (Locale.EN, Locale.AR):
+            screen = SCREEN_BUILDERS[name](_fixtures(), locale)
+            for button in _buttons(screen.markup):
+                style = getattr(button, "style", None)
+                if style is not None:
+                    assert style in ALLOWED_STYLES, (
+                        f"{name}/{locale.value}: style {style!r} is not accepted by "
+                        f"Telegram; the whole message would be refused"
+                    )
+                checked += 1
+    assert checked > 0, "no buttons were inspected"
+
+
+def test_a_url_button_never_carries_a_style():
+    """The specific value Telegram rejects on a URL button is ``"link"``."""
+    from tests.golden.test_golden_screens import SCREEN_BUILDERS, _fixtures
+
+    url_buttons = 0
+    for name in sorted(SCREEN_BUILDERS):
+        for locale in (Locale.EN, Locale.AR):
+            screen = SCREEN_BUILDERS[name](_fixtures(), locale)
+            for button in _buttons(screen.markup):
+                if getattr(button, "url", None):
+                    url_buttons += 1
+                    assert getattr(button, "style", None) != "link", (
+                        f"{name}/{locale.value}: a URL button with style='link' makes "
+                        f"Telegram refuse the whole message"
+                    )
+    assert url_buttons > 0, "the tunnel screens should expose at least one URL button"

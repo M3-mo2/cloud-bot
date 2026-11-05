@@ -17,15 +17,19 @@ from cloudbot.presentation.keyboards.styles import (
 )
 
 
-def test_only_four_styles_exist():
-    assert ALLOWED_STYLES == {"primary", "success", "danger", "link"}
+def test_only_three_styles_exist():
+    # "link" is NOT a style Telegram accepts: sending it on any inline button fails
+    # the whole message with "can't parse InlineKeyboardButton: Invalid button style
+    # specified" (measured against the live Bot API). A URL button carries no style.
+    assert ALLOWED_STYLES == {"primary", "success", "danger"}
 
 
 def test_intent_to_style():
     assert style_for(Intent.PRIMARY) == "primary"
     assert style_for(Intent.SUCCESS) == "success"
     assert style_for(Intent.DANGER) == "danger"
-    assert style_for(Intent.LINK) == "link"
+    # A LINK intent keeps its meaning but maps to NO style — see above.
+    assert style_for(Intent.LINK) is None
     assert style_for(Intent.MUTED) is None
 
 
@@ -33,6 +37,19 @@ def test_bad_style_is_rejected_locally():
     # A typo could not be caught by the type system; our helper catches it.
     with pytest.raises(InvalidIntent):
         style_for("red")  # type: ignore[arg-type]
+
+
+def test_url_button_carries_no_style():
+    """The regression guard for the live defect.
+
+    Every tunnel LINK button went out as ``style="link"``, which Telegram refuses for
+    the whole message — so a published tunnel was created and never shown. A URL
+    button must carry no ``style`` at all.
+    """
+    button = inline("Open 8080", url="https://x.trycloudflare.com", intent=Intent.LINK)
+    assert button.url == "https://x.trycloudflare.com"
+    assert button.style is None, f"a URL button must carry no style, got {button.style!r}"
+    assert button.callback_data is None
 
 
 def test_inline_button_styles():

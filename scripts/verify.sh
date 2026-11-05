@@ -151,7 +151,10 @@ tl = TunnelList(tunnels=(Tunnel(id="tnl_x", workspace_id="ws_x", port=8080, url=
 screen = tnl.tunnels_screen(tl, WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4"), Locale.EN)
 assert URL not in screen.doc.html, "the ephemeral URL leaked into the stored screen text"
 links = [b for row in screen.markup.inline_keyboard for b in row if getattr(b, "url", None)]
-assert any(b.url == URL and b.style == "link" for b in links), "the URL is not a LINK button"
+assert any(b.url == URL for b in links), "the URL is not a LINK button"
+# ...and it carries NO style: "link" is not a value Telegram
+# accepts — it refuses the WHOLE message (measured).
+assert all(b.style is None for b in links), "a URL button must carry no style"
 print("OK: URL only travels as a LINK button; never persisted, never rendered as text")
 PY
 
@@ -863,6 +866,52 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
+
+echo "== 27. bite test: a URL button never carries a style Telegram rejects (F-01 live) =="
+"$PY" - <<'PYEOF'
+import pathlib, subprocess, sys
+
+# The live defect: every tunnel LINK button went out with style="link". Telegram
+# refuses the WHOLE message for it ("can't parse InlineKeyboardButton: Invalid button
+# style specified"), so a published tunnel was created and never shown — and every
+# local test passed, because the repo's own proof asserted style == "link".
+# Reintroduce it, show the guard goes red, restore, show green.
+target = pathlib.Path("cloudbot/presentation/keyboards/buttons.py")
+original = target.read_text(encoding="utf-8")
+guard = 'return InlineKeyboardButton(text=text, url=url, style=style)'
+bite = 'return InlineKeyboardButton(text=text, url=url, style=style or "link")'
+assert guard in original, "the url-button factory moved; update this proof"
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "the bite substitution did not apply"
+
+cmd = [sys.executable, "-m", "pytest", "-q",
+       "tests/unit/test_keyboards.py", "tests/unit/test_screen_keyboards.py",
+       "-k", "url_button",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+
+if before.returncode != 0:
+    print("FAIL: the URL-button guard was not green before the bite")
+    print(before.stdout[-600:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: putting style=\"link\" back did not make the guard red (not evidence)")
+    print(red.stdout[-600:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the style-free URL button did not return it to green")
+    print(green.stdout[-600:]); sys.exit(1)
+
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PYEOF
 
 # ── the proof ledger counts itself ─────────────────────────────────────────────
 # The declared total used to be hand-written, and it drifted: it once claimed
