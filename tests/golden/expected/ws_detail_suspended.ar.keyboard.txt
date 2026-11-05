@@ -2,4 +2,4 @@
 ▶️ تشغيل [run:choose:4cbx57pb] disabled | 🖥 الطرفيات [term:list:4cbx57pb] disabled
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:4cbx57pb] enabled
 🛑 إيقاف الكل [ws:stop_confirm:4cbx57pb] enabled | 🗑 حذف [ws:delete_confirm:4cbx57pb] enabled
-🏠 scraper [ws:home] disabled | 📦 المساحات [ws:list] enabled
+📦 المساحات [ws:list] enabled

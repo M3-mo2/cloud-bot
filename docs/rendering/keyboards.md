@@ -69,7 +69,7 @@ Rationale (recorded in `DECISIONS.md`):
 | --- | --- | --- |
 | **Inline, callback** | All in-message actions, navigation, pagination, per-item actions, confirmations | Enables in-place `edit`, keeps chat clean, carries callback data. |
 | **Inline, url + `LINK`** | External links (docs, published tunnel URL) | Opens directly, styled as a link. |
-| **Inline, `disabled=True`** | Actions not currently valid (incl. the current nav destination) | Shows the affordance without offering a dead end. |
+| **Inline, `disabled=True`** | Actions not currently valid | Shows the affordance without offering a dead end. Never the current nav destination (§3a, R1). |
 | **Inline, `force_reply=True`** (markup) | Short input prompts | Focuses the reply box on the prompt. |
 
 There is **no reply keyboard** and no per-item reply actions. One rule, applied
@@ -83,25 +83,47 @@ One helper (`presentation/screens/nav.py`) renders the same nav block at the
 bottom of every top-level screen. Its content depends on **whether the user is
 inside a workspace** (the helper's `inside` argument):
 
+**R1 — a nav entry never points at the screen you are already on: the current
+destination is omitted, not muted.** This is the task-14 rule and it is
+implemented **inside `nav_rows`**, keyed off the `current` argument, so every
+screen agrees. A disabled entry was the old (task-09) answer; it is wrong because
+a disabled button is still a button-shaped thing that wastes a slot in the
+two-column grid and reads as a real destination. `Intent.MUTED` remains for
+buttons that legitimately exist elsewhere (e.g. `▶️ Run` while a run is active) —
+this rule is about the nav block only.
+
 **Not inside a workspace** — the block is the *account's*: Workspaces
 (`ws:list`), Settings (`nav:settings`), Language (`nav:language`), Help
 (`nav:help`), plus Menu (`nav:menu`) where the screen is not the menu. **At most
 two buttons per row, at most three rows**; a screen's primary action (e.g.
-`➕ New Workspace`) sits full width above it. The destination the user is already
-on is `MUTED` (disabled) — visible, not tappable.
+`➕ New Workspace`) sits full width above it. The screen's own destination is
+omitted (R1).
+
+**R2 — the workspaces list also drops Menu** (`nav:menu`), because the menu's
+body is the same workspace table: for a user who owns workspaces it is a second
+route to the screen the list already is. The list block becomes the three account
+destinations that are not this screen:
+
+```
+[ ⚙️ الإعدادات ] [ 🌐 اللغة ]
+[ ❓ مساعدة ]
+```
+
+A screen such as Help therefore renders its destinations minus itself:
 
 ```
 [ 📦 المساحات ] [ ⚙️ الإعدادات ]
-[ 🌐 اللغة ]     [ ❓ مساعدة ]
-[ 🏠 القائمة ]                      ← only where the screen is not the menu
+[ 🌐 اللغة ]     [ 🏠 القائمة ]
 ```
 
 **Inside a workspace** (task 13) — the block is the *session's*, **not the
-account's**: exactly two entries, the workspace home (`ws:home`, `MUTED` while
-already on it) and Workspaces (`ws:list`, to switch), on one row.
+account's**: up to two entries, the workspace home (`ws:home`) and Workspaces
+(`ws:list`, to switch), on one row. R1/R5 also apply here: **on the workspace home
+itself `ws:home` is omitted** (you are already there), leaving just `📦 المساحات`.
 
 ```
-[ 🏠 demo ] [ 📦 المساحات ]
+[ 🏠 demo ] [ 📦 المساحات ]        ← on any inside screen except the home
+[ 📦 المساحات ]                    ← on the workspace home itself
 ```
 
 The **account destinations — Settings, Language, Help and Menu — are removed
@@ -205,8 +227,6 @@ edited.
 ## 7. `disabled=True` usage
 
 - **Pagination current-page indicator** (a label, §5.4).
-- **The current nav destination** on a top-level screen (§3a): the screen you are
-  on is shown muted, so tapping it is not offered.
 - **An action that is already happening**: "Run" while a run is active shows
   `MUTED` (disabled) so the user sees why.
 - **Empty states**: e.g. "No files" as a disabled button inside an otherwise
@@ -214,6 +234,11 @@ edited.
   omitted. Disabled is used only where the affordance should remain visible.
 
 `disabled=True` sets `disabled=DisabledButton()` on `InlineKeyboardButton`.
+
+> Deliberately **not** in this list: the current nav destination. Since task 14
+> (R1) a nav entry that points at the screen you are already on is **omitted**, not
+> muted (§3a). Muting it kept a button-shaped no-op in a grid slot and still read
+> as a destination.
 
 ---
 
@@ -253,9 +278,11 @@ Action namespaces:
 1. Colors come **only** from `Intent`; a screen never names a `ButtonStyle`.
 2. Every destructive action is `DANGER` **and** requires an explicit confirm.
 3. Every top-level screen ends with the shared inline nav block (§3a); inner
-   screens carry a **Back** (primary) button. There is no reply keyboard. While
-   inside a workspace the block is the session's (two entries) — the account
-   destinations are not offered there (§3a).
+   screens carry a **Back** (primary) button. There is no reply keyboard. A nav
+   entry never points at the screen you are on — the current destination is
+   omitted, not muted (R1); the workspaces list also drops Menu (R2). While
+   inside a workspace the block is the session's, and the account destinations
+   are not offered there (§3a).
 4. Button text always comes from the catalog, in the user's locale — never a
    hardcoded English string.
 5. Icons are part of the catalog string (`"🗑 حذف"` / `"🗑 Delete"`), so both
@@ -273,8 +300,8 @@ Action namespaces:
 
 | Screen element | Type | Intent | Flags |
 | --- | --- | --- | --- |
-| Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one `MUTED`; **not inside** only |
-| Session nav (🏠 home / 📦 Workspaces) | inline | primary | current one `MUTED`; **inside** only, two entries |
+| Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one **omitted** (R1); Menu also omitted on the list (R2); **not inside** only |
+| Session nav (🏠 home / 📦 Workspaces) | inline | primary | current one **omitted** (R1/R5); **inside** only, up to two entries |
 | Back (inner screens) | inline | primary | — |
 | Open workspace | inline | primary | — |
 | Create workspace | inline | success | — |

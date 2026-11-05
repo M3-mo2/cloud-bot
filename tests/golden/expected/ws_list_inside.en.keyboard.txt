@@ -1,4 +1,4 @@
 📦 demo [ws:view:4xt1tp8g] enabled
 📦 scraper [ws:view:4cbx57pb] enabled
 ➕ New Workspace [ws:new] enabled
-🏠 demo [ws:home] enabled | 📦 Workspaces [ws:list] disabled
+🏠 demo [ws:home] enabled

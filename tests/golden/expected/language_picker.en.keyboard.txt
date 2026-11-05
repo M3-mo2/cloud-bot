@@ -1,4 +1,3 @@
 العربية [lang:ar] enabled | ✓ English [lang:en] disabled
 📦 Workspaces [ws:list] enabled | ⚙️ Settings [nav:settings] enabled
-🌐 Language [nav:language] disabled | ❓ Help [nav:help] enabled
-🏠 Menu [nav:menu] enabled
+❓ Help [nav:help] enabled | 🏠 Menu [nav:menu] enabled

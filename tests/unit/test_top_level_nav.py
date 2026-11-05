@@ -1,15 +1,16 @@
 """Top-level navigation: the shared inline nav block on every top-level screen.
 
-There is no reply keyboard. Every top-level screen ends in the same 2×2 nav block
+There is no reply keyboard. Every top-level screen ends in the same nav block
 (Workspaces / Settings / Language / Help, plus Menu where the screen is not the
-menu), with the destination the user is already on rendered muted (inert). The
-block never exceeds two columns or three rows.
+menu). **A nav entry never points at the screen you are already on (R1): the
+current destination is omitted, not muted.** On the workspaces list Menu is
+dropped too (R2), because the menu's body duplicates the list. The block never
+exceeds two columns or three rows.
 """
 
 from __future__ import annotations
 
 import pytest
-from aiogram.types import DisabledButton
 
 from cloudbot.adapters.cloud_service.fake import _ws
 from cloudbot.core.locale import Locale
@@ -90,26 +91,39 @@ def test_no_screen_exceeds_two_columns_anywhere(locale):
             assert len(row) <= 2, f"{name} has a row with more than two columns"
 
 
+#: Each screen's own callback — the entry that must NOT appear on it (R1).
+OWN_CALLBACK = {
+    "main_menu": "nav:menu",
+    "welcome": "nav:menu",
+    "help": "nav:help",
+    "settings": "nav:settings",
+    "ws_list": "ws:list",
+    "ws_list_empty": "ws:list",
+    "language_picker": "nav:language",
+}
+
+
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-@pytest.mark.parametrize(
-    "name,current_action",
-    [
-        ("help", "nav:help"),
-        ("settings", "nav:settings"),
-        ("ws_list", "ws:list"),
-        ("ws_list_empty", "ws:list"),
-        ("language_picker", "nav:language"),
-    ],
-)
-def test_current_destination_is_muted_and_not_tappable(name, current_action, locale):
+@pytest.mark.parametrize("name", sorted(OWN_CALLBACK))
+def test_a_screen_never_offers_its_own_destination(name, locale):
+    """R1, data-driven: no screen's keyboard carries its own nav callback."""
     screen = _screens_both_locales()[(name, locale)]
-    flat = [b for row in _rows(screen) for b in row]
-    current = [b for b in flat if _callback(b) == current_action]
-    assert current, f"{name}/{locale} does not render its own destination"
-    for button in current:
-        assert isinstance(button.disabled, DisabledButton), (
-            f"{name}/{locale}: current destination {current_action} is tappable"
-        )
+    own = OWN_CALLBACK[name]
+    offs = [b for row in _rows(screen) for b in row if _callback(b) == own]
+    assert not offs, f"{name}/{locale} still renders its own destination {own}"
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+@pytest.mark.parametrize("current", sorted(nav.CURRENT_ACTION))
+def test_the_helper_omits_its_own_entry_for_every_destination(current, locale):
+    """R1, data-driven: for every destination the helper knows, rendering that
+    surface never emits that surface's own callback — a future screen inherits
+    the rule by naming its ``current`` key."""
+    rows = nav.nav_rows(locale, current)
+    callbacks = {_callback(b) for row in rows for b in row}
+    assert nav.CURRENT_ACTION[current] not in callbacks, (
+        f"{current}/{locale}: the block points at the screen it is rendered on"
+    )
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
@@ -136,9 +150,22 @@ def test_menu_is_not_offered_on_the_menu_itself():
 
 
 def test_menu_is_offered_on_non_menu_top_level_screens():
-    for name in ("help", "settings", "ws_list", "ws_list_empty", "language_picker"):
+    # R2: the workspaces list drops Menu (it duplicates the list), so it is not
+    # in this set; every other non-menu screen still offers it.
+    for name in ("help", "settings", "language_picker"):
         actions = {_callback(b) for row in _rows(_screen_cases()[name]) for b in row}
         assert "nav:menu" in actions, f"{name} does not offer Menu"
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_workspaces_list_drops_the_workspaces_and_menu_entries(locale):
+    """R2/D2: the list carries Settings, Language and Help — but neither its own
+    ``ws:list`` nor ``nav:menu``."""
+    for name in ("ws_list", "ws_list_empty"):
+        actions = {_callback(b) for row in _rows(_screens_both_locales()[(name, locale)]) for b in row}
+        assert "ws:list" not in actions, f"{name}/{locale} still offers ws:list"
+        assert "nav:menu" not in actions, f"{name}/{locale} still offers the menu"
+        assert {"nav:settings", "nav:language", "nav:help"} <= actions
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
@@ -218,7 +245,11 @@ def test_nav_without_a_session_is_unchanged():
     assert "ws:home" not in callbacks
 
 
-def test_home_entry_is_muted_on_the_workspace_home_itself():
+def test_home_entry_is_omitted_on_the_workspace_home_itself():
+    """R5: on the workspace home you are already home, so ``ws:home`` is gone,
+    leaving the session block at just ``ws:list``."""
     rows = nav.nav_rows(Locale.EN, "workspace_home", inside=WS)
     entries = [b for row in rows for b in row if _callback(b) == "ws:home"]
-    assert entries and all(isinstance(b.disabled, DisabledButton) for b in entries)
+    assert not entries
+    callbacks = [_callback(b) for row in rows for b in row]
+    assert callbacks == ["ws:list"]

@@ -6,4 +6,4 @@
 ⏸️ إيقاف مؤقت [ws:suspend_confirm:4xt1tp8g] enabled
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:4xt1tp8g] enabled
 🛑 إيقاف الكل [ws:stop_confirm:4xt1tp8g] enabled | 🗑 حذف [ws:delete_confirm:4xt1tp8g] enabled
-🏠 demo [ws:home] disabled | 📦 المساحات [ws:list] enabled
+📦 المساحات [ws:list] enabled

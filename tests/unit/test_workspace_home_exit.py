@@ -40,15 +40,23 @@ def _actions(screen) -> list[str]:
 
 
 def _bare_back_row(screen):
-    """A single-button row that goes to the workspace list — the removed Back row.
+    """A single-button row labelled Back that goes to the workspace list — the
+    removed redundant exit.
 
-    A row with only ``ws:list`` is the redundant exit; ``ws:list`` inside the
-    nav block sits beside other destinations and is not this.
+    The removed row used the ``common.back`` label; the session nav block's
+    ``ws:list`` (which task 14 leaves alone on the home after omitting its own
+    ``ws:home`` entry) is a different thing and never this.
     """
+    from cloudbot.presentation.i18n.catalog import catalog
+
+    back_labels = {catalog.t("common.back", loc) for loc in (Locale.EN, Locale.AR)}
     return [
         row
         for row in _rows(screen)
-        if len(row) == 1 and row[0].callback_data and row[0].callback_data.startswith("ws:list")
+        if len(row) == 1
+        and row[0].callback_data
+        and row[0].callback_data.startswith("ws:list")
+        and row[0].text in back_labels
     ]
 
 
@@ -72,23 +80,28 @@ def test_every_status_branch_still_has_a_way_out(name, status, locale):
     Task 13 removed the account destinations (Settings/Language/Help/Menu) from
     the inside block, so the workspace home is no longer a route to the account
     menu — but it still reaches the list, another workspace and out of the session.
+    Task 14 (R5) removes the ``ws:home`` entry from the home itself (you are
+    already there), never muting it.
     """
     screen = _screen(status, locale)
     actions = _actions(screen)
     assert any(a.startswith("ws:logout") for a in actions), f"{name}/{locale}: cannot leave"
     assert any(a.startswith("ws:list") for a in actions), f"{name}/{locale}: cannot switch"
-    assert any(a == "ws:home" for a in actions), f"{name}/{locale}: no workspace home entry"
+    assert not any(a == "ws:home" for a in actions), (
+        f"{name}/{locale}: the home still offers ws:home (you are already there)"
+    )
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
 def test_home_nav_block_still_offers_the_workspace_list(locale):
-    """Switching stays possible: ``ws:list`` is carried by the nav block."""
+    """Switching stays possible: ``ws:list`` is carried by the nav block, and the
+    home's own entry is gone (R1/R5)."""
     screen = _screen(WorkspaceStatus.ACTIVE, locale)
     nav_actions = {
         b.callback_data for row in _rows(screen) for b in row if b.callback_data in nav.NAV_ACTIONS
     }
     assert "ws:list" in nav_actions, "the nav block no longer offers Workspaces"
-    assert "ws:home" in nav_actions, "the workspace-home entry is missing"
+    assert "ws:home" not in nav_actions, "the home still offers its own entry"
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])

@@ -32,10 +32,15 @@ sit **full width above** it. No screen anywhere uses more than two columns.
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 | 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` — only where the screen is not the menu |
 
-The destination the user is **already on** is rendered `MUTED` (a disabled inline
-button — visible, not tappable); on the menu itself nothing is muted and no Menu
-button appears. The block is thus 2 rows on the menu (four destinations) and 3
-rows elsewhere (four destinations + Menu).
+**A nav entry never points at the screen you are already on: the current
+destination is omitted, not muted (R1).** A disabled entry was the old answer; it
+is wrong because a disabled button is still a button-shaped thing that wastes a
+grid slot and reads as a destination. On the menu itself no Menu button appears;
+on the workspaces list `ws:list` and Menu are both dropped, because the list
+*is* `ws:list` and the menu's body duplicates the list (R2). The block is thus 2
+rows on the menu (its four destinations), 2 rows on Help/Settings/Language (their
+destinations + Menu, minus themselves), and 2 rows on the workspaces list (its
+three remaining destinations).
 
 ```
 [ ➕ مساحة جديدة ]                         (success, full width — the screen's own action)
@@ -246,9 +251,9 @@ so the screen stays short.
 <p><i>ملفاتك خاصة بك وحدك. لا شيء مشترك بين المستخدمين.</i></p>
 ```
 
-Keyboard: the shared inline nav block (§0) with **Help** muted (we are on it), so
-the block is **Workspaces · Settings**, then **Language · Help (muted)** and a
-third row **Menu**. There is no Back/reply button.
+Keyboard: the shared inline nav block (§0) with **Help omitted** (we are on it —
+R1), so the block is **Workspaces · Settings**, then **Language · Menu**. There is
+no Back/reply button.
 
 ---
 
@@ -276,13 +281,13 @@ third row **Menu**. There is no Back/reply button.
 
 ### Keyboard
 
-The shared inline nav block (§0) with **Settings** muted. Changing the language is
-the **Language** destination (`nav:language`), and **Menu** returns home.
+The shared inline nav block (§0) with **Settings omitted** (we are on it — R1).
+Changing the language is the **Language** destination (`nav:language`), and
+**Menu** returns home.
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
 | 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
-| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings`, **muted** |
 | 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 | 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` |
@@ -292,8 +297,9 @@ the **Language** destination (`nav:language`), and **Menu** returns home.
 ## 5. Language picker (from Settings)
 
 Same card as onboarding, but reached mid-session. The **current** language is
-shown as a `disabled` label so the user sees their state, and the shared inline
-nav block (§0) with **Language** muted follows.
+shown as a `disabled` label so the user sees their state (that disabled label is
+the language *choice*, not a nav destination), and the shared inline nav block
+(§0) with **Language omitted** (we are on it — R1) follows.
 
 ### English (current = EN)
 
@@ -303,7 +309,6 @@ nav block (§0) with **Language** muted follows.
 | — | ✓ English | inline | primary | `lang:en`, **disabled** |
 | 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
-| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language`, **muted** |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 | 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` |
 

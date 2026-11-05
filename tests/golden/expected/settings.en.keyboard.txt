@@ -1,3 +1,2 @@
-📦 Workspaces [ws:list] enabled | ⚙️ Settings [nav:settings] disabled
-🌐 Language [nav:language] enabled | ❓ Help [nav:help] enabled
-🏠 Menu [nav:menu] enabled
+📦 Workspaces [ws:list] enabled | 🌐 Language [nav:language] enabled
+❓ Help [nav:help] enabled | 🏠 Menu [nav:menu] enabled

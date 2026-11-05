@@ -387,8 +387,11 @@ workspaces list, language picker) ends with one shared **nav block**: the four
 destinations Workspaces (`ws:list`), Settings (`nav:settings`), Language
 (`nav:language`) and Help (`nav:help`) — plus Menu (`nav:menu`) where the screen
 is not the menu itself — laid out **two buttons per row, at most three rows**.
-The destination the user is already on is rendered `MUTED` (inert): visible, not
-tappable. The main menu's own primary action (`➕ New Workspace`) sits full width
+**A nav entry never points at the screen you are already on: the current
+destination is omitted, not muted (task 14, R1).** A disabled entry was tried
+first (task 09); it is wrong because a button-shaped no-op still wastes a grid
+slot and reads as a destination. The workspaces list also drops Menu, whose body
+duplicates the list (R2). The main menu's own primary action (`➕ New Workspace`) sits full width
 *above* the block. One helper (`presentation/screens/nav.py`) renders it, so every
 screen agrees.
 

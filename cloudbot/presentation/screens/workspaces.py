@@ -91,7 +91,8 @@ def workspace_list(
         kb_rows.append(
             [inline(catalog.t("common.load_more", locale), _cb("ws:list", page + 1), intent=Intent.PRIMARY)]
         )
-    # The shared bottom nav block, with Workspaces muted (we are already here).
+    # The shared bottom nav block. We are on the workspaces list, so its own
+    # destination (Workspaces, and Menu per R2) is dropped rather than muted.
     kb_rows += nav.nav_rows(locale, "workspaces", inside=inside)
     return Screen(doc=doc, markup=inline_markup(kb_rows))
 

@@ -1,3 +1,2 @@
-📦 المساحات [ws:list] enabled | ⚙️ الإعدادات [nav:settings] disabled
-🌐 اللغة [nav:language] enabled | ❓ مساعدة [nav:help] enabled
-🏠 القائمة [nav:menu] enabled
+📦 المساحات [ws:list] enabled | 🌐 اللغة [nav:language] enabled
+❓ مساعدة [nav:help] enabled | 🏠 القائمة [nav:menu] enabled

@@ -1,26 +1,34 @@
 """The shared bottom navigation block for every top-level screen.
 
 One helper, one layout, one place. While the user is **not inside** a workspace,
-the block lists the four top-level account destinations — Workspaces
-(``ws:list``), Settings (``nav:settings``), Language (``nav:language``) and Help
-(``nav:help``) — plus Menu (``nav:menu``) where the screen is not the menu
-itself. The destination the user is already on is rendered muted/disabled so it
-stays visible but is not tappable.
+the block lists the top-level account destinations — Workspaces (``ws:list``),
+Settings (``nav:settings``), Language (``nav:language``) and Help (``nav:help``)
+— plus Menu (``nav:menu``) where the screen is not the menu itself.
+
+**A nav entry never points at the screen you are already on (R1): the current
+destination is omitted, not muted.** A disabled entry is still a button-shaped
+thing that wastes a slot in the two-column grid and reads as a real destination;
+the correct answer is that it is simply not there. This is keyed off ``current``
+and applies to every screen that uses the block. ``Intent.MUTED`` stays available
+for buttons that legitimately exist elsewhere (e.g. ``▶️ Run`` while a run is
+active) — this rule is about the nav block only.
+
+On the **workspaces list** Menu is dropped as well (R2): the menu's body is the
+same workspace table, so for a user who owns workspaces the menu is a second
+route to the screen the list already is.
 
 **While the user is inside a workspace (task 13) the block is the session's, not
-the account's.** It carries exactly two entries: ``🏠 <workspace name>``
-(``ws:home``), muted while you are already on the workspace home, and
-``📦 Workspaces`` (``ws:list``) to switch. The account destinations — Settings,
-Language, Help and Menu — are dropped whenever ``inside`` is set; they remain
-reachable the same way as before, through the ``/settings`` and ``/help``
-commands, and by leaving the workspace. A synced account menu has no place on a
-screen the user has *entered*.
+the account's.** It carries up to two entries: ``🏠 <workspace name>``
+(``ws:home``) and ``📦 Workspaces`` (``ws:list``) to switch — minus the one you
+are already on (R1/R5: on the workspace home itself ``ws:home`` is omitted,
+leaving just ``📦 Workspaces``). The account destinations — Settings, Language,
+Help and Menu — are dropped whenever ``inside`` is set; they remain reachable
+the same way as before, through the ``/settings`` and ``/help`` commands, and by
+leaving the workspace.
 
 Layout rule (applies to every screen, forever): at most **two buttons per row**
 and at most **three rows** in the nav block; a screen's own primary action may
-sit full width *above* it. Never more than two columns anywhere. Outside a
-workspace the block carries up to five buttons (four destinations + menu) —
-three rows of two at most; inside it carries exactly two — one row of two.
+sit full width *above* it. Never more than two columns anywhere.
 """
 
 from __future__ import annotations
@@ -43,35 +51,51 @@ NAV_ACTIONS: frozenset[str] = frozenset(
     {"ws:list", "ws:home", "nav:settings", "nav:language", "nav:help", "nav:menu"}
 )
 
+#: Each ``current`` key's own callback (R1). The helper omits the entry whose
+#: action is the caller's own destination; this map lets the rule be asserted
+#: once, data-driven, for every screen.
+CURRENT_ACTION: dict[str, str] = {
+    "workspaces": "ws:list",
+    "settings": "nav:settings",
+    "language": "nav:language",
+    "help": "nav:help",
+    "menu": "nav:menu",
+    "workspace_home": "ws:home",
+}
+
 
 def nav_rows(locale: Locale, current: str, *, inside=None) -> list[list]:
     """Return the nav block's rows for ``current`` (chunked two per row).
 
-    ``inside`` is the workspace the user is currently inside (a domain
-    ``Workspace``) or ``None``. When set, the block is the **session's block**:
-    exactly the workspace-home entry (``ws:home``) and the Workspaces entry
-    (``ws:list``) — the account destinations are not offered while inside. When
-    unset, the block is the unchanged four account destinations plus Menu.
+    ``current`` is the surface the caller is rendering; its own destination is
+    **omitted** (R1), never muted. ``inside`` is the workspace the user is
+    currently inside (a domain ``Workspace``) or ``None``. When set, the block is
+    the **session's block** (``ws:home`` + ``ws:list``, minus the current one);
+    when unset, the block is the account's (the four destinations, plus Menu
+    where the screen is not the menu and not the workspaces list).
     """
     if inside is not None:
         name = getattr(inside, "name", "") or ""
         if name:
-            label = catalog.t("nav.workspace_home_named", locale, name=name)
+            home_label = catalog.t("nav.workspace_home_named", locale, name=name)
         else:
-            label = catalog.t("nav.workspace_home", locale)
-        home_intent = Intent.MUTED if current == "workspace_home" else Intent.PRIMARY
-        list_intent = Intent.MUTED if current == "workspaces" else Intent.PRIMARY
-        buttons = [
-            inline(label, "ws:home", intent=home_intent),
-            inline(catalog.t("menu.workspaces", locale), "ws:list", intent=list_intent),
-        ]
-        return [buttons]
+            home_label = catalog.t("nav.workspace_home", locale)
+        buttons = []
+        if current != "workspace_home":
+            buttons.append(inline(home_label, "ws:home", intent=Intent.PRIMARY))
+        if current != "workspaces":
+            buttons.append(
+                inline(catalog.t("menu.workspaces", locale), "ws:list", intent=Intent.PRIMARY)
+            )
+        return [buttons[index : index + 2] for index in range(0, len(buttons), 2)]
 
     buttons = []
     for key, label_key, action in DESTINATIONS:
-        intent = Intent.MUTED if key == current else Intent.PRIMARY
-        buttons.append(inline(catalog.t(label_key, locale), action, intent=intent))
-    if current != "menu":
+        if key == current:
+            continue
+        buttons.append(inline(catalog.t(label_key, locale), action, intent=Intent.PRIMARY))
+    # R2: on the workspaces list the menu duplicates the list itself; drop it.
+    if current not in ("menu", "workspaces"):
         buttons.append(
             inline(catalog.t("common.menu", locale), "nav:menu", intent=Intent.PRIMARY)
         )

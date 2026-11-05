@@ -1,4 +1,3 @@
 ➕ مساحة جديدة [ws:new] enabled
-📦 المساحات [ws:list] disabled | ⚙️ الإعدادات [nav:settings] enabled
-🌐 اللغة [nav:language] enabled | ❓ مساعدة [nav:help] enabled
-🏠 القائمة [nav:menu] enabled
+⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
+❓ مساعدة [nav:help] enabled

@@ -16,6 +16,7 @@
 #  13. RAR is never offered as a create/export target.
 #  14. Every archive refusal code has its own sentence in both catalogs.
 #  15. A bite test that changes behaviour (metrics honesty guard), restored.
+#  34. A bite test that puts a self-referential nav entry back (R1), restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -586,14 +587,14 @@ import pathlib, subprocess, sys
 # is green again. This proves the two-entry inside block is load-bearing.
 target = pathlib.Path("cloudbot/presentation/screens/nav.py")
 original = target.read_text(encoding="utf-8")
-guard = "        return [buttons]\n"
+guard = "        return [buttons[index : index + 2] for index in range(0, len(buttons), 2)]\n"
 bite = (
     "        # BITE: the account destinations are back in the inside block\n"
     "        for _key, _label_key, _action in DESTINATIONS:\n"
     "            buttons.append(inline(catalog.t(_label_key, locale), _action, intent=Intent.PRIMARY))\n"
     "        if current != \"menu\":\n"
     "            buttons.append(inline(catalog.t(\"common.menu\", locale), \"nav:menu\", intent=Intent.PRIMARY))\n"
-    "        return [buttons[index : index + 2] for index in range(0, len(buttons), 2)]\n"
+    + guard
 )
 bitten = original.replace(guard, bite, 1)
 assert bitten != original, "bite substitution did not apply (inside branch moved?)"
@@ -623,4 +624,44 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-three proofs passed"
+echo "== 34. bite test: a nav entry never points at the screen you are on =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Put the self-referential `ws:list` back onto the workspaces list screen: the
+# task-14 test must go red; restore, and it is green again. This proves R1/R2's
+# assertion is load-bearing.
+target = pathlib.Path("cloudbot/presentation/screens/workspaces.py")
+original = target.read_text(encoding="utf-8")
+guard = '    kb_rows += nav.nav_rows(locale, "workspaces", inside=inside)\n'
+bite = guard + (
+    '    kb_rows.append([inline(catalog.t("menu.workspaces", locale), "ws:list", intent=Intent.PRIMARY)])  # BITE\n'
+)
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (ws_list nav call moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q", "tests/unit/test_top_level_nav.py",
+       "-k", "drops_the_workspaces_and_menu_entries", "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the no-self-nav-entry test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: restoring the self-referential ws:list did not make the test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: removing the bite did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-four proofs passed"

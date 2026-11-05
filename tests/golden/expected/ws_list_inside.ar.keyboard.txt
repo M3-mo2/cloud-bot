@@ -1,4 +1,4 @@
 📦 demo [ws:view:4xt1tp8g] enabled
 📦 scraper [ws:view:4cbx57pb] enabled
 ➕ مساحة جديدة [ws:new] enabled
-🏠 demo [ws:home] enabled | 📦 المساحات [ws:list] disabled
+🏠 demo [ws:home] enabled

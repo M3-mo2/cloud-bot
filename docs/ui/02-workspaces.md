@@ -47,18 +47,28 @@ Status vocabulary used here comes from
 | 📦 scraper | 📦 scraper | inline | primary | opens detail |
 | ➕ مساحة جديدة | ➕ New Workspace | inline | success | — |
 | ➕ المزيد | ➕ Load more | inline | primary | only if more pages |
-| 🏠 القائمة | 🏠 Menu | inline | primary | — |
 
 The list shows up to 10 per page, then a **Load more** button (primary), which
 requests the next page (the engine's offset pagination). When there are no more
 pages, the button is omitted.
 
-**The nav block depends on whether the user is inside a workspace.** When the
-list is shown *outside* a session (from the menu, or after logging out) it ends
-in the account block — Workspaces (muted, we are here), Settings, Language, Help
-and Menu. When the list is shown *inside* a session the block is the session's
-(§2.5.2): `🏠 <workspace>` and `📦 Workspaces` (muted, we are here), and the
-account destinations are absent.
+**The nav block depends on whether the user is inside a workspace.** Two task-14
+rules shape it here. **R1 — a nav entry never points at the screen you are already
+on: its own destination is omitted, not muted.** So the list does not carry
+`📦 Workspaces` (`ws:list`): that is this screen, and its label and icon are
+almost identical to the screen's own title `📦 مساحاتي` (the "two buttons named
+مساحة/مساحاتي" that was reported). **R2 — the list also drops `🏠 Menu`**
+(`nav:menu`): the menu's body is the same workspace table, so for a user who owns
+workspaces it is a second route to the list itself. Outside a session the block
+is therefore exactly the three account destinations that are *not* this screen:
+
+```
+[ ⚙️ الإعدادات ] [ 🌐 اللغة ]
+[ ❓ مساعدة ]
+```
+
+When the list is shown *inside* a session the block is the session's (§2.5.2, and
+R1 again): `📦 Workspaces` is this screen, so only `🏠 <workspace>` remains.
 
 ### 1.4 Empty state
 
@@ -208,12 +218,17 @@ Your files are safe.</blockquote>
 **While the user is inside a workspace the nav block belongs to the session, not
 to the account.** On every screen reachable from a session — the workspace home,
 the workspace list, help, settings and the language picker — the shared block is
-**exactly two entries**:
+**up to two entries**, subject to R1 (§1.3):
 
 | Label (AR) | Label (EN) | Callback | Notes |
 | --- | --- | --- | --- |
-| 🏠 demo | 🏠 demo | `ws:home` | the workspace home; **muted** while already on it |
-| 📦 المساحات | 📦 Workspaces | `ws:list` | browse / **switch** to another workspace |
+| 🏠 demo | 🏠 demo | `ws:home` | the workspace home; **omitted** on the home itself (R1/R5) |
+| 📦 المساحات | 📦 Workspaces | `ws:list` | browse / **switch** to another workspace; omitted on the list itself (R1) |
+
+So on any inside screen that is *not* the workspace home or the list the block is
+the two entries `🏠 demo` + `📦 المساحات`; on the workspace home itself only
+`📦 المساحات` remains (you are already home); and on the inside list only `🏠 demo`
+remains (you are already on the list).
 
 The **account destinations — Settings, Language, Help and Menu — are removed
 from the block whenever the user is inside a workspace.** A place the user has

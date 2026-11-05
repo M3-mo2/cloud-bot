@@ -1,4 +1,3 @@
 ➕ New Workspace [ws:new] enabled
-📦 Workspaces [ws:list] disabled | ⚙️ Settings [nav:settings] enabled
-🌐 Language [nav:language] enabled | ❓ Help [nav:help] enabled
-🏠 Menu [nav:menu] enabled
+⚙️ Settings [nav:settings] enabled | 🌐 Language [nav:language] enabled
+❓ Help [nav:help] enabled

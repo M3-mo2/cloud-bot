@@ -4,18 +4,22 @@ Reported live: the workspace home was cluttered with the top-level account menu.
 ``nav.nav_rows(..., inside=<ws>)`` appended six entries — the ``🏠 <workspace>``
 home, the four account destinations (Settings, Language, Help, Workspaces) and
 Menu — so a place the user had *entered* still offered the account's own screens.
-The rule: **while inside, the block is exactly two entries** — ``ws:home`` (muted
-on the workspace home itself) and ``ws:list`` — and the account destinations are
-gone. They stay reachable exactly as before: the ``/settings`` and ``/help``
-commands, and by leaving the workspace.
+The rule: **while inside, the block is up to two entries** — ``ws:home`` and
+``ws:list`` — and the account destinations are gone. They stay reachable exactly
+as before: the ``/settings`` and ``/help`` commands, and by leaving the
+workspace.
 
-While **not inside**, the block keeps its four destinations plus Menu unchanged.
+Task 14 (R1/R5) refines this: an entry is **omitted**, never muted, when it points
+at the screen you are already on. On the workspace home itself that removes
+``ws:home``, leaving just ``ws:list``.
+
+While **not inside**, the block keeps its destinations plus Menu — minus its own
+(R1).
 """
 
 from __future__ import annotations
 
 import pytest
-from aiogram.types import DisabledButton
 
 from cloudbot.adapters.cloud_service.fake import _ws
 from cloudbot.core.locale import Locale
@@ -65,7 +69,7 @@ def _inside_screens(locale: Locale) -> dict:
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
 @pytest.mark.parametrize(
     "name",
-    ["workspace_home", "workspace_list", "help", "settings", "language_picker", "main_menu"],
+    ["help", "settings", "language_picker", "main_menu"],
 )
 def test_inside_block_is_exactly_home_and_workspaces(name, locale):
     callbacks = set(_callbacks(_inside_screens(locale)[name]))
@@ -77,9 +81,32 @@ def test_inside_block_is_exactly_home_and_workspaces(name, locale):
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_inside_workspace_list_omits_its_own_destination(locale):
+    """R1 on the inside list: main_menu.workspaces is the screen itself, so the
+    block is just the workspace-home entry."""
+    screen = _inside_screens(locale)["workspace_list"]
+    callbacks = set(_callbacks(screen))
+    assert "ws:list" not in callbacks
+    assert "ws:home" in callbacks
+    assert not (ACCOUNT_ACTIONS & callbacks)
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_inside_block_on_the_workspace_home_is_just_workspaces(locale):
+    """R5: on the home itself ``ws:home`` is omitted, leaving the session block at
+    only ``ws:list`` — and no account destination."""
+    screen = _inside_screens(locale)["workspace_home"]
+    callbacks = set(_callbacks(screen))
+    assert "ws:home" not in callbacks
+    assert not (ACCOUNT_ACTIONS & callbacks)
+    nav_actions = {c for c in callbacks if c in nav.NAV_ACTIONS}
+    assert nav_actions == {"ws:list"}
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
 @pytest.mark.parametrize(
     "name",
-    ["workspace_home", "workspace_list", "help", "settings", "language_picker", "main_menu"],
+    ["help", "settings", "language_picker", "main_menu"],
 )
 def test_inside_block_is_one_row_of_two(name, locale):
     block = _nav_block(_inside_screens(locale)[name])
@@ -90,8 +117,16 @@ def test_inside_block_is_one_row_of_two(name, locale):
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_inside_workspace_list_block_is_one_row_of_one(locale):
+    """R1: its own entry is omitted, so only the home entry remains."""
+    block = _nav_block(_inside_screens(locale)["workspace_list"])
+    assert len(block) == 1 and [b.callback_data for b in block[0]] == ["ws:home"]
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
 def test_the_helper_returns_exactly_two_entries_while_inside(locale):
-    """The ONE helper is the single source of truth (D1)."""
+    """The ONE helper is the single source of truth (D1): away from the home, the
+    session block is the home entry and the workspaces entry, one row of two."""
     rows = nav.nav_rows(locale, "help", inside=WS)
     callbacks = [b.callback_data for row in rows for b in row]
     assert callbacks == ["ws:home", "ws:list"]
@@ -101,22 +136,23 @@ def test_the_helper_returns_exactly_two_entries_while_inside(locale):
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_home_entry_is_muted_on_the_workspace_home_but_tappable_elsewhere(locale):
+def test_home_entry_is_omitted_on_the_workspace_home_but_present_elsewhere(locale):
     home_block = nav.nav_rows(locale, "workspace_home", inside=WS)
-    home_btn = [b for row in home_block for b in row if b.callback_data == "ws:home"][0]
-    assert isinstance(home_btn.disabled, DisabledButton)
+    assert [b.callback_data for row in home_block for b in row] == ["ws:list"]
 
     other_block = nav.nav_rows(locale, "settings", inside=WS)
-    other_btn = [b for row in other_block for b in row if b.callback_data == "ws:home"][0]
-    assert other_btn.disabled is None
+    home_btns = [b for row in other_block for b in row if b.callback_data == "ws:home"]
+    assert home_btns and home_btns[0].disabled is None
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_not_inside_block_is_unchanged(locale):
-    """The guard against over-correcting: outside, the account block stays put."""
+def test_not_inside_block_minus_its_own_destination(locale):
+    """The guard against over-correcting: outside, the account block stays put —
+    minus the entry for the screen itself (R1)."""
     rows = nav.nav_rows(locale, "help")
     callbacks = {b.callback_data for row in rows for b in row}
-    assert {"ws:list", "nav:settings", "nav:language", "nav:help", "nav:menu"} == callbacks
+    assert callbacks == {"ws:list", "nav:settings", "nav:language", "nav:menu"}
+    assert "nav:help" not in callbacks
     assert "ws:home" not in callbacks
 
 

@@ -2,4 +2,4 @@
 ▶️ تشغيل [run:choose:3xnpl67c] disabled | 🖥 الطرفيات [term:list:3xnpl67c] disabled
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:3xnpl67c] enabled
 🛑 إيقاف الكل [ws:stop_confirm:3xnpl67c] enabled | 🗑 حذف [ws:delete_confirm:3xnpl67c] enabled
-🏠 legacy [ws:home] disabled | 📦 المساحات [ws:list] enabled
+📦 المساحات [ws:list] enabled
