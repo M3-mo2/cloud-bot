@@ -134,6 +134,15 @@ def _tunnels_disabled_message_key(details: dict) -> str:
     return "err.tunnels_disabled"
 
 
+def tunnels_disabled_message(details: dict, locale: Locale) -> str:
+    """The specific ``tunnels_disabled`` sentence for the engine's own details.
+
+    The tunnel publish path renders this so a gate refusal names the switch the
+    **engine** reported, never the bot's possibly-stale cached limits (F-05).
+    """
+    return catalog.t(_tunnels_disabled_message_key(details), locale)
+
+
 def _extra_actions_for(code: str) -> tuple[tuple[str, str, Intent], ...]:
     if code == "workspace_suspended":
         return (("err.resume", "ws:resume", Intent.SUCCESS),)

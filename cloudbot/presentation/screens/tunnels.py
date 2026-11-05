@@ -2,14 +2,23 @@
 
 The URL is **ephemeral** by the roadmap's rule: it appears only as a ``LINK``
 button on the live screen and is never stored or printed as a plain string. The
-screen also explains which of the three gates is off (server, ``allow_tunnels``,
-``allow_net``) and offers the fix where it belongs.
+screen also explains which gate is off — the workspace lifecycle status
+(suspended/locked/deleted/unknown, F-04), the server switch
+(``tunnels.enabled``), or one of the two workspace switches (``allow_tunnels``,
+``allow_net``) — and offers the fix where it belongs.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from cloudbot.core.locale import Locale
-from cloudbot.domain.value_objects import Tunnel, TunnelList, WorkspaceId
+from cloudbot.domain.value_objects import (
+    Tunnel,
+    TunnelList,
+    WorkspaceId,
+    WorkspaceStatus,
+)
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import localize_digits
 from cloudbot.presentation.keyboards.buttons import inline
@@ -25,6 +34,18 @@ MIN_PORT = 1024
 MAX_PORT = 65535
 
 
+@dataclass(frozen=True)
+class DetectedPort:
+    """One listening TCP port offered by the publish picker.
+
+    ``attributed`` is **display only**: a socket with no discoverable owner is
+    still offered (marked "owner unknown"), never hidden (F-06, the 2c rule).
+    """
+
+    port: int
+    attributed: bool = True
+
+
 def _num(value: int, locale: Locale) -> str:
     return localize_digits(str(value), locale)
 
@@ -33,10 +54,18 @@ def _raw(text: str) -> Html:
     return Html(text)
 
 
-def _short(tunnel_id: str) -> str:
-    if len(tunnel_id) <= 12:
-        return tunnel_id
-    return tunnel_id[:10] + "…"
+#: Engine lifecycle status → the publish gate sentence (F-04). ``active`` is the
+#: only status that may publish; every other status names itself in the reason.
+_LIFECYCLE_GATE_KEYS: dict[WorkspaceStatus, str] = {
+    WorkspaceStatus.SUSPENDED: "tunnel.gate.suspended",
+    WorkspaceStatus.LOCKED: "tunnel.gate.locked",
+    WorkspaceStatus.DELETED: "tunnel.gate.deleted",
+    WorkspaceStatus.UNKNOWN: "tunnel.gate.unknown",
+}
+
+
+def _lifecycle_gate_key(status: WorkspaceStatus) -> str | None:
+    return _LIFECYCLE_GATE_KEYS.get(status)
 
 
 # -- active links ------------------------------------------------------------
@@ -48,8 +77,10 @@ def tunnels_screen(
     allow_tunnels: bool = True,
     allow_net: bool = True,
     server_enabled: bool = True,
+    status: WorkspaceStatus = WorkspaceStatus.ACTIVE,
     max_tunnels: int | None = None,
     note: str | None = None,
+    gate: str | None = None,
 ) -> Screen:
     """The public-links list, its gate, and (when known) its own ceiling.
 
@@ -57,7 +88,11 @@ def tunnels_screen(
     never a hardcoded constant. When the cap is reached the publish entry is
     muted with a reason so the ceiling is visible *before* it is hit. ``note`` is
     a one-line, already-localized explanation (e.g. a port already has a tunnel,
-    F-03).
+    F-03). ``status`` is the workspace's lifecycle status: a suspended/locked/
+    deleted workspace is a gate too (F-04), so Publish is muted with its reason.
+    ``gate`` (already-localized) **overrides** the computed gate sentence —
+    the publish refusal uses it to show the **engine's own** reason (F-05) instead
+    of the bot's possibly-stale cached limits.
     """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.title", locale))
@@ -87,6 +122,10 @@ def tunnels_screen(
         )
         # The URL is ephemeral; say so and never print it as text.
         doc.blockquote(catalog.t("tunnel.ephemeral", locale))
+        # F-07: a non-active tunnel's link no longer serves — say so, do not
+        # keep a live-looking Open button for it.
+        if any(_is_live(t.status) is False for t in tunnels.tunnels):
+            doc.blockquote(catalog.t("tunnel.stopped_note", locale))
 
     # The ceiling is always stated when the engine reports one (R2).
     if max_tunnels is not None:
@@ -103,7 +142,13 @@ def tunnels_screen(
                 catalog.t("tunnel.limit_note", locale, max=_num(max_tunnels, locale))
             )
 
-    gate = _gate_note(locale, allow_tunnels=allow_tunnels, allow_net=allow_net, server_enabled=server_enabled)
+    gate = gate or _gate_note(
+        locale,
+        allow_tunnels=allow_tunnels,
+        allow_net=allow_net,
+        server_enabled=server_enabled,
+        status=status,
+    )
     if gate is not None:
         doc.blockquote(gate)
 
@@ -116,6 +161,7 @@ def tunnels_screen(
             allow_tunnels=allow_tunnels,
             allow_net=allow_net,
             server_enabled=server_enabled,
+            status=status,
             max_tunnels=max_tunnels,
         ),
     )
@@ -129,12 +175,18 @@ def tunnels_markup(
     allow_tunnels: bool = True,
     allow_net: bool = True,
     server_enabled: bool = True,
+    status: WorkspaceStatus = WorkspaceStatus.ACTIVE,
     max_tunnels: int | None = None,
 ):
     rows: list[list] = []
-    # A LINK button per URL — the only place the ephemeral URL appears.
+    # A LINK button per URL — the only place the ephemeral URL appears. A tunnel
+    # that is not ``active`` no longer serves: its URL is **removed** and replaced
+    # by a muted "not serving" button (F-07), so the user is never invited to a
+    # dead link. An unknown status is treated as not-live (fail safe).
     for tunnel in tunnels.tunnels:
-        if tunnel.url:
+        if not tunnel.url:
+            continue
+        if _is_live(tunnel.status) is True:
             rows.append(
                 [
                     inline(
@@ -144,8 +196,21 @@ def tunnels_markup(
                     )
                 ]
             )
+        else:
+            rows.append(
+                [
+                    inline(
+                        catalog.t(
+                            "tunnel.link_stopped", locale, port=_num(tunnel.port, locale)
+                        ),
+                        intent=Intent.MUTED,
+                        disabled=True,
+                    )
+                ]
+            )
     at_cap = max_tunnels is not None and tunnels.count >= max_tunnels
-    publishable = server_enabled and allow_tunnels and allow_net
+    lifecycle_ok = _lifecycle_gate_key(status) is None
+    publishable = server_enabled and allow_tunnels and allow_net and lifecycle_ok
     if at_cap:
         # Disabled-with-reason: the label itself names the ceiling (R2).
         rows.append(
@@ -184,8 +249,18 @@ def tunnels_markup(
 
 
 def _gate_note(
-    locale: Locale, *, allow_tunnels: bool, allow_net: bool, server_enabled: bool
+    locale: Locale,
+    *,
+    allow_tunnels: bool,
+    allow_net: bool,
+    server_enabled: bool,
+    status: WorkspaceStatus = WorkspaceStatus.ACTIVE,
 ) -> str | None:
+    # The lifecycle is the first gate: a paused/locked/gone workspace cannot
+    # publish at all, whatever the three tunnel switches say (F-04).
+    lifecycle_key = _lifecycle_gate_key(status)
+    if lifecycle_key is not None:
+        return catalog.t(lifecycle_key, locale)
     if not server_enabled:
         return catalog.t("tunnel.gate.server", locale)
     if not allow_tunnels:
@@ -195,43 +270,80 @@ def _gate_note(
     return None
 
 
+#: Engine tunnel status → a translated label (F-07). Anything unknown falls back
+#: to the generic ``tunnel.status.unknown`` — never the raw engine token.
+_TUNNEL_STATUS_KEYS: dict[str, str] = {
+    "active": "tunnel.status.active",
+    "stopped": "tunnel.status.stopped",
+}
+
+
 def _status_label(status: str, locale: Locale) -> str:
-    clean = (status or "").strip()
+    clean = (status or "").strip().lower()
     if not clean:
         return catalog.t("port.no_state", locale)
-    # Plain engine statuses are not user vocabulary; show a safe generic word.
-    return clean
+    return catalog.t(_TUNNEL_STATUS_KEYS.get(clean, "tunnel.status.unknown"), locale)
+
+
+def _is_live(status: str) -> bool:
+    """Whether a tunnel in this status still serves its URL. Unknown ⇒ no."""
+    return (status or "").strip().lower() == "active"
 
 
 # -- publish a port ----------------------------------------------------------
+def _as_detected(value: DetectedPort | int) -> DetectedPort:
+    if isinstance(value, DetectedPort):
+        return value
+    return DetectedPort(port=int(value))
+
+
 def publish_port_screen(
     ws_id: WorkspaceId,
     locale: Locale,
     *,
-    detected: list[int] | None = None,
+    detected: list[DetectedPort | int] | None = None,
 ) -> Screen:
-    """Pick a port to publish. Only *detected* ports become instant-publish
-    buttons; a non-listening port goes through the confirm warning (R3)."""
+    """Pick a port to publish. **Every** reported listening TCP port is offered
+    (F-06); an unattributed port is marked "owner unknown", never hidden. A
+    non-listening port goes through the confirm warning (R3)."""
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.publish_title", locale))
     doc.p(catalog.t("tunnel.publish_body", locale))
-    detected = detected or []
+    detected = [_as_detected(p) for p in (detected or [])]
     if detected:
         doc.p(catalog.t("tunnel.publish_detected", locale))
-        doc.ul([_raw(f"<code>{_num(p, locale)}</code>") for p in detected])
+        doc.ul(_raw(_detected_label(p, locale)) for p in detected)
     else:
         doc.p(italic(catalog.t("tunnel.publish_none", locale)))
         doc.p(italic(catalog.t("tunnel.publish_none_hint", locale)))
     doc.p(italic(catalog.t("tunnel.port_hint", locale)))
 
     rows: list[list] = []
-    for port in detected:
+    for entry in detected:
         rows.append(
-            [inline(f"🌐 {_num(port, locale)}", _cb("tnl:port", ws_id, port), intent=Intent.SUCCESS)]
+            [
+                inline(
+                    _detected_button_label(entry, locale),
+                    _cb("tnl:port", ws_id, entry.port),
+                    intent=Intent.SUCCESS,
+                )
+            ]
         )
     rows.append([inline(catalog.t("tunnel.publish_custom", locale), _cb("tnl:port_custom", ws_id), intent=Intent.PRIMARY)])
     rows.append([inline(catalog.t("common.cancel", locale), _cb("tnl:list", ws_id), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(rows))
+
+
+def _detected_label(entry: DetectedPort, locale: Locale) -> str:
+    if entry.attributed:
+        return f"<code>{_num(entry.port, locale)}</code>"
+    return catalog.t("tunnel.publish_unattributed_port", locale, port=_num(entry.port, locale))
+
+
+def _detected_button_label(entry: DetectedPort, locale: Locale) -> str:
+    if entry.attributed:
+        return f"🌐 {_num(entry.port, locale)}"
+    return catalog.t("tunnel.publish_unattributed_port", locale, port=_num(entry.port, locale))
 
 
 def publish_custom_prompt(ws_id: WorkspaceId, locale: Locale) -> Screen:

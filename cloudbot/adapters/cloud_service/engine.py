@@ -96,6 +96,9 @@ class EngineAdapter:
         self._meta = MetaCache(client)
         self._install_timeout_s = PACKAGE_INSTALL_TIMEOUT_S
         self._tunnel_timeout_s = TUNNEL_TIMEOUT_S
+        #: F-08: the named port-scan budget was defined but never used; the call
+        #: now passes it explicitly so bumping the constant has an effect.
+        self._ports_timeout_s = PORTS_TIMEOUT_S
 
     @classmethod
     def create(
@@ -532,7 +535,9 @@ class EngineAdapter:
 
     # -- port discovery (Phase 2c) -------------------------------------------
     async def list_ports(self, ws_id: WorkspaceId) -> PortReport:
-        response = await self._client.get(_ws_path(ws_id, "/ports"))
+        response = await self._client.get(
+            _ws_path(ws_id, "/ports"), timeout=self._ports_timeout_s
+        )
         return port_report_from_dto(
             dto.PortReportEnvelope.model_validate(response.json())
         )

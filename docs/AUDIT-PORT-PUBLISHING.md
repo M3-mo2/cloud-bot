@@ -43,6 +43,43 @@ real dispatcher + fake engine), `scripts/verify.sh` proof 37 (a bite test that
 reintroduces the F-01 silence), and goldens for the publishing /
 already-published screens in both locales.
 
+The five remaining findings were fixed in task 20 (commit follows). The original
+finding text is kept verbatim below.
+
+* **F-04 (medium)** — fixed. `tunnels_screen`/`tunnels_markup` now take the
+  workspace's **lifecycle status** and mute **➕ Publish a port** with a sentence
+  that names it: `tunnel.gate.{suspended,locked,deleted,unknown}` (both locales).
+  The lifecycle gate is checked **before** the three tunnel switches, so a paused
+  workspace says *why* it cannot publish rather than naming a switch. The handler
+  passes the real status (read from the workspace) into `_tunnels_screen`
+  (`docs/DECISIONS.md`, CB-31).
+* **F-05 (medium)** — fixed. On a `422 tunnels_disabled` the gate refusal now
+  renders the **engine's own** reason via `_tunnels_disabled_message_key` on
+  `exc.details` (exposed as `tunnels_disabled_message`), not the bot's cached
+  limits. The reason is always present, so the redraw is never silent even when
+  the cache disagrees or the server switch is the one that is off.
+* **F-06 (medium)** — fixed. `_detected_ports` now offers **every** reported
+  listening TCP port (`protocol in {tcp, tcp6}`), including an
+  `attributed:false` one; the `unattributed` marker is display-only
+  (`tunnel.publish_unattributed_port`), and the engine's order is kept
+  (`docs/DECISIONS.md`, CB-32).
+* **F-07 (low)** — fixed. `_status_label` maps the engine statuses through the
+  catalog in both locales (`tunnel.status.{active,stopped,unknown}`), falling
+  back to a generic translated word for anything else — never the raw token. A
+  tunnel that is not `active` loses its live **Open** URL and shows a muted
+  "not serving" button plus `tunnel.stopped_note`.
+* **F-08 (low)** — fixed. The dead `_short` helper was deleted; the previously
+  unreferenced `PORTS_TIMEOUT_S` is now passed explicitly by `list_ports`; and
+  `_status_label` (which promised a "safe generic word" but returned the input)
+  is now a real mapping (see F-07).
+
+Proofs for F-04…F-08: `tests/unit/test_tunnel_port_fixes.py` (38 tests, most
+driven through the real dispatcher + fake engine), `scripts/verify.sh` proof 38
+(a bite test that re-hides an unattributed port), and goldens for the
+lifecycle-gated list, the unattributed picker and the stopped-tunnel list in both
+locales.
+
+
 ---
 
 ## F-01 · Re-raised refusals render nothing: the error guard receives an `Update`, not the callback/message

@@ -580,6 +580,19 @@ MESSAGES: dict[str, str] = {
     "tunnel.gate.allow_tunnels": "Publishing is turned off for this workspace. Enable <b>public links</b> when you create the workspace.",
     "tunnel.gate.allow_net": "This workspace has no internet access, so it can't be published. Enable network access first.",
     "tunnel.gate.server": "Publishing is unavailable on this server right now.",
+    # F-04: the lifecycle is a gate too — a paused/locked/gone workspace may not publish.
+    "tunnel.gate.suspended": "This workspace is paused, so it can't publish a port. Resume it first.",
+    "tunnel.gate.locked": "This workspace is locked, so it can't publish a port. Renew to continue.",
+    "tunnel.gate.deleted": "This workspace is gone, so it can't publish a port.",
+    "tunnel.gate.unknown": "This workspace isn't available right now, so it can't publish a port.",
+    # F-07: engine tunnel statuses, translated in both locales (never the raw token).
+    "tunnel.status.active": "Active",
+    "tunnel.status.stopped": "Stopped",
+    "tunnel.status.unknown": "Unknown",
+    "tunnel.link_stopped": "🔗 {port} · not serving",
+    "tunnel.stopped_note": "A stopped link no longer serves — remove it and publish the port again.",
+    # F-06: an unattributed listening port is offered, marked (never hidden).
+    "tunnel.publish_unattributed_port": "🌐 {port} · owner unknown",
 
     # -- ports (Phase 2c) ----------------------------------------------------
     "port.title": "🔌 Listening ports",

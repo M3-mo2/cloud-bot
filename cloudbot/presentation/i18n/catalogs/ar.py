@@ -580,6 +580,19 @@ MESSAGES: dict[str, str] = {
     "tunnel.gate.allow_tunnels": "النشر معطّل لهذه المساحة. فعّل <b>الروابط العامة</b> عند إنشاء مساحة العمل.",
     "tunnel.gate.allow_net": "لا تتوفر اتصال بالإنترنت لهذه المساحة لذا لا يمكن نشرها. فعّل الاتصال بالشبكة أولًا.",
     "tunnel.gate.server": "النشر غير متاح على هذا الخادم حاليًا.",
+    # F-04: the lifecycle is a gate too — a paused/locked/gone workspace may not publish.
+    "tunnel.gate.suspended": "هذه المساحة متوقفة مؤقتًا، لذا لا يمكنها نشر منفذ. استأنفها أولًا.",
+    "tunnel.gate.locked": "هذه المساحة مقفلة، لذا لا يمكنها نشر منفذ. جدّد للمتابعة.",
+    "tunnel.gate.deleted": "هذه المساحة محذوفة، لذا لا يمكنها نشر منفذ.",
+    "tunnel.gate.unknown": "هذه المساحة غير متاحة الآن، لذا لا يمكنها نشر منفذ.",
+    # F-07: engine tunnel statuses, translated in both locales (never the raw token).
+    "tunnel.status.active": "نشِط",
+    "tunnel.status.stopped": "متوقف",
+    "tunnel.status.unknown": "غير معروفة",
+    "tunnel.link_stopped": "🔗 {port} · لا يعمل",
+    "tunnel.stopped_note": "الرابط المتوقف لم يعد يعمل — احذفه وانشر المنفذ من جديد.",
+    # F-06: an unattributed listening port is offered, marked (never hidden).
+    "tunnel.publish_unattributed_port": "🌐 {port} · المالك غير معروف",
 
     # -- ports (Phase 2c) ----------------------------------------------------
     "port.title": "🔌 المنافذ المستمِعة",

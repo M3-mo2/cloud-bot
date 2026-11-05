@@ -22,6 +22,8 @@
 #      so sticky input breaks again, restored.
 #  37. A bite test that drops the error guard's Update unwrap so refusals render
 #      nothing again (F-01), restored.
+#  38. A bite test that hides an unattributed listening port from the picker
+#      (F-06), restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -800,3 +802,47 @@ PY
 
 echo
 echo "all thirty-seven proofs passed"
+
+echo
+echo "== 38. bite test: an unattributed listening port is offered, not hidden (F-06) =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Reintroduce the F-06 filter — drop a listening port whose owner is unknown
+# (``attributed`` false) from the picker. The task-20 test must go red; restore
+# the offer-every-port rule, and it is green again. This proves the F-06 change
+# ("never hide an unattributed socket") is load-bearing, not decoration.
+target = pathlib.Path("cloudbot/handlers/features.py")
+original = target.read_text(encoding="utf-8")
+guard = '        if p.protocol in ("tcp", "tcp6")\n'
+bite = '        if p.protocol in ("tcp", "tcp6") and p.attributed  # BITE: hide unknown owners\n'
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (detected-ports filter moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q",
+       "tests/unit/test_tunnel_port_fixes.py",
+       "-k", "f06_unattributed_listening_port_is_offered",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the F-06 test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: hiding the unattributed port did not make the F-06 test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the offer-every-port rule did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+echo "all thirty-eight proofs passed"

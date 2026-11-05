@@ -604,6 +604,74 @@ and read as a refusal, when the request genuinely succeeded (the link exists).
 
 ---
 
+## CB-31 — The publish gate includes the workspace lifecycle status
+
+**Decision.** The tunnels screen is gated by **four** conditions, not three. In
+addition to the server switch (`tunnels.enabled`) and the two workspace switches
+(`limits.allow_tunnels`, `limits.allow_net`), the workspace's **lifecycle
+status** is consulted first: only `active` may publish. `suspended`, `locked`,
+`deleted` and `unknown` all mute **➕ Publish a port** and show a blockquote that
+names the status (`tunnel.gate.{suspended,locked,deleted,unknown}`, both
+locales). The lifecycle gate is evaluated **before** the switch gates, so a
+paused workspace says it is paused rather than naming a tunnel switch that may
+also be off. The handler passes the real status (read from the workspace, exactly
+as `workspace_detail_markup` already does for Run/Terminals) into
+`_tunnels_screen`.
+
+**Why.** The audit (F-04) measured that a suspended/locked workspace still
+showed an enabled Publish button; tapping it reaches the engine and is refused
+with `409 workspace_suspended` / `403 subscription_expired` — an action that
+cannot succeed. `workspace_detail_markup` already disables Run/Terminals for
+those statuses; the tunnels gate was built around the three tunnel switches and
+never extended to the lifecycle. Naming the status (not just "disabled") keeps
+the rule that every muted control carries a reason.
+
+**Consequences.** The list is muted with a status-specific sentence for every
+non-active status, in both locales; an active workspace renders no lifecycle
+sentence. Goldens cover suspended/locked/deleted in both locales.
+`tests/unit/test_tunnel_port_fixes.py` asserts the publish entry's enabled state
+and the reason sentence for every `WorkspaceStatus`, and the real dispatcher path
+for a suspended workspace.
+
+**Alternatives rejected.** Trusting the engine's refusal alone: with the
+lifecycle gate the user never taps a button that cannot work, and the audit's
+F-04 is exactly that dead-end. Folding the status into one generic "disabled"
+sentence: the rule is that the reason names the cause, and a paused vs. locked
+workspace have different fixes (resume vs. renew).
+
+---
+
+## CB-32 — Every reported listening port is offered; the owner is display-only
+
+**Decision.** The publish picker offers **every** TCP port the engine reports
+(`protocol in {tcp, tcp6}`), including one with `attributed:false`. Attribution
+(`pid`/`kind`) is used **only** to label the entry — an unattributed port is
+marked "owner unknown" (`tunnel.publish_unattributed_port`) in both the body list
+and its button, never dropped. The engine's order is preserved. UDP sockets are
+not offered: the engine reports no `LISTEN` state for UDP, so they are not
+listening TCP ports.
+
+**Why.** The audit (F-06) measured that `_detected_ports` filtered
+`if p.attributed`, so a genuinely open port with no discoverable owner was
+silently absent from the picker — while the ports screen *did* show it as "owner
+unknown". The two screens disagreed, the engine accepts a create for such a port,
+and the 2c design rule is that an unattributed socket must "never be hidden or
+guessed". Attribution is an implementation detail (whether the scanner resolved
+the owning pid), not a statement about whether the port is open.
+
+**Consequences.** `_detected_ports` returns a `DetectedPort(port, attributed)`
+record (not a bare int); the picker marks an unattributed entry and keeps its
+`tnl:port` button, so it is publishable. `scripts/verify.sh` proof 38 restores
+the `attributed` filter and shows the F-06 test go red. The fake engine and the
+goldens carry an unattributed `LISTEN` port.
+
+**Alternatives rejected.** Keeping the filter and relying on the typed-port path:
+the user had to know an undisplayed number, and the two screens contradicted each
+other. Guessing an owner: the 2c rule forbids inventing one; the entry is marked
+unknown instead.
+
+---
+
 ## Open questions deliberately left open
 
 - **Provisional:** exact plan/quota model and per-user rate limits (Phase 2;

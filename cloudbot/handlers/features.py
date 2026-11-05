@@ -25,7 +25,7 @@ from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_bytes, localize_digits
 from cloudbot.presentation.keyboards.callbacks import decode
-from cloudbot.presentation.mapping.errors import error_screen
+from cloudbot.presentation.mapping.errors import error_screen, tunnels_disabled_message
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import archives as arc_screens
 from cloudbot.presentation.screens import metrics as met_screens
@@ -33,6 +33,7 @@ from cloudbot.presentation.screens import packages as pkg_screens
 from cloudbot.presentation.screens import ports as port_screens
 from cloudbot.presentation.screens import processes as proc_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
+from cloudbot.presentation.screens.tunnels import DetectedPort
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import RequestEvents
 from cloudbot.services.packages import parse_package_input
@@ -163,33 +164,63 @@ TUNNEL_REFUSAL_KINDS: dict[str, str] = {
 }
 
 
-async def _detected_ports(ctx: UserContext, services: Services, ws_id) -> list[int]:
-    """The workspace's attributed listening ports, or ``[]`` when ports are off."""
+async def _detected_ports(ctx: UserContext, services: Services, ws_id) -> list[DetectedPort]:
+    """Every reported listening TCP port, or ``[]`` when ports are off.
+
+    F-06: an unattributed socket (``attributed:false``) is **offered** too — it is
+    marked "owner unknown" in the picker and never hidden; the two screens must
+    agree, and the engine accepts a create for it. Order is the engine's order.
+    """
     try:
         report = await services.ports.list(ctx.tg_id, ws_id)
     except EngineRefused as exc:
         if exc.engine_code != "ports_disabled":
             raise
         return []
-    return [p.port for p in report.ports if p.attributed]
+    return [
+        DetectedPort(port=p.port, attributed=p.attributed)
+        for p in report.ports
+        if p.protocol in ("tcp", "tcp6")
+    ]
 
 
-def _unlistened_warning(port: int, detected: list[int], locale) -> str | None:
+def _detected_port_numbers(detected) -> list[int]:
+    return [p.port if isinstance(p, DetectedPort) else int(p) for p in detected]
+
+
+def _unlistened_warning(port: int, detected, locale) -> str | None:
     """The one-sentence warning for a port nothing is listening on (R3), or None.
 
     A detected port gets no warning; a port outside the detected set gets the
     sentence but is never blocked.
     """
-    if port in detected:
+    if port in _detected_port_numbers(detected):
         return None
     return catalog.t("tunnel.publish_unlistened", locale)
 
 
-async def _tunnels_screen(ctx: UserContext, services: Services, ws_id, *, note: str | None = None):
-    """Render the tunnels screen with the workspace's gate state and ceiling."""
+async def _tunnels_screen(
+    ctx: UserContext,
+    services: Services,
+    ws_id,
+    *,
+    note: str | None = None,
+    status=None,
+    gate: str | None = None,
+):
+    """Render the tunnels screen with the workspace's gate state and ceiling.
+
+    ``status`` is the workspace's lifecycle status; when not supplied it is read
+    from the workspace (F-04). ``note`` is an extra one-line explanation.
+    ``gate`` (already-localized) **overrides** the computed gate sentence — the
+    gate refusal passes the **engine's own** reason here (F-05), so the redraw
+    never carries a contradictory cached sentence and is never silent.
+    """
     tunnels = await services.tunnels.list(ctx.tg_id, ws_id)
     meta = await services.tunnels.meta()
     ws = await services.workspaces.get(ctx.tg_id, ws_id)
+    if status is None:
+        status = ws.status
     return tnl_screens.tunnels_screen(
         tunnels,
         ws_id,
@@ -197,8 +228,10 @@ async def _tunnels_screen(ctx: UserContext, services: Services, ws_id, *, note: 
         allow_tunnels=ws.limits.allow_tunnels,
         allow_net=ws.limits.allow_net,
         server_enabled=meta.tunnels.enabled,
+        status=status,
         max_tunnels=meta.tunnels.max_per_workspace,
         note=note,
+        gate=gate,
     )
 
 
@@ -215,7 +248,16 @@ async def _tunnel_refusal_screen(
     if kind == "timeout":
         return tnl_screens.tunnel_timeout_screen(port, ws_id, ctx.locale)
     if kind == "gate":
-        return await _tunnels_screen(ctx, services, ws_id)
+        # F-05: name the switch the **engine** reported (its ``details``), not the
+        # bot's cached limits, which may disagree or be stale. Passed as ``gate``
+        # so it **replaces** any cached gate sentence — the reason is always
+        # present, so the redraw is never silent.
+        return await _tunnels_screen(
+            ctx,
+            services,
+            ws_id,
+            gate=tunnels_disabled_message(exc.details, ctx.locale),
+        )
     return None
 
 

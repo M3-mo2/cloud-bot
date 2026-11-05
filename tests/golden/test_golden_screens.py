@@ -285,6 +285,27 @@ def _fixtures():
             ),
         )
     )
+    # F-07: a stopped tunnel keeps its row but is no longer live.
+    stopped_tunnel_list = TunnelList(
+        tunnels=(
+            Tunnel(
+                id="tnl_01M6HJASCWM9Z1PF755GT89NK4",
+                workspace_id=str(ws.id),
+                port=8080,
+                url="https://example-abc.trycloudflare.com",
+                status="active",
+                created_at=NOW,
+            ),
+            Tunnel(
+                id="tnl_01M6HJASCWM9Z1PF755GT89NK6",
+                workspace_id=str(ws.id),
+                port=8082,
+                url="https://example-ghi.trycloudflare.com",
+                status="stopped",
+                created_at=NOW,
+            ),
+        )
+    )
     port_report = PortReport(
         workspace_id=str(ws.id),
         ports=(
@@ -464,6 +485,7 @@ def _fixtures():
         tunnel_list=tunnel_list,
         empty_tunnel_list=empty_tunnel_list,
         full_tunnel_list=full_tunnel_list,
+        stopped_tunnel_list=stopped_tunnel_list,
         port_report=port_report,
         partial_port_report=partial_port_report,
         metrics=metrics,
@@ -626,6 +648,11 @@ SCREEN_BUILDERS = {
     "tunnel_list_at_cap": lambda f, loc: tnl_screens.tunnels_screen(
         f["full_tunnel_list"], f["ws"].id, loc, max_tunnels=2
     ),
+    # F-07: an active and a stopped tunnel together; the stopped one's label is
+    # translated and its LINK button is muted.
+    "tunnel_list_stopped": lambda f, loc: tnl_screens.tunnels_screen(
+        f["stopped_tunnel_list"], f["ws"].id, loc, max_tunnels=3
+    ),
     "tunnel_gate_allow_tunnels": lambda f, loc: tnl_screens.tunnels_screen(
         f["empty_tunnel_list"], f["ws"].id, loc, allow_tunnels=False, max_tunnels=2
     ),
@@ -635,7 +662,22 @@ SCREEN_BUILDERS = {
     "tunnel_gate_server": lambda f, loc: tnl_screens.tunnels_screen(
         f["empty_tunnel_list"], f["ws"].id, loc, server_enabled=False, max_tunnels=2
     ),
+    # F-04: the lifecycle is a gate; the publish entry is muted with its reason.
+    "tunnel_gate_suspended": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, status=WorkspaceStatus.SUSPENDED, max_tunnels=2
+    ),
+    "tunnel_gate_locked": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, status=WorkspaceStatus.LOCKED, max_tunnels=2
+    ),
+    "tunnel_gate_deleted": lambda f, loc: tnl_screens.tunnels_screen(
+        f["empty_tunnel_list"], f["ws"].id, loc, status=WorkspaceStatus.DELETED, max_tunnels=2
+    ),
     "tunnel_publish": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[8080]),
+    # F-06: an unattributed listening port is offered (marked), never hidden.
+    "tunnel_publish_unattributed": lambda f, loc: tnl_screens.publish_port_screen(
+        f["ws"].id, loc,
+        detected=[tnl_screens.DetectedPort(8080), tnl_screens.DetectedPort(9090, attributed=False)],
+    ),
     "tunnel_publish_none": lambda f, loc: tnl_screens.publish_port_screen(f["ws"].id, loc, detected=[]),
     "tunnel_publish_custom": lambda f, loc: tnl_screens.publish_custom_prompt(f["ws"].id, loc),
     # F-02: the progress indication is the message that will carry the result
