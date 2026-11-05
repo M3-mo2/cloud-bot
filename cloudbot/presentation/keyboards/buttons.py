@@ -39,7 +39,9 @@ def inline(
 ) -> InlineKeyboardButton:
     style = style_for(intent)
     if url is not None:
-        return InlineKeyboardButton(text=text, url=url, style=style or "link")
+        # No style fallback: "link" is not a value Telegram accepts (it refuses the whole
+        # message). A URL button is visually distinct already. See styles.ALLOWED_STYLES.
+        return InlineKeyboardButton(text=text, url=url, style=style)
     if action is None:
         action = "nav:noop"
     action = validate_callback(action)

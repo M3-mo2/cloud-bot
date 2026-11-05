@@ -678,3 +678,25 @@ unknown instead.
   owned by the bot). The seam (`services/*` + `users.plan`) exists.
 - **Deferred:** file delivery as Telegram documents (CB-14), user timezones
   (CB-15), tunnels/packages/ports/metrics/subscriptions (ROADMAP).
+
+## CB-33 — a URL button carries no `style`, and `"link"` is not a style value
+
+**Decision.** `ALLOWED_STYLES` is `{primary, success, danger}`. A `Intent.LINK` maps to **no style**, and the
+URL-button factory no longer falls back to `"link"`.
+
+**Why.** Measured against the live Bot API: sending `style="link"` on an inline button — with a `url` **or** with
+`callback_data` — fails the **entire message** with *can't parse InlineKeyboardButton: Invalid button style
+specified*, while a URL button with no style at all (or `primary`/`success`/`danger`) is accepted. The bot put
+`style="link"` on every tunnel LINK button, so publishing a port created the tunnel and then the screen carrying
+the link was refused — the user saw nothing, which is exactly the reported symptom.
+
+**Why it survived every gate.** `InlineKeyboardButton.style` is typed `str | None`, so a value the server rejects
+is not a type error; `ALLOWED_STYLES` had been built from `ButtonStyle.LINK.value` (an aiogram enum that is not
+the server's contract); and the repo **asserted the defect** in three places — `test_only_four_styles_exist`,
+`test_intent_to_style`, and `verify.sh` proof 7 (`b.style == "link"`). A wrong premise locked by an assertion is
+invisible to every local gate.
+
+**What now pins it.** `tests/live/test_live_telegram_markup.py` sends the real markup to the real Bot API (with a
+bogus chat id, so nothing is delivered) and asserts Telegram parses it — the only instrument that can catch a
+server-side contract, since no local rule knows what the server accepts. Plus a per-button guard over every screen
+in `SCREEN_BUILDERS`, and `verify.sh` proof 27 (a bite test that reintroduces `style or "link"`).
