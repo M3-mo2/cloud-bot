@@ -361,6 +361,8 @@ MESSAGES: dict[str, str] = {
     "err.timeout.title": "⚠️ حدث خطأ",
     "err.unknown": "تعذّر إكمال الطلب.",
     "err.unknown.title": "⚠️ حدث خطأ",
+    "err.stale.title": "♻️ هذا الزر قديم",
+    "err.stale.body": "أُعيد تشغيل الخدمة بعد رسم هذا الزر، لذا لم يعد يعمل. افتح القائمة وحاول مرة أخرى.",
     "err.renew": "🔄 تجديد",
     "err.resume": "▶️ استئناف",
     "err.my_terminals": "🖥 طرفياتي",

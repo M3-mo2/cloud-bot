@@ -1,4 +1,4 @@
-⌨️ Send a command [term:cmd:5vfbvvg2] enabled | ⏹ Stop typing [term:exit:5vfbvvg2] enabled
-Ctrl-C [term:signal:dv4b8zrz] enabled | Ctrl-D (EOF) [term:ctrl_d:5vfbvvg2] enabled
-↔️ Resize [term:resize:5vfbvvg2] enabled | ⏹ Close [term:close:5vfbvvg2] enabled
-🖥 My terminals [term:list:4xt1tp8g] enabled | ⬅️ Back [ws:view:4xt1tp8g] enabled
+⌨️ Send a command [term:cmd:~5vfbvvg2] enabled | ⏹ Stop typing [term:exit:~5vfbvvg2] enabled
+Ctrl-C [term:signal:~dv4b8zrz] enabled | Ctrl-D (EOF) [term:ctrl_d:~5vfbvvg2] enabled
+↔️ Resize [term:resize:~5vfbvvg2] enabled | ⏹ Close [term:close:~5vfbvvg2] enabled
+🖥 My terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | ⬅️ Back [ws:view:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled

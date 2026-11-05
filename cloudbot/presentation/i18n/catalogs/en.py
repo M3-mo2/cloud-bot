@@ -361,6 +361,8 @@ MESSAGES: dict[str, str] = {
     "err.timeout.title": "⚠️ Something went wrong",
     "err.unknown": "That request couldn't be completed.",
     "err.unknown.title": "⚠️ Something went wrong",
+    "err.stale.title": "♻️ This button is out of date",
+    "err.stale.body": "The service restarted since this button was drawn, so it can no longer act. Open the menu and try again.",
     "err.renew": "🔄 Renew",
     "err.resume": "▶️ Resume",
     "err.my_terminals": "🖥 My terminals",

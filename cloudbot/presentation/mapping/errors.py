@@ -23,6 +23,7 @@ from cloudbot.core.errors import (
 from cloudbot.core.locale import Locale
 from cloudbot.core.modes import RunMode, shows_raw_payloads
 from cloudbot.presentation.i18n.catalog import catalog
+from cloudbot.presentation.keyboards.callbacks import StaleCallback
 from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
@@ -229,6 +230,13 @@ def view_for_error(err: DomainError) -> ErrorView:
     if isinstance(err, RateLimited):
         return ErrorView(
             "rate_limited", "err.title", "err.domain.rate_limited", retryable=False
+        )
+    if isinstance(err, StaleCallback):
+        # A button whose key parts cannot be resolved in this process: a restart
+        # emptied the token registry, or the callback was malformed. Always a
+        # correctable screen — never an ``IndexError`` and never silence (F-23.1).
+        return ErrorView(
+            "stale_button", "err.stale.title", "err.stale.body", retryable=False
         )
     log.warning("error.unmapped", kind=type(err).__name__)
     return ErrorView("unknown", "err.unknown.title", "err.unknown", retryable=False)

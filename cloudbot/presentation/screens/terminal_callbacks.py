@@ -6,15 +6,20 @@ indexed, and it was invisible until someone tapped the button.
 
 Here the mechanism was subtler. Terminal callbacks carry a workspace id and a
 session id, which together overflow Telegram's 64-byte ``callback_data`` cap, so
-they are encoded through the generic content-addressed codec (CB-8): the compact
-token is a hash, and the full key parts live in a **process-global, in-memory**
-registry. The log shows the service restarted at 14:38:03 and the user tapped a
-button drawn by the *previous* process at 14:44:47: the registry was empty,
-``decode`` returned ``key=()``, and ``decode(cb.data).key[0]`` raised
+they used to be encoded through the generic content-addressed codec (CB-8): the
+compact token is a hash, and the full key parts lived in a **process-global,
+in-memory** registry. The log shows the service restarted at 14:38:03 and the user
+tapped a button drawn by the *previous* process at 14:44:47: the registry was
+empty, ``decode`` returned ``key=()``, and ``decode(cb.data).key[0]`` raised
 ``IndexError: tuple index out of range``. Nothing rendered.
 
-To make that class impossible for the terminal this module is the **only** place
-``term:`` callback data is built and parsed:
+That was the **root cause** of a whole family (TASK 23): the registry dies with
+the process, so *every* key-bearing prefix could die with it. The generic codec
+now encodes key parts **inline whenever they fit** the cap, so a callback is
+restart-proof without a registry; only a callback that genuinely cannot fit falls
+back to the token. ``term:`` callbacks that fit are therefore inline and survive a
+restart, and the parser below is still the only place ``term:`` data is built and
+parsed:
 
 * every producer on a screen calls a typed builder here, never ``cb`` directly;
 * every handler calls :func:`parse`, never ``decode(...).key[n]``.

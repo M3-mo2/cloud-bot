@@ -10,7 +10,7 @@ from cloudbot.core.errors import InvalidInput
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.keyboards.callbacks import decode
+from cloudbot.presentation.keyboards.callbacks import decode_required
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import files as file_screens
 from cloudbot.services.bundle import Services
@@ -36,7 +36,7 @@ async def _show_listing(
 
 @router.callback_query(F.data.startswith("file:ls"))
 async def on_ls(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 1)
     ws_id = _wid(decoded.key[0])
     page = int(decoded.key[1]) if len(decoded.key) > 1 else 0
     await _show_listing(cb, ctx, services, sender, ws_id, "/", page)
@@ -44,7 +44,7 @@ async def on_ls(cb: CallbackQuery, ctx: UserContext, services: Services, sender:
 
 @router.callback_query(F.data.startswith("file:cd"))
 async def on_cd(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     path = decoded.key[1]
     await _show_listing(cb, ctx, services, sender, ws_id, path)
@@ -52,7 +52,7 @@ async def on_cd(cb: CallbackQuery, ctx: UserContext, services: Services, sender:
 
 @router.callback_query(F.data.startswith("file:view"))
 async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     path = decoded.key[1]
     content = await services.files.view(ctx.tg_id, ws_id, path)
@@ -61,7 +61,7 @@ async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 
 @router.callback_query(F.data.startswith("file:more"))
 async def on_more(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     path = decoded.key[1]
     content = await services.files.view(ctx.tg_id, ws_id, path, line_range=(100, 200))
@@ -71,7 +71,7 @@ async def on_more(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 # -- mkdir -------------------------------------------------------------------
 @router.callback_query(F.data.startswith("file:mkdir"))
 async def on_mkdir(cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 1)
     ws_id = decoded.key[0]
     path = decoded.key[1] if len(decoded.key) > 1 else "/"
     await state.set_state(Input.waiting_mkdir_path)
@@ -96,7 +96,7 @@ async def on_mkdir_path(
 # -- rename ------------------------------------------------------------------
 @router.callback_query(F.data.startswith("file:rename_same"))
 async def on_rename_same(cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = decoded.key[0]
     path = decoded.key[1]
     await state.set_state(Input.waiting_rename_path)
@@ -106,7 +106,7 @@ async def on_rename_same(cb: CallbackQuery, ctx: UserContext, sender: RichSender
 
 @router.callback_query(F.data.startswith("file:rename"))
 async def on_rename(cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = decoded.key[0]
     path = decoded.key[1]
     await state.set_state(Input.waiting_rename_path)
@@ -140,7 +140,7 @@ async def on_rename_text(
 # -- delete ------------------------------------------------------------------
 @router.callback_query(F.data.startswith("file:delete_confirm"))
 async def on_delete_confirm(cb: CallbackQuery, ctx: UserContext, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = decoded.key[0]
     path = decoded.key[1]
     await show_screen(cb, file_screens.delete_confirm(path, _wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
@@ -148,7 +148,7 @@ async def on_delete_confirm(cb: CallbackQuery, ctx: UserContext, sender: RichSen
 
 @router.callback_query(F.data.startswith("file:delete"))
 async def on_delete(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     path = decoded.key[1]
     await services.files.delete(ctx.tg_id, ws_id, path)
@@ -161,7 +161,7 @@ async def on_delete(cb: CallbackQuery, ctx: UserContext, services: Services, sen
 # -- upload ------------------------------------------------------------------
 @router.callback_query(F.data.startswith("file:upload"))
 async def on_upload(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 1)
     ws_id = decoded.key[0]
     path = decoded.key[1] if len(decoded.key) > 1 else "/"
     meta = await services.files.meta()

@@ -10,7 +10,7 @@ from cloudbot.core.errors import InvalidInput
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.keyboards.callbacks import decode
+from cloudbot.presentation.keyboards.callbacks import decode, decode_required
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.services.bundle import Services
@@ -47,7 +47,7 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 
 @router.callback_query(F.data.startswith("ws:view"))
 async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 1)
     ws_id = decoded.key[0]
     # Opening a workspace is entering it, like a login (task 10): persist the
     # session before rendering, so this detail screen is an "inside" screen.
@@ -136,7 +136,7 @@ async def _show_advanced(event, ctx, services, sender, state) -> None:
 async def on_profile(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 1)
     profile = decoded.key[0]
     await state.update_data(ws_profile=profile)
     await _show_advanced(cb, ctx, services, sender, state)
@@ -155,7 +155,7 @@ async def on_toggle(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
     """Flip one boolean switch on the advanced create screen (net / tunnels)."""
-    which = decode(cb.data).key[0]
+    which = decode_required(cb.data, 1).key[0]
     data = await state.get_data()
     key = "ws_allow_net" if which == "net" else "ws_allow_tunnels"
     await state.update_data(**{key: not bool(data.get(key, False))})
@@ -198,7 +198,7 @@ async def on_create(
 
 @router.callback_query(F.data.startswith("ws:delete_confirm"))
 async def on_delete_confirm(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     await show_screen(cb, ws_screens.delete_confirm(ws, ctx.locale), ctx=ctx, sender=sender)
 
@@ -211,7 +211,7 @@ async def on_delete(
     sender: RichSender,
     events: RequestEvents,
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     await services.workspaces.delete(ctx.tg_id, _wid(ws_id))
     events.workspace_deleted(tg_id=ctx.tg_id, ws_id=str(ws_id), name=ws.name)
@@ -233,14 +233,14 @@ async def on_delete(
 
 @router.callback_query(F.data.startswith("ws:stop_confirm"))
 async def on_stop_confirm(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     await show_screen(cb, ws_screens.stop_confirm(ws, ctx.locale), ctx=ctx, sender=sender)
 
 
 @router.callback_query(F.data.startswith("ws:stop"))
 async def on_stop(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     result = await services.workspaces.stop(ctx.tg_id, _wid(ws_id))
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     screen = ws_screens.lifecycle_result(
@@ -261,7 +261,7 @@ async def on_suspend(
     sender: RichSender,
     events: RequestEvents,
 ) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 1)
     # Distinguish "suspend" (do it) from "suspend_confirm" (show confirm): the
     # content-addressed token differs, so compare the action string.
     if "confirm" in decoded.action:
@@ -277,7 +277,7 @@ async def on_suspend(
 
 @router.callback_query(F.data.startswith("ws:resume"))
 async def on_resume(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     await services.workspaces.resume(ctx.tg_id, _wid(ws_id))
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     await show_screen(cb, ws_screens.lifecycle_result(ws, ctx.locale, kind="resume"), ctx=ctx, sender=sender)
@@ -289,7 +289,7 @@ async def on_renew(cb: CallbackQuery, ctx: UserContext, services: Services, send
     from cloudbot.presentation.mapping.errors import error_screen
 
     await cb.answer(catalog.t("ws.renew", ctx.locale))
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     await show_screen(cb, ws_screens.workspace_detail(ws, ctx.locale), ctx=ctx, sender=sender)
 

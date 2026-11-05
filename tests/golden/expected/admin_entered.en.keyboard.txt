@@ -1,8 +1,8 @@
-📁 Files [file:ls:9wi2u4xc] enabled | ▶️ Run [run:choose:4xt1tp8g] enabled
-📜 Runs [run:history:4xt1tp8g] enabled | 🖥 Terminals [term:list:4xt1tp8g] enabled
-🐍 Packages [pkg:list:4xt1tp8g] enabled | 🌐 Public links [tnl:list:4xt1tp8g] enabled
-🔌 Ports [port:list:4xt1tp8g] enabled | 🧠 Processes [proc:list:4xt1tp8g] enabled
-📊 Resources [met:view:4xt1tp8g] enabled | 🗜 Archives [arc:menu:4xt1tp8g] enabled
-⏸️ Suspend [ws:suspend_confirm:4xt1tp8g] enabled
-🛑 Stop All [ws:stop_confirm:4xt1tp8g] enabled | 🗑 Delete [ws:delete_confirm:4xt1tp8g] enabled
+📁 Files [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK4:0] enabled | ▶️ Run [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+📜 Runs [run:history:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🖥 Terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+🐍 Packages [pkg:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🌐 Public links [tnl:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+🔌 Ports [port:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🧠 Processes [proc:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+📊 Resources [met:view:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🗜 Archives [arc:menu:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+⏸️ Suspend [ws:suspend_confirm:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+🛑 Stop All [ws:stop_confirm:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🗑 Delete [ws:delete_confirm:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🚪 Leave workspace [adm:leave] enabled

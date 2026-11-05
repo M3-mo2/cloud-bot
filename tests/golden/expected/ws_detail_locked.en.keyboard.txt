@@ -1,5 +1,5 @@
-🔄 Renew [ws:renew:3xnpl67c] enabled | 📁 Files [file:ls:8frr6yh6] enabled
-▶️ Run [run:choose:3xnpl67c] disabled | 🖥 Terminals [term:list:3xnpl67c] disabled
-🚪 Log out of workspace [ws:logout:3xnpl67c] enabled
-🛑 Stop All [ws:stop_confirm:3xnpl67c] enabled | 🗑 Delete [ws:delete_confirm:3xnpl67c] enabled
+🔄 Renew [ws:renew:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled | 📁 Files [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK6:0] enabled
+▶️ Run [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK6] disabled | 🖥 Terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK6] disabled
+🚪 Log out of workspace [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled
+🛑 Stop All [ws:stop_confirm:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled | 🗑 Delete [ws:delete_confirm:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled
 📦 Workspaces [ws:list] enabled

@@ -24,7 +24,7 @@ from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_bytes, localize_digits
-from cloudbot.presentation.keyboards.callbacks import decode
+from cloudbot.presentation.keyboards.callbacks import decode_required
 from cloudbot.presentation.mapping.errors import error_screen, tunnels_disabled_message
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import archives as arc_screens
@@ -54,7 +54,7 @@ def _wid(text: str):
 # ============================================================ packages (2a) ===
 @router.callback_query(F.data.startswith("pkg:list"))
 async def on_packages(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     pkg_list = await services.packages.list(ctx.tg_id, ws_id)
     await show_screen(cb, pkg_screens.packages_screen(pkg_list, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
@@ -63,7 +63,7 @@ async def on_packages(cb: CallbackQuery, ctx: UserContext, services: Services, s
 async def on_install_prompt(
     cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     await state.set_state(FeatureInput.awaiting_package_install)
     await state.update_data(ws_id=ws_id)
     await show_screen(cb, pkg_screens.install_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
@@ -117,14 +117,14 @@ async def on_install_text(
 async def on_remove_all_confirm(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     ws = await services.workspaces.get(ctx.tg_id, ws_id)
     await show_screen(cb, pkg_screens.remove_all_confirm(ws.name, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
 
 @router.callback_query(F.data.startswith("pkg:rm_all"))
 async def on_remove_all(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     await services.packages.remove_all(ctx.tg_id, ws_id)
     pkg_list = await services.packages.list(ctx.tg_id, ws_id)
     await show_screen(cb, pkg_screens.packages_screen(pkg_list, ws_id, ctx.locale), ctx=ctx, sender=sender)
@@ -134,7 +134,7 @@ async def on_remove_all(cb: CallbackQuery, ctx: UserContext, services: Services,
 async def on_remove_prompt(
     cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     await state.set_state(FeatureInput.awaiting_package_remove)
     await state.update_data(ws_id=ws_id)
     await show_screen(cb, pkg_screens.remove_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
@@ -263,7 +263,7 @@ async def _tunnel_refusal_screen(
 
 @router.callback_query(F.data.startswith("tnl:list"))
 async def on_tunnels(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     await show_screen(cb, await _tunnels_screen(ctx, services, ws_id), ctx=ctx, sender=sender)
 
 
@@ -271,7 +271,7 @@ async def on_tunnels(cb: CallbackQuery, ctx: UserContext, services: Services, se
 async def on_publish(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     # Offer the discovered ports (best) plus a "type one" path.
     detected = await _detected_ports(ctx, services, ws_id)
     await show_screen(
@@ -283,7 +283,7 @@ async def on_publish(
 async def on_publish_custom(
     cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     await state.set_state(FeatureInput.awaiting_port)
     await state.update_data(ws_id=ws_id)
     await show_screen(cb, tnl_screens.publish_custom_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
@@ -313,7 +313,7 @@ async def on_port_text(
 
 @router.callback_query(F.data.startswith("tnl:port"))
 async def on_port_pick(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, events: RequestEvents) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     port = int(decoded.key[1])
     await _publish(cb, ctx, services, sender, ws_id, port, events)
@@ -369,7 +369,7 @@ async def _publish(event, ctx: UserContext, services: Services, sender: RichSend
 
 @router.callback_query(F.data.startswith("tnl:remove_confirm"))
 async def on_remove_confirm(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     tunnels = await services.tunnels.list(ctx.tg_id, ws_id)
     tunnel = next((t for t in tunnels.tunnels if t.id == decoded.key[1]), None)
@@ -381,7 +381,7 @@ async def on_remove_confirm(cb: CallbackQuery, ctx: UserContext, services: Servi
 
 @router.callback_query(F.data.startswith("tnl:remove"))
 async def on_remove(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     try:
         await services.tunnels.remove(ctx.tg_id, ws_id, decoded.key[1])
@@ -394,7 +394,7 @@ async def on_remove(cb: CallbackQuery, ctx: UserContext, services: Services, sen
 # ============================================================ ports (2c) =====
 @router.callback_query(F.data.startswith("port:list"))
 async def on_ports(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     report = await services.ports.list(ctx.tg_id, ws_id)
     await show_screen(cb, port_screens.ports_screen(report, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
@@ -408,7 +408,7 @@ def _invalid(field: str, reason: str):
 # ============================================================ metrics (2d) ===
 @router.callback_query(F.data.startswith("met:view"))
 async def on_metrics(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     metrics = await services.metrics.snapshot(ctx.tg_id, ws_id)
     await show_screen(cb, met_screens.metrics_screen(metrics, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
@@ -416,7 +416,7 @@ async def on_metrics(cb: CallbackQuery, ctx: UserContext, services: Services, se
 # ========================================================== processes (2e) ===
 @router.callback_query(F.data.startswith("proc:list"))
 async def on_processes(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     process_list = await services.processes.list(ctx.tg_id, ws_id)
     await show_screen(cb, proc_screens.processes_screen(process_list, ws_id, ctx.locale), ctx=ctx, sender=sender)
 
@@ -425,7 +425,7 @@ async def on_processes(cb: CallbackQuery, ctx: UserContext, services: Services, 
 async def on_process_stop_confirm(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     process_id = decoded.key[1]
     process_list = await services.processes.list(ctx.tg_id, ws_id)
@@ -451,7 +451,7 @@ async def on_process_stop_confirm(
 async def on_process_stop(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     result = await services.processes.stop(ctx.tg_id, ws_id, decoded.key[1])
     await show_screen(
@@ -485,7 +485,7 @@ def _remember_upload(ws_id: str, filename: str, data: bytes) -> str:
 
 @router.callback_query(F.data.startswith("arc:menu"))
 async def on_archive_menu(cb: CallbackQuery, ctx: UserContext, sender: RichSender) -> None:
-    ws_id = _wid(decode(cb.data).key[0])
+    ws_id = _wid(decode_required(cb.data, 1).key[0])
     await show_screen(cb, arc_screens.archive_menu(ws_id, ctx.locale), ctx=ctx, sender=sender)
 
 
@@ -493,7 +493,7 @@ async def on_archive_menu(cb: CallbackQuery, ctx: UserContext, sender: RichSende
 async def on_archive_upload(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     meta = await services.archives.meta()
     await state.set_state(FeatureInput.awaiting_archive_upload)
     await state.update_data(ws_id=ws_id)
@@ -573,7 +573,7 @@ async def on_archive_upload_other(
 async def on_archive_extract_prompt(
     cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     await state.set_state(FeatureInput.awaiting_archive_extract)
     await state.update_data(ws_id=ws_id)
     await show_screen(cb, arc_screens.extract_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
@@ -614,7 +614,7 @@ async def on_archive_extract_text(
 async def on_archive_export_prompt(
     cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
 ) -> None:
-    ws_id = decode(cb.data).key[0]
+    ws_id = decode_required(cb.data, 1).key[0]
     await state.set_state(FeatureInput.awaiting_archive_export)
     await state.update_data(ws_id=ws_id)
     await show_screen(cb, arc_screens.export_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
@@ -644,7 +644,7 @@ async def on_archive_export_text(
 async def on_archive_apply(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
-    decoded = decode(cb.data)
+    decoded = decode_required(cb.data, 3)
     ws_id = _wid(decoded.key[0])
     action = decoded.key[1]
     target = decoded.key[2]

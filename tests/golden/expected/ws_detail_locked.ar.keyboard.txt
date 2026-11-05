@@ -1,5 +1,5 @@
-🔄 تجديد [ws:renew:3xnpl67c] enabled | 📁 الملفات [file:ls:8frr6yh6] enabled
-▶️ تشغيل [run:choose:3xnpl67c] disabled | 🖥 الطرفيات [term:list:3xnpl67c] disabled
-🚪 تسجيل الخروج من مساحة العمل [ws:logout:3xnpl67c] enabled
-🛑 إيقاف الكل [ws:stop_confirm:3xnpl67c] enabled | 🗑 حذف [ws:delete_confirm:3xnpl67c] enabled
+🔄 تجديد [ws:renew:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled | 📁 الملفات [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK6:0] enabled
+▶️ تشغيل [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK6] disabled | 🖥 الطرفيات [term:list:ws_01M6HJASCWM9Z1PF755GT89NK6] disabled
+🚪 تسجيل الخروج من مساحة العمل [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled
+🛑 إيقاف الكل [ws:stop_confirm:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled | 🗑 حذف [ws:delete_confirm:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled
 📦 المساحات [ws:list] enabled
