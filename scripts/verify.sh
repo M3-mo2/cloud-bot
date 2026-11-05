@@ -16,13 +16,13 @@
 #  13. RAR is never offered as a create/export target.
 #  14. Every archive refusal code has its own sentence in both catalogs.
 #  15. A bite test that changes behaviour (metrics honesty guard), restored.
-#  34. A bite test that puts a self-referential nav entry back (R1), restored.
-#  35. A bite test that makes too_many_tunnels silently redraw again, restored.
-#  36. A bite test that restores the old state.clear() after a terminal command,
+#  22. A bite test that puts a self-referential nav entry back (R1), restored.
+#  23. A bite test that makes too_many_tunnels silently redraw again, restored.
+#  24. A bite test that restores the old state.clear() after a terminal command,
 #      so sticky input breaks again, restored.
-#  37. A bite test that drops the error guard's Update unwrap so refusals render
+#  25. A bite test that drops the error guard's Update unwrap so refusals render
 #      nothing again (F-01), restored.
-#  38. A bite test that hides an unattributed listening port from the picker
+#  26. A bite test that hides an unattributed listening port from the picker
 #      (F-06), restored.
 #
 # Runs offline; no token, no network.
@@ -30,6 +30,25 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 PY="${PYTHON:-/home/zerops/cloud-bot-venv/bin/python}"
+
+# ── never leave the tree bitten ────────────────────────────────────────────────
+# Each bite test edits a source file, then restores it in a python ``finally``.
+# If this script is killed mid-bite (SIGPIPE from a ``| tail``, a timeout, Ctrl-C)
+# that restore never runs, and the product stays silently broken while the tree
+# looks like ordinary uncommitted work. This restores ONLY files whose diff still
+# carries the BITE marker, so a genuine uncommitted change is never destroyed.
+cleanup_bites() {
+  local f
+  for f in $(git diff --name-only -- cloudbot tests 2>/dev/null); do
+    if git diff -- "$f" 2>/dev/null | grep -q 'BITE:'; then
+      echo
+      echo "WARNING: a bite test was interrupted — restoring $f"
+      git checkout -- "$f"
+    fi
+  done
+  return 0
+}
+trap cleanup_bites EXIT INT TERM
 
 echo "== 1. rich-only rule =="
 "$PY" - <<'PY'
@@ -318,7 +337,6 @@ print("OK: bite ->", (red_line or ["red"])[0].strip(), "| restored ->", (green_l
 PY
 
 echo
-echo "all fifteen proofs passed"
 echo
 echo "== 16-23. the admin panel (Phase 3) =="
 echo "-- 16. the gate is identity-based, not mode-based --"
@@ -366,7 +384,6 @@ print("OK: bite ->", (red_line or ["red"])[0].strip(), "| restored ->", (green_l
 PY
 
 echo
-echo "all twenty-three proofs passed"
 
 echo
 echo "== 24-27. Task 07 — the callback codec and the no-op edit (Bug A + Bug B) =="
@@ -380,7 +397,7 @@ echo "-- 27. the exact live path: resume then back to the owner page, no excepti
 "$PY" -m pytest -q tests/unit/test_admin_handlers.py -k "not_modified or stale or short_audit or identical"
 
 echo
-echo "== 28. bite test: the full-payload edit signature is load-bearing =="
+echo "== 16. bite test: the full-payload edit signature is load-bearing =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -418,7 +435,7 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "== 29. bite test: the total parser prevents the live IndexError =="
+echo "== 17. bite test: the total parser prevents the live IndexError =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -460,7 +477,7 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "== 30. bite test: the reply-keyboard guard is load-bearing =="
+echo "== 18. bite test: the reply-keyboard guard is load-bearing =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -500,7 +517,7 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "== 31. bite test: the persisted session resume is load-bearing =="
+echo "== 19. bite test: the persisted session resume is load-bearing =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -541,7 +558,7 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "== 32. bite test: the removed workspace-home Back row stays removed =="
+echo "== 20. bite test: the removed workspace-home Back row stays removed =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -582,10 +599,9 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-two proofs passed"
 
 echo
-echo "== 33. bite test: the inside nav block is the session's, not the account's =="
+echo "== 21. bite test: the inside nav block is the session's, not the account's =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -631,7 +647,7 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "== 34. bite test: a nav entry never points at the screen you are on =="
+echo "== 22. bite test: a nav entry never points at the screen you are on =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -671,7 +687,7 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "== 35. bite test: too_many_tunnels is not a silent redraw =="
+echo "== 23. bite test: too_many_tunnels is not a silent redraw =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -710,10 +726,9 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-five proofs passed"
 
 echo
-echo "== 36. bite test: sticky terminal input is load-bearing =="
+echo "== 24. bite test: sticky terminal input is load-bearing =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -758,10 +773,9 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-six proofs passed"
 
 echo
-echo "== 37. bite test: the error guard's Update unwrap is load-bearing (F-01) =="
+echo "== 25. bite test: the error guard's Update unwrap is load-bearing (F-01) =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -801,10 +815,9 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-seven proofs passed"
 
 echo
-echo "== 38. bite test: an unattributed listening port is offered, not hidden (F-06) =="
+echo "== 26. bite test: an unattributed listening port is offered, not hidden (F-06) =="
 "$PY" - <<'PY'
 import pathlib, subprocess, sys
 
@@ -845,4 +858,23 @@ print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", li
 PY
 
 echo
-echo "all thirty-eight proofs passed"
+
+# ── the proof ledger counts itself ─────────────────────────────────────────────
+# The declared total used to be hand-written, and it drifted: it once claimed
+# "thirty-eight proofs passed" while only 26 existed (the ids jumped 15 → 28).
+# The count is now derived from this same file, so the claim and what actually
+# ran cannot disagree.
+N_TOTAL=$(grep -oE '== ?[0-9]+\. ' "$0" | grep -oE '[0-9]+' | sort -un | wc -l)
+N_LAST=$(grep -oE '== ?[0-9]+\. ' "$0" | grep -oE '[0-9]+' | sort -un | tail -1)
+N_LINES=$(grep -cE '^echo "== [0-9]+\.' "$0")
+echo
+echo "proof ledger: declared=$N_TOTAL highest_id=$N_LAST title_lines=$N_LINES"
+if [ "$N_TOTAL" != "$N_LAST" ]; then
+  echo "FAIL: proof ids are not contiguous 1..$N_TOTAL (highest is $N_LAST) — one was skipped"
+  exit 1
+fi
+if [ "$N_LINES" != "$N_TOTAL" ]; then
+  echo "FAIL: $N_LINES proof titles but $N_TOTAL ids — one is duplicated or missing"
+  exit 1
+fi
+echo "all $N_TOTAL proofs passed (counted from this file, not hand-written)"
