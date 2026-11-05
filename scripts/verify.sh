@@ -30,6 +30,9 @@
 #      raises again and never reaches the engine (Task 22 D1), restored.
 #  29. A bite test that makes the terminal callback index a possibly-lost token
 #      key again, so the stale button raises IndexError (Task 22 D2), restored.
+#  30. A bite test that makes ``decode_required`` hand back the bare decoded key
+#      again, so a handler indexes an empty tuple after a restart (the root cause
+#      of the whole family, TASK 23), restored.
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -1007,6 +1010,59 @@ if red.returncode == 0:
     print(red.stdout[-800:]); sys.exit(1)
 if green.returncode != 0:
     print("FAIL: restoring the total parse did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
+
+echo
+
+echo
+echo "== 30. bite test: the restart rule is load-bearing (TASK 23) =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# Reintroduce the ROOT CAUSE: make ``decode_required`` hand back the bare decoded
+# callback again, so a handler's ``.key[0]`` indexes an empty tuple when the token
+# registry died with the previous process (the old ``decode(cb.data).key[0]``). The
+# every-screen restart contract test must go red; restore the guard, and it is
+# green again. This proves the inline/token rule and the total read are what make
+# the whole family impossible, not just one prefix.
+target = pathlib.Path("cloudbot/presentation/keyboards/callbacks.py")
+original = target.read_text(encoding="utf-8")
+guard = (
+    "    decoded = codec.decode(data)\n"
+    "    if len(decoded.key) < arity:\n"
+    "        raise StaleCallback(data)\n"
+    "    return decoded\n"
+)
+bite = (
+    "    decoded = codec.decode(data)\n"
+    "    return decoded  # BITE: the unguarded read (old decode(...).key[n])\n"
+)
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (the decode_required guard moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q",
+       "tests/contract/test_callback_restart_contract.py",
+       "-k", "survives_a_restart",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the restart contract test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: the unguarded read did not make the restart contract test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the total read did not return the contract test to green")
     print(green.stdout[-800:]); sys.exit(1)
 def line(r):
     ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
