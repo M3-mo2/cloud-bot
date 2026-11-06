@@ -247,6 +247,38 @@ async def test_two_concurrent_purchases_cannot_both_succeed(store):
     assert [m.amount for m in wallet.ledger] == [50, -50]
 
 
+async def test_two_connections_cannot_both_spend_one_balance(tmp_path):
+    """The same proof at the database level: two connections, one file.
+
+    ``BEGIN IMMEDIATE`` serialises them, so the second sees the debited balance
+    and is refused — the guarantee survives a second process, not just the
+    in-process lock.
+    """
+
+    path = str(tmp_path / "shared.db")
+    first_db = Database(f"sqlite+aiosqlite:///{path}")
+    await first_db.connect()
+    await first_db.migrate()
+    second_db = Database(f"sqlite+aiosqlite:///{path}")
+    await second_db.connect()
+
+    first = SqliteSubscriptions(first_db)
+    second = SqliteSubscriptions(second_db)
+    await first.credit(1, 50, "topup", actor=1)
+
+    results = await asyncio.gather(
+        first.purchase(1, "week"), second.purchase(1, "week"),
+        return_exceptions=True,
+    )
+    successes = [r for r in results if not isinstance(r, Exception)]
+    failures = [r for r in results if isinstance(r, InsufficientFunds)]
+    assert len(successes) == 1, results
+    assert len(failures) == 1, results
+    assert (await first.wallet(1)).balance_stars == 0
+    await first_db.close()
+    await second_db.close()
+
+
 # -- idempotency -------------------------------------------------------------
 async def test_replaying_a_credit_key_does_not_credit_twice(store):
     first = await store.credit(1, 100, "stars invoice", actor=1, idempotency_key="pay_1")
