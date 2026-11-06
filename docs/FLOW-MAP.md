@@ -2916,7 +2916,7 @@ _No screen is rendered by this command._
 
 - **help** — ❓ Help
   - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-    - **menu** — 🤖 CloudBot
+    - **menu** — (no title)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -3078,7 +3078,7 @@ _No screen is rendered by this command._
       - ⚙️ Settings → `nav:settings` → settings, settings_inside
         - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
         - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-    - **menu_inside** — 🤖 CloudBot
+    - **menu_inside** — (no title)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -6322,7 +6322,7 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -6352,7 +6352,7 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -6373,7 +6373,7 @@ _No screen is rendered by this command._
   - ❓ Help → `nav:help` → help, help_inside
     - **help** — ❓ Help
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -6403,7 +6403,7 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - ↩ `settings` (already on this path)
             - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -6575,26 +6575,26 @@ _No screen is rendered by this command._
   - 🌐 Language → `nav:language` → language_picker, language_picker_inside
     - **language_picker** — 🌐 Choose your language
       - العربية → `lang:ar` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
       - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **language_picker_inside** — 🌐 Choose your language
       - العربية → `lang:ar` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
       - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
@@ -6604,9 +6604,9 @@ _No screen is rendered by this command._
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
   - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-    - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+    - **menu** — (no title) ↩ (already expanded at depth 4)
     - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-    - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+    - **menu_inside** — (no title) ↩ (already expanded at depth 4)
 - **settings_inside** — ⚙️ Settings
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
@@ -6915,7 +6915,7 @@ _No screen is rendered by this command._
 
 - **language_card** — 🌐 Choose your language
   - 🇸🇦 العربية → `lang:ar` → menu, menu_empty, menu_inside
-    - **menu** — 🤖 CloudBot
+    - **menu** — (no title)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -7077,7 +7077,7 @@ _No screen is rendered by this command._
       - ⚙️ Settings → `nav:settings` → settings, settings_inside
         - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
         - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-    - **menu_inside** — 🤖 CloudBot
+    - **menu_inside** — (no title)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -7196,10 +7196,10 @@ _No screen is rendered by this command._
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
   - 🇬🇧 English → `lang:en` → menu, menu_empty, menu_inside
-    - **menu** — 🤖 CloudBot ↩ (already expanded at depth 2)
+    - **menu** — (no title) ↩ (already expanded at depth 2)
     - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 2)
-    - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 2)
-- **menu** — 🤖 CloudBot
+    - **menu_inside** — (no title) ↩ (already expanded at depth 2)
+- **menu** — (no title)
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
       - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -7219,7 +7219,7 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -7354,14 +7354,14 @@ _No screen is rendered by this command._
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - ↩ `menu` (already on this path)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - ↩ `menu` (already on this path)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -7502,7 +7502,7 @@ _No screen is rendered by this command._
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - ↩ `menu` (already on this path)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
@@ -7557,7 +7557,7 @@ _No screen is rendered by this command._
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - ↩ `menu` (already on this path)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **settings_inside** — ⚙️ Settings
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -7571,7 +7571,7 @@ _No screen is rendered by this command._
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
       - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -7587,7 +7587,7 @@ _No screen is rendered by this command._
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
         - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -7720,16 +7720,16 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -7868,9 +7868,9 @@ _No screen is rendered by this command._
             - ↩ `menu_empty` (already on this path)
             - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
@@ -7923,9 +7923,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **settings_inside** — ⚙️ Settings
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -7935,11 +7935,11 @@ _No screen is rendered by this command._
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-- **menu_inside** — 🤖 CloudBot
+- **menu_inside** — (no title)
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
       - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -8736,7 +8736,7 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -8766,7 +8766,7 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -8781,9 +8781,9 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
@@ -9141,7 +9141,7 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -9171,7 +9171,7 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -9186,9 +9186,9 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -10091,7 +10091,7 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot
+        - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -10121,7 +10121,7 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — 🤖 CloudBot
+        - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
@@ -10136,9 +10136,9 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -11160,9 +11160,9 @@ _Status: Running_
 - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
-### menu — 🤖 CloudBot
+### menu — (no title)
 
-_Hello, sara 👋_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - ➕ New Workspace → `ws:new` → ws_create_name
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -11178,9 +11178,9 @@ _Development environments and cloud hosting — right from your phone._
 - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
 - ⚙️ Settings → `nav:settings` → settings, settings_inside
 
-### menu_inside — 🤖 CloudBot
+### menu_inside — (no title)
 
-_Hello, sara 👋_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside

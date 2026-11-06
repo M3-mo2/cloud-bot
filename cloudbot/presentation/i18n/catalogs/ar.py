@@ -133,6 +133,9 @@ MESSAGES: dict[str, str] = {
 
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
+    "menu.rule": "▬▬▭▭▬▬▭▭▬▬▭▭",
+    "menu.hello_label": "أهلًا بك",
+    "menu.count_label": "مساحاتك",
     "menu.hello": "مرحبًا، {name} 👋",
     "menu.tap_hint": "افتح «مساحاتي» للدخول إلى مساحة، أو ابدأ واحدة جديدة.",
     "menu.new_workspace": "➕ مساحة جديدة",

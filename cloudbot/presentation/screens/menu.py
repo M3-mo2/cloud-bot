@@ -75,15 +75,33 @@ def main_menu(
         return welcome_screen(locale, inside=inside)
 
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("menu.title", locale))
-    doc.p(catalog.t("menu.hello", locale, name=display_name))
-    doc.div()
+    rule = bold(catalog.t("menu.rule", locale))
 
-    # -- subscription status line (seam for subs2's wallet screens) ----------
+    # -- the header: a rule, who you are, and how many workspaces you have ----
+    # Same shape as the workspace home — rule, ✦ label ⟸ value, rule — so the two
+    # screens a user lives in read as one product rather than two designs.
+    doc.p(rule)
+    doc.p(
+        fragment(
+            [
+                bold(f"✦ {catalog.t('menu.hello_label', locale)} ⟸ "),
+                bold(display_name),
+            ]
+        )
+    )
+    doc.p(
+        fragment(
+            [
+                bold(f"✦ {catalog.t('menu.count_label', locale)} ⟸ "),
+                bold(format_count("count.workspaces", len(workspaces), locale)),
+            ]
+        )
+    )
+    doc.p(rule)
+
     if plan:
         doc.p(catalog.t("menu.plan_line", locale, plan=catalog.t(f"plan.{plan}", locale)))
 
-    doc.p(format_count("count.workspaces", len(workspaces), locale))
     shown = workspaces[:MENU_WORKSPACE_LINES]
     for ws in shown:
         # A workspace's line states its **plan and when it ends**, when the caller
@@ -113,6 +131,7 @@ def main_menu(
                 + catalog.t("menu.workspaces_more", locale, n=_num(len(workspaces), locale))
             )
         )
+    doc.p(rule)
     doc.p(_italic(catalog.t("menu.tap_hint", locale)))
 
     # Full-width primary action, then the shared 2×2 nav block below it.

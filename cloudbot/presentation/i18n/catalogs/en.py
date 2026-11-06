@@ -134,6 +134,9 @@ MESSAGES: dict[str, str] = {
 
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
+    "menu.rule": "▬▬▭▭▬▬▭▭▬▬▭▭",
+    "menu.hello_label": "Welcome",
+    "menu.count_label": "Your workspaces",
     "menu.hello": "Hello, {name} 👋",
     "menu.tap_hint": "Open My workspaces to enter one, or start a new one.",
     "menu.new_workspace": "➕ New Workspace",
