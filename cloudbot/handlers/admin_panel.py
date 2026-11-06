@@ -409,7 +409,7 @@ async def _route_wallet_op(cb, parsed: AdminCallback, ctx, services, sender, sta
     op, tg_id_raw, step, arg = parsed.args
     tg_id = int(tg_id_raw)
     if step == "go":
-        await _wallet_perform(cb, ctx, services, sender, state, op, tg_id, arg)
+        await _wallet_perform(cb, ctx, services, sender, state, op, tg_id, arg, events)
         return
     # ask: the prompt appropriate to the operation.
     await _wallet_ask(cb, ctx, services, sender, state, op, tg_id)
@@ -418,7 +418,7 @@ async def _route_wallet_plan(cb, parsed: AdminCallback, ctx, services, sender, s
     op, tg_id_raw, plan_code, step, arg = parsed.args
     tg_id = int(tg_id_raw)
     if step == "go":
-        await _wallet_perform(cb, ctx, services, sender, state, op, tg_id, plan_code)
+        await _wallet_perform(cb, ctx, services, sender, state, op, tg_id, plan_code, events)
         return
     # ask: the plan is chosen; now ask for the days.
     await state.set_state(AdminInput.awaiting_wallet_amount)
@@ -466,7 +466,8 @@ def _wallet_prompt(locale, key: str, tg_id: int) -> Screen:
     return Screen(doc=doc, markup=inline_markup([row]))
 
 async def _wallet_perform(
-    cb, ctx: UserContext, services: Services, sender: RichSender, state, op: str, tg_id: int, arg: str
+    cb, ctx: UserContext, services: Services, sender: RichSender, state, op: str, tg_id: int, arg: str,
+    events: RequestEvents,
 ) -> None:
     data = await state.get_data()
     await state.clear()
@@ -616,7 +617,7 @@ async def on_wallet_reason(
     reason = "" if text in ("/skip", "") else text
     await state.update_data(wreason=reason)
     await _wallet_perform(
-        message, ctx, services, sender, state, op, tg_id, reason
+        message, ctx, services, sender, state, op, tg_id, reason, events
     )
 
 @router.message(AdminInput.awaiting_wallet_charge)
@@ -626,7 +627,7 @@ async def on_wallet_charge(
     data = await state.get_data()
     tg_id = int(data.get("wtg") or 0)
     charge_id = (message.text or "").strip()
-    await _wallet_perform(message, ctx, services, sender, state, "refund", tg_id, charge_id)
+    await _wallet_perform(message, ctx, services, sender, state, "refund", tg_id, charge_id, events)
 
 def _not_found(ctx: UserContext) -> Screen:
     doc = RichDoc(ctx.locale)

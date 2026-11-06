@@ -94,15 +94,25 @@ class BillingService:
     ) -> PaymentResult:
         """Credit a delivered Stars payment exactly once.
 
-        Order matters: the credit (keyed by the charge id) runs **before** the
-        payment row, and both are idempotent, so a crash between them is repaired
-        by the customer's next tap or Telegram's re-delivery instead of losing or
-        doubling the Stars.
+        The payment row is inserted first as the claim (``charge_id`` is unique),
+        then the credit is applied with the same charge id as its idempotency key.
+        Both are idempotent, so a crash between them is repaired by the customer's
+        next tap or Telegram's re-delivery instead of losing or doubling Stars.
         """
         if not charge_id:
             raise ValueError("charge_id is required")
         now = now or datetime.now(timezone.utc)
-        already = await self._subscriptions.payment(charge_id)
+        # The payment row is the single-flight claim: only the caller that
+        # inserts ``charge_id`` may credit, so two concurrent deliveries cannot
+        # both report (or apply) a credit.
+        newly_recorded = await self._subscriptions.record_payment(
+            tg_id=tg_id,
+            pack_code=pack.code,
+            stars=pack.stars,
+            charge_id=charge_id,
+            provider_charge_id=provider_charge_id,
+            at=now,
+        )
         wallet = await self._subscriptions.credit(
             tg_id,
             pack.stars,
@@ -110,20 +120,11 @@ class BillingService:
             tg_id,
             idempotency_key=f"wallet:{tg_id}:{charge_id}",
         )
-        if already is None:
-            await self._subscriptions.record_payment(
-                tg_id=tg_id,
-                pack_code=pack.code,
-                stars=pack.stars,
-                charge_id=charge_id,
-                provider_charge_id=provider_charge_id,
-                at=now,
-            )
         return PaymentResult(
             tg_id=tg_id,
             stars=pack.stars,
             balance=wallet.balance_stars,
-            credited=already is None,
+            credited=newly_recorded,
         )
 
     async def refund(
