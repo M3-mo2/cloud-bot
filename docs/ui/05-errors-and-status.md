@@ -372,12 +372,14 @@ Rendered (EN, normal user):
 ```html
 <h2>⚙️ Service unavailable</h2>
 <p>The sandbox is temporarily unavailable. Please try again.</p>
+<p>If this keeps happening, please try again later.</p>
 ```
 Rendered (AR):
 
 ```html
 <h2>⚙️ الخدمة غير متاحة</h2>
 <p>البيئة المعزولة غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.</p>
+<p>إذا تكرر ذلك، يرجى المحاولة لاحقًا.</p>
 ```
 Appended **only** in DEBUG, admin-only, collapsed:
 
