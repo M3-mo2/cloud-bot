@@ -249,6 +249,8 @@ MESSAGES: dict[str, str] = {
     "wallet.ws.expired": "انتهت ({plan})",
     "wallet.ws.trialing": "تجربة مجانية — {plan}",
     "wallet.ws.active": "{plan} — متبقٍ {days} يوم",
+    "wallet.ws.active_until": "{plan} — تنتهي في {when}",
+    "wallet.ws.trialing_until": "تجربة مجانية — تنتهي في {when}",
 
     # -- workspaces: lifecycle ----------------------------------------------
     "ws.delete.title": "🗑 حذف مساحة العمل؟",

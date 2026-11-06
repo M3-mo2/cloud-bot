@@ -34,13 +34,46 @@ async def _open_menu(
     ctx: UserContext,
     services: Services,
     sender: RichSender,
+    *,
+    locale: Locale | None = None,
 ) -> None:
     inside = await services.session.current(ctx.tg_id)
     workspaces = await services.workspaces.list(ctx.tg_id)
+    loc = locale or ctx.locale
     screen = menu_screens.main_menu(
-        workspaces, ctx.locale, display_name=ctx.display_name, inside=inside
+        workspaces,
+        loc,
+        display_name=ctx.display_name,
+        inside=inside,
+        states=await workspace_states(services, ctx.tg_id, workspaces, loc),
     )
     await show_screen(event, screen, ctx=ctx, sender=sender)
+
+
+async def workspace_states(
+    services: Services, tg_id: int, workspaces: list, locale: Locale
+) -> dict[str, str]:
+    """Each workspace's plan and the date it ends — the menu's status column.
+
+    One place, because the menu is reached from four handlers and a second copy
+    of this logic is how the board and the wallet start disagreeing. The engine's
+    own ``summary.state`` is *not* used here: it reports the run-time cap
+    (``unlimited``), not the subscription, which is what a paying user is asking
+    about when they look at their workspace list.
+    """
+    from datetime import datetime, timezone
+
+    from cloudbot.presentation.screens.wallet import plan_state_line
+
+    now = datetime.now(timezone.utc)
+    subs = {s.ws_id: s for s in await services.billing.subscriptions(tg_id)}
+    out: dict[str, str] = {}
+    for ws in workspaces:
+        key = str(ws.id)
+        sub = subs.get(key)
+        status = await services.billing.status(tg_id, key, now=now)
+        out[key] = plan_state_line(sub, status, locale)
+    return out
 
 
 async def _clear_legacy_keyboard(
@@ -96,7 +129,12 @@ async def on_start(
         await show_screen(message, screen, ctx=ctx, sender=sender)
         return
     workspaces = await services.workspaces.list(ctx.tg_id)
-    screen = menu_screens.main_menu(workspaces, user.locale, display_name=ctx.display_name)
+    screen = menu_screens.main_menu(
+        workspaces,
+        user.locale,
+        display_name=ctx.display_name,
+        states=await workspace_states(services, ctx.tg_id, workspaces, user.locale),
+    )
     await show_screen(message, screen, ctx=ctx, sender=sender)
 
 
@@ -147,7 +185,11 @@ async def on_language(
     inside = await services.session.current(ctx.tg_id)
     workspaces = await services.workspaces.list(ctx.tg_id)
     screen = menu_screens.main_menu(
-        workspaces, target, display_name=ctx.display_name, inside=inside
+        workspaces,
+        target,
+        display_name=ctx.display_name,
+        inside=inside,
+        states=await workspace_states(services, ctx.tg_id, workspaces, target),
     )
     await sender.answer_callback(cb)
     if cb.message is not None:

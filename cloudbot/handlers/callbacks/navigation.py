@@ -33,12 +33,18 @@ async def on_clear(cb: CallbackQuery, ctx: UserContext, sender: RichSender) -> N
 
 @router.callback_query(F.data == "nav:refresh")
 async def on_refresh(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    from cloudbot.handlers.common import workspace_states
+
     inside = await services.session.current(ctx.tg_id)
     workspaces = await services.workspaces.list(ctx.tg_id)
     await show_screen(
         cb,
         menu_screens.main_menu(
-            workspaces, ctx.locale, display_name=ctx.display_name, inside=inside
+            workspaces,
+            ctx.locale,
+            display_name=ctx.display_name,
+            inside=inside,
+            states=await workspace_states(services, ctx.tg_id, workspaces, ctx.locale),
         ),
         ctx=ctx,
         sender=sender,
@@ -50,12 +56,18 @@ async def on_other_nav(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
     """Fallback for nav actions whose feature is not in Phase 1 (terminals, etc.)."""
+    from cloudbot.handlers.common import workspace_states
+
     inside = await services.session.current(ctx.tg_id)
     workspaces = await services.workspaces.list(ctx.tg_id)
     await show_screen(
         cb,
         menu_screens.main_menu(
-            workspaces, ctx.locale, display_name=ctx.display_name, inside=inside
+            workspaces,
+            ctx.locale,
+            display_name=ctx.display_name,
+            inside=inside,
+            states=await workspace_states(services, ctx.tg_id, workspaces, ctx.locale),
         ),
         ctx=ctx,
         sender=sender,

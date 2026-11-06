@@ -54,6 +54,7 @@ def main_menu(
     display_name: str = "",
     inside: Workspace | None = None,
     plan: str | None = None,
+    states: dict[str, str] | None = None,
 ) -> Screen:
     """The main board: the account's **only** hub.
 
@@ -85,8 +86,17 @@ def main_menu(
     doc.p(format_count("count.workspaces", len(workspaces), locale))
     shown = workspaces[:MENU_WORKSPACE_LINES]
     for ws in shown:
-        label_key, emoji = display_state(ws.status, ws.summary.state)
-        status = f"{emoji} {catalog.t(label_key, locale)}"
+        # A workspace's line states its **plan and when it ends**, when the caller
+        # supplied that (it is a billing fact, so the handler derives it once and
+        # passes it in). Falling back to the engine's own state keeps this screen
+        # usable in the contexts that have no billing view — never inventing a
+        # plan that does not exist.
+        from_state = (states or {}).get(str(ws.id))
+        if from_state:
+            status = from_state
+        else:
+            label_key, emoji = display_state(ws.status, ws.summary.state)
+            status = f"{emoji} {catalog.t(label_key, locale)}"
         runs = (
             catalog.t("menu.ws.running", locale, n=_num(ws.summary.runs_active, locale))
             if ws.summary.runs_active

@@ -178,6 +178,29 @@ def wallet_screen(view: WalletView) -> Screen:
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
+def plan_state_line(subscription, status: SubscriptionStatus, locale: Locale) -> str:
+    """One workspace's state in words, **with the date it actually ends**.
+
+    The menu used to print the *engine's* ``summary.state``, which is
+    ``unlimited`` for a workspace that simply has no run-time cap — so every
+    workspace read "بلا انتهاء" and the line told a paying user nothing about
+    their plan. A plan belongs to a workspace, so the menu now says the plan and
+    when it stops working.
+
+    Shared with ``menu.py`` rather than re-derived there: two spellings of one
+    fact is how they drift.
+    """
+    if subscription is None or status.state is SubscriptionState.NONE:
+        return catalog.t("wallet.ws.no_plan", locale)
+    name = _plan_name(subscription.plan_code, locale)
+    if status.state is SubscriptionState.EXPIRED:
+        return catalog.t("wallet.ws.expired", locale, plan=name)
+    when = format_datetime(subscription.expires_at, locale)
+    if status.state is SubscriptionState.TRIALING:
+        return catalog.t("wallet.ws.trialing_until", locale, plan=name, when=when)
+    return catalog.t("wallet.ws.active_until", locale, plan=name, when=when)
+
+
 def _plan_and_state(
     subscription: "Subscription | None",
     status: SubscriptionStatus,

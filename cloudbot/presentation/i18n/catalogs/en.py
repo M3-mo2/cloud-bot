@@ -250,6 +250,8 @@ MESSAGES: dict[str, str] = {
     "wallet.ws.expired": "Expired ({plan})",
     "wallet.ws.trialing": "Free trial — {plan}",
     "wallet.ws.active": "{plan} — {days} day(s) left",
+    "wallet.ws.active_until": "{plan} — ends {when}",
+    "wallet.ws.trialing_until": "Free trial — ends {when}",
 
     # -- workspaces: lifecycle ----------------------------------------------
     "ws.delete.title": "🗑 Delete workspace?",
