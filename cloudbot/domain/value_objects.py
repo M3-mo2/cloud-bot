@@ -180,8 +180,6 @@ class WorkspaceSummary:
     disk_used_bytes: int
     disk_limit_bytes: int
     profile: str
-    subscription_state: str | None = None
-    subscription_remaining_sec: int | None = None
 
 
 @dataclass(frozen=True)

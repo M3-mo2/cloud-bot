@@ -40,7 +40,6 @@ def row_to_user(row: Any) -> User:
         tg_id=int(row["tg_id"]),
         locale=coerce_locale(row["locale"]),
         created_at=parse_dt(row["created_at"]),
-        plan=str(row["plan"]),
         display_name=str(_optional(row, "display_name") or ""),
         last_seen_at=parse_dt(last_seen) if last_seen else None,
     )

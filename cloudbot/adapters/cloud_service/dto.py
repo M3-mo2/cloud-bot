@@ -46,14 +46,6 @@ class SummaryDiskDTO(_DTO):
     limit_bytes: int = 0
 
 
-class SubscriptionSummaryDTO(_DTO):
-    state: str = ""
-    expires_at: str = ""
-    remaining_sec: int | None = None
-    grace_ends_at: str = ""
-    extensions: int = 0
-    locked_at: str = ""
-
 
 class WorkspaceSummaryDTO(_DTO):
     state: str = "active"
@@ -62,7 +54,6 @@ class WorkspaceSummaryDTO(_DTO):
     runs: SummaryRunsDTO = Field(default_factory=SummaryRunsDTO)
     disk: SummaryDiskDTO = Field(default_factory=SummaryDiskDTO)
     profile: str = ""
-    subscription: SubscriptionSummaryDTO | None = None
 
 
 class WorkspaceDTO(_DTO):

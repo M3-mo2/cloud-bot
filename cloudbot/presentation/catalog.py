@@ -613,7 +613,7 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
         user_page=page,
         audit_page=AuditPage(events=[event], total=1, offset=0, limit=20),
         recent_events=[event],
-        subscriptions={EventCategory.RUN_STARTED.value: True, EventCategory.RUN_FAILED.value: False},
+        notification_subscriptions={EventCategory.RUN_STARTED.value: True, EventCategory.RUN_FAILED.value: False},
         notify_paused=False,
         notification_cursor=42,
         entered=EnteredWorkspace(

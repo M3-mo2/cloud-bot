@@ -11,6 +11,7 @@ from datetime import datetime
 from cloudbot.core.locale import Locale
 from cloudbot.domain.entities import User, Workspace
 from cloudbot.domain.events import EventRecord
+from cloudbot.domain.subscription import Subscription
 from cloudbot.domain.value_objects import ResourceUsage
 
 
@@ -111,7 +112,11 @@ class AdminView:
     user_page: UserPage | None = None
     audit_page: AuditPage | None = None
     recent_events: list[EventRecord] = field(default_factory=list)
-    subscriptions: dict[str, bool] = field(default_factory=dict)
+    #: Per-admin notification categories (``event_subscriptions``), NOT the
+    #: user's paid subscription. Named explicitly so the two cannot be confused.
+    notification_subscriptions: dict[str, bool] = field(default_factory=dict)
+    #: The subject's paid subscription, when the screen shows one.
+    subscription: "Subscription | None" = None
     notify_paused: bool = False
     #: When set, the admin only receives events for this user.
     notify_scope: int | None = None
@@ -119,12 +124,13 @@ class AdminView:
     entered: EnteredWorkspace | None = None
 
 
-def summarize_user(user: User, workspace_count: int) -> UserSummary:
+def summarize_user(user: User, workspace_count: int, *, plan: str = "free") -> UserSummary:
+    """``plan`` is passed in by the service from the derived subscription."""
     return UserSummary(
         tg_id=user.tg_id,
         display_name=user.display_name or "",
         locale=user.locale,
-        plan=user.plan,
+        plan=plan,
         created_at=user.created_at,
         last_seen_at=user.last_seen_at,
         workspace_count=workspace_count,

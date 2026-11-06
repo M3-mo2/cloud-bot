@@ -16,6 +16,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
 )
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
+from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.clock import SystemClock
 from cloudbot.core.config import Settings
 from cloudbot.core.modes import mock_engine_allowed
@@ -49,6 +50,7 @@ class Container:
     sessions: SqliteSessionStore
     event_log: SqliteEventLog
     admin_state: SqliteAdminStateStore
+    subscriptions: SqliteSubscriptions
     services: Services
 
     async def aclose(self) -> None:
@@ -73,12 +75,13 @@ def build(settings: Settings) -> Container:
     sessions = SqliteSessionStore(database)
     event_log = SqliteEventLog(database)
     admin_state = SqliteAdminStateStore(database)
+    subscriptions = SqliteSubscriptions(database)
     clock = SystemClock()
     ownership = OwnershipService(users)
 
     services = Services(
         account=AccountService(users),
-        workspaces=WorkspacesService(engine, users, ownership),
+        workspaces=WorkspacesService(engine, users, ownership, subscriptions),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),
         execution=ExecutionService(engine, ownership),
@@ -91,7 +94,10 @@ def build(settings: Settings) -> Container:
         processes=ProcessesService(engine, ownership),
         archives=ArchivesService(engine, ownership),
         events=EventsService(event_log),
-        admin=AdminService(users, engine, event_log, admin_state, ownership, BotRuntime()),
+        admin=AdminService(
+            users, engine, event_log, admin_state, ownership, BotRuntime(),
+            subscriptions=subscriptions,
+        ),
         notifier=NotifierService(event_log, admin_state),
     )
     return Container(
@@ -102,5 +108,6 @@ def build(settings: Settings) -> Container:
         sessions=sessions,
         event_log=event_log,
         admin_state=admin_state,
+        subscriptions=subscriptions,
         services=services,
     )

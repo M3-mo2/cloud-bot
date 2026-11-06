@@ -92,10 +92,10 @@ def summary_from_dto(s: dto.WorkspaceSummaryDTO | None) -> WorkspaceSummary:
         disk_used_bytes=s.disk.used_bytes,
         disk_limit_bytes=s.disk.limit_bytes,
         profile=s.profile,
-        subscription_state=s.subscription.state if s.subscription else None,
-        subscription_remaining_sec=(
-            s.subscription.remaining_sec if s.subscription else None
-        ),
+        # The engine's per-workspace subscription block is not a source of truth:
+        # ``domain.subscription`` derives the state from the bot's own store. The
+        # DTO is still parsed (extra fields ignored) but its summary lines are
+        # deliberately dropped so two truths cannot drift apart.
     )
 
 

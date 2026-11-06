@@ -39,7 +39,7 @@ def notifications_screen(view: AdminView) -> Screen:
 
     rows = []
     for category in EventCategory:
-        enabled = view.subscriptions.get(category.value, True)
+        enabled = view.notification_subscriptions.get(category.value, True)
         rows.append(
             [
                 catalog.t(category.label_key, locale),
@@ -54,10 +54,10 @@ def notifications_screen(view: AdminView) -> Screen:
         rows,
     )
 
-    all_on = all(view.subscriptions.get(c.value, True) for c in EventCategory)
+    all_on = all(view.notification_subscriptions.get(c.value, True) for c in EventCategory)
     kb = []
     for category in EventCategory:
-        enabled = view.subscriptions.get(category.value, True)
+        enabled = view.notification_subscriptions.get(category.value, True)
         label = catalog.t(
             "admin.notify.toggle_on" if enabled else "admin.notify.toggle_off",
             locale,

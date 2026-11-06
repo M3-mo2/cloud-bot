@@ -12,8 +12,10 @@ from cloudbot.core.errors import EngineRefused, InvalidInput, NotOwned
 from cloudbot.domain.entities import Workspace
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.ports.engine import EnginePort
+from cloudbot.domain.ports.subscriptions import Subscriptions
 from cloudbot.domain.ports.users import UserRepository
-from cloudbot.domain.value_objects import LifecycleResult, Limits, ResourceUsage, WorkspaceId
+from cloudbot.domain.subscription import derive_status
+from cloudbot.domain.value_objects import LifecycleResult, Limits, ResourceUsage, WorkspaceId, WorkspaceStatus
 from cloudbot.services.ownership import OwnershipService
 
 log = structlog.get_logger("cloudbot.workspaces")
@@ -35,10 +37,12 @@ class WorkspacesService:
         engine: EnginePort,
         users: UserRepository,
         ownership: OwnershipService,
+        subscriptions: Subscriptions | None = None,
     ) -> None:
         self._engine = engine
         self._users = users
         self._ownership = ownership
+        self._subscriptions = subscriptions
 
     async def meta(self, refresh: bool = False) -> EngineMeta:
         return await self._engine.meta(refresh=refresh)
@@ -73,7 +77,42 @@ class WorkspacesService:
             ws = by_id.get(str(ws_id))
             if ws is not None:
                 result.append(self._with_owner(ws, tg_id))
-        return result
+        return await self._with_subscription_state(tg_id, result)
+
+    async def _with_subscription_state(
+        self, tg_id: int, workspaces: list[Workspace]
+    ) -> list[Workspace]:
+        """Derive ``LOCKED`` from the subscription — never a second stored lock.
+
+        The engine owns state changes; the bot only reads. A workspace the engine
+        reports ``active`` is presented as ``locked`` when the owner's plan is not
+        active. This is what the screens and the lock banner read.
+        """
+        if self._subscriptions is None:
+            return workspaces
+        from datetime import datetime, timezone
+
+        subscription = await self._subscriptions.get(tg_id)
+        active = derive_status(subscription, datetime.now(timezone.utc)).is_active
+        if active:
+            return workspaces
+        return [self._locked(ws) for ws in workspaces]
+
+    @staticmethod
+    def _locked(ws: Workspace) -> Workspace:
+        if ws.status is not WorkspaceStatus.ACTIVE:
+            return ws
+        return Workspace(
+            id=ws.id,
+            owner_tg_id=ws.owner_tg_id,
+            name=ws.name,
+            profile=ws.profile,
+            status=WorkspaceStatus.LOCKED,
+            limits=ws.limits,
+            summary=ws.summary,
+            created_at=ws.created_at,
+            last_activity_at=ws.last_activity_at,
+        )
 
     async def create(
         self,
@@ -100,7 +139,21 @@ class WorkspacesService:
             except Exception:  # noqa: BLE001
                 log.error("workspace.compensation_failed", ws_id=str(ws.id))
             raise
+        await self._start_trial_if_new(tg_id)
         return self._with_owner(ws, tg_id)
+
+    async def _start_trial_if_new(self, tg_id: int) -> None:
+        """The free trial starts the first time a user creates a workspace.
+
+        ``start_trial`` is idempotent (the trial flag can only be written once),
+        and it is only attempted when the user has no subscription at all, so a
+        paying user is never pushed onto a trial.
+        """
+        if self._subscriptions is None:
+            return
+        if await self._subscriptions.get(tg_id) is not None:
+            return
+        await self._subscriptions.start_trial(tg_id)
 
     async def get(self, tg_id: int, ws_id: WorkspaceId) -> Workspace:
         await self._ownership.assert_owned(tg_id, ws_id)
@@ -112,7 +165,8 @@ class WorkspacesService:
                 await self._users.remove_workspace(tg_id, ws_id)
                 raise
             raise
-        return self._with_owner(ws, tg_id)
+        result = self._with_owner(ws, tg_id)
+        return (await self._with_subscription_state(tg_id, [result]))[0]
 
     async def patch(
         self, tg_id: int, ws_id: WorkspaceId, *, name: str | None = None, limits: Limits | None = None

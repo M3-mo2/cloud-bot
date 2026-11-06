@@ -33,7 +33,9 @@ from cloudbot.domain.entities import Workspace
 from cloudbot.domain.events import EventCategory
 from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.domain.ports.events import AdminStateStore, EventLog
+from cloudbot.domain.ports.subscriptions import Subscriptions
 from cloudbot.domain.ports.users import UserRepository
+from cloudbot.domain.subscription import SubscriptionState, derive_status
 from cloudbot.domain.value_objects import WorkspaceId, WorkspaceStatus
 from cloudbot.services.ownership import OwnershipService
 
@@ -49,6 +51,7 @@ class AdminService:
         state: AdminStateStore,
         ownership: OwnershipService,
         runtime: BotRuntime | None = None,
+        subscriptions: Subscriptions | None = None,
     ) -> None:
         self._users = users
         self._engine = engine
@@ -56,6 +59,7 @@ class AdminService:
         self._state = state
         self._ownership = ownership
         self._runtime = runtime or BotRuntime()
+        self._subscriptions = subscriptions
 
     # -- overview ------------------------------------------------------------
     async def overview(self, *, now: datetime | None = None) -> AdminOverview:
@@ -121,14 +125,30 @@ class AdminService:
         return "ok" if engine.reachable else "unknown"
 
     # -- users ---------------------------------------------------------------
+    async def plan_label(self, tg_id: int, *, now: datetime | None = None) -> str:
+        """The user's plan, derived from the subscription (never ``users.plan``)."""
+        if self._subscriptions is None:
+            return "free"
+        now = now or datetime.now(timezone.utc)
+        subscription = await self._subscriptions.get(tg_id)
+        status = derive_status(subscription, now)
+        if status.state is SubscriptionState.NONE:
+            return "free"
+        if status.state is SubscriptionState.EXPIRED:
+            return "expired"
+        return subscription.plan_code if subscription is not None else "free"
+
     async def users_page(
         self, *, query: str = "", offset: int = 0, limit: int = 10
     ) -> UserListPage:
         rows, total = await self._users.list_users(query=query, offset=offset, limit=limit)
+        now = datetime.now(timezone.utc)
         summaries: list[UserSummary] = []
         for user in rows:
             count = await self._users.count_workspaces(user.tg_id)
-            summaries.append(summarize_user(user, count))
+            summaries.append(
+                summarize_user(user, count, plan=await self.plan_label(user.tg_id, now=now))
+            )
         return UserListPage(
             users=summaries, total=total, offset=offset, limit=limit, query=query
         )
@@ -138,7 +158,9 @@ class AdminService:
         if user is None:
             return None
         count = await self._users.count_workspaces(tg_id)
-        summary = summarize_user(user, count)
+        summary = summarize_user(
+            user, count, plan=await self.plan_label(tg_id)
+        )
         # Admin exemption: read the subject's workspaces, not ours.
         await self._ownership.assert_admin_override(0, WorkspaceId("ws_admin"))
         workspaces = await self._workspaces_of(tg_id)
@@ -171,7 +193,11 @@ class AdminService:
         user = await self._users.get(tg_id)
         if user is None:
             return None
-        return summarize_user(user, await self._users.count_workspaces(tg_id))
+        return summarize_user(
+            user,
+            await self._users.count_workspaces(tg_id),
+            plan=await self.plan_label(tg_id),
+        )
 
     # -- actions -------------------------------------------------------------
     async def get_workspace(self, ws_id: WorkspaceId) -> Workspace:
@@ -197,6 +223,71 @@ class AdminService:
         # Drop the registration for every owner of this workspace.
         for owner_tg_id in await self._users.workspace_owners(ws_id):
             await self._users.remove_workspace(owner_tg_id, ws_id)
+
+    # -- wallet + subscription administration --------------------------------
+    # Every change is attributed to the admin (``actor``) and carries a reason;
+    # the store appends the ledger movement and the subscription event.
+    async def wallet(self, tg_id: int):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.wallet(tg_id)
+
+    async def subscription(self, tg_id: int):
+        if self._subscriptions is None:
+            return None
+        return await self._subscriptions.get(tg_id)
+
+    async def credit(
+        self, tg_id: int, amount: int, reason: str, *, actor: int, idempotency_key: str = ""
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.credit(
+            tg_id, amount, reason, actor, idempotency_key=idempotency_key
+        )
+
+    async def debit(
+        self, tg_id: int, amount: int, reason: str, *, actor: int, idempotency_key: str = ""
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.debit(
+            tg_id, amount, reason, actor, idempotency_key=idempotency_key
+        )
+
+    async def set_balance(
+        self, tg_id: int, amount: int, reason: str, *, actor: int, idempotency_key: str = ""
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.set_balance(
+            tg_id, amount, reason, actor, idempotency_key=idempotency_key
+        )
+
+    async def grant(
+        self,
+        tg_id: int,
+        plan_code: str,
+        days: int,
+        reason: str,
+        *,
+        actor: int,
+        idempotency_key: str = "",
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.grant(
+            tg_id, plan_code, days, actor, reason, idempotency_key=idempotency_key
+        )
+
+    async def revoke(
+        self, tg_id: int, reason: str, *, actor: int, idempotency_key: str = ""
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.revoke(
+            tg_id, actor, reason, idempotency_key=idempotency_key
+        )
 
     # -- notifications -------------------------------------------------------
     async def subscriptions(self, admin_id: int) -> dict[str, bool]:

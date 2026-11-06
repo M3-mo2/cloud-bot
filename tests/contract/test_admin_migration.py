@@ -45,11 +45,13 @@ async def test_0001_then_0002_preserves_existing_rows(tmp_path):
         )
         await conn.commit()
 
-    # 2. Point the app's Database at it and migrate (applies only 0002).
+    # 2. Point the app's Database at it and migrate (applies every later file).
     db = Database(f"sqlite+aiosqlite:///{path}")
     await db.connect()
     applied = await db.migrate()
-    assert applied == [2, 3, 4]
+    # The exact tail grows as migrations are added (0005 = subscriptions);
+    # this asserts "nothing before 0002 was re-applied and nothing was skipped".
+    assert applied == [2, 3, 4, 5]
 
     conn = await db.connect()
     async with conn.execute("SELECT tg_id FROM users") as cur:

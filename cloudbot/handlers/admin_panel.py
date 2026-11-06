@@ -86,7 +86,7 @@ async def _view(
         user_page=user_page,
         audit_page=audit_page,
         recent_events=recent_events or [],
-        subscriptions=subs,
+        notification_subscriptions=subs,
         notify_paused=paused,
         notify_scope=scope,
         notification_cursor=cursor,

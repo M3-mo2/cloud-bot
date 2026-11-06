@@ -29,7 +29,10 @@ class User:
     tg_id: int
     locale: Locale
     created_at: datetime
-    plan: str = "free"
+    #: The plan label is **derived** from ``domain.subscription`` (see
+    #: ``AdminService.user_summary``); it is not stored on the user any more, so
+    #: there is one truth about whether a subscription is active. The legacy
+    #: ``users.plan`` column remains in SQLite (additive migration) but is unused.
     #: The Telegram username/full name captured at first contact; a reading aid
     #: for the admin panel, never an identity.
     display_name: str = ""

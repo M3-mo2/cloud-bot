@@ -48,6 +48,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
 )
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
+from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.locale import Locale
 from cloudbot.core.runtime import BotRuntime
 from cloudbot.services.account import AccountService
@@ -101,16 +102,20 @@ async def admin_state(database):
 
 
 @pytest.fixture
+async def subscriptions(database):
+    return SqliteSubscriptions(database)
+
+@pytest.fixture
 def engine():
     return FakeEngine()
 
 
 @pytest.fixture
-async def services(engine, users, sessions, event_log, admin_state):
+async def services(engine, users, sessions, event_log, admin_state, subscriptions):
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
-        workspaces=WorkspacesService(engine, users, ownership),
+        workspaces=WorkspacesService(engine, users, ownership, subscriptions),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),
         execution=ExecutionService(engine, ownership),
@@ -124,7 +129,8 @@ async def services(engine, users, sessions, event_log, admin_state):
         archives=ArchivesService(engine, ownership),
         events=EventsService(event_log),
         admin=AdminService(
-            users, engine, event_log, admin_state, ownership, BotRuntime(FROZEN_NOW)
+            users, engine, event_log, admin_state, ownership, BotRuntime(FROZEN_NOW),
+            subscriptions=subscriptions,
         ),
         notifier=NotifierService(event_log, admin_state),
     )
