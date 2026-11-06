@@ -201,8 +201,6 @@ def workspace_detail(
         doc.blockquote(fragment(catalog.t("ws.locked_banner", locale).replace("\n", " ")))
     if active_run:
         doc.p(italic(catalog.t("ws.run_active_caption", locale)))
-    if session:
-        doc.p(italic(catalog.t("ws.session.inside", locale)))
     if confirmation:
         doc.blockquote(_raw(confirmation))
 
@@ -219,32 +217,55 @@ def workspace_detail(
         percent=_disk_percent(ws),
     )
 
-    # Reference material, collapsed. Built as one raw fragment because ``kv_table``
-    # appends to the document rather than producing a value to nest inside a block.
-    rows = [
-        (catalog.t("ws.detail.runtime", locale), "python3"),
-        (catalog.t("ws.detail.profile", locale), ws.profile),
-        (catalog.t("ws.detail.cpu", locale), _raw(cpu_line)),
-        (catalog.t("ws.detail.memory", locale), format_bytes(ws.limits.memory_mb * 1024 * 1024, locale)),
-        (catalog.t("ws.detail.disk", locale), disk),
+    # Reference material, collapsed. It is a table with a caption and two
+    # section rows rather than one flat list of nine: nine undifferentiated
+    # key/value lines are a wall, three labelled groups are scannable. The
+    # identifier gets its own full-width row because it is long enough to wrap
+    # and is not a value anyone compares against a label.
+    sections: tuple[tuple[str, list[tuple[str, object]]], ...] = (
         (
-            catalog.t("ws.detail.runs", locale),
-            catalog.t(
-                "ws.detail.runs_line",
-                locale,
-                total=_num(ws.summary.runs_total, locale),
-                active=_num(ws.summary.runs_active, locale),
-            ),
+            catalog.t("ws.detail.group.resources", locale),
+            [
+                (catalog.t("ws.detail.runtime", locale), "python3"),
+                (catalog.t("ws.detail.profile", locale), ws.profile),
+                (catalog.t("ws.detail.cpu", locale), _raw(cpu_line)),
+                (catalog.t("ws.detail.memory", locale), format_bytes(ws.limits.memory_mb * 1024 * 1024, locale)),
+                (catalog.t("ws.detail.disk", locale), disk),
+            ],
         ),
-        (catalog.t("ws.detail.last_activity", locale), format_relative(ws.last_activity_at, now, locale)),
-        (catalog.t("ws.detail.created", locale), format_datetime(ws.created_at, locale)),
-        (catalog.t("ws.detail.id", locale), _raw(f"<code>{ws.id}</code>")),
-    ]
-    body = "".join(str(_kv(k, v)) for k, v in rows)
+        (
+            catalog.t("ws.detail.group.activity", locale),
+            [
+                (
+                    catalog.t("ws.detail.runs", locale),
+                    catalog.t(
+                        "ws.detail.runs_line",
+                        locale,
+                        total=_num(ws.summary.runs_total, locale),
+                        active=_num(ws.summary.runs_active, locale),
+                    ),
+                ),
+                (catalog.t("ws.detail.last_activity", locale), format_relative(ws.last_activity_at, now, locale)),
+                (catalog.t("ws.detail.created", locale), format_datetime(ws.created_at, locale)),
+            ],
+        ),
+    )
+
+    rows_html: list[str] = []
+    for title, pairs in sections:
+        rows_html.append(f'<tr><th colspan="2">{title}</th></tr>')
+        for label, value in pairs:
+            inner = str(value) if isinstance(value, Html) else _raw(str(value))
+            rows_html.append(f"<tr><th>{label}</th><td>{inner}</td></tr>")
+    rows_html.append(f'<tr><th colspan="2">{catalog.t("ws.detail.group.identity", locale)}</th></tr>')
+    rows_html.append(f'<tr><td colspan="2" align="center"><code>{ws.id}</code></td></tr>')
+
     doc.div()
     doc.raw(
-        f'<details><summary><b>{catalog.t("ws.detail.tech", locale)}</b> ⇣</summary>'
-        f'<table is_bordered="true">{body}</table></details>'
+        f"<details><summary><b>{catalog.t('ws.detail.tech', locale)}</b> ⇣</summary>"
+        f'<table is_bordered="true" is_striped="true" is_compact="true">'
+        f"<caption>{catalog.t('ws.detail.caption', locale)}</caption>"
+        f"{''.join(rows_html)}</table></details>"
     )
 
     return Screen(

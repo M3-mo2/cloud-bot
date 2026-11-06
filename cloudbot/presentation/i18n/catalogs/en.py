@@ -193,6 +193,10 @@ MESSAGES: dict[str, str] = {
     "ws.detail.created": "Created",
     "ws.detail.id": "ID:",
     "ws.detail.tech": "Technical details",
+    "ws.detail.caption": "Workspace data",
+    "ws.detail.group.resources": "Compute",
+    "ws.detail.group.activity": "Activity",
+    "ws.detail.group.identity": "Identifier",
     # -- the workspace header: a rule, the name, and how long it has been alive --
     "ws.head.rule": "▬▬▭▭▬▬▭▭▬▬▭▭",
     "ws.head.title": "Your workspace",
