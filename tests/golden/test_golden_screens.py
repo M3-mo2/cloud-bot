@@ -36,8 +36,12 @@ NEVER_RTL = screen_catalog.NEVER_RTL
 def test_golden_screen(name, locale):
     CallbackCodec()  # deterministic content-addressed tokens per render
     screen = screen_catalog.build(name, locale)
-    html = screen.doc.html
     built = screen.doc.build()
+    # A screen may build in **blocks** rather than html (in-body buttons, Bot API
+    # 10.3) — Telegram allows either form, never both. Snapshot whichever was
+    # built, so the golden still locks what the user will actually see instead of
+    # locking an empty string.
+    html = built.html if built.html is not None else built.model_dump_json(exclude_none=True)
     if locale is Locale.AR and name not in NEVER_RTL:
         assert built.is_rtl is True
     elif locale is Locale.EN:

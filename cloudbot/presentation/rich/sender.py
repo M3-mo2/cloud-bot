@@ -7,6 +7,8 @@ The only module that calls ``Bot.send_rich_message`` / ``send_rich_message_draft
 
 from __future__ import annotations
 
+import json
+
 from typing import Any
 
 import structlog
@@ -94,7 +96,12 @@ class RichSender:
         markup: Any | None = None,
     ) -> Message:
         built = doc.build()
-        signature = (built.html, bool(built.is_rtl), _markup_signature(markup))
+        # A blocks document has no ``html`` (Telegram allows either, never both), so
+        # the duplicate-edit cache has to key on whichever form was built.
+        # ``blocks`` are aiogram models, not dicts — ``model_dump_json`` is the only
+        # correct serialisation here (``json.dumps`` raises TypeError on them).
+        body = built.html if built.html is not None else built.model_dump_json(exclude_none=True)
+        signature = (body, bool(built.is_rtl), _markup_signature(markup))
         key = (chat_id, message_id)
         if self._last_payload.get(key) == signature:
             # Telegram rejects "message is not modified"; short-circuit. This is a

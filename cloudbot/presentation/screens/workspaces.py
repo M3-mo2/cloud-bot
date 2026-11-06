@@ -46,6 +46,12 @@ def _raw(text: str) -> Html:
 
 
 # -- list --------------------------------------------------------------------
+#: How many workspace buttons one inline row carries. Two keeps a long name
+#: readable on a phone; the API allows up to eight, and using eight here would
+#: make every label a two-word abbreviation.
+_LIST_COLS = 2
+
+
 def workspace_list(
     workspaces: list[Workspace],
     locale: Locale,
@@ -56,47 +62,59 @@ def workspace_list(
     inside: Workspace | None = None,
     confirmation: str | None = None,
 ) -> Screen:
+    """The workspaces list, as **buttons inside the message** (Bot API 10.3).
+
+    The old screen was a four-column table — name, state, runs, disk — and in a
+    right-to-left message that reads as numbers drifting away from their labels.
+    The list now carries **no table at all**: a rule, one line of state, then one
+    button per workspace, so the name *is* the thing you press and there is nothing
+    for the eye to re-align.
+
+    The buttons are inline ``buttons`` blocks rather than a keyboard below the
+    message: a press still arrives as an ordinary ``CallbackQuery``, so the whole
+    routing layer is untouched. Telegram refuses ``<tg-button callback_data=...>``
+    in the html form, which is why this screen builds blocks (measured).
+    """
     if not workspaces:
         return empty_workspaces(locale, inside=inside)
 
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("ws.list.title", locale))
-    if confirmation:
-        doc.blockquote(_raw(confirmation))
-    doc.p(format_count("count.workspaces", len(workspaces), locale))
-    rows = []
-    for ws in workspaces:
-        label_key, emoji = display_state(ws.status, ws.summary.state)
-        status = f"{emoji} {catalog.t(label_key, locale)}"
-        runs = (
-            catalog.t("ws.runs.active", locale, n=_num(ws.summary.runs_active, locale))
-            if ws.summary.runs_active
-            else catalog.t("ws.runs.none", locale)
-        )
-        disk = format_bytes_pair(ws.summary.disk_used_bytes, ws.summary.disk_limit_bytes, locale)
-        rows.append([ws.name, status, runs, disk])
-    doc.table(
-        [
-            catalog.t("ws.column.name", locale),
-            catalog.t("ws.column.status", locale),
-            catalog.t("ws.column.runs", locale),
-            catalog.t("ws.column.disk", locale),
-        ],
-        rows,
-    )
-    doc.p(page_footer(page, total_pages, locale))
+    rule = catalog.t("ws.head.rule", locale)
 
-    kb_rows = []
+    # Blocks carry plain RichText, not html: a tag in a paragraph prints literally.
+    # The heading block is what gives the title its weight, so no <b> is needed.
+    doc.paragraph(rule)
+    doc.heading(f"✦ {catalog.t('ws.list.title', locale).replace('📦 ', '')} ⟸ "
+                f"{format_count('count.workspaces', len(workspaces), locale)}")
+    doc.paragraph(rule)
+
+    if confirmation:
+        doc.paragraph(confirmation)
+
+    # One button per workspace, two to a row: the list itself is the navigation, so
+    # there is no table for a right-to-left message to mis-align.
+    row: list[tuple[str, str, str | None]] = []
     for ws in workspaces:
-        kb_rows.append(
-            [inline(catalog.t("ws.open", locale, name=ws.name), _cb("ws:view", ws.id), intent=Intent.PRIMARY)]
-        )
-    kb_rows.append([inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)])
-    kb_rows += _pager_rows(page, total_pages, lambda target: _cb("ws:list", target), locale)
-    # The shared bottom nav block. We are on the workspaces list, so its own
-    # destination (Workspaces, and Menu per R2) is dropped rather than muted.
-    kb_rows += nav.nav_rows(locale, "workspaces", inside=inside)
-    return Screen(doc=doc, markup=inline_markup(kb_rows))
+        row.append((ws.name, _cb("ws:view", ws.id), "primary"))
+        if len(row) == _LIST_COLS:
+            doc.buttons(row)
+            row = []
+    new_btn = (catalog.t("menu.new_workspace", locale), "ws:new", "success")
+    doc.buttons(row + [new_btn] if row else [new_btn])
+
+    if total_pages > 1:
+        nav_row: list[tuple[str, str, str | None]] = []
+        if page > 0:
+            nav_row.append((catalog.t("common.prev", locale), _cb("ws:list", page - 1), None))
+        if page + 1 < total_pages:
+            nav_row.append((catalog.t("common.next", locale), _cb("ws:list", page + 1), None))
+        if nav_row:
+            doc.buttons(nav_row, align="center")
+        doc.footer(page_footer(page, total_pages, locale))
+
+    # The keyboard below carries only what is not a workspace: the shared nav block.
+    kb_rows = nav.nav_rows(locale, "workspaces", inside=inside)
+    return Screen(doc=doc, markup=inline_markup(kb_rows) if kb_rows else None)
 
 
 def empty_workspaces(locale: Locale, *, inside: Workspace | None = None) -> Screen:

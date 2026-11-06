@@ -326,15 +326,34 @@ def test_no_catalog_screen_renders_more_than_a_page_without_a_pager(locale):
 
 # -- the workspace list has one entry point, paged ---------------------------
 def test_the_workspace_list_entry_point_pages_the_logout_and_delete_renders():
-    """The logout and delete handlers used to render the *whole* list unpaged."""
+    """The logout and delete handlers used to render the *whole* list unpaged.
+
+    The list is no longer a table: it is a row of in-body buttons per workspace
+    (Bot API 10.3), so the count is taken from the buttons and the page number from
+    the footer block. The *rule* being defended is unchanged — one entry point that
+    pages — only the way it is measured.
+    """
     from cloudbot.handlers.workspaces import _list_screen
 
     fixtures = screen_catalog.fixtures()
     many = [fixtures["ws"]] * (pagination.PAGE_SIZE * 2)
 
+    def ws_buttons(screen) -> int:
+        blocks = screen.doc.build().blocks or []
+        return sum(
+            1
+            for b in blocks
+            for btn in (getattr(b, "buttons", None) or [])
+            if getattr(btn, "callback_data", "").startswith("ws:view")
+        )
+
+    def footer_text(screen) -> str:
+        blocks = screen.doc.build().blocks or []
+        return " ".join(getattr(b, "text", "") or "" for b in blocks if type(b).__name__ == "InputRichBlockFooter")
+
     first = _list_screen(many, Locale.EN, confirmation="left")
-    assert _table_rows(first.doc.html) == pagination.PAGE_SIZE
-    assert "Page 1 of 2" in first.doc.html
+    assert ws_buttons(first) == pagination.PAGE_SIZE
+    assert "1 / 2" in footer_text(first) or "Page 1 of 2" in footer_text(first), footer_text(first)
 
     second = _list_screen(many, Locale.EN, page=1)
-    assert "Page 2 of 2" in second.doc.html
+    assert "2 / 2" in footer_text(second) or "Page 2 of 2" in footer_text(second), footer_text(second)

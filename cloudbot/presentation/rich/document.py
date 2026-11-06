@@ -24,6 +24,7 @@ class RichDoc:
     def __init__(self, locale: Locale) -> None:
         self._locale = locale
         self._parts: list[str] = []
+        self._blocks: list = []
 
     @property
     def locale(self) -> Locale:
@@ -117,6 +118,57 @@ class RichDoc:
         )
         return self._add(f"<table{attr}>{body}</table>")
 
+    def paragraph(self, text: str) -> "RichDoc":
+        """A body paragraph as an ``InputRichBlock`` — the blocks form of a message.
+
+        A screen that needs **buttons inside its body** cannot use html: Telegram
+        refuses ``<tg-button callback_data=...>`` with ``BUTTON_URL_INVALID`` (the
+        tag only accepts a ``url``), while the ``blocks`` form accepts
+        ``callback_data`` and delivers a normal ``CallbackQuery``. Measured.
+
+        ``InputRichMessage`` allows *either* ``html`` or ``blocks``, never both — so
+        a document that has any block emits **only** blocks. That is why this is an
+        all-or-nothing seam: a screen either builds entirely in blocks or not at all.
+        """
+        from aiogram.types import InputRichBlockParagraph
+
+        self._blocks.append(InputRichBlockParagraph(text=text))
+        return self
+
+    def heading(self, text: str, *, size: int = 2) -> "RichDoc":
+        """A heading block (``size`` 1-6, 1 largest) — the blocks form's <h2>."""
+        from aiogram.types import InputRichBlockSectionHeading
+
+        self._blocks.append(InputRichBlockSectionHeading(text=text, size=max(1, min(6, size))))
+        return self
+
+    def footer(self, text: str) -> "RichDoc":
+        from aiogram.types import InputRichBlockFooter
+
+        self._blocks.append(InputRichBlockFooter(text=text))
+        return self
+
+    def buttons(
+        self,
+        row: Sequence[tuple[str, str, str | None]],
+        *,
+        align: str | None = None,
+    ) -> "RichDoc":
+        """A row of 1-8 buttons inside the body: ``(label, callback_data, style)``.
+
+        ``align`` is ``left`` / ``center`` / ``right`` — an alignment the keyboard
+        below the message simply does not have.
+        """
+        from aiogram.types import InputRichBlockButtons, RichMessageButton
+
+        built = []
+        for label, action, style in row:
+            if len(str(action).encode("utf-8")) > 64:
+                raise ValueError(f"callback_data over 64 bytes: {action!r}")
+            built.append(RichMessageButton(text=label, callback_data=action, style=style))
+        self._blocks.append(InputRichBlockButtons(buttons=built, align=align))
+        return self
+
     def alert(self, kind: str, title: Element, body: Element) -> "RichDoc":
         icon = {"warning": "⚠️", "error": "❌", "success": "✅", "info": "ℹ️"}.get(kind, "⚠️")
         return self.h(2, tags.fragment([icon, " ", tags.bold(title)])).p(body)
@@ -127,6 +179,9 @@ class RichDoc:
         return "".join(self._parts)
 
     def build(self) -> InputRichMessage:
+        """``InputRichMessage`` allows *either* html or blocks, never both."""
+        if self._blocks:
+            return InputRichMessage(blocks=self._blocks, is_rtl=is_rtl(self._locale))
         return InputRichMessage(html=self.html, is_rtl=is_rtl(self._locale))
 
     def __len__(self) -> int:

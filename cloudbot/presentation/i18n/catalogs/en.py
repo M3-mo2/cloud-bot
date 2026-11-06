@@ -21,7 +21,6 @@ MESSAGES: dict[str, str] = {
     "common.choose": "Choose",
     "common.page": "Page {page} of {total}",
     "common.previous": "⬅️ Previous",
-    "common.next": "Next ➡️",
     "common.load_more": "➕ Load more",
     "common.too_fast": "You are going a bit fast. One moment.",
     "common.yes": "Yes",
@@ -176,6 +175,9 @@ MESSAGES: dict[str, str] = {
 
     # -- workspaces: list ----------------------------------------------------
     "ws.list.title": "📦 My Workspaces",
+    "ws.list.open_named": "{name}",
+    "common.prev": "⬅️ Previous",
+    "common.next": "Next ➡️",
     "ws.list.empty_title": "📦 My Workspaces",
     "ws.list.empty_line1": "You don't have any workspaces yet.",
     "ws.list.empty_line2": "A workspace is your own private sandbox where you can run code safely.",

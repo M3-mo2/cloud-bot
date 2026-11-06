@@ -14,7 +14,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 126 |
 | Screens including the /dev tool | 129 |
-| Button edges | 417 |
+| Button edges | 411 |
 | Distinct destinations (actions) | 113 |
 | Entry commands | 9 |
 | Callback re-entry actions | 113 |
@@ -22,7 +22,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 0 |
 | Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 212 |
+| Contradictions: two-screen loops | 208 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -2924,19 +2924,7 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
@@ -2948,19 +2936,7 @@ _No screen is rendered by this command._
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -3067,9 +3043,9 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
       - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
         - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
@@ -3193,9 +3169,9 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 - **help_inside** — ❓ Help
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
@@ -3448,19 +3424,7 @@ _No screen is rendered by this command._
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
@@ -3472,19 +3436,7 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -3496,9 +3448,9 @@ _No screen is rendered by this command._
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 
 ### `/notifications`
 
@@ -6527,19 +6479,7 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
@@ -6551,19 +6491,7 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -6600,9 +6528,9 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
   - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
     - **menu** — (no title) ↩ (already expanded at depth 4)
     - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
@@ -6859,19 +6787,7 @@ _No screen is rendered by this command._
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
@@ -6883,19 +6799,7 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -6907,9 +6811,9 @@ _No screen is rendered by this command._
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 
 ### `/start`
 
@@ -6923,19 +6827,7 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
@@ -6947,19 +6839,7 @@ _No screen is rendered by this command._
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7066,9 +6946,9 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
       - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
         - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
@@ -7192,9 +7072,9 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
   - 🇬🇧 English → `lang:en` → menu, menu_empty, menu_inside
     - **menu** — (no title) ↩ (already expanded at depth 2)
     - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 2)
@@ -7231,8 +7111,20 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+    - **ws_list** — (no title)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - ↩ `menu` (already on this path)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_list_empty** — 📦 My Workspaces
+      - ➕ New Workspace → `ws:new` → ws_create_name
+        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - ↩ `menu` (already on this path)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title)
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -7256,9 +7148,9 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -7269,9 +7161,9 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -7319,9 +7211,9 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -7341,46 +7233,10 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - ↩ `menu` (already on this path)
-        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_empty** — 📦 My Workspaces
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - ↩ `menu` (already on this path)
-        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+            - ↩ `ws_list_inside` (already on this path)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
   - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -7564,9 +7420,9 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 2)
 - **menu_empty** — ☁️ CloudBot
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
@@ -7599,8 +7455,20 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+    - **ws_list** — (no title)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `menu_empty` (already on this path)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_list_empty** — 📦 My Workspaces
+      - ➕ New Workspace → `ws:new` → ws_create_name
+        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `menu_empty` (already on this path)
+        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title)
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -7624,9 +7492,9 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -7637,9 +7505,9 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -7687,9 +7555,9 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -7709,46 +7577,10 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_empty** — 📦 My Workspaces
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `menu_empty` (already on this path)
-        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+            - ↩ `ws_list_inside` (already on this path)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
   - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -7932,9 +7764,9 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 2)
 - **menu_inside** — (no title)
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
@@ -8221,19 +8053,7 @@ _No screen is rendered by this command._
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
@@ -8245,19 +8065,7 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - ↩ `menu_inside` (already on this path)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -8269,9 +8077,9 @@ _No screen is rendered by this command._
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 - **ws_detail** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files
@@ -8718,23 +8526,7 @@ _No screen is rendered by this command._
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
+    - **ws_list** — (no title)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
@@ -8779,30 +8571,22 @@ _No screen is rendered by this command._
             - … `ws_list_inside` at depth 6 (not expanded)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+        - **ws_create_name** — ➕ New Workspace
+          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
 - **ws_detail_locked** — (no title)
@@ -9123,23 +8907,7 @@ _No screen is rendered by this command._
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
+    - **ws_list** — (no title)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
@@ -9184,30 +8952,22 @@ _No screen is rendered by this command._
             - … `ws_list_inside` at depth 6 (not expanded)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+        - **ws_create_name** — ➕ New Workspace
+          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
 - **ws_detail_more** — (no title)
@@ -10073,23 +9833,7 @@ _No screen is rendered by this command._
         - ↩ `ws_detail_more` (already on this path)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
+    - **ws_list** — (no title)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
@@ -10134,30 +9878,22 @@ _No screen is rendered by this command._
             - … `ws_list_inside` at depth 6 (not expanded)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+        - **ws_create_name** — ➕ New Workspace
+          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
       - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
 - **ws_detail_suspended** — (no title)
@@ -10391,19 +10127,7 @@ _No screen is rendered by this command._
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list** — (no title)
           - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
@@ -10415,19 +10139,7 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -10452,9 +10164,9 @@ _No screen is rendered by this command._
     - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 
 ## 3. The contradictions
 
@@ -10484,7 +10196,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (212)
+### 3.5 Loops that are not obvious (208)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -10683,21 +10395,17 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **ws_create_plan_short** —“Monthly — 150 Stars ✓”→ **ws_create_plan_trial_used** —“Monthly — 150 Stars”→ **ws_create_plan_short** (**unobvious**)
 - **ws_detail** —“⋯ More”→ **ws_detail_more** —“⋯ Less”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⋯ More”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
-- **ws_detail** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail** (**unobvious**)
-- **ws_detail** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail** (**unobvious**)
+- **ws_detail** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
-- **ws_detail_locked** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail_locked** (**unobvious**)
-- **ws_detail_locked** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail_locked** (**unobvious**)
+- **ws_detail_locked** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_more** —“⋯ Less”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail_more** (**unobvious**)
+- **ws_detail_more** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_more** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_more** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_suspended** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail_suspended** (**unobvious**)
-- **ws_detail_suspended** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail_suspended** (**unobvious**)
+- **ws_detail_suspended** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_suspended** (**unobvious**)
 
@@ -11776,13 +11484,10 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 
-### ws_list — 📦 My Workspaces
+### ws_list — (no title)
 
-_2 workspaces_
+_(no body text)_
 
-- demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### ws_list_empty — 📦 My Workspaces
@@ -11792,13 +11497,10 @@ _You don't have any workspaces yet._
 - ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
-### ws_list_inside — 📦 My Workspaces
+### ws_list_inside — (no title)
 
-_2 workspaces_
+_(no body text)_
 
-- demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### ws_settings — ⚙️ Workspace settings

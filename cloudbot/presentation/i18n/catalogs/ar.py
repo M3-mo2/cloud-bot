@@ -21,7 +21,6 @@ MESSAGES: dict[str, str] = {
     "common.choose": "اختر",
     "common.page": "صفحة {page} من {total}",
     "common.previous": "⬅️ السابق",
-    "common.next": "التالي ➡️",
     "common.load_more": "➕ المزيد",
     "common.too_fast": "أنت أسرع قليلًا. لحظة واحدة.",
     "common.yes": "نعم",
@@ -175,6 +174,9 @@ MESSAGES: dict[str, str] = {
 
     # -- workspaces: list ----------------------------------------------------
     "ws.list.title": "📦 مساحاتي",
+    "ws.list.open_named": "{name}",
+    "common.prev": "⬅️ السابق",
+    "common.next": "التالي ➡️",
     "ws.list.empty_title": "📦 مساحاتي",
     "ws.list.empty_line1": "لا توجد لديك أي مساحات عمل بعد.",
     "ws.list.empty_line2": "مساحة العمل هي بيئتك الخاصة المعزولة التي تشغّل فيها الأكواد بأمان.",
