@@ -54,7 +54,7 @@ def main_menu(
     display_name: str = "",
     inside: Workspace | None = None,
     plan: str | None = None,
-    states: dict[str, str] | None = None,
+    states: dict[str, tuple[str, str]] | None = None,
 ) -> Screen:
     """The main board: the account's **only** hub.
 
@@ -77,23 +77,23 @@ def main_menu(
     doc = RichDoc(locale)
     rule = bold(catalog.t("menu.rule", locale))
 
-    # -- the header: a rule, who you are, and how many workspaces you have ----
-    # Same shape as the workspace home — rule, ✦ label ⟸ value, rule — so the two
-    # screens a user lives in read as one product rather than two designs.
+    # -- header: who you are, then what you actually have ----------------------
+    # Only the second line carries the arrow: it points at the facts this screen
+    # exists for. An arrow at a person's own name points at nothing.
     doc.p(rule)
     doc.p(
         fragment(
             [
-                bold(f"✦ {catalog.t('menu.hello_label', locale)} ⟸ "),
-                bold(display_name),
+                "✦ ",
+                fragment([catalog.t("menu.hello_inline", locale), " ", bold(display_name)]),
             ]
         )
     )
     doc.p(
         fragment(
             [
-                bold(f"✦ {catalog.t('menu.count_label', locale)} ⟸ "),
-                bold(format_count("count.workspaces", len(workspaces), locale)),
+                bold(f"✦ {catalog.t('menu.summary_label', locale)} ⟸ "),
+                bold(_summary(workspaces, states or {}, locale)),
             ]
         )
     )
@@ -111,7 +111,7 @@ def main_menu(
         # plan that does not exist.
         from_state = (states or {}).get(str(ws.id))
         if from_state:
-            status = from_state
+            status = from_state[0]
         else:
             label_key, emoji = display_state(ws.status, ws.summary.state)
             status = f"{emoji} {catalog.t(label_key, locale)}"
@@ -138,6 +138,35 @@ def main_menu(
     rows_kb = [[inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)]]
     rows_kb += nav.nav_rows(locale, "menu", inside=inside)
     return Screen(doc=doc, markup=inline_markup(rows_kb))
+
+
+
+def _summary(workspaces: list[Workspace], states: dict[str, tuple[str, str]], locale: Locale) -> str:
+    """The one fact worth a label: what is happening, and what runs out.
+
+    Built from the same ``(label, kind)`` pairs the rows print, so the summary can
+    never contradict the list underneath it. First match wins:
+
+    1. something is running now — the live fact;
+    2. something expires and something does not — the next thing that costs them;
+    3. otherwise the plain count.
+    """
+    running = [ws for ws in workspaces if ws.summary.runs_active]
+    if len(running) == 1:
+        return catalog.t("menu.summary.running_one", locale)
+    if running:
+        return catalog.t("menu.summary.running", locale, n=_num(len(running), locale))
+
+    kinds = [states.get(str(ws.id), ("", "none"))[1] for ws in workspaces]
+    ending = [k for k in kinds if k in ("active", "trial")]
+    if ending and len(ending) < len(workspaces):
+        return catalog.t(
+            "menu.summary.mixed",
+            locale,
+            total=_num(len(workspaces), locale),
+            ending=_num(len(ending), locale),
+        )
+    return format_count("count.workspaces", len(workspaces), locale)
 
 
 def help_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:

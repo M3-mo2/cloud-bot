@@ -52,28 +52,34 @@ async def _open_menu(
 
 async def workspace_states(
     services: Services, tg_id: int, workspaces: list, locale: Locale
-) -> dict[str, str]:
-    """Each workspace's plan and the date it ends — the menu's status column.
+) -> dict[str, tuple[str, str]]:
+    """Each workspace's plan label **and its kind** — the menu's status column.
+
+    ``(label, kind)`` where kind is one of ``active`` / ``trial`` / ``expired`` /
+    ``none``. The label is what the row prints; the kind is what the summary line
+    reasons about. Returning both from one derivation is what stops the header
+    from contradicting the rows.
 
     One place, because the menu is reached from four handlers and a second copy
     of this logic is how the board and the wallet start disagreeing. The engine's
-    own ``summary.state`` is *not* used here: it reports the run-time cap
+    own ``summary.state`` is *not* used: it reports the run-time cap
     (``unlimited``), not the subscription, which is what a paying user is asking
     about when they look at their workspace list.
     """
     from datetime import datetime, timezone
 
-    from cloudbot.presentation.screens.wallet import plan_state_line
+    from cloudbot.presentation.screens.wallet import plan_state_short
 
     now = datetime.now(timezone.utc)
     subs = {s.ws_id: s for s in await services.billing.subscriptions(tg_id)}
-    out: dict[str, str] = {}
+    out: dict[str, tuple[str, str]] = {}
     for ws in workspaces:
         key = str(ws.id)
         sub = subs.get(key)
         status = await services.billing.status(tg_id, key, now=now)
-        out[key] = plan_state_line(sub, status, locale)
+        out[key] = (plan_state_short(sub, status, locale), status.state.value)
     return out
+
 
 
 async def _clear_legacy_keyboard(

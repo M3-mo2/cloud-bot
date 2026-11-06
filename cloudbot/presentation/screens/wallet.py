@@ -201,6 +201,25 @@ def plan_state_line(subscription, status: SubscriptionStatus, locale: Locale) ->
     return catalog.t("wallet.ws.active_until", locale, plan=name, when=when)
 
 
+def plan_state_short(subscription, status: SubscriptionStatus, locale: Locale) -> str:
+    """The same fact as :func:`plan_state_line`, without the clock.
+
+    A list of four workspaces printing the full date *and* time four times is a
+    wall of numbers where the only question is "which one runs out first". The
+    menu prints the day; the wallet — where a subscription is the subject, not a
+    row — keeps the exact timestamp.
+    """
+    if subscription is None or status.state is SubscriptionState.NONE:
+        return catalog.t("wallet.ws.no_plan", locale)
+    name = _plan_name(subscription.plan_code, locale)
+    if status.state is SubscriptionState.EXPIRED:
+        return catalog.t("wallet.ws.expired", locale, plan=name)
+    day = format_datetime(subscription.expires_at, locale).split(",")[0]
+    if status.state is SubscriptionState.TRIALING:
+        return catalog.t("wallet.ws.trialing_day", locale, when=day)
+    return catalog.t("wallet.ws.active_day", locale, plan=name, when=day)
+
+
 def _plan_and_state(
     subscription: "Subscription | None",
     status: SubscriptionStatus,
