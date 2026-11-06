@@ -20,20 +20,43 @@ from cloudbot.states.input import Input
 router = Router(name="workspaces")
 
 
-async def _show_list(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, page: int = 0) -> None:
-    workspaces = await services.workspaces.list(ctx.tg_id)
-    inside = await services.session.current(ctx.tg_id)
-    page_size = ws_screens.PAGE_SIZE
-    start = page * page_size
-    window = workspaces[start : start + page_size]
-    total_pages = max(1, (len(workspaces) + page_size - 1) // page_size)
-    screen = ws_screens.workspace_list(
+def _list_screen(
+    workspaces,
+    locale,
+    *,
+    page: int = 0,
+    inside=None,
+    confirmation: str | None = None,
+):
+    """One entry point for every render of the workspace list, paged."""
+    from cloudbot.presentation import pagination
+
+    window, total_pages, has_more = pagination.window(workspaces, page)
+    page = max(0, min(page, total_pages - 1))
+    return ws_screens.workspace_list(
         window,
-        ctx.locale,
+        locale,
         page=page,
         total_pages=total_pages,
-        has_more=(start + page_size) < len(workspaces),
+        has_more=has_more,
         inside=inside,
+        confirmation=confirmation,
+    )
+
+
+async def _show_list(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    page: int = 0,
+    *,
+    confirmation: str | None = None,
+) -> None:
+    workspaces = await services.workspaces.list(ctx.tg_id)
+    inside = await services.session.current(ctx.tg_id)
+    screen = _list_screen(
+        workspaces, ctx.locale, page=page, inside=inside, confirmation=confirmation
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
@@ -107,11 +130,13 @@ async def on_less(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 async def on_logout(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     """Leave the workspace and return to the chooser (the list)."""
     await services.session.leave(ctx.tg_id)
-    workspaces = await services.workspaces.list(ctx.tg_id)
-    screen = ws_screens.workspace_list(
-        workspaces, ctx.locale, confirmation=catalog.t("ws.logout.done", ctx.locale)
+    await _show_list(
+        cb,
+        ctx,
+        services,
+        sender,
+        confirmation=catalog.t("ws.logout.done", ctx.locale),
     )
-    await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
 # -- create wizard -----------------------------------------------------------
@@ -257,7 +282,7 @@ async def on_delete(
         d.blockquote(_frag(catalog.t("ws.delete.done", ctx.locale, name=ws.name)))
         await sender.edit(cb.message.chat.id, cb.message.message_id, d)
     workspaces = await services.workspaces.list(ctx.tg_id)
-    screen = ws_screens.workspace_list(workspaces, ctx.locale)
+    screen = _list_screen(workspaces, ctx.locale)
     if cb.message is not None:
         await sender.send(cb.message.chat.id, screen.doc, markup=screen.markup)
 

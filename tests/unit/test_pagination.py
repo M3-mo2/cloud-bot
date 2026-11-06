@@ -321,3 +321,19 @@ def test_no_catalog_screen_renders_more_than_a_page_without_a_pager(locale):
         if rows > pagination.PAGE_SIZE and not _has_pager(screen):
             offenders.append((name, rows))
     assert not offenders, f"screens over {pagination.PAGE_SIZE} rows with no pager: {offenders}"
+
+
+# -- the workspace list has one entry point, paged ---------------------------
+def test_the_workspace_list_entry_point_pages_the_logout_and_delete_renders():
+    """The logout and delete handlers used to render the *whole* list unpaged."""
+    from cloudbot.handlers.workspaces import _list_screen
+
+    fixtures = screen_catalog.fixtures()
+    many = [fixtures["ws"]] * (pagination.PAGE_SIZE * 2)
+
+    first = _list_screen(many, Locale.EN, confirmation="left")
+    assert _table_rows(first.doc.html) == pagination.PAGE_SIZE
+    assert "Page 1 of 2" in first.doc.html
+
+    second = _list_screen(many, Locale.EN, page=1)
+    assert "Page 2 of 2" in second.doc.html
