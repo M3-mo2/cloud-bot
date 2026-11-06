@@ -23,6 +23,7 @@ MESSAGES: dict[str, str] = {
     "common.previous": "⬅️ السابق",
     "common.next": "التالي ➡️",
     "common.load_more": "➕ المزيد",
+    "common.too_fast": "أنت أسرع قليلًا. لحظة واحدة.",
     "common.yes": "نعم",
     "common.no": "لا",
     "common.id": "المعرّف",
@@ -1065,6 +1066,12 @@ MESSAGES: dict[str, str] = {
     "dev.report.scope": "النطاق: {scope}",
     "dev.report.failures": "{n} ملاحظة/ملاحظات",
     "dev.report.no_failures": "لا ملاحظات — كل الأزرار معالَجة.",
+    "dev.doctor.run": "🩺 تشغيل طبيب البنية",
+    "dev.doctor.title": "🩺 طبيب البنية",
+    "dev.doctor.clean": "لا ملاحظات — الشجرة سليمة.",
+    "dev.doctor.severity.error": "أخطاء",
+    "dev.doctor.severity.warning": "تحذيرات",
+    "dev.doctor.severity.info": "ملاحظات",
 }
 
 PLURALS: dict[str, dict[str, str]] = {

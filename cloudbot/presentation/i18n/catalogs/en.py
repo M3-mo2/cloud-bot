@@ -23,6 +23,7 @@ MESSAGES: dict[str, str] = {
     "common.previous": "⬅️ Previous",
     "common.next": "Next ➡️",
     "common.load_more": "➕ Load more",
+    "common.too_fast": "You are going a bit fast. One moment.",
     "common.yes": "Yes",
     "common.no": "No",
     "common.id": "ID",
@@ -1066,6 +1067,12 @@ MESSAGES: dict[str, str] = {
     "dev.report.scope": "Scope: {scope}",
     "dev.report.failures": "{n} finding(s)",
     "dev.report.no_failures": "No findings — every button is handled.",
+    "dev.doctor.run": "🩺 Run the architecture doctor",
+    "dev.doctor.title": "🩺 Architecture doctor",
+    "dev.doctor.clean": "No findings — the tree is clean.",
+    "dev.doctor.severity.error": "Errors",
+    "dev.doctor.severity.warning": "Warnings",
+    "dev.doctor.severity.info": "Notes",
 }
 
 PLURALS: dict[str, dict[str, str]] = {

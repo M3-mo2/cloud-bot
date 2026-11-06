@@ -42,6 +42,9 @@ button is a footgun if it is ever reachable by a non-admin.
   **real dispatcher** and shows the resulting screen — so you see the real next
   screen, not a guess. **▶️ Run all checks** walks every screen in the section, and
   **the whole catalog**, and reports the totals plus every finding.
+* **🩺 Run the architecture doctor** runs the offline doctor
+  (`python -m cloudbot.devtools.doctor`) and shows its findings grouped by
+  severity, paged with the shared pager. See [`DEVTOOLS.md`](DEVTOOLS.md).
 
 ## The three hard guarantees
 

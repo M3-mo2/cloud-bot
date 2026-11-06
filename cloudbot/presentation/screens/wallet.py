@@ -70,7 +70,6 @@ def _status_line(view: WalletView) -> Html:
                 "wallet.status.trialing",
                 locale,
                 plan=plan_name,
-                days=_num(status.days_left, locale),
             )
         )
     if status.state is SubscriptionState.EXPIRED:

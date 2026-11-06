@@ -410,3 +410,44 @@ async def test_the_catalog_walk_counts_every_screen_and_flags_a_dead_button():
         assert probe in {f[0] for f in dirty.failures}
     finally:
         await sandbox.aclose()
+
+# -- the architecture doctor section of /dev (TASK devtool) -------------------
+async def test_dev_runs_the_doctor_and_shows_findings_by_severity():
+    """The sections screen offers the doctor; its report groups by severity."""
+    settings, container, bot, dispatcher = await _tool()
+    try:
+        await dispatcher.feed_update(bot, _msg(1, TG, "/dev"))
+        section_callbacks = [
+            b.callback_data
+            for row in bot.sent[-1]["markup"].inline_keyboard
+            for b in row
+        ]
+        assert "dev:doctor" in section_callbacks, "the doctor entry is missing"
+
+        await dispatcher.feed_update(bot, _cb(2, TG, "dev:doctor"))
+        html = _last(bot)
+        assert catalog.t("dev.doctor.title", Locale.EN) in html
+        # The totals table is there even when there are no findings.
+        assert catalog.t("dev.doctor.severity.error", Locale.EN) in html
+        # The doctor really ran on the tree and found something to show.
+        from cloudbot.devtools import doctor as doctor_mod
+
+        findings = doctor_mod.run().findings
+        assert findings
+        # Page 1 lists the highest-severity findings; the first one's check is
+        # shown verbatim, so the report is not empty.
+        first = sorted(findings, key=lambda f: (f.severity.rank, f.check))[0]
+        assert first.check in html
+    finally:
+        await container.aclose()
+
+async def test_the_doctor_route_is_parsed_and_paged():
+    from cloudbot.presentation.screens import dev as dev_screens
+
+    assert dev_screens.parse("dev:doctor").valid
+    assert dev_screens.parse("dev:doctor:2").valid
+    assert not dev_screens.parse("dev:doctor:x").valid
+    from cloudbot.devtools import doctor as doctor_mod
+
+    screen = dev_screens.doctor_screen(doctor_mod.run().findings, Locale.AR, page=1)
+    assert screen.markup is not None

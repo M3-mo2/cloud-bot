@@ -69,8 +69,9 @@ class Subscriptions(Protocol):
         actor: int,
         *,
         idempotency_key: str = "",
-    ) -> Wallet: ...
-    """Append a *negative* reversal (a refunded credit). Never below zero."""
+    ) -> Wallet:
+        """Append a *negative* reversal (a refunded credit). Never below zero."""
+        ...
 
     async def purchase(
         self,

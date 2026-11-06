@@ -35,6 +35,9 @@
 #      of the whole family, TASK 23), restored.
 #  31. A bite test that reintroduces a dead button, so the dev tool's own catalog
 #      check reports it (TASK 24), restored.
+#  32. The architecture doctor finds real problems and runs offline (TASK devtool).
+#  33. The bug reproducer narrows a report to a screen with visible evidence and
+#      emits a stub test that fails on today's tree (TASK devtool).
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -1112,6 +1115,75 @@ def line(r):
     return ls[-1].strip() if ls else ("red" if r.returncode else "green")
 print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
 PY
+
+echo
+echo "== 32. the architecture doctor finds real problems, offline (TASK devtool) =="
+"$PY" - <<'PYCODE'
+import json, subprocess, sys
+
+# It finds real problems on this tree (a doctor that finds nothing is worthless).
+proc = subprocess.run(
+    [sys.executable, "-m", "cloudbot.devtools.doctor", "--json"],
+    capture_output=True, text=True,
+)
+assert proc.returncode in (0, 1), proc.stderr
+data = json.loads(proc.stdout)
+assert data["findings"], "the doctor found nothing"
+checks = {f["check"] for f in data["findings"]}
+for expected in ("screens.orphan", "i18n.dead_key", "layer.import_direction",
+                 "design.row_width", "design.nav_rows"):
+    assert expected in checks, f"the doctor never reported {expected}"
+# The exit code is a pre-commit gate: non-zero exactly when an error exists.
+assert (proc.returncode == 1) == (data["counts"]["error"] > 0)
+
+# And it opens no socket: patch socket.socket to raise, run in-process.
+import socket
+from pathlib import Path
+import cloudbot.devtools.doctor as doctor_mod
+
+def _boom(*_a, **_k):
+    raise AssertionError("the doctor opened a socket")
+
+real_socket = socket.socket
+socket.socket = _boom
+try:
+    report = doctor_mod.run(Path.cwd())
+finally:
+    socket.socket = real_socket
+assert report.findings, "the offline run found nothing"
+print(f"OK: doctor offline — {len(report.findings)} findings, "
+      f"{report.counts['error']} error / {report.counts['warning']} warning / "
+      f"{report.counts['info']} info; exit 1 iff error")
+PYCODE
+
+echo
+echo "== 33. the reproducer narrows a report and emits a failing stub (TASK devtool) =="
+"$PY" - <<'PYCODE'
+import pathlib, subprocess, sys, tempfile
+
+from cloudbot.devtools import reproduce
+
+# Keyword matching, with visible evidence, against the real catalogue.
+repro = reproduce.match("publishing a tunnel shows no url")
+assert repro.best is not None, "no screen matched the report"
+assert "tunnel" in repro.best.screen, repro.best.screen
+assert repro.best.evidence, "the guess came with no evidence"
+assert all(e.needle and e.matched for e in repro.best.evidence)
+
+# The emitted stub is a runnable test that FAILS on today's tree.
+with tempfile.TemporaryDirectory() as tmp:
+    out = pathlib.Path(tmp) / "test_repro.py"
+    out.write_text(
+        reproduce.render_test(repro, out_path=str(out)), encoding="utf-8"
+    )
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", str(out), "-p", "no:cacheprovider"],
+        capture_output=True, text=True,
+    )
+assert proc.returncode != 0, "the generated stub passed (it must fail now)"
+print(f"OK: reproduce → {repro.best.screen} (score {repro.best.score:.1f}); "
+      f"stub fails on today's tree as intended")
+PYCODE
 
 # ── the proof ledger counts itself ─────────────────────────────────────────────
 # The declared total used to be hand-written, and it drifted: it once claimed

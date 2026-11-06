@@ -44,6 +44,8 @@ English) presentation model.
 | 22 | [`../docs-cloud-service/REVIEW-sandboxd-v0.0.5.md`](../docs-cloud-service/REVIEW-sandboxd-v0.0.5.md) | Historical review of the engine at v0.0.5 (context for the decisions). |
 | 23 | [`ADMIN-PANEL.md`](ADMIN-PANEL.md) | The `/admin` panel: architecture and the extension guide. |
 | 24 | [`ui/07-admin-panel.md`](ui/07-admin-panel.md) | The admin panel's screens and behaviour. |
+| 25 | [`DEV-TOOLS.md`](DEV-TOOLS.md) | The in-bot `/dev` button inspector and sandbox. |
+| 26 | [`DEVTOOLS.md`](DEVTOOLS.md) | The offline architecture doctor and the bug reproducer. |
 
 **Precedence.** If any document here ever conflicts with
 `docs-cloud-service/INTEGRATION-GUIDE.md`, the integration guide wins — it is the

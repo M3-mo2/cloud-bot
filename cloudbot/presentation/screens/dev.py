@@ -70,6 +70,9 @@ def run_section_callback(key: str) -> str:
 def run_catalog_callback() -> str:
     return f"{DEV_PREFIX}:run:catalog"
 
+def doctor_callback(page: int = 0) -> str:
+    return f"{DEV_PREFIX}:doctor" if page <= 0 else f"{DEV_PREFIX}:doctor:{int(page)}"
+
 
 # -- callback parsing ----------------------------------------------------------
 @dataclass(frozen=True)
@@ -109,6 +112,12 @@ def parse(data: str) -> DevCallback:
         if len(rest) == 2 and rest[0] == "section" and rest[1]:
             return DevCallback(action, rest)
         return _invalid(action, *rest)
+    if action == "doctor":
+        if not rest:
+            return DevCallback(action)
+        if len(rest) == 1 and rest[0].isdigit():
+            return DevCallback(action, rest)
+        return _invalid(action, *rest)
     return _invalid(action, *rest)
 
 
@@ -143,6 +152,9 @@ def sections_screen(stats: list[tuple[str, int, int]], locale: Locale) -> Screen
         [
             [inline(catalog.t("dev.section." + key, locale), section_callback(key), intent=Intent.PRIMARY)]
             for key, _s, _b in stats
+        ]
+        + [
+            [inline(catalog.t("dev.doctor.run", locale), doctor_callback(), intent=Intent.SUCCESS)],
         ]
     )
     return Screen(doc=doc, markup=markup)
@@ -355,6 +367,54 @@ def report_screen(report: WalkReport, locale: Locale, *, scope: str) -> Screen:
     return Screen(doc=doc, markup=markup)
 
 
+def doctor_screen(findings, locale: Locale, *, page: int = 0) -> Screen:
+    """The architecture doctor's report, grouped by severity and paged.
+
+    ``findings`` is a sequence of ``devtools.model.Finding``; the screen never
+    imports the doctor module itself (it stays a pure presentation function).
+    """
+    from cloudbot.presentation import pagination
+
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("dev.doctor.title", locale))
+
+    counts = {"error": 0, "warning": 0, "info": 0}
+    for finding in findings:
+        counts[finding.severity.value] = counts.get(finding.severity.value, 0) + 1
+    doc.kv_table(
+        [
+            (catalog.t("dev.doctor.severity.error", locale), _n(counts["error"], locale)),
+            (catalog.t("dev.doctor.severity.warning", locale), _n(counts["warning"], locale)),
+            (catalog.t("dev.doctor.severity.info", locale), _n(counts["info"], locale)),
+        ]
+    )
+
+    ordered = sorted(
+        findings, key=lambda f: (f.severity.rank, f.check, f.location, f.message)
+    )
+    window, total_pages, _has_more = pagination.window(ordered, page)
+    page = max(0, min(page, total_pages - 1))
+    doc.p(pagination.footer(page, total_pages, locale))
+
+    if not ordered:
+        doc.p(catalog.t("dev.doctor.clean", locale))
+    else:
+        items = []
+        for finding in window:
+            where = f" · {finding.location}" if finding.location else ""
+            items.append(
+                Html(
+                    f"<b>{esc(finding.severity.value.upper())}</b> "
+                    f"<code>{esc(finding.check)}</code>{esc(where)} — "
+                    f"{esc(finding.message)}"
+                )
+            )
+        doc.ul(items)
+
+    rows = pagination.pager_rows(page, total_pages, doctor_callback, locale)
+    rows.append([inline(catalog.t("dev.back.sections", locale), sections_callback(), intent=Intent.PRIMARY)])
+    return Screen(doc=doc, markup=inline_markup(rows))
+
 def disabled_screen(locale: Locale) -> Screen:
     """Shown when the developer tools are switched off."""
     doc = RichDoc(locale)
@@ -378,6 +438,8 @@ __all__ = [
     "DEV_PREFIX",
     "DevCallback",
     "disabled_screen",
+    "doctor_callback",
+    "doctor_screen",
     "inspect_callback",
     "inspect_screen",
     "parse",

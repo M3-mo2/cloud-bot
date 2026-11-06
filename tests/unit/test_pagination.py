@@ -308,17 +308,18 @@ def _has_pager(screen) -> bool:
 
 @pytest.mark.parametrize("locale", LOCALES)
 def test_no_catalog_screen_renders_more_than_a_page_without_a_pager(locale):
+    # The rule lives in one place (``devtools.screens``) and the doctor uses the
+    # same helper, so the test and the tool cannot disagree.
+    from cloudbot.devtools import screens as screen_tools
+
     fixtures = screen_catalog.fixtures()
-    # A closed, compile-time set of rows cannot grow with the data: the admin
-    # notification categories are an enum, not a fetched list.
-    FIXED_ROW_SCREENS = {"admin_notifications"}
     offenders = []
     for name, build in screen_catalog.SCREEN_BUILDERS.items():
-        if name in FIXED_ROW_SCREENS:
+        if name in screen_tools.FIXED_ROW_SCREENS:
             continue
         screen = build(fixtures, locale)
-        rows = _table_rows(screen.doc.html)
-        if rows > pagination.PAGE_SIZE and not _has_pager(screen):
+        rows = screen_tools.oversized_without_pager(screen)
+        if rows:
             offenders.append((name, rows))
     assert not offenders, f"screens over {pagination.PAGE_SIZE} rows with no pager: {offenders}"
 

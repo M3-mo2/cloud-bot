@@ -14,8 +14,10 @@ from aiogram import BaseMiddleware
 from aiogram.types import CallbackQuery, TelegramObject
 
 from cloudbot.core.config import Settings
+from cloudbot.core.locale import DEFAULT_LOCALE
 from cloudbot.core.modes import throttle_enabled, throttle_relaxed
 from cloudbot.middleware.context import UserContext
+from cloudbot.presentation.i18n.catalog import catalog
 
 log = structlog.get_logger("cloudbot.throttle")
 
@@ -49,7 +51,12 @@ class ThrottleMiddleware(BaseMiddleware):
             return await handler(event, data)
         if not self._allow(ctx.tg_id):
             if isinstance(event, CallbackQuery):
-                await event.answer("You're going a bit fast — one moment.", show_alert=False)
+                # The one user-facing line in this edge module; like every other
+                # string it comes from the catalog.
+                await event.answer(
+                    catalog.t("common.too_fast", ctx.locale if ctx else DEFAULT_LOCALE),
+                    show_alert=False,
+                )
             log.info("throttle.refused", tg_id=ctx.tg_id)
             return None
         return await handler(event, data)

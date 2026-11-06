@@ -54,14 +54,10 @@ def _callbacks(screen) -> list[str]:
 
 
 def _table_columns(html: str) -> int:
-    """The widest table row, counted exactly as it renders (headers included)."""
-    widest = 0
-    for table in html.split("<table")[1:]:
-        head = table.split("</table>")[0]
-        for tr in head.split("<tr>")[1:]:
-            tr = tr.split("</tr>")[0]
-            widest = max(widest, tr.count("<th") + tr.count("<td"))
-    return widest
+    """The widest table row (the doctor's one implementation)."""
+    from cloudbot.devtools import screens as screen_tools
+
+    return screen_tools.table_columns(html)
 
 
 # -- 1. the catalog-wide duplicate-destination guard --------------------------
@@ -73,15 +69,13 @@ def test_no_screen_offers_two_buttons_on_the_same_destination(locale):
     in both locales, and fails on any keyboard that names one callback twice.
     Disabled entries count too — a muted duplicate is still a duplicate.
     """
+    from cloudbot.devtools import screens as screen_tools
+
     CallbackCodec()
     offenders = []
     for name in sorted(screen_catalog.SCREEN_BUILDERS):
         screen = screen_catalog.build(name, locale)
-        duplicates = [
-            action
-            for action, count in Counter(_callbacks(screen)).items()
-            if count > 1
-        ]
+        duplicates = screen_tools.duplicate_destinations(screen)
         if duplicates:
             offenders.append((name, duplicates))
     assert not offenders, f"screens with duplicate destinations: {offenders}"

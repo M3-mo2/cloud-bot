@@ -122,6 +122,9 @@ async def _dispatch(cb, ctx, settings, sender, parsed, uid: int) -> None:
     elif action == "run":
         section = None if parsed.args == ("catalog",) else parsed.args[1]
         await _run(cb, ctx, settings, sender, section)
+    elif action == "doctor":
+        page = int(parsed.args[0]) if parsed.args else 0
+        await _doctor(cb, ctx, sender, page)
     else:
         await show_screen(cb, _sections(ctx), ctx=ctx, sender=sender)
 
@@ -184,3 +187,19 @@ async def _run(cb, ctx, settings, sender, section: str | None) -> None:
     finally:
         await sandbox.aclose()
     await show_screen(cb, dev_screens.report_screen(report, ctx.locale, scope=scope), ctx=ctx, sender=sender)
+
+async def _doctor(cb, ctx, sender, page: int) -> None:
+    """Run the architecture doctor and render its findings, grouped by severity.
+
+    Reuses the same job mechanism as *run all checks*: the work runs off the event
+    loop and the result is one of the tool's own pure screens. It never imports a
+    bot or engine — the doctor reads the tree and the screen catalogue only.
+    """
+    import asyncio
+
+    from cloudbot.devtools import doctor as doctor_mod
+
+    findings = await asyncio.to_thread(lambda: doctor_mod.run().findings)
+    await show_screen(
+        cb, dev_screens.doctor_screen(findings, ctx.locale, page=page), ctx=ctx, sender=sender
+    )

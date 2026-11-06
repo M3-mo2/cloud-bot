@@ -194,30 +194,13 @@ def test_every_destination_wears_one_static_label(locale):
     callback, and the user should read the affordance, not the destination. What
     remains on a destination must be a single name.
     """
-    from cloudbot.presentation.i18n.catalog import catalog
+    from cloudbot.devtools import screens as screen_tools
 
     CallbackCodec()
-    static = _static_labels(locale)
-    exceptions = {
-        catalog.t(key, locale) for key in nav.NAV_LABEL_EXCEPTIONS
-    }
-    names: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
-    for name in sorted(screen_catalog.SCREEN_BUILDERS):
-        screen = screen_catalog.build(name, locale)
-        for button in _buttons(screen):
-            action = getattr(button, "callback_data", None)
-            if action is None or button.text not in static:
-                continue
-            if button.text in exceptions:
-                continue
-            names[action][button.text].add(name)
-
-    offenders = {
-        action: {text: sorted(screens) for text, screens in texts.items()}
-        for action, texts in names.items()
-        if len(texts) > 1
-    }
+    # The catalogue-wide rule has one implementation (``devtools.screens``), shared
+    # with the architecture doctor so the test and the tool cannot drift.
+    offenders = screen_tools.label_conflicts(sorted(screen_catalog.SCREEN_BUILDERS), locale)
     assert not offenders, (
         f"{locale.value}: destinations wearing several static labels "
-        f"(callback, labels, screens): {offenders}"
+        f"(callback, labels): {offenders}"
     )

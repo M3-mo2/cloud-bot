@@ -66,7 +66,6 @@ def wallet_screen(
                 "wallet.status.trialing",
                 locale,
                 plan=plan,
-                days=_num(status.days_left, locale),
             )
         else:
             plan_line = catalog.t(
