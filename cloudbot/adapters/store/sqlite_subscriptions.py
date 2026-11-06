@@ -9,7 +9,8 @@ connection, so an ``asyncio.Lock`` serialises the transactions in-process and a
 Idempotency is a caller-supplied key. It is stored on the ledger row and on the
 subscription-event row; the partial unique indexes reject a replay, and the store
 checks the key before doing anything, so ``successful_payment`` arriving twice
-credits (or purchases) once.
+credits (or purchases) once. Keys are global, so a caller should namespace them
+(e.g. ``wallet:{tg_id}:{charge_id}``) to keep two users' charge ids apart.
 
 The balance is never stored: it is ``SUM(amount)`` over the ledger, so it cannot
 drift from its own history.

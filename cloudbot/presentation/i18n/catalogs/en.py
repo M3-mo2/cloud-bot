@@ -31,6 +31,12 @@ MESSAGES: dict[str, str] = {
     "language.name.en": "English",
     "language.name.ar": "العربية",
     "plan.free": "Free",
+    # Derived from the subscription (domain.subscription). One per plan code.
+    "plan.trial": "Trial",
+    "plan.week": "Weekly",
+    "plan.month": "Monthly",
+    "plan.year": "Yearly",
+    "plan.expired": "Expired",
 
     # -- onboarding / language ----------------------------------------------
     "lang.title": "🌐 Choose your language",

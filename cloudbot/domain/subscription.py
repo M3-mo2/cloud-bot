@@ -129,8 +129,10 @@ def extend(
     """
     if days <= 0:
         raise ValueError("days must be positive")
-    started_at = now
-    base = subscription.expires_at if subscription and now < subscription.expires_at else now
+    extended_active = subscription is not None and now < subscription.expires_at
+    # A renewal keeps the original start; a fresh/expired one starts now.
+    started_at = subscription.started_at if extended_active else now
+    base = subscription.expires_at if extended_active else now
     return Subscription(
         tg_id=tg_id,
         plan_code=plan_code,

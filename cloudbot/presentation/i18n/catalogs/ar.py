@@ -31,6 +31,11 @@ MESSAGES: dict[str, str] = {
     "language.name.en": "English",
     "language.name.ar": "العربية",
     "plan.free": "مجانية",
+    "plan.trial": "تجريبية",
+    "plan.week": "أسبوعية",
+    "plan.month": "شهرية",
+    "plan.year": "سنوية",
+    "plan.expired": "منتهية",
 
     # -- onboarding / language ----------------------------------------------
     "lang.title": "🌐 Choose your language",
