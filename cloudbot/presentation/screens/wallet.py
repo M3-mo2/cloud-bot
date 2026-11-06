@@ -28,7 +28,7 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
-from cloudbot.presentation.rich.tags import Html, bold, code, fragment, italic
+from cloudbot.presentation.rich.tags import Html, code, fragment, italic
 from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
 

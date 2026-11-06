@@ -54,7 +54,6 @@ MESSAGES: dict[str, str] = {
     "wallet.buy_stars": "⭐ Buy Stars",
     "wallet.buy_plan": "📦 Plans",
     "wallet.refresh": "🔄 Refresh",
-    "wallet.renew": "🔄 Renew now",
     "wallet.back": "⬅️ Back",
     "wallet.plans.title": "📦 Choose a plan",
     "wallet.plan.col.plan": "Plan",
@@ -88,7 +87,6 @@ MESSAGES: dict[str, str] = {
     "pay.nothing_to_refund": "No refundable payment exists with that id.",
     "pay.refunded": "Refunded {stars} Stars and took them off the balance.",
     "pay.refund_already": "That payment was already refunded.",
-    "pay.bad_amount": "Send a positive whole number.",
 
     # -- onboarding / language ----------------------------------------------
     "lang.title": "🌐 Choose your language",

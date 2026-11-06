@@ -543,3 +543,30 @@ async def test_a_locked_workspace_renew_opens_the_plan_picker():
         assert "pay:buy:week" in actions
     finally:
         await container.aclose()
+
+# -- enforcement: the plan sets the ceiling a workspace may ASK for ---------
+async def test_the_plan_sets_the_request_ceiling_not_the_enforced_default():
+    from cloudbot.core.errors import InvalidInput
+    from cloudbot.domain.value_objects import Limits
+
+    container = await _container()
+    try:
+        await container.services.admin.credit(USER, 50, "test", actor=ADMIN)
+        await container.services.billing.buy_plan(USER, "week")
+        meta = await container.services.workspaces.meta()
+        ceiling = await container.services.workspaces.plan_maxima(USER, meta.limits_maxima)
+        # The week plan's allowance, capped by the engine.
+        assert ceiling.cpu_cores == 1.0
+        assert ceiling.memory_mb == 512
+        assert ceiling.disk_mb == 1024
+        # Asking above the plan's ceiling is refused before the engine is called.
+        with pytest.raises(InvalidInput):
+            await container.services.workspaces.create(
+                USER, "too-big", limits=Limits(cpu_cores=2.0)
+            )
+        # Naming nothing still gets the engine's default — limits stay what the
+        # engine enforces; the plan only bounds what may be requested.
+        ws = await container.services.workspaces.create(USER, "fits")
+        assert ws.limits.cpu_cores == meta.limits_defaults.cpu_cores
+    finally:
+        await container.aclose()

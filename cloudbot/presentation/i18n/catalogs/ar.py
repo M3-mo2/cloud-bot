@@ -53,7 +53,6 @@ MESSAGES: dict[str, str] = {
     "wallet.buy_stars": "⭐ شراء نجوم",
     "wallet.buy_plan": "📦 الخطط",
     "wallet.refresh": "🔄 تحديث",
-    "wallet.renew": "🔄 تجديد الآن",
     "wallet.back": "⬅️ رجوع",
     "wallet.plans.title": "📦 اختر خطة",
     "wallet.plan.col.plan": "الخطة",
@@ -87,7 +86,6 @@ MESSAGES: dict[str, str] = {
     "pay.nothing_to_refund": "لا توجد دفعة قابلة للاسترداد بهذا المعرّف.",
     "pay.refunded": "تم استرداد {stars} نجمة وخصمها من الرصيد.",
     "pay.refund_already": "هذه الدفعة استُردت من قبل.",
-    "pay.bad_amount": "أرسل عددًا صحيحًا موجبًا.",
 
     # -- onboarding / language ----------------------------------------------
     "lang.title": "🌐 Choose your language",

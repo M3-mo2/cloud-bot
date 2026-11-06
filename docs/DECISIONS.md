@@ -872,3 +872,45 @@ and `menu.plan_line` are new in both catalogs. `welcome.start` now reuses the Ne
 `ws.open` loses its `📦` prefix (the button lives inside a list, next to the `📦 My workspaces` destination,
 so a second package icon was noise). Goldens for `menu*`, the nav-block keyboards (`help*`, `settings*`,
 `language_picker*`, `ws_list*`, `ws_detail*`) and the four `err_*` screens changed.
+
+---
+
+## CB-38 — Telegram Stars: one-off packs and plan purchases, not recurring
+
+**Measured facts (aiogram 3.31.0, introspected).** `Bot.send_invoice` exists and accepts
+`provider_token=""` for digital goods; `Bot.answer_pre_checkout_query` and `Bot.refund_star_payment`
+exist. `Bot.create_invoice_link` **does** expose `subscription_period` (and `SuccessfulPayment`
+carries `subscription_expiration_date`, `is_recurring`, `is_first_recurring`). Neither
+`send_invoice` nor the Bot API's one-off flow carries a period — recurring is only reachable through
+an invoice **link**, not the inline `sendInvoice` this bot uses.
+
+**Decision.** The bot sells a **one-off Stars top-up** (a pack, credited to the wallet) and a
+**one-off plan purchase** from that balance. It does **not** use recurring Stars billing.
+
+**Why.** (a) Recurring requires an invoice link, which loses the inline flow and the natural
+"two taps from the wallet" path. (b) A subscription whose *enforcement* is ours (locked workspaces,
+no data deletion) does not need Telegram to keep charging — and a surprise recurring charge is the
+worst support case in a product he will show people. (c) A plan bought from a balance the user already
+holds is refundable and auditable in one ledger; recurring Stars would charge outside that ledger.
+Renewal is deliberate and visible: the wallet says the days left, the locked workspace points at the
+picker, and the plan picker is one tap away.
+
+**Payment contract wired.** The payload is `stars:<tg_id>:<pack_code>` — **no amount**. The catalogue
+(`domain/billing.py`) is the price: `pre_checkout_query` approves only when the payload is ours, the
+buyer matches, and `total_amount == pack.stars`; otherwise it answers `ok=False` with a catalog
+sentence (Telegram shows it). Only `successful_payment` credits, keyed by
+`telegram_payment_charge_id` on both the payment row and the ledger movement, so a re-delivery is a
+no-op with the same receipt. The charge id is stored for refunds; an admin refund calls
+`refundStarPayment` first and then appends a `reversal` ledger row, also keyed, so a retry does not
+reverse twice. `/paysupport` is implemented.
+
+**Enforcement wired (reported honestly).** The engine's rule is `limits` = enforced,
+`max_limits` = the most a request may ask for. The plan sets **the ceiling a user may request**
+(`WorkspacesService.plan_maxima`, capped by `limits_maxima`); a create that names no limits still sends
+none, so the engine's `limits_defaults` remain what is enforced. That keeps part 1's derived-lock model
+and the trial's behaviour unchanged, and it is what the new test pins.
+
+**Consequences.** New migration `0006_stars_payments.sql`; new `wallet` admin section and `adm:wallet*`
+callbacks; the nav block gained one destination (`pay:wallet`), so the menu board is one row taller
+(still two columns, and the nav block is three rows); goldens for `menu*`, the nav keyboards,
+`dev_sections` and the new `wallet*` screens were regenerated.
