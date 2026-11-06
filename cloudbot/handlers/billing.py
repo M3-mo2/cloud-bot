@@ -64,6 +64,18 @@ async def open_wallet(
     view = await _view(services, ctx.tg_id, ctx.locale, banner=banner)
     await show_screen(event, wallet_screens.wallet_screen(view), ctx=ctx, sender=sender)
 
+async def open_plans(
+    event, ctx: UserContext, services: Services, sender: RichSender, *, needed_plan=None
+) -> None:
+    """The plan picker — the renewal route a locked workspace points at."""
+    view = await _view(services, ctx.tg_id, ctx.locale)
+    await show_screen(
+        event,
+        wallet_screens.plan_picker_screen(view, needed_plan=needed_plan),
+        ctx=ctx,
+        sender=sender,
+    )
+
 @router.callback_query(F.data == "pay:wallet")
 async def on_wallet(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     await open_wallet(cb, ctx, services, sender)
@@ -213,4 +225,4 @@ async def on_paysupport(message: Message, ctx: UserContext, sender: RichSender) 
 def _num(value: int, locale: Locale) -> str:
     return localize_digits(str(value), locale)
 
-__all__ = ["open_wallet", "router"]
+__all__ = ["open_plans", "open_wallet", "router"]

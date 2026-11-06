@@ -525,3 +525,21 @@ def _text(dispatcher, bot, uid: int, user_id: int, text: str):
             ),
         ),
     )
+
+async def test_a_locked_workspace_renew_opens_the_plan_picker():
+    container = await _container()
+    bot = RecordingBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        ws = await container.services.workspaces.create(USER, "mine")
+        # If the plan is active the workspace is active; a revocation locks it.
+        await container.services.billing._subscriptions.revoke(USER, actor=ADMIN, reason="test")
+        await dispatcher.feed_update(bot, _callback(1, USER, f"ws:renew:{ws.id}"))
+        html = bot.sent[-1]
+        assert "Choose a plan" in html
+        actions = {
+            b.callback_data for row in bot.markups[-1].inline_keyboard for b in row
+        }
+        assert "pay:buy:week" in actions
+    finally:
+        await container.aclose()

@@ -341,13 +341,16 @@ async def on_resume(cb: CallbackQuery, ctx: UserContext, services: Services, sen
 
 @router.callback_query(F.data.startswith("ws:renew"))
 async def on_renew(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    from cloudbot.core.errors import EngineRefused
-    from cloudbot.presentation.mapping.errors import error_screen
+    """Renew: a locked workspace's explicit route to the plan picker.
 
-    await cb.answer(catalog.t("ws.renew", ctx.locale))
-    ws_id = decode_required(cb.data, 1).key[0]
-    ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
-    await show_screen(cb, ws_screens.workspace_detail(ws, ctx.locale), ctx=ctx, sender=sender)
+    The button carried the workspace id, but the fix is an account action — buying
+    a plan — so the user lands on the plan picker, not on another locked screen.
+    """
+    from cloudbot.handlers import billing
+
+    decode_required(cb.data, 1)
+    await cb.answer()
+    await billing.open_plans(cb, ctx, services, sender)
 
 
 def _wid(text: str):
