@@ -55,9 +55,9 @@ pages, the button is omitted.
 **The nav block depends on whether the user is inside a workspace.** Two task-14
 rules shape it here. **R1 — a nav entry never points at the screen you are already
 on: its own destination is omitted, not muted.** So the list does not carry
-`📦 Workspaces` (`ws:list`): that is this screen, and its label and icon are
+`📦 My workspaces` (`ws:list`): that is this screen, and its label and icon are
 almost identical to the screen's own title `📦 مساحاتي` (the "two buttons named
-مساحة/مساحاتي" that was reported). **R2 — the list also drops `🏠 Menu`**
+مساحة/مساحاتي" that was reported). **R2 — the list also drops `☰ Menu`**
 (`nav:menu`): the menu's body is the same workspace table, so for a user who owns
 workspaces it is a second route to the list itself. Outside a session the block
 is therefore exactly the three account destinations that are *not* this screen:
@@ -68,7 +68,7 @@ is therefore exactly the three account destinations that are *not* this screen:
 ```
 
 When the list is shown *inside* a session the block is the session's (§2.5.2, and
-R1 again): `📦 Workspaces` is this screen, so only `🏠 <workspace>` remains.
+R1 again): `📦 My workspaces` is this screen, so only `🏠 <workspace>` remains.
 
 ### 1.4 Empty state
 
@@ -88,7 +88,7 @@ Arabic (`is_rtl=True`):
 <p>مساحة العمل هي بيئتك الخاصة المعزولة التي تشغّل فيها الأكواد بأمان.</p>
 ```
 
-Keyboard: **➕ New Workspace** (inline, success), **🏠 Menu** (inline, primary).
+Keyboard: **➕ New Workspace** (inline, success), **☰ Menu** (inline, primary).
 
 ---
 
@@ -189,17 +189,17 @@ remains is by intent:
   `leave` and returns to the list with an acknowledgement. It is present in
   **every** status branch, because being unable to leave a suspended or locked
   workspace would be a trap. It never uses `DANGER` (leaving harms nothing).
-* **`📦 Workspaces`** in the shared nav block (`ws:list`) *browses/switches* to
+* **`📦 My workspaces`** in the shared nav block (`ws:list`) *browses/switches* to
   another workspace **without** leaving the session first.
 
 The two labels already read differently (`ws.logout` "تسجيل الخروج من مساحة العمل /
-Log out of workspace" vs `menu.workspaces` "📦 المساحات / 📦 Workspaces"), so no
+Log out of workspace" vs `menu.workspaces` "📦 مساحاتي / 📦 My workspaces"), so no
 new wording is needed. The nav block sits **last** (below the destructive row),
 following the shared bottom-placement rule (§0 of `01-language-and-menu.md`) and
 its ≤2-columns, ≤3-rows limit.
 
 > **Only the workspace home changes.** Every *inner* screen — a file browser, a
-> run history, a settings form, a confirm — keeps its own `⬅️ رجوع`/`🏠 القائمة`;
+> run history, a settings form, a confirm — keeps its own `⬅️ رجوع`/`☰ القائمة`;
 > those are not duplicating anything and are deliberately untouched.
 
 A banner line is added when locked:
@@ -223,11 +223,11 @@ the workspace list, help, settings and the language picker — the shared block 
 | Label (AR) | Label (EN) | Callback | Notes |
 | --- | --- | --- | --- |
 | 🏠 demo | 🏠 demo | `ws:home` | the workspace home; **omitted** on the home itself (R1/R5) |
-| 📦 المساحات | 📦 Workspaces | `ws:list` | browse / **switch** to another workspace; omitted on the list itself (R1) |
+| 📦 مساحاتي | 📦 My workspaces | `ws:list` | browse / **switch** to another workspace; omitted on the list itself (R1) |
 
 So on any inside screen that is *not* the workspace home or the list the block is
-the two entries `🏠 demo` + `📦 المساحات`; on the workspace home itself only
-`📦 المساحات` remains (you are already home); and on the inside list only `🏠 demo`
+the two entries `🏠 demo` + `📦 مساحاتي`; on the workspace home itself only
+`📦 مساحاتي` remains (you are already home); and on the inside list only `🏠 demo`
 remains (you are already on the list).
 
 The **account destinations — Settings, Language, Help and Menu — are removed
@@ -492,5 +492,5 @@ Result:
 | Detail | Stop All | confirm → active detail + counts |
 | Detail | Delete | confirm → list |
 | Detail | Log out of workspace | leaves the session → list (with an acknowledgement) |
-| Detail | 📦 Workspaces (nav block) | list, staying inside the session |
+| Detail | 📦 My workspaces (nav block) | list, staying inside the session |
 | Any | Back | previous screen (inline edit; inner screens only — the home has no Back row) |

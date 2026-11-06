@@ -112,18 +112,18 @@ destinations that are not this screen:
 A screen such as Help therefore renders its destinations minus itself:
 
 ```
-[ 📦 المساحات ] [ ⚙️ الإعدادات ]
-[ 🌐 اللغة ]     [ 🏠 القائمة ]
+[ 📦 مساحاتي ] [ ⚙️ الإعدادات ]
+[ 🌐 اللغة ]     [ ☰ القائمة ]
 ```
 
 **Inside a workspace** (task 13) — the block is the *session's*, **not the
 account's**: up to two entries, the workspace home (`ws:home`) and Workspaces
 (`ws:list`, to switch), on one row. R1/R5 also apply here: **on the workspace home
-itself `ws:home` is omitted** (you are already there), leaving just `📦 المساحات`.
+itself `ws:home` is omitted** (you are already there), leaving just `📦 مساحاتي`.
 
 ```
-[ 🏠 demo ] [ 📦 المساحات ]        ← on any inside screen except the home
-[ 📦 المساحات ]                    ← on the workspace home itself
+[ 🏠 demo ] [ 📦 مساحاتي ]        ← on any inside screen except the home
+[ 📦 مساحاتي ]                    ← on the workspace home itself
 ```
 
 The **account destinations — Settings, Language, Help and Menu — are removed
@@ -301,7 +301,7 @@ Action namespaces:
 | Screen element | Type | Intent | Flags |
 | --- | --- | --- | --- |
 | Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one **omitted** (R1); Menu also omitted on the list (R2); **not inside** only |
-| Session nav (🏠 home / 📦 Workspaces) | inline | primary | current one **omitted** (R1/R5); **inside** only, up to two entries |
+| Session nav (🏠 home / 📦 My workspaces) | inline | primary | current one **omitted** (R1/R5); **inside** only, up to two entries |
 | Back (inner screens) | inline | primary | — |
 | Open workspace | inline | primary | — |
 | Create workspace | inline | success | — |

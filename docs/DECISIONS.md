@@ -831,3 +831,44 @@ is the normal case, not the corner.
 `run.clear_output`, `admin.users.col.locale` and `admin.users.col.workspaces` are removed. The goldens for
 `run_history`, `terminal_list`, `admin_users`, `admin_audit`, `help`, `help_inside`, `file_browser*` and
 `dev_sections` changed accordingly.
+
+---
+
+## CB-37 — The main board leads with workspaces, and one destination wears one label
+
+**Decision.** The main menu's body and keyboard were rebuilt around the order a user's attention moves:
+
+1. **The body is one compact line per workspace, not a table.** The old board rendered a four-column grid
+   (`مساحة العمل · الحالة · التشغيلات · القرص`) — the same shape already reduced on the workspace home and
+   the terminal list, because four columns do not fit a phone. A line now reads `**name** — state · one
+   number` (the active-run count, when there is one). The disk figure is dropped from the board: it is a
+   workspace *detail*, not a menu fact.
+2. **No silent truncation.** The old body sliced `[:5]` and said nothing, so a user with six workspaces
+   simply never learned about the sixth. The board still shows five lines (one phone screen), then says
+   `… and N more — See all N in My workspaces.`, which is a real destination (`ws:list`). A test pins both
+   the "and N more" copy and its absence at exactly five.
+3. **The subscription line is a seam, not an invented flow.** `main_menu(plan=…)` renders `Plan: <label>`
+   from the derived plan code; the wallet screens from `subs2` are not in the tree yet, so nothing passes it
+   today and no payment path is invented. When those screens land, this one argument becomes live.
+4. **The grid reads: what they came to do, then their own things, then the account.** `➕ New Workspace` is
+   full width on its own first row; `📦 My workspaces` and the account destinations follow, two per row.
+   The board never exceeds three rows.
+5. **One destination, one label, everywhere.** `ws:list` was `📦 المساحات` on some screens and `📦 مساحاتي`
+   on others; the error screens' `nav:menu` recovery button said `⬅️ Back` while the nav block said
+   `🏠 Menu`. Both are fixed: `ws:list` is always **📦 My workspaces / 📦 مساحاتي**, and `nav:menu` is
+   always **☰ Menu / ☰ القائمة**. The emoji also stopped lying: `🏠` means the *workspace* home
+   (`ws:home`), never the menu, and `▶️` is no longer shared by Start and Run — the welcome board's primary
+   action is the same **➕ New Workspace** as the menu's.
+
+   Two guards walk `SCREEN_BUILDERS` in both locales: no two buttons on the main board share a leading
+   emoji, and every shared destination callback carries exactly one label across the whole product.
+
+**Why.** He asked for better organisation and naming of the buttons themselves («ابدع بجد فيها»). The old
+board mixed account destinations with the workspace list, put `➕ مساحة جديدة` wherever the catalog happened
+to order it, and leaked internal names (`📦 المساحات`, `🎛 القائمة`) into the UI.
+
+**Consequences.** `menu.column.*` are removed; `menu.ws.running`, `menu.and_more`, `menu.workspaces_more`
+and `menu.plan_line` are new in both catalogs. `welcome.start` now reuses the New Workspace wording.
+`ws.open` loses its `📦` prefix (the button lives inside a list, next to the `📦 My workspaces` destination,
+so a second package icon was noise). Goldens for `menu*`, the nav-block keyboards (`help*`, `settings*`,
+`language_picker*`, `ws_list*`, `ws_detail*`) and the four `err_*` screens changed.

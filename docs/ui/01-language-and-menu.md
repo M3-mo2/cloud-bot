@@ -26,11 +26,11 @@ sit **full width above** it. No screen anywhere uses more than two columns.
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
 | 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
-| 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` — only where the screen is not the menu |
+| ☰ القائمة | ☰ Menu | inline | primary | `nav:menu` — only where the screen is not the menu |
 
 **A nav entry never points at the screen you are already on: the current
 destination is omitted, not muted (R1).** A disabled entry was the old answer; it
@@ -44,7 +44,7 @@ three remaining destinations).
 
 ```
 [ ➕ مساحة جديدة ]                         (success, full width — the screen's own action)
-[ 📦 المساحات ] [ ⚙️ الإعدادات ]
+[ 📦 مساحاتي ] [ ⚙️ الإعدادات ]
 [ 🌐 اللغة ]     [ ❓ مساعدة ]              ← the nav block, always last
 ```
 
@@ -100,36 +100,35 @@ snapshot, a full-width **New Workspace** action, and the shared inline nav block
 
 ### 2.1 English
 
+The body is **one compact line per workspace**, not a four-column table: the name,
+its state, and the one number that matters (running). A user with more than five
+workspaces is **never silently truncated** — the sixth and beyond are counted in
+a visible "and N more" line.
+
 ```html
 <h2>🤖 CloudBot</h2>
-<p>Hello, <b>@sara</b> 👋</p>
+<p>Hello, <b>sara</b> 👋</p>
 <hr>
-<p>You have <b>2 workspaces</b>.</p>
-<table is_bordered="true">
-  <tr><th>Workspace</th><th>Status</th><th>Runs</th><th>Disk</th></tr>
-  <tr><td><code>demo</code></td><td>Active</td><td>1 active</td><td>2.3 MB / 256 MB</td></tr>
-  <tr><td><code>scraper</code></td><td>Paused</td><td>—</td><td>12 MB / 512 MB</td></tr>
-</table>
-<p><i>Tap a workspace to open it, or create a new one.</i></p>
+<p>2 workspaces</p>
+<p><b>demo</b> — 🟢 Active · 1 running</p>
+<p><b>scraper</b> — 🟠 Paused</p>
+<p><i>Open My workspaces to enter one, or start a new one.</i></p>
 ```
 
 ### 2.2 Arabic (`is_rtl=True`)
 
 ```html
 <h2>🤖 CloudBot</h2>
-<p>مرحبًا، <b>@sara</b> 👋</p>
+<p>مرحبًا، sara 👋</p>
 <hr>
-<p>لديك <b>مساحتان</b>.</p>
-<table is_bordered="true">
-  <tr><th>المساحة</th><th>الحالة</th><th>التشغيلات</th><th>القرص</th></tr>
-  <tr><td><code>demo</code></td><td>نشِطة</td><td>١ نشِط</td><td>٢٫٣ ميغابايت / ٢٥٦ ميغابايت</td></tr>
-  <tr><td><code>scraper</code></td><td>متوقفة مؤقتًا</td><td>—</td><td>١٢ ميغابايت / ٥١٢ ميغابايت</td></tr>
-</table>
-<p><i>اضغط على مساحة لفتحها، أو أنشئ واحدة جديدة.</i></p>
+<p>مساحتان</p>
+<p><b>demo</b> — 🟢 نشِطة · ١ قيد التشغيل</p>
+<p><b>scraper</b> — 🟠 متوقفة مؤقتًا</p>
+<p><i>افتح «مساحاتي» للدخول إلى مساحة، أو ابدأ واحدة جديدة.</i></p>
 ```
 
-> Workspace names are user-supplied; they are placed in `<code>` and escaped, so
-> an RTL name inside the Arabic table cannot break the layout.
+> Workspace names are user-supplied; they are escaped, so an RTL name cannot
+> break the layout.
 
 ### 2.3 Menu keyboard
 
@@ -140,19 +139,20 @@ the distributed block.
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
 | ➕ مساحة جديدة | ➕ New Workspace | inline | success | `ws:new`, full width |
-| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
 | 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 
 ```
 [ ➕ مساحة جديدة ]
-[ 📦 المساحات ] [ ⚙️ الإعدادات ]
-[ 🌐 اللغة ]     [ ❓ مساعدة ]
+[ 📦 مساحاتي ] [ ⚙️ الإعدادات ]
+[ 🌐 اللغة ]   [ ❓ مساعدة ]
 ```
 
 There is no persistent reply menu. "My workspaces" is reachable as the
-**📦 Workspaces** destination in the nav block.
+**📦 My workspaces** destination in the nav block, and it wears that one name on
+every screen.
 
 With no workspaces, the menu is replaced by the **welcome board** (§2.5).
 
@@ -174,7 +174,7 @@ action.
 No laptop. No setup. No hassle.</p>
 <hr>
 <p>Ready to begin?</p>
-<p>Press <b>Start</b> and you're in.</p>
+<p>Tap <b>New Workspace</b> and you're in.</p>
 ```
 
 ### Arabic (`is_rtl=True`)
@@ -186,22 +186,22 @@ No laptop. No setup. No hassle.</p>
 بلا حاسوب، بلا إعدادات، بلا تعقيد.</p>
 <hr>
 <p>جاهز للبدء؟</p>
-<p>اضغط <b>ابدأ</b> وابدأ فورًا.</p>
+<p>اضغط <b>مساحة جديدة</b> وابدأ فورًا.</p>
 ```
 
 ### Keyboard
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| ▶️ ابدأ | ▶️ Start | inline | success | opens the create wizard (`ws:new`) |
-| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| ➕ مساحة جديدة | ➕ New Workspace | inline | success | opens the create wizard (`ws:new`) |
+| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
 | 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 
 The board deliberately avoids architecture jargon (no "isolated", "sandbox",
 "secure"): it speaks to what the user gets, not how the engine works. The inline
-Start button is kept (his `b606238` fix); the shared nav block follows it.
+New Workspace button is kept (his `b606238` fix); the shared nav block follows it.
 
 
 ---
@@ -306,10 +306,10 @@ Changing the language is the **Language** destination (`nav:language`), and
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
 | 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
-| 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` |
+| ☰ القائمة | ☰ Menu | inline | primary | `nav:menu` |
 
 ---
 
@@ -326,10 +326,10 @@ the language *choice*, not a nav destination), and the shared inline nav block
 | --- | --- | --- | --- | --- |
 | العربية | — | inline | primary | `lang:ar` |
 | — | ✓ English | inline | primary | `lang:en`, **disabled** |
-| 📦 المساحات | 📦 Workspaces | inline | primary | `ws:list` |
+| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
-| 🏠 القائمة | 🏠 Menu | inline | primary | `nav:menu` |
+| ☰ القائمة | ☰ Menu | inline | primary | `nav:menu` |
 
 Switching language edits the current message into the menu in the new locale.
 
