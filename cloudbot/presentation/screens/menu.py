@@ -5,7 +5,7 @@ from __future__ import annotations
 from cloudbot.core.locale import LOCALE_LABELS, Locale
 from cloudbot.domain.entities import Workspace
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.i18n.formatters import format_count, localize_digits
+from cloudbot.presentation.i18n.formatters import format_count
 from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
