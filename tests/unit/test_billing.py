@@ -45,6 +45,7 @@ class RecordingBot:
         self.refunds: list[dict] = []
         self.deleted: list[int] = []
         self.markups: list = []
+        self.refund_raises: Exception | None = None
 
     async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
         self.sent.append(rich_message.html)
@@ -71,6 +72,8 @@ class RecordingBot:
         return True
 
     async def refund_star_payment(self, user_id, telegram_payment_charge_id):
+        if self.refund_raises is not None:
+            raise self.refund_raises
         self.refunds.append({"user_id": user_id, "charge_id": telegram_payment_charge_id})
         return True
 
@@ -568,5 +571,28 @@ async def test_the_plan_sets_the_request_ceiling_not_the_enforced_default():
         # engine enforces; the plan only bounds what may be requested.
         ws = await container.services.workspaces.create(USER, "fits")
         assert ws.limits.cpu_cores == meta.limits_defaults.cpu_cores
+    finally:
+        await container.aclose()
+
+async def test_a_refund_telegram_refuses_leaves_the_books_untouched():
+    container = await _container()
+    bot = RecordingBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        payload = encode_payload(USER, "stars_50")
+        await dispatcher.feed_update(
+            bot, _payment_message(1, USER, payload=payload, amount=50, charge_id="ch_refuse")
+        )
+        bot.refund_raises = RuntimeError("telegram said no")
+        await dispatcher.feed_update(bot, _callback(2, ADMIN, f"adm:wop:refund:{USER}:ask"))
+        await _text(dispatcher, bot, 3, ADMIN, "ch_refuse")
+        # Telegram refused: the payment stays refundable, no reversal row, and
+        # the balance is unchanged (the ledger still matches Telegram).
+        payment = await container.subscriptions.payment("ch_refuse")
+        assert payment is not None and payment.refundable
+        wallet = await container.subscriptions.wallet(USER)
+        assert wallet.balance_stars == 50
+        assert all(m.kind != "reversal" for m in wallet.ledger)
+        assert "refused" in bot.sent[-1].lower()
     finally:
         await container.aclose()

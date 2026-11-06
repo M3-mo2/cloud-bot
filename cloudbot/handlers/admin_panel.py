@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+import structlog
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -49,6 +50,8 @@ from cloudbot.services.events import RequestEvents
 from cloudbot.states.admin_input import AdminInput
 
 router = Router(name="admin_panel")
+
+log = structlog.get_logger("cloudbot.admin_panel")
 
 PAGE_SIZE = 10
 
