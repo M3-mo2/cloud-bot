@@ -219,8 +219,12 @@ def _result_doc(
     )
 
     # A skipped entry is not a failure; a rejected one is. Refused entries get
-    # their own stable sentence, never a raw engine string.
-    refused = [e for e in result.entries if e.rejected]
+    # their own stable sentence, never a raw engine string. On the paginated
+    # result screen this list follows the page too, so no bullet list can grow
+    # past the window either.
+    refused = [
+        e for e in (page_entries if paginated else result.entries) if e.rejected
+    ]
     if refused:
         doc.p(_raw(f"<b>{catalog.t('archive.rejected_header', locale)}</b>"))
         for entry in refused[:MAX_ENTRIES_SHOWN]:
