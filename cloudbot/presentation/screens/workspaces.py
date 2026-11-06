@@ -117,11 +117,41 @@ def workspace_detail(
     confirmation: str | None = None,
     mode: RunMode = RunMode.PRODUCTION,
     session: bool = True,
+    more: bool = False,
 ) -> Screen:
+    """The workspace home: it leads with *state*, not with a specification sheet.
+
+    Opening a workspace should answer three questions in order — which workspace is
+    this, what state is it in, what can I do here — and then stop. The full
+    specification (runtime, profile, CPU, memory, disk, run counters, timestamps,
+    identifier) is genuine information that is simply not what the screen is *for*,
+    so it sits behind a collapsed ``<details>`` block: one tap away, and out of the
+    way of the visits that do not need it.
+
+    ``more`` reveals the secondary tool destinations in the keyboard; the body never
+    depends on it, so the screen reads the same however the user reached it.
+    """
+
     doc = RichDoc(locale)
     doc.h(2, f"📦 {ws.name}")
     label_key, _emoji = display_state(ws.status, ws.summary.state)
     doc.p(_raw(f"<b>{catalog.t('ws.detail.status', locale)}</b> {catalog.t(label_key, locale)}"))
+
+    # Transient, actionable state first: a locked plan, a run already going. These
+    # change what the user can do, so they belong above any reference material.
+    if ws.status is WorkspaceStatus.LOCKED:
+        doc.blockquote(fragment(catalog.t("ws.locked_banner", locale).replace("\n", " ")))
+    if active_run:
+        doc.p(italic(catalog.t("ws.run_active_caption", locale)))
+    if session:
+        doc.p(italic(catalog.t("ws.session.inside", locale)))
+    if confirmation:
+        doc.blockquote(_raw(confirmation))
+
+    if now is None:
+        from datetime import timezone
+
+        now = datetime.now(timezone.utc)
 
     cpu = ws.limits.cpu_cores
     cpu_line = (
@@ -129,61 +159,78 @@ def workspace_detail(
         if cpu == 1
         else catalog.t("ws.cpu.cores_plural", locale, n=_num(int(cpu), locale))
     )
-    if now is None:
-        from datetime import timezone
-
-        now = datetime.now(timezone.utc)
     disk = format_bytes_pair(
         ws.summary.disk_used_bytes,
         ws.summary.disk_limit_bytes,
         locale,
         percent=_disk_percent(ws),
     )
-    doc.kv_table(
-        [
-            (catalog.t("ws.detail.runtime", locale), "python3"),
-            (catalog.t("ws.detail.profile", locale), ws.profile),
-            (catalog.t("ws.detail.cpu", locale), _raw(cpu_line)),
-            (catalog.t("ws.detail.memory", locale), format_bytes(ws.limits.memory_mb * 1024 * 1024, locale)),
-            (catalog.t("ws.detail.disk", locale), disk),
-            (
-                catalog.t("ws.detail.runs", locale),
-                catalog.t(
-                    "ws.detail.runs_line",
-                    locale,
-                    total=_num(ws.summary.runs_total, locale),
-                    active=_num(ws.summary.runs_active, locale),
-                ),
+
+    # Reference material, collapsed. Built as one raw fragment because ``kv_table``
+    # appends to the document rather than producing a value to nest inside a block.
+    rows = [
+        (catalog.t("ws.detail.runtime", locale), "python3"),
+        (catalog.t("ws.detail.profile", locale), ws.profile),
+        (catalog.t("ws.detail.cpu", locale), _raw(cpu_line)),
+        (catalog.t("ws.detail.memory", locale), format_bytes(ws.limits.memory_mb * 1024 * 1024, locale)),
+        (catalog.t("ws.detail.disk", locale), disk),
+        (
+            catalog.t("ws.detail.runs", locale),
+            catalog.t(
+                "ws.detail.runs_line",
+                locale,
+                total=_num(ws.summary.runs_total, locale),
+                active=_num(ws.summary.runs_active, locale),
             ),
-            (catalog.t("ws.detail.last_activity", locale), format_relative(ws.last_activity_at, now, locale)),
-            (catalog.t("ws.detail.created", locale), format_datetime(ws.created_at, locale)),
-        ]
-    )
-
-    if ws.status is WorkspaceStatus.LOCKED:
-        doc.blockquote(fragment(catalog.t("ws.locked_banner", locale).replace("\n", " ")))
-    if active_run:
-        doc.p(italic(catalog.t("ws.run_active_caption", locale)))
-
+        ),
+        (catalog.t("ws.detail.last_activity", locale), format_relative(ws.last_activity_at, now, locale)),
+        (catalog.t("ws.detail.created", locale), format_datetime(ws.created_at, locale)),
+        (catalog.t("ws.detail.id", locale), _raw(f"<code>{ws.id}</code>")),
+    ]
+    body = "".join(str(_kv(k, v)) for k, v in rows)
     doc.div()
-    doc.p(_raw(f"<b>{catalog.t('ws.detail.id', locale)}</b> <code>{ws.id}</code>"))
-    if session:
-        doc.p(italic(catalog.t("ws.session.inside", locale)))
-    if confirmation:
-        doc.blockquote(_raw(confirmation))
+    doc.raw(
+        f'<details><summary>{catalog.t("ws.detail.tech", locale)}</summary>'
+        f'<table is_bordered="true">{body}</table></details>'
+    )
 
     return Screen(
         doc=doc,
-        markup=workspace_detail_markup(ws, locale, active_run=active_run, session=session),
+        markup=workspace_detail_markup(ws, locale, active_run=active_run, session=session, more=more),
     )
 
 
+#: Tool destinations behind "More", in display order. Each is (label key, callback).
+#: These are the screens a user reaches less often than files/runs/terminals, so they
+#: are the ones worth collapsing rather than the ones worth deleting.
+_EXTRA_TOOLS: tuple[tuple[str, str], ...] = (
+    ("ws.packages", "pkg:list"),
+    ("ws.public_links", "tnl:list"),
+    ("ws.ports", "port:list"),
+    ("ws.processes", "proc:list"),
+    ("ws.metrics", "met:view"),
+    ("ws.archives", "arc:menu"),
+)
+
+
 def workspace_detail_markup(
-    ws: Workspace, locale: Locale, *, active_run: bool = False, session: bool = True
+    ws: Workspace,
+    locale: Locale,
+    *,
+    active_run: bool = False,
+    session: bool = True,
+    more: bool = False,
 ):
     ws_id = ws.id
     rows: list[list] = []
+
+    def _more_row(expanded: bool) -> list:
+        label = catalog.t("ws.less" if expanded else "ws.more", locale)
+        action = _cb("ws:less" if expanded else "ws:more", ws_id)
+        return [inline(label, action, intent=Intent.PRIMARY)]
+
     if ws.status is WorkspaceStatus.ACTIVE:
+        # What a user does on every visit: their files, and running something.
         rows.append(
             [
                 inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
@@ -201,28 +248,15 @@ def workspace_detail_markup(
                 inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
             ]
         )
-        rows.append(
-            [
-                inline(catalog.t("ws.packages", locale), _cb("pkg:list", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("ws.public_links", locale), _cb("tnl:list", ws_id), intent=Intent.PRIMARY),
+        if more:
+            extra = [
+                inline(catalog.t(key, locale), _cb(action, ws_id), intent=Intent.PRIMARY)
+                for key, action in _EXTRA_TOOLS
             ]
-        )
+            rows += [extra[i : i + 2] for i in range(0, len(extra), 2)]
+        rows.append(_more_row(more))
         rows.append(
-            [
-                inline(catalog.t("ws.ports", locale), _cb("port:list", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("ws.processes", locale), _cb("proc:list", ws_id), intent=Intent.PRIMARY),
-            ]
-        )
-        rows.append(
-            [
-                inline(catalog.t("ws.metrics", locale), _cb("met:view", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("ws.archives", locale), _cb("arc:menu", ws_id), intent=Intent.PRIMARY),
-            ]
-        )
-        rows.append(
-            [
-                inline(catalog.t("ws.suspend", locale), _cb("ws:suspend_confirm", ws_id), intent=Intent.PRIMARY),
-            ]
+            [inline(catalog.t("ws.suspend", locale), _cb("ws:suspend_confirm", ws_id), intent=Intent.PRIMARY)]
         )
     elif ws.status is WorkspaceStatus.SUSPENDED:
         rows.append(
@@ -231,10 +265,17 @@ def workspace_detail_markup(
                 inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
             ]
         )
+        # Deliberately present but disabled: "not now, resume first" is information.
+        # A user shown nothing here is left wondering why the screen looks different.
         rows.append(
             [
                 inline(catalog.t("ws.run", locale), _cb("run:choose", ws_id), intent=Intent.MUTED, disabled=True),
-                inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.MUTED, disabled=True),
+                inline(
+                    catalog.t("ws.terminals", locale),
+                    _cb("term:list", ws_id),
+                    intent=Intent.MUTED,
+                    disabled=True,
+                ),
             ]
         )
     elif ws.status is WorkspaceStatus.LOCKED:
@@ -244,12 +285,6 @@ def workspace_detail_markup(
                 inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
             ]
         )
-        rows.append(
-            [
-                inline(catalog.t("ws.run", locale), _cb("run:choose", ws_id), intent=Intent.MUTED, disabled=True),
-                inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.MUTED, disabled=True),
-            ]
-        )
     else:
         rows.append([inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)])
 
@@ -257,12 +292,17 @@ def workspace_detail_markup(
         rows.append(
             [inline(catalog.t("ws.logout", locale), _cb("ws:logout", ws_id), intent=Intent.PRIMARY)]
         )
-    rows.append(
-        [
-            inline(catalog.t("ws.stop_all", locale), _cb("ws:stop_confirm", ws_id), intent=Intent.DANGER),
-            inline(catalog.t("ws.delete", locale), _cb("ws:delete_confirm", ws_id), intent=Intent.DANGER),
-        ]
-    )
+
+    # Destructive actions last, after the exit, and never adjacent to a tool a user
+    # taps repeatedly.
+    if ws.status is WorkspaceStatus.ACTIVE:
+        rows.append(
+            [
+                inline(catalog.t("ws.stop_all", locale), _cb("ws:stop_confirm", ws_id), intent=Intent.DANGER),
+                inline(catalog.t("ws.delete", locale), _cb("ws:delete_confirm", ws_id), intent=Intent.DANGER),
+            ]
+        )
+
     # The workspace home has exactly one *exit* — the explicit log-out above — and
     # no redundant bottom "Back" row: leaving and going "back" to the list were the
     # same destination. Switching workspaces (without leaving the session first) is

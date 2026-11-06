@@ -1,5 +1,4 @@
 ▶️ استئناف [ws:resume:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled | 📁 الملفات [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK5:0] enabled
 ▶️ تشغيل [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK5] disabled | 🖥 الطرفيات [term:list:ws_01M6HJASCWM9Z1PF755GT89NK5] disabled
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled
-🛑 إيقاف الكل [ws:stop_confirm:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled | 🗑 حذف [ws:delete_confirm:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled
 📦 المساحات [ws:list] enabled

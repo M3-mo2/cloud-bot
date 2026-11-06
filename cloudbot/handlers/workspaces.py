@@ -72,6 +72,37 @@ async def on_home(cb: CallbackQuery, ctx: UserContext, services: Services, sende
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
+@router.callback_query(F.data.startswith("ws:more"))
+async def on_more(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """Reveal the workspace home's secondary tools.
+
+    These are the destinations a user reaches less often than files, runs and
+    terminals, so they start collapsed. Expanding is a re-render, not a navigation:
+    the screen the user is looking at stays the screen they are looking at.
+    """
+
+    decoded = decode_required(cb.data, 1)
+    ws_id = decoded.key[0]
+    ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
+    screen = ws_screens.workspace_detail(
+        ws, ctx.locale, active_run=ws.summary.runs_active > 0, mode=ctx.mode, more=True
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+
+@router.callback_query(F.data.startswith("ws:less"))
+async def on_less(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """Collapse the secondary tools again."""
+
+    decoded = decode_required(cb.data, 1)
+    ws_id = decoded.key[0]
+    ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
+    screen = ws_screens.workspace_detail(
+        ws, ctx.locale, active_run=ws.summary.runs_active > 0, mode=ctx.mode
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+
 @router.callback_query(F.data.startswith("ws:logout"))
 async def on_logout(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     """Leave the workspace and return to the chooser (the list)."""
