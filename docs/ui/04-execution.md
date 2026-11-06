@@ -329,8 +329,12 @@ While running:
 | --- | --- | --- | --- | --- |
 | ⏹ إيقاف | ⏹ Stop | inline | danger | confirm |
 | 🔄 تحديث | 🔄 Refresh | inline | primary | manual poll |
-| 🧹 مسح | 🧹 Clear output | inline | primary | — |
 | ⬅️ رجوع | ⬅️ Back | inline | primary | leaves stream running |
+
+> **No "Clear output" while running (screens-b).** The engine has no
+> log-truncation endpoint, so the old button re-read the same bytes and carried
+> the same callback as Refresh — a duplicate destination. It is removed; the
+> output clears when the run ends (or with the finished run's **Delete log**).
 
 When finished: **⏹ Stop** becomes **🔁 Run again** (primary) and
 **🗑 حذف السجل / 🗑 Delete log** (danger).
@@ -365,11 +369,12 @@ Keyboard: **⏹ إيقاف / ⏹ Stop** (danger), **✖️ إلغاء / ✖️ C
 <h2>📜 Runs</h2>
 <p>12 runs</p>
 <table is_bordered="true">
-  <tr><th>Run</th><th>Status</th><th>Command</th><th>When</th></tr>
-  <tr><td><code>run_…a1</code></td><td>✅ Finished</td><td><code>python3 main.py</code></td><td>2 min ago</td></tr>
-  <tr><td><code>run_…b2</code></td><td>🐌 Rate limited</td><td><code>dd if=/dev/zero …</code></td><td>1 h ago</td></tr>
-  <tr><td><code>run_…c3</code></td><td>⏱️ Timed out</td><td><code>python3 slow.py</code></td><td>3 h ago</td></tr>
+  <tr><th>Run</th><th>Status</th><th>When</th></tr>
+  <tr><td><code>run_…a1</code></td><td>✅ Finished</td><td>2 min ago</td></tr>
+  <tr><td><code>run_…b2</code></td><td>🐌 Rate limited</td><td>1 h ago</td></tr>
+  <tr><td><code>run_…c3</code></td><td>⏱️ Timed out</td><td>3 h ago</td></tr>
 </table>
+<p><i>Page 1 of 2</i></p>
 ```
 
 ### 5.2 Arabic (`is_rtl=True`)
@@ -378,26 +383,37 @@ Keyboard: **⏹ إيقاف / ⏹ Stop** (danger), **✖️ إلغاء / ✖️ C
 <h2>📜 التشغيلات</h2>
 <p>١٢ تشغيلًا</p>
 <table is_bordered="true">
-  <tr><th>التشغيل</th><th>الحالة</th><th>الأمر</th><th>الوقت</th></tr>
-  <tr><td><code>run_…a1</code></td><td>✅ انتهى بنجاح</td><td><code>python3 main.py</code></td><td>قبل دقيقتين</td></tr>
-  <tr><td><code>run_…b2</code></td><td>🐌 بلغ حد السرعة</td><td><code>dd if=/dev/zero …</code></td><td>قبل ساعة</td></tr>
-  <tr><td><code>run_…c3</code></td><td>⏱️ انتهت المهلة</td><td><code>python3 slow.py</code></td><td>قبل ٣ ساعات</td></tr>
+  <tr><th>التشغيل</th><th>الحالة</th><th>الوقت</th></tr>
+  <tr><td><code>run_…a1</code></td><td>✅ انتهى بنجاح</td><td>قبل دقيقتين</td></tr>
+  <tr><td><code>run_…b2</code></td><td>🐌 بلغ حد السرعة</td><td>قبل ساعة</td></tr>
+  <tr><td><code>run_…c3</code></td><td>⏱️ انتهت المهلة</td><td>قبل ٣ ساعات</td></tr>
 </table>
+<p><i>صفحة ١ من ٢</i></p>
 ```
+
+> **Three columns, not eight (screens-b).** The row is what a user scans — the
+> run's identity, its state, and when. The command, duration and exit code are
+> **not lost**: tapping a run opens its own screen (`run:logs`), where they are
+> shown. The history pages through the shared pager (`PAGE_SIZE`,
+> `⬅️ Previous`/`Next ➡️`, 「Page n of m」), and the active filter is carried
+> inline so a page turn keeps it.
 
 ### 5.3 History keyboard
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
+| 📜 run_…a1 | 📜 run_…a1 | inline | primary | opens that run (`run:logs`) |
 | 🔎 الكل | 🔎 All | inline | primary | filter |
 | ✅ انتهت | ✅ Finished | inline | primary | filter exited |
 | ❌ فشلت | ❌ Failed | inline | primary | filter failed/killed |
 | ⏳ النشطة | ⏳ Active | inline | primary | filter queued/running |
-| ➕ المزيد | ➕ More | inline | primary | next page |
+| ⬅️ السابق | ⬅️ Previous | inline | primary | previous page (no page 0) |
+| التالي ➡️ | Next ➡️ | inline | primary | next page (no past the last) |
 | 🗑 مسح السجل | 🗑 Purge history | inline | danger | confirm; refused if a run is live |
 | ⬅️ رجوع | ⬅️ Back | inline | primary | — |
 
-The active filter is shown as a **`disabled=True`** label on the current row.
+The active filter is **omitted** (R1 — it points at the screen you are already
+on), never a muted placeholder. Per-run buttons are two per row.
 
 ### 5.4 Purge — conflict
 
@@ -551,6 +567,14 @@ message.
 
 The list is one line per terminal (`id · status · relative age`), running first
 then newest, and paginated with the **workspace list's own contract**
+
+> **Names are unique within the list (screens-b).** Session ids are ULIDs;
+> two opened in the same millisecond share their first ~12 characters, so a fixed
+> prefix renders two terminals identically. The label extends the prefix only
+> until it is distinct (and numbers an exact duplicate), while the callback still
+> carries the full id.
+
+
 (`PAGE_SIZE = 10`, `page`/`total_pages`/`has_more`, `⬅️ Previous` / `Next ➡️`,
 `صفحة {page} من {total}`). Per-session buttons follow the page, so the keyboard
 cannot grow one-for-one with the session count; **Open terminal** and **Back**

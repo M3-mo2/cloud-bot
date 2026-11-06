@@ -265,16 +265,17 @@ def live_logs_markup(run: Run, locale: Locale):
                 ],
             ]
         )
+    # No "clear output" here: the engine has no log-truncation endpoint, so the
+    # old button just re-read the same bytes and was indistinguishable from
+    # Refresh (it even carried the same callback). Two destinations exist while a
+    # run is live — Stop and Refresh — and the output clears when the run does.
     return inline_markup(
         [
             [
                 inline(catalog.t("run.stop", locale), _cb("run:stop_confirm", ws_id, run.id), intent=Intent.DANGER),
                 inline(catalog.t("common.refresh", locale), _cb("run:refresh", ws_id, run.id), intent=Intent.PRIMARY),
             ],
-            [
-                inline(catalog.t("run.clear_output", locale), _cb("run:refresh", ws_id, run.id), intent=Intent.PRIMARY),
-                inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
-            ],
+            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
         ]
     )
 

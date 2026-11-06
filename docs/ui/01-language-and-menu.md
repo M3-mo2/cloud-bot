@@ -208,19 +208,31 @@ Start button is kept (his `b606238` fix); the shared nav block follows it.
 
 ## 3. `/help`
 
-A rich message explaining the bot, using a collapsible block for the command list
-so the screen stays short.
+A rich message that explains the product to a new user: what a workspace is (and
+that it is isolated), what the tool screens do, that a user may keep several
+workspaces and several terminals, and — the part that was previously documented
+nowhere the user can see — how to change the terminal size from inside the shell.
+The command list stays in a collapsible block so the screen stays short.
 
 ### English
 
 ```html
 <h2>❓ Help</h2>
-<p>CloudBot runs your code safely in an isolated sandbox.</p>
-<ul>
-  <li>Create a <b>workspace</b> — your private sandbox.</li>
-  <li>Add <b>files</b> and <b>run</b> code.</li>
-  <li>Watch output live, and stop anything you start.</li>
-</ul>
+<p>CloudBot runs your code safely in an isolated sandbox — you never need to touch a server.</p>
+<p>A <b>workspace</b> is your private sandbox: its own files, packages, processes,
+   ports and terminals, isolated from every other user. Everything you do to it
+   stays inside it.</p>
+<p>Inside a workspace you can browse and edit <b>files</b>, <b>run</b> commands and
+   jobs, open a <b>terminal</b>, install <b>packages</b>, publish <b>tunnels</b>, and
+   inspect <b>ports</b>, <b>metrics</b>, <b>processes</b> and <b>archives</b>.</p>
+<p>You can keep several workspaces and open several terminals in each. A terminal
+   is live until you close it or it sits idle long enough — then it ends and you
+   can open a new one.</p>
+<hr>
+<h3>Terminal size</h3>
+<p>The chat decides how much of the screen you see. To change the terminal itself,
+   run <code>stty cols N rows M</code> inside the shell (<code>stty size</code>
+   reads the current size).</p>
 <details><summary>Commands</summary>
   <ul>
     <li><code>/start</code> — open the menu</li>
@@ -235,12 +247,19 @@ so the screen stays short.
 
 ```html
 <h2>❓ مساعدة</h2>
-<p>يشغّل CloudBot أكوادك بأمان داخل بيئة معزولة.</p>
-<ul>
-  <li>أنشئ <b>مساحة عمل</b> — بيئتك الخاصة المعزولة.</li>
-  <li>أضف <b>ملفات</b> و<b>شغّل</b> الأكواد.</li>
-  <li>راقب المخرجات مباشرة، وأوقف أي شيء تبدأه.</li>
-</ul>
+<p>يشغّل CloudBot أكوادك بأمان داخل بيئة معزولة — دون أن تتعامل مع أي خادم.</p>
+<p><b>مساحة العمل</b> هي بيئتك الخاصة: ملفاتها وحزمها وعملياتها ومنافذها وطرفياتها،
+   معزولة عن كل مستخدم آخر. كل ما تفعله يبقى داخلها.</p>
+<p>داخل مساحة العمل يمكنك تصفح <b>الملفات</b> وتحريرها، و<b>تشغيل</b> الأوامر
+   والمهام، وفتح <b>طرفية</b>، وتثبيت <b>الحزم</b>، ونشر <b>الأنفاق</b>، وفحص
+   <b>المنافذ</b> و<b>المقاييس</b> و<b>العمليات</b> و<b>الأرشيفات</b>.</p>
+<p>يمكنك الاحتفاظ بعدة مساحات عمل وفتح عدة طرفيات في كل مساحة. تبقى الطرفية حيّة
+   حتى تغلقها أو تبقى خاملة بما يكفي — عندها تنتهي ويمكنك فتح واحدة جديدة.</p>
+<hr>
+<h3>حجم الطرفية</h3>
+<p>الدردشة تحدّد ما تراه من الشاشة. لتغيير الطرفية نفسها، نفّذ
+   <code>stty cols N rows M</code> داخل الصدفة (<code>stty size</code> يقرأ الحجم
+   الحالي).</p>
 <details><summary>الأوامر</summary>
   <ul>
     <li><code>/start</code> — فتح القائمة</li>

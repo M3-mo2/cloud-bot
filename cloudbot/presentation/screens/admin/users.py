@@ -49,23 +49,21 @@ def users_screen(view: AdminView, *, page: int = 0) -> Screen:
                 if u.last_seen_at
                 else "—"
             )
+            # Three columns: who, plan, when. Language, workspace count and the
+            # numeric id are on the user's own page (one tap away); a phone can
+            # scan identity + plan + recency, not six columns.
+            who = fragment([u.display_name or "—", " · ", code(str(u.tg_id))])
             rows.append(
                 [
-                    code(str(u.tg_id)),
-                    u.display_name or "—",
-                    catalog.t(f"lang.name.{u.locale.value}", locale),
+                    who,
                     catalog.t(f"plan.{u.plan}", locale),
-                    num(u.workspace_count, locale),
                     last_seen,
                 ]
             )
         doc.table(
             [
-                catalog.t("admin.users.col.id", locale),
-                catalog.t("admin.users.col.name", locale),
-                catalog.t("admin.users.col.locale", locale),
+                catalog.t("admin.users.col.user", locale),
                 catalog.t("admin.users.col.plan", locale),
-                catalog.t("admin.users.col.workspaces", locale),
                 catalog.t("admin.users.col.last_seen", locale),
             ],
             rows,

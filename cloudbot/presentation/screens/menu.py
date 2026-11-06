@@ -82,16 +82,21 @@ def main_menu(
 
 
 def help_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
+    """What the product is, how a workspace and a terminal behave, and the two
+    controls a new user needs (the in-session size tool, and the commands).
+
+    Kept to one screen: a help screen is a starting point, not a manual, and
+    every deep tool already has its own screen one tap away.
+    """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("help.title", locale))
     doc.p(catalog.t("help.body", locale))
-    doc.ul(
-        [
-            _raw(catalog.t("help.item.workspace", locale)),
-            _raw(catalog.t("help.item.files", locale)),
-            _raw(catalog.t("help.item.watch", locale)),
-        ]
-    )
+    doc.p(_raw(catalog.t("help.workspace", locale)))
+    doc.p(_raw(catalog.t("help.tools", locale)))
+    doc.p(_raw(catalog.t("help.terminals", locale)))
+    doc.div()
+    doc.h(3, catalog.t("help.size_title", locale))
+    doc.p(_raw(catalog.t("help.size", locale)))
     doc.raw(
         "<details><summary>"
         + catalog.t("help.commands", locale)

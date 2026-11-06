@@ -51,11 +51,12 @@ def audit_screen(view: AdminView, *, page: int = 0, tg_id: int | None = None) ->
         doc.p(catalog.t("admin.audit.count", locale, n=num(page_obj.total, locale)))
         rows = []
         for e in page_obj.events:
+            # Three columns: when, who, what. The numeric event id is internal
+            # and the category is the filter you are already looking through, so
+            # neither earns a column on a phone.
             rows.append(
                 [
-                    num(e.id, locale),
                     format_datetime(e.ts, locale),
-                    catalog.t(e.category.label_key, locale),
                     catalog.t("event.actor.user", locale)
                     if e.actor == "user"
                     else catalog.t("event.actor.system", locale)
@@ -66,9 +67,7 @@ def audit_screen(view: AdminView, *, page: int = 0, tg_id: int | None = None) ->
             )
         doc.table(
             [
-                catalog.t("admin.audit.col.id", locale),
                 catalog.t("admin.audit.col.time", locale),
-                catalog.t("admin.audit.col.category", locale),
                 catalog.t("admin.audit.col.actor", locale),
                 catalog.t("admin.audit.col.summary", locale),
             ],

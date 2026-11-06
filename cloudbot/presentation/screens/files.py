@@ -103,14 +103,13 @@ def file_browser_markup(page: FilePage, ws_id: WorkspaceId, locale: Locale, *, p
     path = page.path
     rows: list[list] = []
 
-    # Breadcrumbs (current segment disabled).
+    # Breadcrumbs. R1: the current directory is the screen you are already on,
+    # so it is omitted, never a muted button — that muted entry also duplicated
+    # the home destination in the empty root-level listing.
     crumbs = _breadcrumbs(path)
     crumb_row = [inline(catalog.t("file.home", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)]
-    for i, (label, target) in enumerate(crumbs):
-        if i == len(crumbs) - 1:
-            crumb_row.append(inline(label, _cb("file:ls", ws_id, target), intent=Intent.PRIMARY, disabled=True))
-        else:
-            crumb_row.append(inline(label, _cb("file:ls", ws_id, target), intent=Intent.PRIMARY))
+    for label, target in crumbs:
+        crumb_row.append(inline(label, _cb("file:cd", ws_id, target), intent=Intent.PRIMARY))
     rows.append(crumb_row)
 
     for entry in page.entries:
@@ -283,13 +282,19 @@ def upload_progress(path: str, name: str, done: str, total: str, percent: float,
 
 
 # -- breadcrumbs / path helpers ---------------------------------------------
-def _breadcrumbs(path: str) -> list[tuple[str, int]]:
+def _breadcrumbs(path: str) -> list[tuple[str, str]]:
+    """Ancestor segments only, each with its real path.
+
+    The current (last) segment is not returned: it is the screen already shown
+    (R1 — omitted, not muted). Each ancestor keeps its directory so the crumb
+    navigates to *that* listing rather than back to the root.
+    """
     parts = [p for p in path.split("/") if p]
-    crumbs: list[tuple[str, int]] = []
+    crumbs: list[tuple[str, str]] = []
     acc = ""
-    for p in parts:
+    for p in parts[:-1]:
         acc += "/" + p
-        crumbs.append((p, 0))
+        crumbs.append((p, acc))
     return crumbs
 
 

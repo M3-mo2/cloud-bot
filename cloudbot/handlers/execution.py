@@ -177,25 +177,63 @@ async def on_delete_run(cb: CallbackQuery, ctx: UserContext, services: Services,
 
 
 # -- history -----------------------------------------------------------------
+def _history_page(key: tuple) -> tuple[str, str | None, int]:
+    """``(ws_id, status_filter, page)`` from a history callback's key parts.
+
+    The filter is carried inline so a page turn keeps it, and the page is the
+    last part; both are optional (buttons drawn before paging existed carry
+    neither and still render the first page of all runs).
+    """
+    ws_id = key[0]
+    status: str | None = None
+    page = 0
+    known = {value for _, value in history_screens.FILTERS if value}
+    if len(key) >= 2:
+        if key[1] == "all":
+            page = _page_of(key[2]) if len(key) >= 3 else 0
+        elif key[1] in known:
+            status = key[1]
+            if len(key) >= 3:
+                page = _page_of(key[2])
+        else:
+            page = _page_of(key[1])
+    return ws_id, status, page
+
+def _page_of(value) -> int:
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return 0
+
+async def _show_history(
+    cb, ctx: UserContext, services: Services, sender: RichSender, ws_id, status: str | None, page: int
+) -> None:
+    from cloudbot.presentation.pagination import PAGE_SIZE
+
+    run_page = await services.execution.list_runs(
+        ctx.tg_id,
+        _wid(ws_id),
+        status=status,
+        offset=page * PAGE_SIZE,
+    )
+    await show_screen(
+        cb,
+        history_screens.run_history(
+            run_page, _wid(ws_id), ctx.locale, active_filter=status, page_index=page
+        ),
+        ctx=ctx,
+        sender=sender,
+    )
+
 @router.callback_query(F.data.startswith("run:history"))
 async def on_history(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode_required(cb.data, 1)
-    ws_id = _wid(decoded.key[0])
-    page = await services.execution.list_runs(ctx.tg_id, ws_id)
-    await show_screen(cb, history_screens.run_history(page, ws_id, ctx.locale), ctx=ctx, sender=sender)
-
+    ws_id, status, page = _history_page(decode_required(cb.data, 1).key)
+    await _show_history(cb, ctx, services, sender, ws_id, status, page)
 
 @router.callback_query(F.data.startswith("run:filter"))
 async def on_filter(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    decoded = decode_required(cb.data, 2)
-    ws_id = _wid(decoded.key[0])
-    status = decoded.key[1]
-    page = await services.execution.list_runs(ctx.tg_id, ws_id, status=None if status == "all" else status)
-    await show_screen(
-        cb, history_screens.run_history(page, ws_id, ctx.locale, active_filter=None if status == "all" else status),
-        ctx=ctx, sender=sender,
-    )
-
+    ws_id, status, page = _history_page(decode_required(cb.data, 2).key)
+    await _show_history(cb, ctx, services, sender, ws_id, status, page)
 
 @router.callback_query(F.data.startswith("run:purge_confirm"))
 async def on_purge_confirm(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:

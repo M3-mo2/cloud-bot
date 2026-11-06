@@ -81,11 +81,13 @@ Above the list, the current path renders as tappable segments. In a keyboard row
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| 🏠 / | 🏠 / | inline | primary | — |
+| 🏠 / | 🏠 / | inline | primary | navigate to the root |
 | src | src | inline | primary | navigate to `/src` |
-| data | data | inline | primary | navigate to `/src/data` |
 
-The final segment (current directory) is a `disabled=True` label.
+The current directory is **omitted**, not shown as a muted label (R1 — it points
+at the screen you are already on), and each ancestor crumb navigates to *that*
+directory (`file:cd`), not back to the root. This also removed the duplicate
+`file:ls:<ws>:0` the empty root-level listing used to carry.
 
 ### 1.5 Empty directory
 

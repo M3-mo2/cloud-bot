@@ -253,8 +253,10 @@ def fixtures() -> dict[str, Any]:
         rows=24,
         created_at=NOW,
     )
+    # A distinct ULID sharing the running session's first 12 characters: the
+    # realistic same-millisecond case the terminal list must disambiguate.
     ended_session = TerminalSession(
-        id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+        id="ses_01M6HJATYTFXTWXWBG8A5KWYS8",
         workspace_id=ws.id,
         status=SessionStatus.TIMED_OUT,
         cols=100,

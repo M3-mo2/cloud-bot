@@ -781,3 +781,53 @@ in-process map; a stale pager button after a restart falls back to the archive m
 
 **Alternatives rejected.** A second pager for the screens that "would never grow" (metrics, archive result):
 that is exactly how six screens ended up without one.
+
+---
+
+## CB-36 — No duplicate destinations; a scannable default row; unique terminal names; a real help screen
+
+**Decision.** Four rules, each measured on the live catalog (screens-b):
+
+1. **A keyboard never names one destination twice.** Two buttons on the same callback waste a slot and read
+   as two actions. Where the two labels meant the same thing, the redundant one is removed or re-pointed:
+   * `run_history` — the active filter button carried `run:history:<ws>` while "Load more" did too. The filter
+     row is now filters only (the active one is **omitted**, R1), and paging uses the shared pager with the
+     filter carried inline (`run:history:<ws>:<page>` / `run:filter:<ws>:<filter>:<page>`).
+   * `live_logs_running` — **🧹 Clear output** carried the same `run:refresh` callback as **🔄 Refresh**. The
+     engine has no log-truncation endpoint, so the button could never do anything different; it is removed
+     rather than renamed.
+   * `file_browser_empty` — the disabled current-directory breadcrumb duplicated the `🏠 /` crumb's
+     destination. The current segment is omitted (R1) and each ancestor crumb navigates with `file:cd` to its
+     own directory (the old code always emitted page 0, which was also wrong).
+   * `terminal_list` — the two fixtures shared an id; see rule 3.
+   * `ports` — already fixed before this task.
+
+   A test walks `SCREEN_BUILDERS` in both locales and fails on any repeated callback in one keyboard.
+
+2. **The default row is what a user scans.** `run_history` rendered eight columns of markup (the header row
+   was double-wrapped, so "Run · Status · Command · When" counted as eight). It now renders **three**:
+   identity, state, when. Command, duration and exit code remain one tap away on the run's own screen
+   (`run:logs`, which the run's identity button opens). `admin_users` loses Language and Workspaces (6 → 3;
+   both are on the user's own page); `admin_audit` loses the internal event id and the category (5 → 3; the
+   category is the filter you are already viewing through).
+
+3. **Terminal labels are unique among the list.** Session ids are ULIDs and share their first ~12 characters
+   when created in the same millisecond, so `ses_…Z…` and `ses_…Y…` rendered identically. `unique_short_ids()`
+   extends the prefix only until it is distinct (and numbers an exact duplicate), so two terminals never show
+   the same label; the callback still carries the full id. Short when it can be.
+
+4. **The help screen explains the product.** It now says what a workspace is (isolation, the tool screens),
+   that a user may keep several workspaces and several terminals (and that a terminal ends on idle), and —
+   the gap that mattered — how to change the terminal size in-session (`stty cols N rows M`), which was
+   documented nowhere a user could see. It stays one short screen with the command list collapsed; the depth
+   is a sentence each, not a manual.
+
+**Why.** `docs/ui/01-language-and-menu.md` §3 previously showed a 480-character help screen with three
+commands and nothing about the terminal size. The run table was the widest in the product (`port_list` had
+already been reduced to five). The terminal-name collision is latent but real: two terminals opened together
+is the normal case, not the corner.
+
+**Consequences.** `run.history_column.when` and `admin.users.col.user` are new keys in both catalogs;
+`run.clear_output`, `admin.users.col.locale` and `admin.users.col.workspaces` are removed. The goldens for
+`run_history`, `terminal_list`, `admin_users`, `admin_audit`, `help`, `help_inside`, `file_browser*` and
+`dev_sections` changed accordingly.

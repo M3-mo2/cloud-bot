@@ -35,6 +35,7 @@ from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens import terminal_callbacks as _term
 from cloudbot.presentation.screens.screen import Screen
+from cloudbot.presentation.screens.short_id import unique_short_ids
 
 #: The project-wide page size (one pagination contract, not two).
 PAGE_SIZE = _PAGE_SIZE
@@ -65,12 +66,6 @@ def _tail(text: str, *, max_bytes: int = MAX_OUTPUT_BYTES) -> tuple[str, bool]:
     if len(encoded) <= max_bytes:
         return text, False
     return encoded[-max_bytes:].decode("utf-8", errors="ignore"), True
-
-
-def _short(ses_id: str) -> str:
-    if len(ses_id) <= 14:
-        return ses_id
-    return ses_id[:12] + "…"
 
 
 def _created_at(session: TerminalSession) -> float:
@@ -116,15 +111,12 @@ def my_terminals(
         doc.p(italic(catalog.t("terminal.empty_hint", locale)))
     else:
         doc.p(catalog.t("terminal.count", locale, n=_num(len(sessions), locale)))
-        for session in sessions:
+        labels = unique_short_ids([session.id for session in sessions])
+        for session, label in zip(sessions, labels):
             emoji = SESSION_STATUS_EMOJI.get(session.status, "—")
             status = f"{emoji} {session_status_label(session.status, locale)}"
             age = format_relative(session.created_at, now, locale)
-            doc.p(
-                _raw(
-                    f"<code>{esc(_short(session.id))}</code> · {esc(status)} · {esc(age)}"
-                )
-            )
+            doc.p(_raw(f"<code>{esc(label)}</code> · {esc(status)} · {esc(age)}"))
         doc.p(page_footer(page, total_pages, locale))
     return Screen(
         doc=doc,
@@ -146,9 +138,13 @@ def my_terminals_markup(
     rows = []
     # Per-session buttons follow the page, not the whole list: the keyboard can
     # never grow past one page regardless of how many terminals were opened.
+    # Labels are unique within the page (a ULID prefix alone is not: two
+    # terminals opened in the same millisecond share their first ~12 chars);
+    # the callback still carries the full id.
+    labels = unique_short_ids([session.id for session in sessions])
     session_buttons = [
-        inline(f"🖥 {_short(session.id)}", _term.view(ws_id, session.id), intent=Intent.PRIMARY)
-        for session in sessions
+        inline(f"🖥 {label}", _term.view(ws_id, session.id), intent=Intent.PRIMARY)
+        for session, label in zip(sessions, labels)
     ]
     for index in range(0, len(session_buttons), 2):
         rows.append(session_buttons[index : index + 2])
@@ -322,4 +318,5 @@ __all__ = [
     "terminal_view",
     "terminal_view_markup",
     "timeout_notice",
+    "unique_short_ids",
 ]
