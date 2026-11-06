@@ -191,7 +191,12 @@ MESSAGES: dict[str, str] = {
     "ws.detail.last_activity": "آخر نشاط",
     "ws.detail.created": "أُنشئت",
     "ws.detail.id": "المعرّف:",
-    "ws.detail.tech": "التفاصيل التقنية",
+    "ws.detail.tech": "تفاصيل تقنية",
+    # -- the workspace header: a rule, the name, and how long it has been alive --
+    "ws.head.rule": "▬▬▭▭▬▬▭▭▬▬▭▭",
+    "ws.head.title": "مساحه عملك",
+    "ws.head.since": "يعمل منذ",
+    "ws.head.just_now": "<b>قبل قليل</b>",
     "ws.more": "⋯ المزيد",
     "ws.less": "⋯ أقل",
     "ws.detail.runs_line": "{total} إجمالًا، {active} نشِط",
@@ -733,6 +738,15 @@ MESSAGES: dict[str, str] = {
     "ws.processes": "🧠 العمليات",
     "ws.metrics": "📊 الموارد",
     "ws.archives": "🗜 الأرشيفات",
+    # -- the workspace settings screen --------------------------------------
+    "ws.settings": "⚙️ الإعدادات",
+    "ws.settings.title": "⚙️ إعدادات المساحة",
+    "ws.settings.intro": "» تستطيع من هنا التحكم في مساحه عملك ، اذا كنت تريد مسحها او ايقافها بشكل مؤقت او حتي ايقاف كل العمليات.",
+    "ws.settings.rule": "─┄┅┈┉┈┅┄─┄┅┈┉┈┅┄─",
+    "ws.settings.suspend": "⏸️ ايقاف مؤقت",
+    "ws.settings.stop_all": "🛑 ايقاف كل العمليات",
+    "ws.settings.delete": "🗑 حذف المساحة",
+    "ws.settings.back": "⬅️ رجوع للمساحة",
 
     # -- metrics (Phase 2d) --------------------------------------------------
     "metrics.title": "📊 الموارد",
@@ -1110,6 +1124,46 @@ MESSAGES: dict[str, str] = {
 }
 
 PLURALS: dict[str, dict[str, str]] = {
+    "ws.head.minutes": {
+        "zero": "قبل قليل",
+        "one": "<b>قبل دقيقة</b>",
+        "two": "<b>قبل دقيقتين</b>",
+        "few": "<b>قبل {n} دقائق</b>",
+        "many": "<b>قبل {n} دقيقة</b>",
+        "other": "<b>قبل {n} دقيقة</b>",
+    },
+    "ws.head.hours": {
+        "zero": "قبل قليل",
+        "one": "<b>قبل ساعة</b>",
+        "two": "<b>قبل ساعتين</b>",
+        "few": "<b>قبل {n} ساعات</b>",
+        "many": "<b>قبل {n} ساعة</b>",
+        "other": "<b>قبل {n} ساعة</b>",
+    },
+    "ws.head.days": {
+        "zero": "قبل قليل",
+        "one": "<b>قبل يوم</b>",
+        "two": "<b>قبل يومين</b>",
+        "few": "<b>قبل {n} أيام</b>",
+        "many": "<b>قبل {n} يوم</b>",
+        "other": "<b>قبل {n} يوم</b>",
+    },
+    "ws.head.months": {
+        "zero": "قبل قليل",
+        "one": "<b>قبل شهر</b>",
+        "two": "<b>قبل شهرين</b>",
+        "few": "<b>قبل {n} أشهر</b>",
+        "many": "<b>قبل {n} شهر</b>",
+        "other": "<b>قبل {n} شهر</b>",
+    },
+    "ws.head.years": {
+        "zero": "قبل قليل",
+        "one": "<b>قبل سنة</b>",
+        "two": "<b>قبل سنتين</b>",
+        "few": "<b>قبل {n} سنوات</b>",
+        "many": "<b>قبل {n} سنة</b>",
+        "other": "<b>قبل {n} سنة</b>",
+    },
     "count.workspaces": {
         "zero": "لا توجد مساحات",
         "one": "مساحة واحدة",

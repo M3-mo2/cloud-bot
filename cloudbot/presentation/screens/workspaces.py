@@ -28,6 +28,7 @@ from cloudbot.presentation.pagination import PAGE_SIZE as _PAGE_SIZE
 from cloudbot.presentation.pagination import footer as page_footer
 from cloudbot.presentation.pagination import pager_rows as _pager_rows
 from cloudbot.presentation.rich.document import RichDoc
+from cloudbot.presentation.rich import tags
 from cloudbot.presentation.rich.tags import Html, fragment, italic
 from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
@@ -109,6 +110,38 @@ def empty_workspaces(locale: Locale, *, inside: Workspace | None = None) -> Scre
 
 
 # -- detail ------------------------------------------------------------------
+def _age_label(created, now: datetime, locale: Locale) -> str:
+    """How long this workspace has been alive, in his format: bold, coarse units.
+
+    A workspace is created once and then runs, so "since" is measured from
+    ``created_at`` and needs no plural table beyond what babel already gives us:
+    minutes, hours, days, months, years. Under a minute reads "just now" rather
+    than "0 min ago".
+    """
+    if created is None:
+        return catalog.t("ws.head.just_now", locale)
+    if created.tzinfo is None:
+        from datetime import timezone as _tz
+
+        created = created.replace(tzinfo=_tz.utc)
+    secs = max(0, int((now - created).total_seconds()))
+
+    if secs < 60:
+        return catalog.t("ws.head.just_now", locale)
+
+    steps: tuple[tuple[int, str], ...] = (
+        (365 * 24 * 3600, "ws.head.years"),
+        (30 * 24 * 3600, "ws.head.months"),
+        (24 * 3600, "ws.head.days"),
+        (3600, "ws.head.hours"),
+    )
+    for size, key in steps:
+        if secs >= size:
+            n = max(1, secs // size)
+            return catalog.plural(key, n, locale)
+    return catalog.plural("ws.head.minutes", max(1, secs // 60), locale)
+
+
 def workspace_detail(
     ws: Workspace,
     locale: Locale,
@@ -120,21 +153,45 @@ def workspace_detail(
     session: bool = True,
     more: bool = False,
 ) -> Screen:
-    """The workspace home: it leads with *state*, not with a specification sheet.
+    """The workspace home: identity, age, then the specification on request.
 
-    Opening a workspace should answer three questions in order — which workspace is
-    this, what state is it in, what can I do here — and then stop. The full
-    specification (runtime, profile, CPU, memory, disk, run counters, timestamps,
-    identifier) is genuine information that is simply not what the screen is *for*,
-    so it sits behind a collapsed ``<details>`` block: one tap away, and out of the
-    way of the visits that do not need it.
+    The header is three bold lines and a rule — the name, how long this workspace
+    has been running, and nothing else. Everything a user does not act on sits
+    behind the collapsed "technical details" table, which stays one tap away and
+    out of the way of the visits that only want files or a run.
 
-    ``more`` reveals the secondary tool destinations in the keyboard; the body never
-    depends on it, so the screen reads the same however the user reached it.
+    ``more`` reveals the secondary tool destinations in the keyboard; the body
+    never depends on it, so the screen reads the same however the user reached it.
     """
 
+    if now is None:
+        from datetime import timezone
+
+        now = datetime.now(timezone.utc)
+
     doc = RichDoc(locale)
-    doc.h(2, f"📦 {ws.name}")
+    rule = tags.bold(catalog.t("ws.head.rule", locale))
+
+    # -- the header: name and age, in bold, between two rules -----------------
+    doc.p(rule)
+    doc.p(
+        tags.fragment(
+            [
+                tags.bold("✦ " + catalog.t("ws.head.title", locale) + " ⟸ "),
+                tags.bold(ws.name),
+            ]
+        )
+    )
+    doc.p(
+        tags.fragment(
+            [
+                tags.bold("✦ " + catalog.t("ws.head.since", locale) + " ⟸ "),
+                _raw(_age_label(ws.created_at, now, locale)),
+            ]
+        )
+    )
+    doc.p(rule)
+
     label_key, _emoji = display_state(ws.status, ws.summary.state)
     doc.p(_raw(f"<b>{catalog.t('ws.detail.status', locale)}</b> {catalog.t(label_key, locale)}"))
 
@@ -148,11 +205,6 @@ def workspace_detail(
         doc.p(italic(catalog.t("ws.session.inside", locale)))
     if confirmation:
         doc.blockquote(_raw(confirmation))
-
-    if now is None:
-        from datetime import timezone
-
-        now = datetime.now(timezone.utc)
 
     cpu = ws.limits.cpu_cores
     cpu_line = (
@@ -191,7 +243,7 @@ def workspace_detail(
     body = "".join(str(_kv(k, v)) for k, v in rows)
     doc.div()
     doc.raw(
-        f'<details><summary>{catalog.t("ws.detail.tech", locale)}</summary>'
+        f'<details><summary><b>{catalog.t("ws.detail.tech", locale)}</b> ⇣</summary>'
         f'<table is_bordered="true">{body}</table></details>'
     )
 
@@ -199,6 +251,58 @@ def workspace_detail(
         doc=doc,
         markup=workspace_detail_markup(ws, locale, active_run=active_run, session=session, more=more),
     )
+
+
+def workspace_settings(
+    ws: Workspace,
+    locale: Locale,
+    *,
+    confirmation: str | None = None,
+) -> Screen:
+    """Where a workspace is administered: pause it, stop everything, or delete it.
+
+    These three used to sit on the home screen among the everyday tools, where the
+    destructive pair crowded the actions a user actually came for. A workspace has
+    one settings destination; it is the only place that owns them.
+    """
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("ws.settings.title", locale))
+    doc.p(_raw(catalog.t("ws.settings.intro", locale)))
+    doc.p(tags.bold(catalog.t("ws.settings.rule", locale)))
+    if confirmation:
+        doc.blockquote(_raw(confirmation))
+
+    rows: list[list] = []
+    if ws.status is WorkspaceStatus.ACTIVE:
+        rows.append(
+            [
+                inline(
+                    catalog.t("ws.settings.stop_all", locale),
+                    _cb("ws:stop_confirm", ws.id),
+                    intent=Intent.DANGER,
+                )
+            ]
+        )
+        rows.append(
+            [
+                inline(
+                    catalog.t("ws.settings.suspend", locale),
+                    _cb("ws:suspend_confirm", ws.id),
+                    intent=Intent.PRIMARY,
+                )
+            ]
+        )
+    elif ws.status is WorkspaceStatus.SUSPENDED:
+        rows.append(
+            [inline(catalog.t("ws.resume", locale), _cb("ws:resume", ws.id), intent=Intent.SUCCESS)]
+        )
+    rows.append(
+        [inline(catalog.t("ws.settings.delete", locale), _cb("ws:delete_confirm", ws.id), intent=Intent.DANGER)]
+    )
+    rows.append(
+        [inline(catalog.t("ws.settings.back", locale), _cb("ws:view", ws.id), intent=Intent.PRIMARY)]
+    )
+    return Screen(doc=doc, markup=inline_markup(rows))
 
 
 #: Tool destinations behind "More", in display order. Each is (label key, callback).
@@ -210,7 +314,6 @@ _EXTRA_TOOLS: tuple[tuple[str, str], ...] = (
     ("ws.ports", "port:list"),
     ("ws.processes", "proc:list"),
     ("ws.metrics", "met:view"),
-    ("ws.archives", "arc:menu"),
 )
 
 
@@ -222,6 +325,14 @@ def workspace_detail_markup(
     session: bool = True,
     more: bool = False,
 ):
+    """The language of this screen, in his order.
+
+    Everyday tools first (files, run, runs, terminals), then the one archived
+    corner (archives) directly under the file tools it belongs to, then the single
+    settings destination. Pausing, stopping everything and deleting left this grid
+    entirely: they are administration, and they have their own screen — putting a
+    destructive button among the buttons a user taps all day is how it gets tapped.
+    """
     ws_id = ws.id
     rows: list[list] = []
 
@@ -231,7 +342,6 @@ def workspace_detail_markup(
         return [inline(label, action, intent=Intent.PRIMARY)]
 
     if ws.status is WorkspaceStatus.ACTIVE:
-        # What a user does on every visit: their files, and running something.
         rows.append(
             [
                 inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
@@ -243,11 +353,16 @@ def workspace_detail_markup(
                 ),
             ]
         )
+        # Archives sits with the file tools, not in the overflow: it is where a user
+        # goes after uploading a zip, which is a files-adjacent errand.
         rows.append(
             [
-                inline(catalog.t("ws.runs", locale), _cb("run:history", ws_id), intent=Intent.PRIMARY),
+                inline(catalog.t("ws.archives", locale), _cb("arc:menu", ws_id), intent=Intent.PRIMARY),
                 inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
             ]
+        )
+        rows.append(
+            [inline(catalog.t("ws.runs", locale), _cb("run:history", ws_id), intent=Intent.PRIMARY)]
         )
         if more:
             extra = [
@@ -257,7 +372,7 @@ def workspace_detail_markup(
             rows += [extra[i : i + 2] for i in range(0, len(extra), 2)]
         rows.append(_more_row(more))
         rows.append(
-            [inline(catalog.t("ws.suspend", locale), _cb("ws:suspend_confirm", ws_id), intent=Intent.PRIMARY)]
+            [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
         )
     elif ws.status is WorkspaceStatus.SUSPENDED:
         rows.append(
@@ -279,6 +394,9 @@ def workspace_detail_markup(
                 ),
             ]
         )
+        rows.append(
+            [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
+        )
     elif ws.status is WorkspaceStatus.LOCKED:
         rows.append(
             [
@@ -286,22 +404,18 @@ def workspace_detail_markup(
                 inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
             ]
         )
+        rows.append(
+            [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
+        )
     else:
         rows.append([inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)])
+        rows.append(
+            [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
+        )
 
     if session:
         rows.append(
             [inline(catalog.t("ws.logout", locale), _cb("ws:logout", ws_id), intent=Intent.PRIMARY)]
-        )
-
-    # Destructive actions last, after the exit, and never adjacent to a tool a user
-    # taps repeatedly.
-    if ws.status is WorkspaceStatus.ACTIVE:
-        rows.append(
-            [
-                inline(catalog.t("ws.stop_all", locale), _cb("ws:stop_confirm", ws_id), intent=Intent.DANGER),
-                inline(catalog.t("ws.delete", locale), _cb("ws:delete_confirm", ws_id), intent=Intent.DANGER),
-            ]
         )
 
     # The workspace home has exactly one *exit* — the explicit log-out above — and

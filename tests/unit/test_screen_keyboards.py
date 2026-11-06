@@ -56,12 +56,25 @@ def test_callbacks_within_64_bytes(locale):
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
 def test_danger_buttons_point_to_confirms(locale):
-    # On the detail screen, Stop All and Delete are danger and open a confirm.
-    screen = ws_screens.workspace_detail(WS, locale, now=NOW)
-    danger = [b for b in _buttons(screen.markup) if getattr(b, "style", None) == "danger"]
-    assert danger, "detail screen must expose destructive actions"
+    """Destructive actions live on the settings screen, and still open a confirm.
+
+    They used to sit on the workspace home among the everyday tools. They moved to
+    ``workspace_settings`` — the home is for the things a user does all day — so the
+    guard follows them: the *settings* screen must expose danger buttons, each of
+    which opens a confirm, and the *home* must expose none.
+
+    The "none on the home" half is the half that would rot silently: re-adding a
+    delete button to the busy screen would pass a test that only looked at settings.
+    """
+    settings = ws_screens.workspace_settings(WS, locale)
+    danger = [b for b in _buttons(settings.markup) if getattr(b, "style", None) == "danger"]
+    assert danger, "settings screen must expose destructive actions"
     for button in danger:
         assert "confirm" in (button.callback_data or "")
+
+    home = ws_screens.workspace_detail(WS, locale, now=NOW)
+    home_danger = [b for b in _buttons(home.markup) if getattr(b, "style", None) == "danger"]
+    assert not home_danger, f"the workspace home must not carry destructive buttons: {home_danger}"
 
 
 def test_active_detail_has_run_button():

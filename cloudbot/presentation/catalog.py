@@ -868,6 +868,8 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     ),
     "ws_detail_suspended": lambda f, loc: ws_screens.workspace_detail(f["suspended"], loc, now=NOW),
     "ws_detail_locked": lambda f, loc: ws_screens.workspace_detail(f["locked"], loc, now=NOW),
+    "ws_settings": lambda f, loc: ws_screens.workspace_settings(f["ws"], loc),
+    "ws_settings_suspended": lambda f, loc: ws_screens.workspace_settings(f["suspended"], loc),
     "ws_create_name": lambda f, loc: ws_screens.create_name_prompt(loc),
     "ws_create_network": lambda f, loc: ws_screens.create_network(
         Limits(allow_net=True, allow_tunnels=True), loc

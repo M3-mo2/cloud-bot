@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 124 |
-| Screens including the /dev tool | 127 |
-| Button edges | 456 |
-| Distinct destinations (actions) | 112 |
+| Catalog screens | 126 |
+| Screens including the /dev tool | 129 |
+| Button edges | 461 |
+| Distinct destinations (actions) | 113 |
 | Entry commands | 9 |
-| Callback re-entry actions | 112 |
+| Callback re-entry actions | 113 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 0 |
 | Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 244 |
+| Contradictions: two-screen loops | 247 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 112 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 113 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -152,6 +152,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `ws:plan` | ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 | `ws:renew` | wallet_plans |
 | `ws:resume` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `ws:settings` | ws_settings, ws_settings_suspended |
 | `ws:stop` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 | `ws:stop_confirm` | ws_stop_confirm |
 | `ws:suspend` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm |
@@ -208,7 +209,7 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-    - **admin_entered** — 📦 demo
+    - **admin_entered** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -260,22 +261,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -327,48 +320,67 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -377,18 +389,20 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -413,32 +427,23 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -453,6 +458,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -461,42 +469,32 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -525,7 +523,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
       - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace
           - ✅ Proceed → `adm:delete` → admin_user
@@ -553,7 +551,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -574,7 +572,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -583,7 +581,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -605,33 +603,28 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_overview** — 🛠 Admin panel
       - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -720,7 +713,7 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -729,7 +722,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
       - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -741,33 +734,28 @@ One tree per command. The same screen reached twice is shown both times (that is
   - ✅ Proceed → `adm:delete` → admin_user
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -805,7 +793,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -900,33 +888,28 @@ One tree per command. The same screen reached twice is shown both times (that is
   - ✅ Proceed → `adm:suspend` → admin_user
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -964,7 +947,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -1055,7 +1038,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-- **admin_entered** — 📦 demo
+- **admin_entered** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -1124,47 +1107,45 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -1173,18 +1154,20 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -1209,32 +1192,23 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -1249,6 +1223,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -1274,57 +1251,29 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `menu_inside` at depth 6 (not expanded)
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
       - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 📜 Runs → `run:history` → run_history
-    - **run_history** — 📜 Runs
-      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-        - **live_logs_finished** — ✅ Finished (exit 0)
-          - 🔁 Run again → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 🗑 Delete log → `run:delete` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **live_logs_running** — 📜 Live logs
-          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
-          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ✅ Finished → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ❌ Failed → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ⏳ Active → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - Next ➡️ → `run:history` → run_history
-        - ↩ `run_history` (already on this path)
-      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-        - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⬅️ Back → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-        - ↩ `run_history` (already on this path)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🗜 Archives → `arc:menu` → archive_menu
+    - **archive_menu** — 🗜 Archives
+      - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+        - **archive_upload_prompt** — 📤 Upload and extract
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+        - **archive_extract_prompt** — 📂 Extract a file
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+        - **archive_export_prompt** — 📦 Export a folder
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
       - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
@@ -1457,119 +1406,124 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+  - 📜 Runs → `run:history` → run_history
+    - **run_history** — 📜 Runs
+      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+        - **live_logs_finished** — ✅ Finished (exit 0)
+          - 🔁 Run again → `run:file` → job_prompt
+            - … `job_prompt` at depth 6 (not expanded)
+          - 🗑 Delete log → `run:delete` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🧹 Clear → `nav:clear` → (handler only — no screen)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **live_logs_running** — 📜 Live logs
+          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
+          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - ↩ `live_logs_running` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ✅ Finished → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ❌ Failed → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ⏳ Active → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - Next ➡️ → `run:history` → run_history
+        - ↩ `run_history` (already on this path)
+      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+        - **purge_conflict** — 🗑 Purge history
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+        - ↩ `run_history` (already on this path)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-    - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-    - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-      - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - ↩ `ws_suspend_confirm` (already on this path)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-    - **ws_stop_confirm** — 🛑 Stop everything?
-      - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-    - **ws_delete_confirm** — 🗑 Delete workspace?
-      - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+    - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+    - **ws_settings** — ⚙️ Workspace settings
+      - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+        - **ws_stop_confirm** — 🛑 Stop everything?
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-        - **ws_list_empty** — 📦 My Workspaces
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_suspend_confirm` (already on this path)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace?
+          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_settings_suspended** — ⚙️ Workspace settings
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
       - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
@@ -1721,33 +1675,28 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1820,7 +1769,7 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -1829,7 +1778,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
       - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -1883,7 +1832,7 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_entered** — 📦 demo
+    - **admin_entered** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -1935,22 +1884,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -2002,48 +1943,67 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -2052,18 +2012,20 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -2088,32 +2050,23 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -2128,6 +2081,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -2136,42 +2092,32 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -2200,7 +2146,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
       - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace
           - ✅ Proceed → `adm:delete` → admin_user
@@ -2228,7 +2174,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
@@ -2249,7 +2195,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
@@ -2258,7 +2204,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
@@ -2267,7 +2213,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_user** — 👤 User
   - 🚪 Enter → `adm:enter` → admin_entered
-    - **admin_entered** — 📦 demo
+    - **admin_entered** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -2319,22 +2265,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -2386,48 +2324,67 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -2436,18 +2393,20 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -2472,32 +2431,23 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -2512,6 +2462,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -2520,42 +2473,32 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -2657,7 +2600,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - ↩ `admin_user` (already on this path)
   - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2694,33 +2637,28 @@ One tree per command. The same screen reached twice is shown both times (that is
   - 👤 Mohamed → `adm:user` → admin_user
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2764,7 +2702,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2868,33 +2806,28 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2979,7 +2912,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_users_empty` (already on this path)
       - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -2988,7 +2921,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_users_empty` (already on this path)
       - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -3049,47 +2982,45 @@ _No screen is rendered by this command._
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -3098,18 +3029,20 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -3134,32 +3067,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -3174,6 +3098,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -3183,10 +3110,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -3436,22 +3363,22 @@ _No screen is rendered by this command._
         - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
@@ -3513,10 +3440,10 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -3526,7 +3453,7 @@ _No screen is rendered by this command._
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **help_inside** — ❓ Help
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-    - **ws_detail** — 📦 demo
+    - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -3578,22 +3505,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -3645,14 +3564,38 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -3661,18 +3604,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -3697,32 +3642,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -3737,6 +3673,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -3745,19 +3684,32 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -3828,36 +3780,13 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -3899,33 +3828,28 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -3998,7 +3922,7 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -4007,7 +3931,7 @@ _No screen is rendered by this command._
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
       - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -4030,33 +3954,28 @@ _No screen is rendered by this command._
     - **admin_overview** — 🛠 Admin panel
       - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4145,7 +4064,7 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -4154,7 +4073,7 @@ _No screen is rendered by this command._
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
       - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -4166,33 +4085,28 @@ _No screen is rendered by this command._
   - ✅ Proceed → `adm:delete` → admin_user
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4230,7 +4144,7 @@ _No screen is rendered by this command._
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -4325,33 +4239,28 @@ _No screen is rendered by this command._
   - ✅ Proceed → `adm:suspend` → admin_user
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4389,7 +4298,7 @@ _No screen is rendered by this command._
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -4480,7 +4389,7 @@ _No screen is rendered by this command._
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-- **admin_entered** — 📦 demo
+- **admin_entered** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -4549,47 +4458,45 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -4598,18 +4505,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -4634,32 +4543,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -4674,6 +4574,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -4699,57 +4602,29 @@ _No screen is rendered by this command._
             - … `menu_inside` at depth 6 (not expanded)
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
       - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 📜 Runs → `run:history` → run_history
-    - **run_history** — 📜 Runs
-      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-        - **live_logs_finished** — ✅ Finished (exit 0)
-          - 🔁 Run again → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 🗑 Delete log → `run:delete` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **live_logs_running** — 📜 Live logs
-          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
-          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ✅ Finished → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ❌ Failed → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ⏳ Active → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - Next ➡️ → `run:history` → run_history
-        - ↩ `run_history` (already on this path)
-      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-        - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⬅️ Back → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-        - ↩ `run_history` (already on this path)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🗜 Archives → `arc:menu` → archive_menu
+    - **archive_menu** — 🗜 Archives
+      - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+        - **archive_upload_prompt** — 📤 Upload and extract
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+        - **archive_extract_prompt** — 📂 Extract a file
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+        - **archive_export_prompt** — 📦 Export a folder
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
       - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
@@ -4882,119 +4757,124 @@ _No screen is rendered by this command._
         - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+  - 📜 Runs → `run:history` → run_history
+    - **run_history** — 📜 Runs
+      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+        - **live_logs_finished** — ✅ Finished (exit 0)
+          - 🔁 Run again → `run:file` → job_prompt
+            - … `job_prompt` at depth 6 (not expanded)
+          - 🗑 Delete log → `run:delete` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🧹 Clear → `nav:clear` → (handler only — no screen)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **live_logs_running** — 📜 Live logs
+          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
+          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - ↩ `live_logs_running` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ✅ Finished → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ❌ Failed → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ⏳ Active → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - Next ➡️ → `run:history` → run_history
+        - ↩ `run_history` (already on this path)
+      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+        - **purge_conflict** — 🗑 Purge history
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+        - ↩ `run_history` (already on this path)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-    - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-    - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-      - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - ↩ `ws_suspend_confirm` (already on this path)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-    - **ws_stop_confirm** — 🛑 Stop everything?
-      - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-    - **ws_delete_confirm** — 🗑 Delete workspace?
-      - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+    - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+    - **ws_settings** — ⚙️ Workspace settings
+      - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+        - **ws_stop_confirm** — 🛑 Stop everything?
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-        - **ws_list_empty** — 📦 My Workspaces
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_suspend_confirm` (already on this path)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace?
+          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_settings_suspended** — ⚙️ Workspace settings
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
       - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
@@ -5161,7 +5041,7 @@ _No screen is rendered by this command._
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-    - **admin_entered** — 📦 demo
+    - **admin_entered** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -5213,22 +5093,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -5280,48 +5152,67 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -5330,18 +5221,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -5366,32 +5259,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -5406,6 +5290,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -5414,42 +5301,32 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -5478,7 +5355,7 @@ _No screen is rendered by this command._
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
       - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace
           - ✅ Proceed → `adm:delete` → admin_user
@@ -5506,7 +5383,7 @@ _No screen is rendered by this command._
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5527,7 +5404,7 @@ _No screen is rendered by this command._
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5536,7 +5413,7 @@ _No screen is rendered by this command._
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5586,7 +5463,7 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_entered** — 📦 demo
+    - **admin_entered** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -5638,22 +5515,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -5705,48 +5574,67 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -5755,18 +5643,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -5791,32 +5681,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -5831,6 +5712,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -5839,42 +5723,32 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -5903,7 +5777,7 @@ _No screen is rendered by this command._
     - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
       - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace
           - ✅ Proceed → `adm:delete` → admin_user
@@ -5931,7 +5805,7 @@ _No screen is rendered by this command._
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
@@ -5952,7 +5826,7 @@ _No screen is rendered by this command._
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
@@ -5961,7 +5835,7 @@ _No screen is rendered by this command._
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
   - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
@@ -5970,7 +5844,7 @@ _No screen is rendered by this command._
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_user** — 👤 User
   - 🚪 Enter → `adm:enter` → admin_entered
-    - **admin_entered** — 📦 demo
+    - **admin_entered** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -6022,22 +5896,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -6089,48 +5955,67 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -6139,18 +6024,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -6175,32 +6062,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -6215,6 +6093,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -6223,42 +6104,32 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -6360,7 +6231,7 @@ _No screen is rendered by this command._
     - ↩ `admin_user` (already on this path)
   - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_entered** — 📦 demo ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -6397,33 +6268,28 @@ _No screen is rendered by this command._
   - 👤 Mohamed → `adm:user` → admin_user
     - **admin_user** — 👤 User
       - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -6467,7 +6333,7 @@ _No screen is rendered by this command._
         - ↩ `admin_user` (already on this path)
       - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -6571,33 +6437,28 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-        - **admin_entered** — 📦 demo
+        - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -6682,7 +6543,7 @@ _No screen is rendered by this command._
         - ↩ `admin_users_empty` (already on this path)
       - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -6691,7 +6552,7 @@ _No screen is rendered by this command._
         - ↩ `admin_users_empty` (already on this path)
       - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-        - **admin_entered** — 📦 demo ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -7110,47 +6971,45 @@ _No screen is rendered by this command._
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -7159,18 +7018,20 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -7195,32 +7056,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7235,6 +7087,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -7244,10 +7099,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -7497,22 +7352,22 @@ _No screen is rendered by this command._
         - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
@@ -7574,10 +7429,10 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -7587,7 +7442,7 @@ _No screen is rendered by this command._
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **settings_inside** — ⚙️ Settings
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-    - **ws_detail** — 📦 demo
+    - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -7639,22 +7494,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7706,14 +7553,38 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -7722,18 +7593,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -7758,32 +7631,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7798,6 +7662,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -7806,19 +7673,32 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -7889,36 +7769,13 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -8272,47 +8129,45 @@ _No screen is rendered by this command._
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -8321,18 +8176,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -8357,32 +8214,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -8397,6 +8245,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -8460,47 +8311,45 @@ _No screen is rendered by this command._
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -8509,18 +8358,20 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -8545,32 +8396,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -8585,6 +8427,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -8594,10 +8439,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -8862,22 +8707,22 @@ _No screen is rendered by this command._
         - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
@@ -8939,47 +8784,45 @@ _No screen is rendered by this command._
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -8988,18 +8831,20 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -9024,32 +8869,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -9064,6 +8900,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9073,10 +8912,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -9341,22 +9180,22 @@ _No screen is rendered by this command._
         - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
@@ -9422,7 +9261,7 @@ _No screen is rendered by this command._
             - … `help_inside` at depth 6 (not expanded)
         - ↩ `menu_inside` (already on this path)
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-    - **ws_detail** — 📦 demo
+    - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -9474,22 +9313,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -9541,14 +9372,38 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9557,18 +9412,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -9593,32 +9450,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -9633,6 +9481,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9641,19 +9492,32 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -9724,36 +9588,13 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -9761,7 +9602,7 @@ _No screen is rendered by this command._
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-- **ws_detail** — 📦 demo
+- **ws_detail** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -9831,12 +9672,15 @@ _No screen is rendered by this command._
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9845,18 +9689,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -9881,32 +9727,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -9921,6 +9758,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9947,56 +9787,28 @@ _No screen is rendered by this command._
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
       - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 📜 Runs → `run:history` → run_history
-    - **run_history** — 📜 Runs
-      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-        - **live_logs_finished** — ✅ Finished (exit 0)
-          - 🔁 Run again → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 🗑 Delete log → `run:delete` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **live_logs_running** — 📜 Live logs
-          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
-          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ✅ Finished → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ❌ Failed → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ⏳ Active → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - Next ➡️ → `run:history` → run_history
-        - ↩ `run_history` (already on this path)
-      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-        - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⬅️ Back → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-        - ↩ `run_history` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🗜 Archives → `arc:menu` → archive_menu
+    - **archive_menu** — 🗜 Archives
+      - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+        - **archive_upload_prompt** — 📤 Upload and extract
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+        - **archive_extract_prompt** — 📂 Extract a file
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+        - **archive_export_prompt** — 📦 Export a folder
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
       - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
@@ -10130,45 +9942,135 @@ _No screen is rendered by this command._
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+  - 📜 Runs → `run:history` → run_history
+    - **run_history** — 📜 Runs
+      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+        - **live_logs_finished** — ✅ Finished (exit 0)
+          - 🔁 Run again → `run:file` → job_prompt
+            - … `job_prompt` at depth 6 (not expanded)
+          - 🗑 Delete log → `run:delete` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🧹 Clear → `nav:clear` → (handler only — no screen)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **live_logs_running** — 📜 Live logs
+          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
+          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - ↩ `live_logs_running` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ✅ Finished → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ❌ Failed → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ⏳ Active → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - Next ➡️ → `run:history` → run_history
+        - ↩ `run_history` (already on this path)
+      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+        - **purge_conflict** — 🗑 Purge history
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+        - ↩ `run_history` (already on this path)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
     - ↩ `ws_detail` (already on this path)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-    - ↩ `ws_detail` (already on this path)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-    - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-      - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+    - **ws_settings** — ⚙️ Workspace settings
+      - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+        - **ws_stop_confirm** — 🛑 Stop everything?
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - ↩ `ws_suspend_confirm` (already on this path)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - ↩ `ws_suspend_confirm` (already on this path)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace?
+          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_settings_suspended** — ⚙️ Workspace settings
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -10438,52 +10340,29 @@ _No screen is rendered by this command._
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
-  - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-    - **ws_stop_confirm** — 🛑 Stop everything?
-      - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-    - **ws_delete_confirm** — 🗑 Delete workspace?
-      - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-- **ws_detail_locked** — 📦 legacy
+- **ws_detail_locked** — (no title)
   - 🔄 Renew → `ws:renew` → wallet_plans
     - **wallet_plans** — 📦 Choose a plan
       - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
@@ -10692,54 +10571,51 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - ↩ `ws_detail_locked` (already on this path)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -10764,32 +10640,23 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
@@ -10804,6 +10671,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -10813,18 +10683,78 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
     - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+    - **ws_settings** — ⚙️ Workspace settings
+      - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+        - **ws_stop_confirm** — 🛑 Stop everything?
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_locked` (already on this path)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - ↩ `ws_suspend_confirm` (already on this path)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace?
+          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_locked` (already on this path)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_settings_suspended** — ⚙️ Workspace settings
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_locked` (already on this path)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_locked` (already on this path)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -10973,22 +10903,22 @@ _No screen is rendered by this command._
         - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
@@ -10996,7 +10926,7 @@ _No screen is rendered by this command._
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-- **ws_detail_more** — 📦 demo
+- **ws_detail_more** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -11065,47 +10995,45 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo
+        - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -11115,7 +11043,7 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper
+        - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -11130,6 +11058,9 @@ _No screen is rendered by this command._
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -11155,57 +11086,29 @@ _No screen is rendered by this command._
             - … `menu_inside` at depth 6 (not expanded)
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
       - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 📜 Runs → `run:history` → run_history
-    - **run_history** — 📜 Runs
-      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-        - **live_logs_finished** — ✅ Finished (exit 0)
-          - 🔁 Run again → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 🗑 Delete log → `run:delete` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **live_logs_running** — 📜 Live logs
-          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
-          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ✅ Finished → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ❌ Failed → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ⏳ Active → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - Next ➡️ → `run:history` → run_history
-        - ↩ `run_history` (already on this path)
-      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-        - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⬅️ Back → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-        - ↩ `run_history` (already on this path)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🗜 Archives → `arc:menu` → archive_menu
+    - **archive_menu** — 🗜 Archives
+      - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+        - **archive_upload_prompt** — 📤 Upload and extract
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+        - **archive_extract_prompt** — 📂 Extract a file
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
+      - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+        - **archive_export_prompt** — 📦 Export a folder
+          - ✖️ Cancel → `arc:menu` → archive_menu
+            - ↩ `archive_menu` (already on this path)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
       - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
@@ -11338,12 +11241,59 @@ _No screen is rendered by this command._
         - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+  - 📜 Runs → `run:history` → run_history
+    - **run_history** — 📜 Runs
+      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+        - **live_logs_finished** — ✅ Finished (exit 0)
+          - 🔁 Run again → `run:file` → job_prompt
+            - … `job_prompt` at depth 6 (not expanded)
+          - 🗑 Delete log → `run:delete` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🧹 Clear → `nav:clear` → (handler only — no screen)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **live_logs_running** — 📜 Live logs
+          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
+          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - ↩ `live_logs_running` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ✅ Finished → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ❌ Failed → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - ⏳ Active → `run:filter` → run_history
+        - ↩ `run_history` (already on this path)
+      - Next ➡️ → `run:history` → run_history
+        - ↩ `run_history` (already on this path)
+      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+        - **purge_conflict** — 🗑 Purge history
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+        - ↩ `run_history` (already on this path)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_more` (already on this path)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🐍 Packages → `pkg:list` → package_list, package_list_empty
     - **package_list** — 🐍 Packages
       - ➕ Install packages → `pkg:install` → package_install_prompt
@@ -11365,18 +11315,18 @@ _No screen is rendered by this command._
             - ↩ `package_list` (already on this path)
             - … `package_list_empty` at depth 6 (not expanded)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **package_list_empty** — 🐍 Packages
       - ➕ Install packages → `pkg:install` → package_install_prompt
         - **package_install_prompt** — ➕ Install packages ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
     - **tunnel_already_published** — 🌐 Public links
       - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
@@ -11664,10 +11614,10 @@ _No screen is rendered by this command._
             - … `tunnel_list_empty` at depth 6 (not expanded)
             - … `tunnel_list_stopped` at depth 6 (not expanded)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **tunnel_gate_allow_net** — 🌐 Public links ↩ (already expanded at depth 4)
     - **tunnel_gate_allow_tunnels** — 🌐 Public links ↩ (already expanded at depth 4)
     - **tunnel_gate_deleted** — 🌐 Public links ↩ (already expanded at depth 4)
@@ -11700,10 +11650,10 @@ _No screen is rendered by this command._
         - **tunnel_publish_none** — ➕ Publish a port ↩ (already expanded at depth 4)
         - **tunnel_publish_unattributed** — ➕ Publish a port ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **port_list_partial** — 🔌 Listening ports ↩ (already expanded at depth 4)
   - 🧠 Processes → `proc:list` → process_list, process_list_empty
     - **process_list** — 🧠 Processes
@@ -11777,67 +11727,91 @@ _No screen is rendered by this command._
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
   - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
     - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
     - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
-  - 🗜 Archives → `arc:menu` → archive_menu
-    - **archive_menu** — 🗜 Archives
-      - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
-        - **archive_upload_prompt** — 📤 Upload and extract
-          - ✖️ Cancel → `arc:menu` → archive_menu
-            - ↩ `archive_menu` (already on this path)
-      - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
-        - **archive_extract_prompt** — 📂 Extract a file
-          - ✖️ Cancel → `arc:menu` → archive_menu
-            - ↩ `archive_menu` (already on this path)
-      - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
-        - **archive_export_prompt** — 📦 Export a folder
-          - ✖️ Cancel → `arc:menu` → archive_menu
-            - ↩ `archive_menu` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
   - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+    - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - ↩ `ws_detail_more` (already on this path)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-    - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - ↩ `ws_detail_more` (already on this path)
-    - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-    - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-      - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+    - **ws_settings** — ⚙️ Workspace settings
+      - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+        - **ws_stop_confirm** — 🛑 Stop everything?
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-        - ↩ `ws_suspend_confirm` (already on this path)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - ↩ `ws_suspend_confirm` (already on this path)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace?
+          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_settings_suspended** — ⚙️ Workspace settings
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_more` (already on this path)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+        - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_more` (already on this path)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -12106,55 +12080,32 @@ _No screen is rendered by this command._
         - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
-  - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-    - **ws_stop_confirm** — 🛑 Stop everything?
-      - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
-  - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-    - **ws_delete_confirm** — 🗑 Delete workspace?
-      - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — 📦 demo ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — 📦 scraper ↩ (already expanded at depth 4)
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-- **ws_detail_suspended** — 📦 scraper
+- **ws_detail_suspended** — (no title)
   - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — 📦 demo
+    - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
         - **file_browser** — 📁 Files
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -12206,22 +12157,14 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
+      - 🗜 Archives → `arc:menu` → archive_menu
+        - **archive_menu** — 🗜 Archives
+          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
+            - … `archive_upload_prompt` at depth 6 (not expanded)
+          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
+            - … `archive_extract_prompt` at depth 6 (not expanded)
+          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
+            - … `archive_export_prompt` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -12273,14 +12216,38 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+      - 📜 Runs → `run:history` → run_history
+        - **run_history** — 📜 Runs
+          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
+            - … `live_logs_finished` at depth 6 (not expanded)
+            - … `live_logs_running` at depth 6 (not expanded)
+          - ✅ Finished → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ❌ Failed → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - ⏳ Active → `run:filter` → run_history
+            - ↩ `run_history` (already on this path)
+          - Next ➡️ → `run:history` → run_history
+            - ↩ `run_history` (already on this path)
+          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
+            - … `purge_conflict` at depth 6 (not expanded)
+            - ↩ `run_history` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
       - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy
+        - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -12289,18 +12256,20 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — 📦 demo
+        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
             - … `terminal_list` at depth 6 (not expanded)
             - … `terminal_list_empty` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
             - … `package_list` at depth 6 (not expanded)
             - … `package_list_empty` at depth 6 (not expanded)
@@ -12325,45 +12294,49 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
           - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - ↩ `ws_detail_suspended` (already on this path)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - ↩ `ws_detail_suspended` (already on this path)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - ↩ `ws_detail_suspended` (already on this path)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-        - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_suspended` (already on this path)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings
+          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+            - … `ws_stop_confirm` at depth 6 (not expanded)
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_suspend_confirm` at depth 6 (not expanded)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **ws_settings_suspended** — ⚙️ Workspace settings
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+            - … `ws_delete_confirm` at depth 6 (not expanded)
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
@@ -12434,35 +12407,12 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-      - 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
       - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — 📦 legacy ↩ (already expanded at depth 4)
-    - **ws_detail_more** — 📦 demo ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - ↩ `ws_detail_suspended` (already on this path)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files ↩ (already expanded at depth 4)
@@ -12473,6 +12423,9 @@ _No screen is rendered by this command._
     - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+    - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+    - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -12510,7 +12463,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (244)
+### 3.5 Loops that are not obvious (247)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -12533,6 +12486,7 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **archive_export_prompt** —“✖️ Cancel”→ **archive_menu** —“📦 Export a folder”→ **archive_export_prompt** (expected (back/affordance))
 - **archive_extract_prompt** —“✖️ Cancel”→ **archive_menu** —“📂 Extract a file”→ **archive_extract_prompt** (expected (back/affordance))
 - **archive_menu** —“📤 Upload and extract”→ **archive_upload_prompt** —“✖️ Cancel”→ **archive_menu** (expected (back/affordance))
+- **archive_menu** —“⬅️ Back”→ **ws_detail** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **archive_menu** —“⬅️ Back”→ **ws_detail_more** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **dev_report** —“⬅️ Sections”→ **dev_sections** —“🩺 Run the architecture doctor”→ **dev_report** (**unobvious**)
 - **file_browser** —“📁 Files”→ **file_browser_empty** —“📁 Files”→ **file_browser** (**unobvious**)
@@ -12741,23 +12695,25 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **ws_create_plan** —“Monthly — 150 Stars”→ **ws_create_plan_short** —“Monthly — 150 Stars ✓”→ **ws_create_plan** (**unobvious**)
 - **ws_create_plan** —“Monthly — 150 Stars”→ **ws_create_plan_trial_used** —“Monthly — 150 Stars”→ **ws_create_plan** (**unobvious**)
 - **ws_create_plan_short** —“Monthly — 150 Stars ✓”→ **ws_create_plan_trial_used** —“Monthly — 150 Stars”→ **ws_create_plan_short** (**unobvious**)
-- **ws_delete_confirm** —“✖️ Cancel”→ **ws_detail** —“🗑 Delete”→ **ws_delete_confirm** (expected (back/affordance))
-- **ws_delete_confirm** —“✖️ Cancel”→ **ws_detail_more** —“🗑 Delete”→ **ws_delete_confirm** (expected (back/affordance))
 - **ws_detail** —“⋯ More”→ **ws_detail_more** —“⋯ Less”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⋯ More”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail** (**unobvious**)
-- **ws_detail** —“🛑 Stop All”→ **ws_stop_confirm** —“✖️ Cancel”→ **ws_detail** (expected (back/affordance))
-- **ws_detail** —“⏸️ Suspend”→ **ws_suspend_confirm** —“⏸️ Suspend”→ **ws_detail** (**unobvious**)
+- **ws_detail** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail** (**unobvious**)
+- **ws_detail** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
 - **ws_detail_locked** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail_locked** (**unobvious**)
+- **ws_detail_locked** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_locked** (**unobvious**)
+- **ws_detail_locked** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_more** —“⋯ Less”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_more** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_more** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“🛑 Stop All”→ **ws_stop_confirm** —“✖️ Cancel”→ **ws_detail_more** (expected (back/affordance))
-- **ws_detail_more** —“⏸️ Suspend”→ **ws_suspend_confirm** —“⏸️ Suspend”→ **ws_detail_more** (**unobvious**)
+- **ws_detail_more** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_more** (**unobvious**)
+- **ws_detail_more** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_suspended** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail_suspended** (**unobvious**)
+- **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_suspended** (**unobvious**)
+- **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_suspended** (**unobvious**)
 
 ### 3.6 Screens out of the inside/outside rule (0)
 
@@ -12849,18 +12805,17 @@ _Suspend demo (ws_01M6HJASCWM9Z1PF755GT89NK4)? Its files are kept._
 - ✅ Proceed → `adm:suspend` → admin_user
 - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
 
-### admin_entered — 📦 demo
+### admin_entered — (no title)
 
-_Status: Active_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - 📁 Files → `file:ls` → file_browser, file_browser_empty
 - ▶️ Run → `run:choose` → run_mode
-- 📜 Runs → `run:history` → run_history
+- 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- 📜 Runs → `run:history` → run_history
 - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-- 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-- 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
+- ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
 
 ### admin_notifications — 🔔 Notifications
@@ -13818,59 +13773,58 @@ _demo will be permanently deleted._
 - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
 - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
-### ws_detail — 📦 demo
+### ws_detail — (no title)
 
-_Status: Active_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - 📁 Files → `file:ls` → file_browser, file_browser_empty
 - ▶️ Run (disabled) → `run:choose` → run_mode
-- 📜 Runs → `run:history` → run_history
+- 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- 📜 Runs → `run:history` → run_history
 - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+- ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-- 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-- 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
-### ws_detail_locked — 📦 legacy
+### ws_detail_locked — (no title)
 
-_Status: Locked_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - 🔄 Renew → `ws:renew` → wallet_plans
 - 📁 Files → `file:ls` → file_browser, file_browser_empty
+- ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
-### ws_detail_more — 📦 demo
+### ws_detail_more — (no title)
 
-_Status: Active_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - 📁 Files → `file:ls` → file_browser, file_browser_empty
 - ▶️ Run → `run:choose` → run_mode
-- 📜 Runs → `run:history` → run_history
+- 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- 📜 Runs → `run:history` → run_history
 - 🐍 Packages → `pkg:list` → package_list, package_list_empty
 - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
 - 🔌 Ports → `port:list` → port_list, port_list_partial
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
 - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-- 🗜 Archives → `arc:menu` → archive_menu
 - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+- ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-- 🛑 Stop All → `ws:stop_confirm` → ws_stop_confirm
-- 🗑 Delete → `ws:delete_confirm` → ws_delete_confirm
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
-### ws_detail_suspended — 📦 scraper
+### ws_detail_suspended — (no title)
 
-_Status: Paused_
+_▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - 📁 Files → `file:ls` → file_browser, file_browser_empty
 - ▶️ Run (disabled) → `run:choose` → run_mode
 - 🖥 Terminals (disabled) → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
@@ -13904,6 +13858,23 @@ _2 workspaces_
 - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+
+### ws_settings — ⚙️ Workspace settings
+
+_» From here you control this workspace: delete it, pause it, or stop every running process._
+
+- 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
+- ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+- 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+- ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+
+### ws_settings_suspended — ⚙️ Workspace settings
+
+_» From here you control this workspace: delete it, pause it, or stop every running process._
+
+- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
+- ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### ws_stop_confirm — 🛑 Stop everything?
 

@@ -193,6 +193,11 @@ MESSAGES: dict[str, str] = {
     "ws.detail.created": "Created",
     "ws.detail.id": "ID:",
     "ws.detail.tech": "Technical details",
+    # -- the workspace header: a rule, the name, and how long it has been alive --
+    "ws.head.rule": "▬▬▭▭▬▬▭▭▬▬▭▭",
+    "ws.head.title": "Your workspace",
+    "ws.head.since": "Running since",
+    "ws.head.just_now": "<b>just now</b>",
     "ws.more": "⋯ More",
     "ws.less": "⋯ Less",
     "ws.detail.runs_line": "{total} total, {active} active",
@@ -734,6 +739,15 @@ MESSAGES: dict[str, str] = {
     "ws.processes": "🧠 Processes",
     "ws.metrics": "📊 Resources",
     "ws.archives": "🗜 Archives",
+    # -- the workspace settings screen --------------------------------------
+    "ws.settings": "⚙️ Settings",
+    "ws.settings.title": "⚙️ Workspace settings",
+    "ws.settings.intro": "» From here you control this workspace: delete it, pause it, or stop every running process.",
+    "ws.settings.rule": "─┄┅┈┉┈┅┄─┄┅┈┉┈┅┄─",
+    "ws.settings.suspend": "⏸️ Suspend",
+    "ws.settings.stop_all": "🛑 Stop all processes",
+    "ws.settings.delete": "🗑 Delete workspace",
+    "ws.settings.back": "⬅️ Back to workspace",
 
     # -- metrics (Phase 2d) --------------------------------------------------
     "metrics.title": "📊 Resources",
@@ -1111,6 +1125,46 @@ MESSAGES: dict[str, str] = {
 }
 
 PLURALS: dict[str, dict[str, str]] = {
+    "ws.head.minutes": {
+        "zero": "just now",
+        "one": "<b>{n} min ago</b>",
+        "two": "<b>{n} min ago</b>",
+        "few": "<b>{n} min ago</b>",
+        "many": "<b>{n} min ago</b>",
+        "other": "<b>{n} min ago</b>",
+    },
+    "ws.head.hours": {
+        "zero": "just now",
+        "one": "<b>{n} h ago</b>",
+        "two": "<b>{n} h ago</b>",
+        "few": "<b>{n} h ago</b>",
+        "many": "<b>{n} h ago</b>",
+        "other": "<b>{n} h ago</b>",
+    },
+    "ws.head.days": {
+        "zero": "just now",
+        "one": "<b>{n} d ago</b>",
+        "two": "<b>{n} d ago</b>",
+        "few": "<b>{n} d ago</b>",
+        "many": "<b>{n} d ago</b>",
+        "other": "<b>{n} d ago</b>",
+    },
+    "ws.head.months": {
+        "zero": "just now",
+        "one": "<b>{n} mo ago</b>",
+        "two": "<b>{n} mo ago</b>",
+        "few": "<b>{n} mo ago</b>",
+        "many": "<b>{n} mo ago</b>",
+        "other": "<b>{n} mo ago</b>",
+    },
+    "ws.head.years": {
+        "zero": "just now",
+        "one": "<b>{n} y ago</b>",
+        "two": "<b>{n} y ago</b>",
+        "few": "<b>{n} y ago</b>",
+        "many": "<b>{n} y ago</b>",
+        "other": "<b>{n} y ago</b>",
+    },
     "count.workspaces": {"one": "{n} workspace", "other": "{n} workspaces"},
     "count.files": {"one": "{n} item", "other": "{n} items"},
     "count.runs": {"one": "{n} run", "other": "{n} runs"},
