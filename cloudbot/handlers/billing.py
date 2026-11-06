@@ -61,15 +61,18 @@ async def _view(
         if not first_ws:
             first_ws = str(ws.id)
     primary = subscriptions.get(first_ws) or next(iter(subscriptions.values()), None)
+    wallet = await services.billing.wallet(tg_id)
     return WalletView(
         locale=locale,
         tg_id=tg_id,
-        balance=(await services.billing.wallet(tg_id)).balance_stars,
+        balance=wallet.balance_stars,
         subscription=primary,
         status=await services.billing.status(tg_id, primary.ws_id if primary else ""),
         now=now,
         banner=banner,
         workspaces=tuple(rows),  # type: ignore[arg-type]
+        ledger=wallet.ledger,
+        payments=await services.billing.payments(tg_id),
     )
 
 async def open_wallet(
@@ -109,6 +112,21 @@ async def on_plans(cb: CallbackQuery, ctx: UserContext, services: Services, send
 async def on_packs(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     view = await _view(services, ctx.tg_id, ctx.locale)
     await show_screen(cb, wallet_screens.packs_screen(view), ctx=ctx, sender=sender)
+
+@router.callback_query(F.data.startswith("pay:history"))
+async def on_history(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
+    """The movement and payment history, newest first, paged by the shared pager."""
+    from cloudbot.presentation.keyboards.callbacks import decode
+
+    page = 0
+    decoded = decode(cb.data)
+    if decoded.key:
+        try:
+            page = max(0, int(decoded.key[0]))
+        except (TypeError, ValueError):
+            page = 0
+    view = await _view(services, ctx.tg_id, ctx.locale)
+    await show_screen(cb, wallet_screens.history_screen(view, page=page), ctx=ctx, sender=sender)
 
 @router.callback_query(F.data.startswith("pay:buy"))
 async def on_buy(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:

@@ -16,8 +16,9 @@ from datetime import datetime
 
 from cloudbot.core.locale import Locale
 from cloudbot.domain import plans
-from cloudbot.domain.billing import StarPack, packs
+from cloudbot.domain.billing import StarPack, StarsPayment, packs
 from cloudbot.domain.subscription import (
+    Movement,
     Subscription,
     SubscriptionState,
     SubscriptionStatus,
@@ -25,8 +26,16 @@ from cloudbot.domain.subscription import (
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_datetime, localize_digits
 from cloudbot.presentation.keyboards.buttons import inline
+from cloudbot.presentation.keyboards.callbacks import cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    PAGE_SIZE,
+    footer as page_footer,
+    pager_rows,
+    total_pages_for,
+    window,
+)
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, code, fragment, italic
 from cloudbot.presentation.screens import nav
@@ -46,6 +55,10 @@ class WalletView:
     #: One entry per workspace, because a plan belongs to a workspace now:
     #: ``(workspace name, subscription, its derived status)``.
     workspaces: tuple[tuple[str, "Subscription | None", SubscriptionStatus], ...] = ()
+    #: The account's movements, oldest first (the store appends them in order).
+    ledger: tuple[Movement, ...] = ()
+    #: The account's Stars payments, oldest first.
+    payments: tuple[StarsPayment, ...] = ()
 
 
 def _num(value: int, locale: Locale) -> str:
@@ -88,7 +101,13 @@ def _status_line(view: WalletView) -> Html:
 
 
 def wallet_screen(view: WalletView) -> Screen:
-    """The account's money home: plan, days left, trial banner, balance, actions."""
+    """The account's money home: balance, plan per workspace, actions.
+
+    The balance leads, because it is the number a user opens this screen to see.
+    Plans are per workspace, so each workspace keeps its own plan line. The
+    reference material (when the plan ends, the empty-wallet hint) is collapsed
+    into ``<details>`` so the body stays a glance, not a manual.
+    """
     locale = view.locale
     doc = RichDoc(locale)
     doc.h(2, catalog.t("wallet.title", locale))
@@ -96,9 +115,10 @@ def wallet_screen(view: WalletView) -> Screen:
     if view.banner is not None:
         doc.blockquote(view.banner)
 
-    # Current plan first: it is the answer to "what am I paying for?". When the
-    # caller supplies per-workspace state, each workspace shows its own plan,
-    # because a plan is attached to a workspace, not to the account.
+    doc.h(3, catalog.t("wallet.balance_line", locale, stars=_stars(view.balance, locale)))
+
+    # Current plan per workspace: a plan is attached to a workspace, not to the
+    # account, so each workspace shows its own plan and its own days left.
     if view.workspaces:
         rows = []
         for ws_name, subscription, status in view.workspaces:
@@ -119,17 +139,17 @@ def wallet_screen(view: WalletView) -> Screen:
         )
     else:
         doc.kv_table(
-            [
-                (catalog.t("wallet.plan_label", locale), _status_line(view)),
-                (
-                    catalog.t("wallet.balance_label", locale),
-                    _stars(view.balance, locale),
-                ),
-            ]
+            [(catalog.t("wallet.plan_label", locale), _status_line(view))]
         )
 
+    if view.status.state is SubscriptionState.TRIALING:
+        doc.blockquote(fragment(catalog.t("wallet.trial_banner", locale)))
+    elif view.status.state is SubscriptionState.EXPIRED:
+        doc.blockquote(fragment(catalog.t("wallet.expired_banner", locale)))
+
+    details: list[Html] = []
     if view.subscription is not None and view.subscription.expires_at:
-        doc.p(
+        details.append(
             _raw(
                 catalog.t(
                     "wallet.expires_line",
@@ -138,13 +158,10 @@ def wallet_screen(view: WalletView) -> Screen:
                 )
             )
         )
-
-    if view.status.state is SubscriptionState.TRIALING:
-        doc.blockquote(fragment(catalog.t("wallet.trial_banner", locale)))
-    elif view.status.state is SubscriptionState.EXPIRED:
-        doc.blockquote(fragment(catalog.t("wallet.expired_banner", locale)))
-    elif view.status.state is SubscriptionState.NONE:
-        doc.p(italic(catalog.t("wallet.none_hint", locale)))
+    if view.status.state is SubscriptionState.NONE:
+        details.append(italic(catalog.t("wallet.none_hint", locale)))
+    if details:
+        doc.details(catalog.t("wallet.details.title", locale), details)
 
     doc.div()
     rows: list[list] = [
@@ -153,6 +170,7 @@ def wallet_screen(view: WalletView) -> Screen:
             inline(catalog.t("wallet.buy_plan", locale), "pay:plans", intent=Intent.PRIMARY),
         ],
         [
+            inline(catalog.t("wallet.history.button", locale), "pay:history", intent=Intent.PRIMARY),
             inline(catalog.t("common.refresh", locale), "pay:wallet", intent=Intent.PRIMARY),
         ],
     ]
@@ -341,6 +359,131 @@ def needed_note(needed: int, available: int, locale: Locale) -> Html:
             missing=_num(needed - available, locale),
         )
     )
+
+
+# -- history: movements and Stars payments -----------------------------------
+#: The buyer-facing wording of each movement kind. A ``kind`` is an internal
+#: discriminator and must never reach the screen raw; this table is the only
+#: translation, in one place, for both locales.
+KIND_LABEL_KEY: dict[str, str] = {
+    "credit": "wallet.history.kind.credit",
+    "debit": "wallet.history.kind.debit",
+    "admin_set": "wallet.history.kind.admin_set",
+    "refund": "wallet.history.kind.refund",
+    "reversal": "wallet.history.kind.reversal",
+}
+
+#: Reasons are stored as stable codes (``purchase:month``, ``stars:stars_150``)
+#: or as free text written by an admin. A known code gets a human sentence; any
+#: other reason is shown verbatim (it is already the operator's own words).
+REASON_LABEL_KEY: dict[str, str] = {
+    "purchase:week": "wallet.history.reason.purchase_week",
+    "purchase:month": "wallet.history.reason.purchase_month",
+    "purchase:year": "wallet.history.reason.purchase_year",
+    "stars:stars_50": "wallet.history.reason.stars",
+    "stars:stars_150": "wallet.history.reason.stars",
+    "stars:stars_500": "wallet.history.reason.stars",
+    "stars:stars_1200": "wallet.history.reason.stars",
+}
+
+
+def _movement_kind(movement: Movement, locale: Locale) -> str:
+    key = KIND_LABEL_KEY.get(movement.kind)
+    return catalog.t(key, locale) if key else catalog.t("wallet.history.kind.other", locale)
+
+
+def _movement_reason(movement: Movement, locale: Locale) -> str:
+    key = REASON_LABEL_KEY.get(movement.reason)
+    if key is not None:
+        return catalog.t(key, locale)
+    if movement.reason.startswith("refund:"):
+        return catalog.t("wallet.history.reason.refund", locale)
+    return movement.reason or catalog.t("wallet.history.reason.none", locale)
+
+
+def _signed(amount: int, locale: Locale) -> Html:
+    """The amount with its sign, in a fixed-width ``<code>`` fragment."""
+    sign = "+" if amount >= 0 else "-"
+    return code(f"{sign}{_num(abs(amount), locale)}")
+
+
+def history_screen(view: WalletView, *, page: int = 0) -> Screen:
+    """Movements and Stars payments, newest first, on one paged history screen.
+
+    A movement's ``kind`` is mapped to buyer-facing wording; a payment's full
+    ``telegram_payment_charge_id`` is never shown (it is an internal identifier)
+    — the row carries pack, amount, date and refund state, which is what helps a
+    user, and the support screen already tells them what to send if a refund is
+    needed. One pager (``presentation.pagination``) covers both lists together so
+    the screen never grows without bound.
+    """
+    locale = view.locale
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("wallet.history.title", locale))
+
+    # Newest first across both lists: a movement is stamped ``at``, a payment
+    # ``created_at``. Both are stored oldest first, so sort the merged stream by
+    # its own timestamp (never by insertion order of two separate tables).
+    movements = [(m.at, "movement", m) for m in view.ledger]
+    payments = [(p.created_at, "payment", p) for p in view.payments]
+    entries = sorted(movements + payments, key=lambda item: item[0], reverse=True)
+    total = len(entries)
+    items, total_pages, _has_more = window(entries, page)
+    page = max(0, min(int(page), total_pages - 1))
+
+    if not entries:
+        doc.p(italic(catalog.t("wallet.history.empty", locale)))
+        doc.p(_raw(catalog.t("wallet.history.empty_hint", locale)))
+    else:
+        doc.p(catalog.t("wallet.history.count", locale, n=_num(total, locale)))
+        rows = []
+        for _at, kind, entry in items:
+            if kind == "movement":
+                movement: Movement = entry
+                rows.append(
+                    [
+                        _movement_kind(movement, locale),
+                        _signed(movement.amount, locale),
+                        _movement_reason(movement, locale),
+                        _raw(format_datetime(movement.at, locale)),
+                    ]
+                )
+            else:
+                payment: StarsPayment = entry
+                state = (
+                    catalog.t("wallet.history.refunded", locale)
+                    if not payment.refundable
+                    else catalog.t("wallet.history.charged", locale)
+                )
+                rows.append(
+                    [
+                        catalog.t("wallet.history.pack_label", locale),
+                        _stars(payment.stars, locale),
+                        state,
+                        _raw(format_datetime(payment.created_at, locale)),
+                    ]
+                )
+        doc.table(
+            [
+                catalog.t("wallet.history.col.what", locale),
+                catalog.t("wallet.history.col.amount", locale),
+                catalog.t("wallet.history.col.reason", locale),
+                catalog.t("wallet.history.col.when", locale),
+            ],
+            rows,
+        )
+        if total > PAGE_SIZE:
+            doc.p(page_footer(page, total_pages, locale))
+
+    rows_kb: list[list] = []
+    if total > PAGE_SIZE:
+        rows_kb += pager_rows(page, total_pages, lambda target: cb("pay:history", target), locale)
+    rows_kb.append(
+        [
+            inline(catalog.t("common.back", locale), "pay:wallet", intent=Intent.PRIMARY),
+        ]
+    )
+    return Screen(doc=doc, markup=inline_markup(rows_kb))
 
 
 def support_screen(locale: Locale) -> Screen:

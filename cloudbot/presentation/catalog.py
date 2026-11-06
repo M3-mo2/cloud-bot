@@ -632,7 +632,9 @@ def plans_plan(code: str):
     return _plan(code)
 
 def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False):
+    from cloudbot.domain.billing import StarsPayment
     from cloudbot.domain.subscription import (
+        Movement,
         Subscription,
         SubscriptionSource,
         SubscriptionState,
@@ -663,6 +665,54 @@ def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False
             source=SubscriptionSource.TRIAL,
         )
         status = derive_status(subscription, NOW)
+    # A ledger and payments ending at the fixture clock: one purchase debit, the
+    # Stars credit that funded it, an admin grant, and a refunded payment.
+    ledger = (
+        Movement(
+            tg_id=6508129575,
+            kind="credit",
+            amount=500,
+            reason="stars:stars_500",
+            at=NOW - timedelta(days=5),
+            actor_tg_id=6508129575,
+            idempotency_key="wallet:seed:stars",
+        ),
+        Movement(
+            tg_id=6508129575,
+            kind="debit",
+            amount=-150,
+            reason="purchase:month",
+            at=NOW - timedelta(days=4),
+            actor_tg_id=6508129575,
+        ),
+        Movement(
+            tg_id=6508129575,
+            kind="credit",
+            amount=50,
+            reason="Goodwill credit",
+            at=NOW - timedelta(days=1),
+            actor_tg_id=777,
+        ),
+    )
+    payments = (
+        StarsPayment(
+            tg_id=6508129575,
+            pack_code="stars_150",
+            stars=150,
+            charge_id="ch_fixture_refunded",
+            provider_charge_id="",
+            created_at=NOW - timedelta(days=6),
+            refunded_at=NOW - timedelta(days=5),
+        ),
+        StarsPayment(
+            tg_id=6508129575,
+            pack_code="stars_500",
+            stars=500,
+            charge_id="ch_fixture_paid",
+            provider_charge_id="",
+            created_at=NOW - timedelta(days=5),
+        ),
+    )
     return WalletView(
         locale=locale,
         tg_id=6508129575,
@@ -671,10 +721,102 @@ def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False
         status=status,
         now=NOW,
         workspaces=(("demo", subscription, status),),
+        ledger=ledger,
+        payments=payments,
     )
 
 def _admin_entered_view(locale: Locale) -> AdminView:
     return _admin_view(locale, entered=True)
+
+
+def _wallet_two_plans(locale: Locale):
+    """Two workspaces on different plans: the acceptance case for ``planws``.
+
+    One is a live monthly plan, the other's plan lapsed a day ago, so the wallet
+    must show two different states on two workspace lines.
+    """
+    from cloudbot.domain.subscription import (
+        Subscription,
+        SubscriptionSource,
+        derive_status,
+    )
+    from cloudbot.presentation.screens.wallet import WalletView
+
+    active = Subscription(
+        tg_id=6508129575,
+        plan_code="month",
+        started_at=NOW - timedelta(days=2),
+        expires_at=NOW + timedelta(days=28),
+        source=SubscriptionSource.STARS,
+    )
+    lapsed = Subscription(
+        tg_id=6508129575,
+        plan_code="week",
+        started_at=NOW - timedelta(days=10),
+        expires_at=NOW - timedelta(days=3),
+        source=SubscriptionSource.STARS,
+    )
+    return WalletView(
+        locale=locale,
+        tg_id=6508129575,
+        balance=350,
+        subscription=active,
+        status=derive_status(active, NOW),
+        now=NOW,
+        workspaces=(
+            ("demo", active, derive_status(active, NOW)),
+            ("scraper", lapsed, derive_status(lapsed, NOW)),
+        ),
+    )
+
+
+def _wallet_history_view(locale: Locale, *, empty: bool = False):
+    view = _wallet_view(fixtures(), locale)
+    if not empty:
+        return view
+    from cloudbot.presentation.screens.wallet import WalletView
+
+    return WalletView(
+        locale=view.locale,
+        tg_id=view.tg_id,
+        balance=view.balance,
+        subscription=view.subscription,
+        status=view.status,
+        now=view.now,
+        workspaces=view.workspaces,
+        ledger=(),
+        payments=(),
+    )
+
+
+def _wallet_history_paged(locale: Locale):
+    """More than one page of movements, so the shared pager is exercised."""
+    from cloudbot.domain.subscription import Movement
+    from cloudbot.presentation.screens.wallet import WalletView
+
+    view = _wallet_view(fixtures(), locale)
+    ledger = tuple(
+        Movement(
+            tg_id=6508129575,
+            kind="credit",
+            amount=10 + index,
+            reason="seed",
+            at=NOW - timedelta(hours=index),
+            actor_tg_id=777,
+        )
+        for index in range(12)
+    )
+    return WalletView(
+        locale=view.locale,
+        tg_id=view.tg_id,
+        balance=view.balance,
+        subscription=view.subscription,
+        status=view.status,
+        now=view.now,
+        workspaces=view.workspaces,
+        ledger=ledger,
+        payments=(),
+    )
 
 
 #: name → builder. This is the registry's payload; ``SECTION_OF`` assigns each
@@ -684,6 +826,14 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "wallet": lambda f, loc: wallet_screens.wallet_screen(_wallet_view(f, loc)),
     "wallet_no_plan": lambda f, loc: wallet_screens.wallet_screen(_wallet_view(f, loc, none=True)),
     "wallet_expired": lambda f, loc: wallet_screens.wallet_screen(_wallet_view(f, loc, expired=True)),
+    "wallet_two_plans": lambda f, loc: wallet_screens.wallet_screen(_wallet_two_plans(loc)),
+    "wallet_history": lambda f, loc: wallet_screens.history_screen(_wallet_view(f, loc)),
+    "wallet_history_empty": lambda f, loc: wallet_screens.history_screen(
+        _wallet_history_view(loc, empty=True)
+    ),
+    "wallet_history_page_2": lambda f, loc: wallet_screens.history_screen(
+        _wallet_history_paged(loc), page=1
+    ),
     "wallet_plans": lambda f, loc: wallet_screens.plan_picker_screen(
         _wallet_view(f, loc), needed_plan="year"
     ),
