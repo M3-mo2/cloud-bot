@@ -689,7 +689,7 @@ def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False
             tg_id=6508129575,
             kind="credit",
             amount=50,
-            reason="Goodwill credit",
+            reason="admin adjustment",
             at=NOW - timedelta(days=1),
             actor_tg_id=777,
         ),
