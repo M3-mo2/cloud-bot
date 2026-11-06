@@ -97,13 +97,18 @@ def test_ended_screen_shows_reason_sentence(locale):
 def test_terminal_has_a_visible_way_out_on_every_screen():
     """The FSM is only entered by an explicit action, and buttons are always shown.
 
-    term26 contract change: the live view carries **one** exit — *My terminals* —
-    instead of both My terminals and a redundant Back row that led to the workspace
+    term26 contract change: the live view carries **one** exit — the terminals
+    list — instead of both that and a redundant Back row that led to the workspace
     home (one tap further, via the list's own Back).
+
+    TASK labels: the list is named ``🖥 Terminals`` / ``🖥 الطرفيات`` on every
+    screen now (it used to be *My terminals* here and *Terminals* on the workspace
+    home — two names for one destination). The assertion below follows the single
+    name; the way out is unchanged.
     """
     session = TerminalSession(id=SES, workspace_id=WS, status=SessionStatus.RUNNING)
     view = term_screens.terminal_view(session, WS, Locale.EN)
     labels = [b.text for row in view.markup.inline_keyboard for b in row]
     assert any("Close" in label for label in labels)
-    assert any("My terminals" in label for label in labels)
+    assert any("Terminals" in label for label in labels)
     assert not any("Back" in label for label in labels)

@@ -147,3 +147,63 @@ def test_a_shared_destination_never_wears_two_labels(locale):
 def test_the_label_guard_would_have_caught_the_old_workspaces_name():
     """Bite check: the old ``📦 المساحات`` / ``📦 مساحاتي`` pair fails the rule."""
     assert len({"📦 المساحات", "📦 مساحاتي"}) > 1
+
+
+def _static_labels(locale) -> set[str]:
+    """The catalogue's *static* labels: entire messages with no substitution field.
+
+    A label is static only when it is exactly a catalogue value containing no
+    ``{field}`` (so ``📜 Runs`` is static while ``📜 {first}…`` and any string the
+    screen builds from data — a workspace name, a port, a truncated session id —
+    is not). Two dynamic labels are never compared: both "look different" simply
+    because the data differs, and grouping them would report a defect that does
+    not exist.
+    """
+    from cloudbot.presentation.i18n.catalog import CATALOGS
+
+    return {
+        text
+        for text in CATALOGS[locale].MESSAGES.values()
+        if "{" not in text and "}" not in text
+    }
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_every_destination_wears_one_static_label(locale):
+    """The catalogue-wide rule: one destination, one *naming* label.
+
+    Walk every screen in ``SCREEN_BUILDERS`` and group each button by its exact
+    ``callback_data`` (the destination). Only static labels are compared (see
+    ``_static_labels``). The affordance labels declared in
+    ``nav.NAV_LABEL_EXCEPTIONS`` are removed before the check: they deliberately
+    say "step back"/"abandon this"/"re-read this" on several screens for the same
+    callback, and the user should read the affordance, not the destination. What
+    remains on a destination must be a single name.
+    """
+    from cloudbot.presentation.i18n.catalog import catalog
+
+    CallbackCodec()
+    static = _static_labels(locale)
+    exceptions = {
+        catalog.t(key, locale) for key in nav.NAV_LABEL_EXCEPTIONS
+    }
+    names: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
+    for name in sorted(screen_catalog.SCREEN_BUILDERS):
+        screen = screen_catalog.build(name, locale)
+        for button in _buttons(screen):
+            action = getattr(button, "callback_data", None)
+            if action is None or button.text not in static:
+                continue
+            if button.text in exceptions:
+                continue
+            names[action][button.text].add(name)
+
+    offenders = {
+        action: {text: sorted(screens) for text, screens in texts.items()}
+        for action, texts in names.items()
+        if len(texts) > 1
+    }
+    assert not offenders, (
+        f"{locale.value}: destinations wearing several static labels "
+        f"(callback, labels, screens): {offenders}"
+    )

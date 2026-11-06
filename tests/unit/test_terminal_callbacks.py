@@ -247,7 +247,8 @@ async def test_a_valid_terminal_list_callback_renders_the_list():
         await dispatcher.feed_update(bot, _callback(1, TG, data))
         assert bot.sent, "nothing rendered"
         html = bot.sent[-1]["html"]
-        assert "My terminals" in html or "طرفياتي" in html, html[:200]
+        # TASK labels: one name for this destination everywhere.
+        assert "Terminals" in html or "الطرفيات" in html, html[:200]
     finally:
         await container.aclose()
 

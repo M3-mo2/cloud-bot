@@ -38,6 +38,44 @@ from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.styles import Intent
 
+#: **The one-destination-one-label rule (TASK labels).**
+#:
+#: * Default: a destination callback wears **one** static label everywhere in the
+#:   catalogue. "Static" means the text is a catalog message with no substitution
+#:   field; a label built from data (a workspace name, a truncated session id, a
+#:   port number) is *not* the same label as another built from other data even
+#:   though both reach the same callback, and is therefore not compared.
+#: * The exceptions below are **affordance** labels: the same callback means "step
+#:   back"/"abandon this"/"re-read this" on different screens, and the user should
+#:   read the affordance, not the destination it happens to open. They are listed
+#:   here, by catalog key, rather than left scattered across the screens.
+#:
+#: ``tests/unit/test_menu.py::test_every_destination_wears_one_static_label`` walks
+#: ``SCREEN_BUILDERS`` and enforces both halves of the rule.
+NAV_LABEL_EXCEPTIONS: frozenset[str] = frozenset(
+    {
+        # Step back one level — the affordance, not the target screen.
+        "common.back",
+        # Abandon the current flow without doing it.
+        "common.cancel",
+        # Re-read the screen you are already on.
+        "common.refresh",
+        # Re-attempt the failed action (same destination, deliberately re-offered).
+        "common.retry",
+        # The admin panel's own step-back affordance, separate section tree.
+        "admin.back",
+        # Re-run the last exec; the destination is a prompt, not a screen to name.
+        "exec.run_again",
+        # Retry the install flow from its result screen.
+        "package.result_retry",
+        # On the cap screen this opens the list *to remove one*; the verb is the point.
+        "tunnel.remove_one",
+        # Same Publish destination, deliberately labelled with its ceiling
+        # ("· limit reached") because the number is the message.
+        "tunnel.publish_full",
+    }
+)
+
 #: (current-key, catalog-label key, callback) in display order.
 DESTINATIONS: tuple[tuple[str, str, str], ...] = (
     ("workspaces", "menu.workspaces", "ws:list"),
