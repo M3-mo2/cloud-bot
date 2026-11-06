@@ -89,6 +89,8 @@ MESSAGES: dict[str, str] = {
     "pay.refund_already": "That payment was already refunded.",
 
     # -- onboarding / language ----------------------------------------------
+    "lang.name.en": "English",
+    "lang.name.ar": "Arabic",
     "lang.title": "🌐 Choose your language",
     "lang.prompt_ar": "اختر لغتك",
     "lang.change_later_en": "You can change this later from the menu.",
