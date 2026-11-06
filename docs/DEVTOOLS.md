@@ -157,3 +157,38 @@ listed below, split into what was fixed in passing and what is left for a human.
 * 7 `screens.orphan` notes: screens reached only through the catalog, `/dev`, or
   the error-mapping helper (the `err_*` boards) rather than a named handler. They
   are not dead, but the report names them so the distinction is visible.
+
+---
+
+## `flow` — the generated flow map (`docs/FLOW-MAP.md`)
+
+```
+python -m scripts.map_flow        # or: python scripts/map_flow.py
+```
+
+The third tool is a **generator**, not a checker. It derives a single large
+document — the map of every screen, every button and where each leads — and
+writes `docs/FLOW-MAP.md`. The document is output, never hand-edited: a test
+fails when the committed copy is stale.
+
+It reuses the same instruments as the doctor and adds the one piece they lack:
+
+* screens and buttons come from `presentation.catalog` / `button_infos`;
+* the action of a button is the callback codec's own `action` (the graph edge);
+* the handler that claims an action is found with `devtools.checks`' route
+  extraction (the doctor's parser, not a second one);
+* the screens that handler renders are found with the package-wide, alias-aware
+  call graph added to `devtools.project` (`build_call_graph`); and the catalog's
+  own `SCREEN_BUILDERS` lambdas are resolved to their builder functions, so
+  ``file:view`` lands on ``file_view`` and ``file_view_binary``.
+
+Everything is measured, so the "contradictions" section is a report the maintainer
+can act on: one destination wearing several labels, a repeated button on one
+screen, dead ends, orphans (with the error-guard and text-step screens excluded
+and named), two-screen loops, inside/outside nav violations, and depth from
+`/start`. The numbers in the summary are produced by the script, and the tests
+assert that each number equals the count in the section it summarises.
+
+The generator is offline: it imports the presentation catalogue (to render
+screens) but never a bot, dispatcher or engine, and a test proves a full run
+completes with `socket.socket` patched to raise.

@@ -161,3 +161,86 @@ class SourceTree:
         return found
 
 __all__ = ["AREAS", "Module", "SourceTree"]
+
+# -- call graph -------------------------------------------------------------
+def module_path(relative: str) -> str:
+    """``cloudbot/handlers/files.py`` → ``cloudbot.handlers.files``."""
+    path = relative[:-3].replace("/", ".")
+    return path[: -len(".__init__")] if path.endswith(".__init__") else path
+
+@dataclass(frozen=True)
+class FunctionRef:
+    """A resolved function: its module, name and fully qualified id."""
+
+    module: str
+    name: str
+
+    @property
+    def ident(self) -> str:
+        return f"{self.module}::{self.name}"
+
+@dataclass
+class CallGraph:
+    """A package-wide, alias-resolved call graph of every function defined here.
+
+    ``nodes[ident]`` is the set of idents that function calls. Every call is
+    resolved through the module's own ``from … import …`` aliases, so
+    ``entry.publish_screen(...)`` and ``*_screens.tunnels_screen(...)`` are told
+    apart and neither is mistaken for a same-named function elsewhere. The map is
+    deliberately conservative: an unresolvable call is simply dropped.
+    """
+
+    nodes: dict[str, set[str]]
+    modules: dict[str, str]  # ident → relative module path
+
+
+def build_call_graph(tree: SourceTree) -> CallGraph:
+    paths = {module_path(m.relative) for m in tree.modules}
+    nodes: dict[str, set[str]] = {}
+    modules: dict[str, str] = {}
+    for module in tree.modules:
+        mod = module_path(module.relative)
+        aliases: dict[str, str] = {}
+        symbols: dict[str, tuple[str, str]] = {}
+        for node in ast.walk(module.tree):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                for alias in node.names:
+                    if alias.name == "*":
+                        continue
+                    full = f"{node.module}.{alias.name}"
+                    if full in paths:
+                        aliases[alias.asname or alias.name] = full
+                    symbols[alias.asname or alias.name] = (node.module, alias.name)
+        for node in ast.walk(module.tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            ident = f"{mod}::{node.name}"
+            modules[ident] = module.relative
+            targets = nodes.setdefault(ident, set())
+            for call in ast.walk(node):
+                if not isinstance(call, ast.Call):
+                    continue
+                func = call.func
+                if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+                    alias = func.value.id
+                    if alias in aliases:
+                        targets.add(f"{aliases[alias]}::{func.attr}")
+                elif isinstance(func, ast.Name):
+                    name = func.id
+                    if name in symbols:
+                        symbol_module, symbol_name = symbols[name]
+                        targets.add(f"{symbol_module}::{symbol_name}")
+                    targets.add(f"{mod}::{name}")
+    return CallGraph(nodes=nodes, modules=modules)
+
+def reachable_functions(graph: CallGraph, start: str) -> set[str]:
+    """Every function ident reachable from ``start`` by calls (inclusive)."""
+    seen = {start}
+    stack = [start]
+    while stack:
+        current = stack.pop()
+        for target in graph.nodes.get(current, ()):
+            if target not in seen:
+                seen.add(target)
+                stack.append(target)
+    return seen
