@@ -5,7 +5,7 @@ from __future__ import annotations
 MESSAGES: dict[str, str] = {
     # -- common --------------------------------------------------------------
     "common.back": "⬅️ رجوع",
-    "common.menu": "🏠 القائمة",
+    "common.menu": "☰ القائمة",
     "common.cancel": "✖️ إلغاء",
     "common.retry": "🔄 إعادة",
     "common.confirm": "✅ تأكيد",
@@ -49,22 +49,22 @@ MESSAGES: dict[str, str] = {
     "welcome.tagline": "بيئات تطوير واستضافة سحابية — من هاتفك بكل سهولة.",
     "welcome.body": "أنشئ مساحة عمل، أضف مشروعك، واتركه يعمل في السحابة.\nبلا حاسوب، بلا إعدادات، بلا تعقيد.",
     "welcome.ready": "جاهز للبدء؟",
-    "welcome.start_hint": "اضغط <b>ابدأ</b> وابدأ فورًا.",
-    "welcome.start": "▶️ ابدأ",
+    "welcome.start_hint": "اضغط <b>مساحة جديدة</b> وابدأ فورًا.",
+    "welcome.start": "➕ مساحة جديدة",
 
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
     "menu.hello": "مرحبًا، {name} 👋",
-    "menu.tap_hint": "اضغط على مساحة لفتحها، أو أنشئ واحدة جديدة.",
+    "menu.tap_hint": "افتح «مساحاتي» للدخول إلى مساحة، أو ابدأ واحدة جديدة.",
     "menu.new_workspace": "➕ مساحة جديدة",
     "menu.settings": "⚙️ الإعدادات",
-    "menu.workspaces": "📦 المساحات",
+    "menu.workspaces": "📦 مساحاتي",
     "menu.language": "🌐 اللغة",
     "menu.help": "❓ مساعدة",
-    "menu.column.workspace": "المساحة",
-    "menu.column.status": "الحالة",
-    "menu.column.runs": "التشغيلات",
-    "menu.column.disk": "القرص",
+    "menu.plan_line": "الخطة: {plan}",
+    "menu.ws.running": "{n} قيد التشغيل",
+    "menu.and_more": "… و{n} أخرى",
+    "menu.workspaces_more": "اعرض كل الـ{n} في «مساحاتي».",
 
     # -- help ----------------------------------------------------------------
     "help.title": "❓ مساعدة",
@@ -92,7 +92,7 @@ MESSAGES: dict[str, str] = {
     "ws.list.empty_line1": "لا توجد لديك أي مساحات عمل بعد.",
     "ws.list.empty_line2": "مساحة العمل هي بيئتك الخاصة المعزولة التي تشغّل فيها الأكواد بأمان.",
     "ws.page": "صفحة {page} من {total}",
-    "ws.open": "📦 {name}",
+    "ws.open": "{name}",
     "ws.column.name": "الاسم",
     "ws.column.status": "الحالة",
     "ws.column.runs": "التشغيلات",

@@ -1,3 +1,3 @@
-▶️ Start [ws:new] enabled
-📦 Workspaces [ws:list] enabled | ⚙️ Settings [nav:settings] enabled
+➕ New Workspace [ws:new] enabled
+📦 My workspaces [ws:list] enabled | ⚙️ Settings [nav:settings] enabled
 🌐 Language [nav:language] enabled | ❓ Help [nav:help] enabled

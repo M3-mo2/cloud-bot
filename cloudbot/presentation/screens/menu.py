@@ -5,14 +5,28 @@ from __future__ import annotations
 from cloudbot.core.locale import LOCALE_LABELS, Locale
 from cloudbot.domain.entities import Workspace
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.i18n.formatters import format_bytes_pair, format_count
+from cloudbot.presentation.i18n.formatters import format_count, localize_digits
 from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
-from cloudbot.presentation.mapping.statuses import display_state, workspace_status_label
+from cloudbot.presentation.mapping.statuses import display_state
 from cloudbot.presentation.rich.document import RichDoc
+from cloudbot.presentation.rich.tags import Html, bold, fragment
 from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
+
+#: How many workspace lines the menu body shows before summarising the rest.
+#: Five lines plus the "and N more" line keep the board inside one phone screen;
+#: the remainder is never silently dropped (see ``main_menu``).
+MENU_WORKSPACE_LINES = 5
+
+
+def _line(name: str, status: str, runs: str | None = None) -> Html:
+    """One scannable workspace line: name, state, and the one number that matters."""
+    parts = [bold(fragment(name)), " — ", fragment(status)]
+    if runs:
+        parts += [" · ", fragment(runs)]
+    return fragment(parts)
 
 
 def welcome_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
@@ -39,7 +53,22 @@ def main_menu(
     *,
     display_name: str = "",
     inside: Workspace | None = None,
+    plan: str | None = None,
 ) -> Screen:
+    """The main board: what the user came for, then a principled button grid.
+
+    The body answers *which workspaces do I have, which is running, and how do I
+    start a new one* — one compact line per workspace, never a four-column table.
+    The keyboard reads top-to-bottom in the order attention moves: **the thing
+    they came to do** (``New Workspace``, full width), then **their own stuff**
+    (``My workspaces`` · the subscription), then **the account** (``Settings`` ·
+    ``Help``).
+
+    Subscription seam: ``plan`` is the *derived* plan label (``active``, ``trial``,
+    ``expiring`` …) for the wallet/subscription screens added by ``subs2``. Those
+    screens do not exist yet, so this place is deliberately a no-op: pass ``plan``
+    and the status line appears; leave it ``None`` and nothing is invented.
+    """
     if not workspaces:
         return welcome_screen(locale, inside=inside)
 
@@ -48,31 +77,31 @@ def main_menu(
     doc.p(catalog.t("menu.hello", locale, name=display_name))
     doc.div()
 
+    # -- subscription status line (seam for subs2's wallet screens) ----------
+    if plan:
+        doc.p(catalog.t("menu.plan_line", locale, plan=catalog.t(f"plan.{plan}", locale)))
+
     doc.p(format_count("count.workspaces", len(workspaces), locale))
-    rows = []
-    for ws in workspaces[:5]:
+    shown = workspaces[:MENU_WORKSPACE_LINES]
+    for ws in shown:
         label_key, emoji = display_state(ws.status, ws.summary.state)
         status = f"{emoji} {catalog.t(label_key, locale)}"
         runs = (
-            catalog.t("ws.runs.active", locale, n=_num(ws.summary.runs_active, locale))
+            catalog.t("menu.ws.running", locale, n=_num(ws.summary.runs_active, locale))
             if ws.summary.runs_active
-            else catalog.t("ws.runs.none", locale)
+            else None
         )
-        disk = format_bytes_pair(
-            ws.summary.disk_used_bytes,
-            ws.summary.disk_limit_bytes,
-            locale,
+        doc.p(_line(ws.name, status, runs))
+    hidden = len(workspaces) - len(shown)
+    if hidden:
+        # Never a silent truncation: say how many more there are and where.
+        doc.p(
+            _italic(
+                catalog.t("menu.and_more", locale, n=_num(hidden, locale))
+                + " "
+                + catalog.t("menu.workspaces_more", locale, n=_num(len(workspaces), locale))
+            )
         )
-        rows.append([ws.name, status, runs, disk])
-    doc.table(
-        [
-            catalog.t("menu.column.workspace", locale),
-            catalog.t("menu.column.status", locale),
-            catalog.t("menu.column.runs", locale),
-            catalog.t("menu.column.disk", locale),
-        ],
-        rows,
-    )
     doc.p(_italic(catalog.t("menu.tap_hint", locale)))
 
     # Full-width primary action, then the shared 2×2 nav block below it.

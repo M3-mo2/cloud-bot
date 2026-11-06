@@ -272,6 +272,18 @@ def view_for_error(
     return ErrorView("unknown", "err.unknown.title", "err.unknown", retryable=False)
 
 
+def _back_label(action: str, locale: Locale) -> str:
+    """Same destination, same label: the recovery button wears the nav's own words.
+
+    ``nav:menu`` is the menu destination, so it reads ``☰ Menu`` — not a second
+    name (``⬅️ Back``) for the same callback. Any other recovery action keeps the
+    generic Back wording.
+    """
+    if action == "nav:menu":
+        return catalog.t("common.menu", locale)
+    return catalog.t("common.back", locale)
+
+
 def error_screen(
     err: DomainError,
     locale: Locale,
@@ -300,7 +312,7 @@ def error_screen(
         extra.append(inline(catalog.t("common.retry", locale), "nav:refresh", intent=Intent.PRIMARY))
     if extra:
         rows.append(extra)
-    rows.append([inline(catalog.t("common.back", locale), back_action, intent=Intent.PRIMARY)])
+    rows.append([inline(_back_label(back_action, locale), back_action, intent=Intent.PRIMARY)])
 
     if (
         raw_payload
@@ -347,5 +359,5 @@ def error_code_screen(
         extra.append(inline(catalog.t("common.retry", locale), "nav:refresh", intent=Intent.PRIMARY))
     if extra:
         rows.append(extra)
-    rows.append([inline(catalog.t("common.back", locale), "nav:menu", intent=Intent.PRIMARY)])
+    rows.append([inline(_back_label("nav:menu", locale), "nav:menu", intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(rows))

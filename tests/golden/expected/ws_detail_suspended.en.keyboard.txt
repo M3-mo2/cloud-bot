@@ -1,4 +1,4 @@
 ▶️ Resume [ws:resume:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled | 📁 Files [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK5:0] enabled
 ▶️ Run [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK5] disabled | 🖥 Terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK5] disabled
 🚪 Log out of workspace [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled
-📦 Workspaces [ws:list] enabled
+📦 My workspaces [ws:list] enabled

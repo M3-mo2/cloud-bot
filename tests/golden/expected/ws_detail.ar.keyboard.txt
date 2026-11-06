@@ -4,4 +4,4 @@
 ⏸️ إيقاف مؤقت [ws:suspend_confirm:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🛑 إيقاف الكل [ws:stop_confirm:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🗑 حذف [ws:delete_confirm:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
-📦 المساحات [ws:list] enabled
+📦 مساحاتي [ws:list] enabled

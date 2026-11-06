@@ -5,7 +5,7 @@ from __future__ import annotations
 MESSAGES: dict[str, str] = {
     # -- common --------------------------------------------------------------
     "common.back": "⬅️ Back",
-    "common.menu": "🏠 Menu",
+    "common.menu": "☰ Menu",
     "common.cancel": "✖️ Cancel",
     "common.retry": "🔄 Retry",
     "common.confirm": "✅ Confirm",
@@ -50,22 +50,22 @@ MESSAGES: dict[str, str] = {
     "welcome.tagline": "Development environments and cloud hosting — right from your phone.",
     "welcome.body": "Create a workspace, add your project, and keep it running in the cloud.\nNo laptop. No setup. No hassle.",
     "welcome.ready": "Ready to begin?",
-    "welcome.start_hint": "Press <b>Start</b> and you're in.",
-    "welcome.start": "▶️ Start",
+    "welcome.start_hint": "Tap <b>New Workspace</b> and you're in.",
+    "welcome.start": "➕ New Workspace",
 
     # -- main menu -----------------------------------------------------------
     "menu.title": "🤖 CloudBot",
     "menu.hello": "Hello, {name} 👋",
-    "menu.tap_hint": "Tap a workspace to open it, or create a new one.",
+    "menu.tap_hint": "Open My workspaces to enter one, or start a new one.",
     "menu.new_workspace": "➕ New Workspace",
     "menu.settings": "⚙️ Settings",
-    "menu.workspaces": "📦 Workspaces",
+    "menu.workspaces": "📦 My workspaces",
     "menu.language": "🌐 Language",
     "menu.help": "❓ Help",
-    "menu.column.workspace": "Workspace",
-    "menu.column.status": "Status",
-    "menu.column.runs": "Runs",
-    "menu.column.disk": "Disk",
+    "menu.plan_line": "Plan: {plan}",
+    "menu.ws.running": "{n} running",
+    "menu.and_more": "… and {n} more",
+    "menu.workspaces_more": "See all {n} in My workspaces.",
 
     # -- help ----------------------------------------------------------------
     "help.title": "❓ Help",
@@ -93,7 +93,7 @@ MESSAGES: dict[str, str] = {
     "ws.list.empty_line1": "You don't have any workspaces yet.",
     "ws.list.empty_line2": "A workspace is your own private sandbox where you can run code safely.",
     "ws.page": "Page {page} of {total}",
-    "ws.open": "📦 {name}",
+    "ws.open": "{name}",
     "ws.column.name": "Name",
     "ws.column.status": "Status",
     "ws.column.runs": "Runs",

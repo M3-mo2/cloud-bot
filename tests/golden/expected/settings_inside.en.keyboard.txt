@@ -1,1 +1,1 @@
-🏠 demo [ws:home] enabled | 📦 Workspaces [ws:list] enabled
+🏠 demo [ws:home] enabled | 📦 My workspaces [ws:list] enabled

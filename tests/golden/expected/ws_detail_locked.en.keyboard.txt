@@ -1,3 +1,3 @@
 🔄 Renew [ws:renew:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled | 📁 Files [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK6:0] enabled
 🚪 Log out of workspace [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK6] enabled
-📦 Workspaces [ws:list] enabled
+📦 My workspaces [ws:list] enabled
