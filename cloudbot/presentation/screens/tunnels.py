@@ -101,6 +101,7 @@ def tunnels_screen(
     of the bot's possibly-stale cached limits.
     """
     page_tunnels, total_pages, _has_more = window(list(tunnels.tunnels), page)
+    page = max(0, min(page, total_pages - 1))
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.title", locale))
     at_cap = max_tunnels is not None and tunnels.count >= max_tunnels
@@ -194,6 +195,7 @@ def tunnels_markup(
 ):
     if page_tunnels is None:
         page_tunnels, total_pages, _has_more = window(list(tunnels.tunnels), page)
+    page = max(0, min(page, total_pages - 1))
     rows: list[list] = []
     # A LINK button per URL — the only place the ephemeral URL appears. A tunnel
     # that is not ``active`` no longer serves: its URL is **removed** and replaced

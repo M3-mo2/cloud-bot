@@ -75,6 +75,7 @@ def ports_screen(
     # still grow without bound.
     entries = list(report.ports) + list(report.unix)
     page_items, total_pages, _has_more = window(entries, page)
+    page = max(0, min(page, total_pages - 1))
     ports = [item for item in page_items if isinstance(item, PortEntry)]
     sockets = [item for item in page_items if isinstance(item, UnixSocket)]
 

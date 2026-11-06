@@ -143,6 +143,7 @@ def archive_result_screen(
     page: int = 0,
 ) -> Screen:
     page_entries, total_pages, _has_more = window(list(result.entries), page)
+    page = max(0, min(page, total_pages - 1))
     doc = _result_doc(
         result,
         ws_id,

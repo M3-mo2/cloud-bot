@@ -80,6 +80,7 @@ def metrics_screen(
         (catalog.t("metrics.live_cgroups", locale), _num(metrics.live_cgroups, locale)),
     ]
     page_rows, total_pages, _has_more = window(rows, page)
+    page = max(0, min(page, total_pages - 1))
 
     doc = RichDoc(locale)
     doc.h(2, catalog.t("metrics.title", locale))

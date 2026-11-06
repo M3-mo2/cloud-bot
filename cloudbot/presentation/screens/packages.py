@@ -45,6 +45,7 @@ def packages_screen(
     pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale, *, page: int = 0
 ) -> Screen:
     page_items, total_pages, _has_more = window(list(pkg_list.packages), page)
+    page = max(0, min(page, total_pages - 1))
     doc = RichDoc(locale)
     doc.h(2, catalog.t("package.title", locale))
     doc.p(catalog.t("package.count", locale, n=_num(pkg_list.count, locale)))

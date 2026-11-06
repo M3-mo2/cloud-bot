@@ -70,6 +70,7 @@ def processes_screen(
     process_list: ProcessList, ws_id: WorkspaceId, locale: Locale, *, page: int = 0
 ) -> Screen:
     page_items, total_pages, _has_more = window(list(process_list.processes), page)
+    page = max(0, min(page, total_pages - 1))
     doc = RichDoc(locale)
     doc.h(2, catalog.t("process.title", locale))
     doc.p(catalog.t("process.count", locale, n=_num(process_list.count, locale)))
@@ -122,6 +123,7 @@ def processes_markup(
 ):
     if page_items is None:
         page_items, total_pages, _has_more = window(list(process_list.processes), page)
+    page = max(0, min(page, total_pages - 1))
     rows: list[list] = []
     # Stop buttons follow the page, never the whole inventory.
     for entry in page_items:
