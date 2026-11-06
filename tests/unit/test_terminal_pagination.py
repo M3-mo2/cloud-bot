@@ -92,8 +92,8 @@ def test_a_page_renders_one_compact_line_per_terminal_not_a_growing_table(locale
     # One identity line per terminal of this page, and no more.
     assert html.count("<code>") == len(window) == term_screens.PAGE_SIZE
     # The count/footer describe this page, not the whole list.
-    assert "10" in html or "١٠" in html
-    assert "1" in html and "2" in html  # "page 1 of 2" / "صفحة ١ من ٢"
+    assert "10" in html  # TASK digits: ASCII in every locale
+    assert "1" in html and "2" in html  # "page 1 of 2" / "صفحة 1 من 2"
 
 
 def test_ordering_is_running_first_then_newest_so_the_live_one_is_on_page_one():
@@ -250,7 +250,7 @@ def test_the_view_body_carries_no_size_line(locale):
     html = term_screens.terminal_view(session, WS, locale, output="$ ").doc.html
     assert "الحجم" not in html
     assert "Size:" not in html
-    assert "٨٠×٢٤" not in html and "80×24" not in html
+    assert "80×24" not in html  # and the Arabic-Indic form is gone too
 
 
 # -- 4. a retired resize button is answered, and arms nothing -----------------

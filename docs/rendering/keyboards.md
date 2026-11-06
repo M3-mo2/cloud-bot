@@ -185,7 +185,7 @@ Top-level screens use the shared bottom block (§3a). Inner screens keep a
 ### 5.4 Pagination
 
 ```
-[ ⬅️ السابق ] (primary)  [ ٢ / ٥ ] (disabled)  [ التالي ➡️ ] (primary)
+[ ⬅️ السابق ] (primary)  [ 2 / 5 ] (disabled)  [ التالي ➡️ ] (primary)
 ```
 
 The page indicator is a `disabled=True` button used purely as a label — one of the

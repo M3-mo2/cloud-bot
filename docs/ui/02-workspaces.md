@@ -33,10 +33,10 @@ Status vocabulary used here comes from
 <p>مساحتان</p>
 <table is_bordered="true">
   <tr><th>الاسم</th><th>الحالة</th><th>التشغيلات</th><th>القرص</th></tr>
-  <tr><td><code>demo</code></td><td>نشِطة</td><td>١ نشِط</td><td>٢٫٣ ميغابايت / ٢٥٦ ميغابايت</td></tr>
-  <tr><td><code>scraper</code></td><td>متوقفة مؤقتًا</td><td>—</td><td>١٢ ميغابايت / ٥١٢ ميغابايت</td></tr>
+  <tr><td><code>demo</code></td><td>نشِطة</td><td>1 نشِط</td><td>2.3 ميغابايت / 256 ميغابايت</td></tr>
+  <tr><td><code>scraper</code></td><td>متوقفة مؤقتًا</td><td>—</td><td>12 ميغابايت / 512 ميغابايت</td></tr>
 </table>
-<p><i>صفحة ١ من ١</i></p>
+<p><i>صفحة 1 من 1</i></p>
 ```
 
 ### 1.3 Keyboard
@@ -122,11 +122,11 @@ Keyboard: **➕ New Workspace** (inline, success), **☰ Menu** (inline, primary
   <tr><th>بيئة التشغيل</th><td>python3</td></tr>
   <tr><th>الملف التعريفي</th><td>python</td></tr>
   <tr><th>المعالج</th><td>نواة واحدة</td></tr>
-  <tr><th>الذاكرة</th><td>٥١٢ ميغابايت</td></tr>
-  <tr><th>القرص</th><td>٢٫٣ ميغابايت / ٢٥٦ ميغابايت (١٪)</td></tr>
-  <tr><th>التشغيلات</th><td>٣ إجمالًا، ١ نشِط</td></tr>
+  <tr><th>الذاكرة</th><td>512 ميغابايت</td></tr>
+  <tr><th>القرص</th><td>2.3 ميغابايت / 256 ميغابايت (1%)</td></tr>
+  <tr><th>التشغيلات</th><td>3 إجمالًا، 1 نشِط</td></tr>
   <tr><th>آخر نشاط</th><td>قبل دقيقتين</td></tr>
-  <tr><th>أُنشئت</th><td>٣ نوفمبر ٢٠٢٦، ٢٠:٤١</td></tr>
+  <tr><th>أُنشئت</th><td>3 نوفمبر 2026، 20:41</td></tr>
 </table>
 <hr>
 <p><b>المعرّف:</b> <code>ws_01M6HJASCWM9Z1PF755GT89NK4</code></p>
@@ -282,7 +282,7 @@ Arabic (`is_rtl=True`):
 ```html
 <h2>➕ مساحة جديدة</h2>
 <p>أرسل لي اسمًا لمساحة العمل.</p>
-<p><i>حتى ١٢٨ حرفًا. هذا مجرد اسم — يمكنك تغييره لاحقًا.</i></p>
+<p><i>حتى 128 حرفًا. هذا مجرد اسم — يمكنك تغييره لاحقًا.</i></p>
 ```
 
 Keyboard (markup has `force_reply=True`):

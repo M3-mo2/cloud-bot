@@ -55,7 +55,7 @@ def _buttons(screen) -> list:
 
 def _footer_present(html: str, locale: Locale) -> bool:
     """Whether the page-2 footer is there (any page total)."""
-    page_two = "2" if locale is Locale.EN else "٢"
+    page_two = "2"  # TASK digits: ASCII in every locale
     joiner = " of " if locale is Locale.EN else " من "
     return f"Page {page_two}{joiner}" in html or f"صفحة {page_two}{joiner}" in html
 
@@ -215,7 +215,7 @@ def test_a_full_list_renders_one_page_and_says_which(name, locale):
     assert len(_buttons(screen)) <= 40, "the keyboard grew with the list length"
     # The footer is present (the audit rule) and names page 2 of 3 on page 2.
     assert _footer_present(build(count, locale, 1).doc.html, locale)
-    assert "Page 1 of" in screen.doc.html or "صفحة ١ من" in screen.doc.html
+    assert "Page 1 of" in screen.doc.html or "صفحة 1 من" in screen.doc.html
     # The pager row exists and offers only "next" on the first page.
     actions = [b.callback_data for b in _buttons(screen) if b.callback_data]
     assert any(a.endswith(":1") for a in actions), f"{name} has no next-page button"
@@ -279,8 +279,8 @@ def test_metrics_goes_through_the_one_pager_too():
         assert catalog.t(
             "common.page",
             locale,
-            page="1" if locale is Locale.EN else "١",
-            total="1" if locale is Locale.EN else "١",
+            page="1",  # TASK digits: ASCII in every locale
+            total="1",  # TASK digits: ASCII in every locale
         ) in screen.doc.html
 
 

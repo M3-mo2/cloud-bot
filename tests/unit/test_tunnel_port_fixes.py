@@ -369,7 +369,7 @@ def test_f06_picker_marks_the_unattributed_port_without_hiding_it():
         screen = tnl.publish_port_screen(WS, locale, detected=detected)
         ports = _offered_ports(screen)
         assert ports == [8080, 9090], f"the unattributed port was hidden: {ports}"
-        mark = catalog.t("tunnel.publish_unattributed_port", locale, port="٩٠٩٠" if locale is Locale.AR else "9090")
+        mark = catalog.t("tunnel.publish_unattributed_port", locale, port="9090")  # TASK digits
         assert esc(mark) in screen.doc.html, "the unattributed port is not marked"
 
 

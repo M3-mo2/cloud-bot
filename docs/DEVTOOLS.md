@@ -126,7 +126,7 @@ listed below, split into what was fixed in passing and what is left for a human.
   the detector was corrected, not the catalogue.)
 * **Placeholder drift** `ws.cpu.cores` in `ar` was missing `{n}` — but it is a
   deliberate singular ("one core", never a number). Left as a documented exception
-  rather than printing "١ نواة"; the report explains it.
+  rather than printing "1 نواة"; the report explains it.
 * **A user-facing string outside the catalogue**: the throttle's "going a bit fast"
   now uses `common.too_fast` (both locales).
 * **A floating docstring** in `domain/ports/subscriptions.py` (after `...`) became

@@ -35,7 +35,7 @@ Reached from a workspace's **▶️ Run**.
 <h2>▶️ تشغيل</h2>
 <p>كيف تريد تشغيل الكود في <b>demo</b>؟</p>
 <ul>
-  <li><b>أمر سريع</b> — أمر قصير، والنتيجة خلال ٦٠ ثانية كحد أقصى.</li>
+  <li><b>أمر سريع</b> — أمر قصير، والنتيجة خلال 60 ثانية كحد أقصى.</li>
   <li><b>مهمة خلفية</b> — تشغيل أطول يمكنك متابعته مباشرة وإيقافه.</li>
 </ul>
 ```
@@ -68,7 +68,7 @@ Arabic:
 ```html
 <h2>⚡ أمر سريع</h2>
 <p>أرسل أمرًا لتشغيله (مثال <code>python3 main.py</code>).</p>
-<p><i>يعمل لمدة ٦٠ ثانية كحد أقصى. تُعرض المخرجات هنا.</i></p>
+<p><i>يعمل لمدة 60 ثانية كحد أقصى. تُعرض المخرجات هنا.</i></p>
 ```
 
 Keyboard: **✖️ Cancel** (primary), `force_reply=True`.
@@ -89,12 +89,12 @@ args: ['a', 'b']
 Arabic (`is_rtl=True`):
 
 ```html
-<h2>✅ انتهى بنجاح (الرمز ٠)</h2>
+<h2>✅ انتهى بنجاح (الرمز 0)</h2>
 <pre><code class="language-text">hello from main.py
 args: ['a', 'b']
 </code></pre>
 <details><summary>الخطأ القياسي (فارغ)</summary><pre><code></code></pre></details>
-<p><i>٦٨ ملّي ثانية</i></p>
+<p><i>68 ملّي ثانية</i></p>
 ```
 
 ### 2.3 Non-zero exit
@@ -115,20 +115,20 @@ SystemExit: 1
 Arabic:
 
 ```html
-<h2>❌ فشل (الرمز ١)</h2>
+<h2>❌ فشل (الرمز 1)</h2>
 <pre><code class="language-text"></code></pre>
 <details open><summary>الخطأ القياسي</summary><pre><code class="language-text">Traceback (most recent call last):
   File "/workspace/main.py", line 3, in &lt;module&gt;
     raise SystemExit(1)
 SystemExit: 1
 </code></pre></details>
-<p><i>١٢٠ ملّي ثانية</i></p>
+<p><i>120 ملّي ثانية</i></p>
 ```
 
 ### 2.4 Timeout / truncated / empty
 
 - **Timed out:** heading `⏱️ Stopped (60 s limit)` /
-  `⏱️ تم الإيقاف (حد ٦٠ ثانية)`; body explains the hard cap.
+  `⏱️ تم الإيقاف (حد 60 ثانية)`; body explains the hard cap.
 - **Truncated** (`truncated:true`): a row
   `⚠️ Output was shortened.` / `⚠️ تم اختصار المخرجات.`
 - **No output:** `📭 No output.` / `📭 لا توجد مخرجات.`
@@ -248,7 +248,7 @@ Arabic (`is_rtl=True`):
 processed 100 records
 processed 200 records
 </code></pre>
-<p><i>حُدّث الآن · ٣١٢ بايت</i></p>
+<p><i>حُدّث الآن · 312 بايت</i></p>
 ```
 
 > **Progress bar.** When the run exposes a finite `timeout_sec`, a bar is added:
@@ -278,13 +278,13 @@ English:
 Arabic:
 
 ```html
-<h2>✅ انتهى بنجاح (الرمز ٠)</h2>
+<h2>✅ انتهى بنجاح (الرمز 0)</h2>
 <pre><code class="language-text">done: 500 records
 </code></pre>
 <details><summary>الخطأ القياسي (فارغ)</summary><pre><code></code></pre></details>
 <table is_bordered="true">
-  <tr><th>المدة</th><td>٤٫٢ ثانية</td></tr>
-  <tr><th>المخرجات</th><td>١٫٤ كيلوبايت</td></tr>
+  <tr><th>المدة</th><td>4.2 ثانية</td></tr>
+  <tr><th>المخرجات</th><td>1.4 كيلوبايت</td></tr>
 </table>
 ```
 
@@ -295,7 +295,7 @@ Each terminal run status maps to a humanized heading (full table in
 
 | `run.status` | EN heading | AR heading |
 | --- | --- | --- |
-| `exited` (exit 0) | ✅ Finished (exit 0) | ✅ انتهى بنجاح (الرمز ٠) |
+| `exited` (exit 0) | ✅ Finished (exit 0) | ✅ انتهى بنجاح (الرمز 0) |
 | `exited` (exit ≠ 0) | ❌ Failed (exit N) | ❌ فشل (الرمز N) |
 | `killed` | ⏹ Stopped | ⏹ أُوقف |
 | `timeout` | ⏱️ Timed out | ⏱️ انتهت المهلة |
@@ -387,14 +387,14 @@ Keyboard: **⏹ إيقاف / ⏹ Stop** (danger), **✖️ إلغاء / ✖️ C
 
 ```html
 <h2>📜 التشغيلات</h2>
-<p>١٢ تشغيلًا</p>
+<p>12 تشغيلًا</p>
 <table is_bordered="true">
   <tr><th>التشغيل</th><th>الحالة</th><th>الوقت</th></tr>
   <tr><td><code>run_…a1</code></td><td>✅ انتهى بنجاح</td><td>قبل دقيقتين</td></tr>
   <tr><td><code>run_…b2</code></td><td>🐌 بلغ حد السرعة</td><td>قبل ساعة</td></tr>
-  <tr><td><code>run_…c3</code></td><td>⏱️ انتهت المهلة</td><td>قبل ٣ ساعات</td></tr>
+  <tr><td><code>run_…c3</code></td><td>⏱️ انتهت المهلة</td><td>قبل 3 ساعات</td></tr>
 </table>
-<p><i>صفحة ١ من ٢</i></p>
+<p><i>صفحة 1 من 2</i></p>
 ```
 
 > **Three columns, not eight (screens-b).** The row is what a user scans — the
@@ -494,7 +494,7 @@ Arabic (`is_rtl=True`):
 <h2>🖥 الطرفية</h2>
 <p><b>الحالة:</b> 🟢 قيد التشغيل</p>
 <pre><code class="language-text">$ </code></pre>
-<p><i>تُغلق هذه الطرفية بعد ١٥ د ٠٠ ث من الخمول، أو ١ س ٠٠ د ٠٠ ث من فتحها.</i></p>
+<p><i>تُغلق هذه الطرفية بعد 15 د 00 ث من الخمول، أو 1 س 00 د 00 ث من فتحها.</i></p>
 <p><i>هذه الطرفية نشِطة. أرسل أمرًا، أو استخدم الأزرار بالأسفل.</i></p>
 ```
 

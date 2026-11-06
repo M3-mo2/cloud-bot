@@ -48,10 +48,10 @@ pages through them.
   <tr><th>الاسم</th><th>النوع</th><th>الحجم</th></tr>
   <tr><td>📁 <code>src</code></td><td>مجلد</td><td>—</td></tr>
   <tr><td>📁 <code>data</code></td><td>مجلد</td><td>—</td></tr>
-  <tr><td>🐍 <code>main.py</code></td><td>python · قابل للتشغيل</td><td>٨١٢ بايت</td></tr>
-  <tr><td>📄 <code>README.md</code></td><td>ملف</td><td>١٫٢ كيلوبايت</td></tr>
+  <tr><td>🐍 <code>main.py</code></td><td>python · قابل للتشغيل</td><td>812 بايت</td></tr>
+  <tr><td>📄 <code>README.md</code></td><td>ملف</td><td>1.2 كيلوبايت</td></tr>
 </table>
-<p><i>٤ عناصر · صفحة ١ من ١</i></p>
+<p><i>4 عناصر · صفحة 1 من 1</i></p>
 ```
 
 Notes:
@@ -145,7 +145,7 @@ if __name__ == "__main__":
 ```html
 <h2>🐍 main.py</h2>
 <table is_bordered="true">
-  <tr><th>الحجم</th><td>٨١٢ بايت</td></tr>
+  <tr><th>الحجم</th><td>812 بايت</td></tr>
   <tr><th>النوع</th><td>text/x-python</td></tr>
   <tr><th>قابل للتشغيل</th><td>python3</td></tr>
 </table>
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     greet("world")
 </code></pre>
-<p><i>sha256 9f2c…a1 · الأسطر ١–٥ من ٥</i></p>
+<p><i>sha256 9f2c…a1 · الأسطر 1–5 من 5</i></p>
 ```
 
 > Code blocks render in logical (LTR) order regardless of `is_rtl`, so code is
@@ -199,7 +199,7 @@ Arabic (`is_rtl=True`):
 ```html
 <h2>📦 archive.zip</h2>
 <table is_bordered="true">
-  <tr><th>الحجم</th><td>٤٫١ ميغابايت</td></tr>
+  <tr><th>الحجم</th><td>4.1 ميغابايت</td></tr>
   <tr><th>النوع</th><td>application/zip</td></tr>
 </table>
 <blockquote>👁 لا تتوفر معاينة لهذا النوع من الملفات.</blockquote>
@@ -338,7 +338,7 @@ Arabic:
 ```html
 <h2>📤 رفع ملف</h2>
 <p>أرسل لي الملف لرفعه إلى <code>/src</code>.</p>
-<p><i>الحجم الأقصى: ٢٥ ميغابايت.</i></p>
+<p><i>الحجم الأقصى: 25 ميغابايت.</i></p>
 ```
 
 Keyboard: **✖️ Cancel** (primary), **📁 Copy to /  نسخ إلى /** (primary, optional
@@ -356,7 +356,7 @@ Arabic:
 
 ```html
 <h2>📤 رفع ملف</h2>
-<blockquote>⚠️ هذا الملف كبير جدًا (٤٨ ميغابايت). الحد هو ٢٥ ميغابايت.</blockquote>
+<blockquote>⚠️ هذا الملف كبير جدًا (48 ميغابايت). الحد هو 25 ميغابايت.</blockquote>
 ```
 
 ### 6.3 Progress
@@ -374,8 +374,8 @@ Arabic (`is_rtl=True`):
 
 ```html
 <h2>📤 جارٍ الرفع…</h2>
-<p><b>report.pdf</b> · ١٢٫٤ ميغابايت / ٢٥ ميغابايت</p>
-<pre><code>[█████░░░░░░░░] ٥٠٪</code></pre>
+<p><b>report.pdf</b> · 12.4 ميغابايت / 25 ميغابايت</p>
+<pre><code>[█████░░░░░░░░] 50%</code></pre>
 ```
 
 ### 6.4 Result
@@ -384,7 +384,7 @@ Arabic (`is_rtl=True`):
 <blockquote>✅ <b>report.pdf</b> uploaded to <code>/src</code> (1.2 MB).</blockquote>
 ```
 ```html
-<blockquote>✅ تم رفع <b>report.pdf</b> إلى <code>/src</code> (١٫٢ ميغابايت).</blockquote>
+<blockquote>✅ تم رفع <b>report.pdf</b> إلى <code>/src</code> (1.2 ميغابايت).</blockquote>
 ```
 
 Then the listing screen for `/src`.

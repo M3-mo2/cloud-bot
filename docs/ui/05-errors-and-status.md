@@ -450,7 +450,7 @@ value maps to an emoji + heading + short label, AR and EN.
 | --- | --- | --- | --- | --- |
 | `queued` | ⏳ Queued | Queued | ⏳ في الانتظار | في الانتظار |
 | `running` | ⏳ Running | Running | ⏳ قيد التشغيل | قيد التشغيل |
-| `exited` (exit 0) | ✅ Finished (exit 0) | Finished | ✅ انتهى بنجاح (الرمز ٠) | انتهى |
+| `exited` (exit 0) | ✅ Finished (exit 0) | Finished | ✅ انتهى بنجاح (الرمز 0) | انتهى |
 | `exited` (exit ≠ 0) | ❌ Failed (exit N) | Failed | ❌ فشل (الرمز N) | فشل |
 | `killed` | ⏹ Stopped | Stopped | ⏹ أُوقف | أُوقف |
 | `timeout` | ⏱️ Timed out | Timed out | ⏱️ انتهت المهلة | انتهت المهلة |
@@ -463,7 +463,7 @@ Notes:
 - `interrupted` means the server restarted mid-run (SPEC §2.5.2): the short label
   is "Interrupted / انقطع", with a tooltip line "The server was restarted."
   / "أُعيد تشغيل الخادم."
-- `exit N` renders N as a locale number in Arabic (`الرمز ١`), but the underlying
+- `exit N` renders N with Latin digits in Arabic too (`الرمز 1`), and the underlying
   number is never digit-localized in `<code>` ids.
 - A run's `timeout_sec` being `null` (with `unlimited:true`) never yields "0";
   the UI says "Unlimited / بلا حد" and shows elapsed, not a percentage.
@@ -544,10 +544,10 @@ Counts use the plural rules in
 
 | Engine field | EN | AR |
 | --- | --- | --- |
-| `disk_percent` | "{p}% used" | "{p}٪ مستخدَم" |
+| `disk_percent` | "{p}% used" | "{p}% مستخدَم" |
 | `disk_complete:false` | "≥ {used} used" (lower bound) | "≥ {used} مستخدَم" (حد أدنى) |
-| `ram_percent` | "{p}% of {limit}" | "{p}٪ من {limit}" |
-| `ram_used_bytes:0` (no workload) | "0 B (idle)" | "٠ بايت (خامل)" |
+| `ram_percent` | "{p}% of {limit}" | "{p}% من {limit}" |
+| `ram_used_bytes:0` (no workload) | "0 B (idle)" | "0 بايت (خامل)" |
 | `truncated:true` (a list) | "⚠️ Some items are hidden." | "⚠️ بعض العناصر مخفية." |
 | `output_truncated:true` | "⚠️ Older output was dropped." | "⚠️ تم حذف المخرجات الأقدم." |
 | run `unlimited:true` | "Unlimited" | "بلا حد" |

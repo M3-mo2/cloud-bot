@@ -62,7 +62,7 @@ def test_too_many_tunnels_names_the_limit_and_offers_removal(locale):
     screen = tnl.publish_refused_screen(8082, WS, locale, max_tunnels=2)
     html = screen.doc.html
     # The actual number of the limit is present, in the user's own words.
-    assert "2" in html or "٢" in html
+    assert "2" in html  # TASK digits: ASCII in every locale
     assert catalog.t("tunnel.limit_title", locale) in html
     # The fix: a button whose callback opens the list/removal path.
     callbacks = [b.callback_data for b in _buttons(screen) if b.callback_data]
@@ -140,8 +140,8 @@ def test_tunnels_screen_shows_n_of_m_from_fake_meta(locale):
     expected = catalog.t(
         "tunnel.usage",
         locale,
-        used="2" if locale is _EN else "٢",
-        max="5" if locale is _EN else "٥",
+        used="2",  # TASK digits: ASCII in every locale
+        max="5",  # TASK digits: ASCII in every locale
     )
     assert expected in screen.doc.html
     # No hardcoded ceiling leaked from the old constant.
@@ -155,7 +155,7 @@ def test_at_cap_publish_entry_is_disabled_with_a_reason(locale):
     assert publish, "no publish entry rendered"
     assert all(b.disabled is not None for b in publish)
     # The reason is on the screen and in the button label.
-    assert esc(catalog.t("tunnel.limit_note", locale, max="2" if locale is _EN else "٢")) in screen.doc.html
+    assert esc(catalog.t("tunnel.limit_note", locale, max="2")) in screen.doc.html
     assert catalog.t("tunnel.publish_full", locale) in publish[0].text
 
 

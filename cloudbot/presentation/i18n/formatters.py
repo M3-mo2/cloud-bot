@@ -1,12 +1,18 @@
 """Locale-aware formatters: bytes, durations, relative time, percent, dates.
 
-No screen formats a number itself. Arabic uses Arabic-Indic digits and the
-Arabic decimal/percent separators. Identifiers (``ws_...``) are never passed
-through here — they stay ASCII in ``<code>``.
+No screen formats a number itself.
+
+**Digits are always ASCII ``0-9``, in every locale.** That is the product rule:
+Arabic copy, Arabic punctuation and Arabic word order stay exactly as they are,
+but a numeral is Latin even when the UI is Arabic — fifty is ``50``, not the
+Arabic-Indic form; ``3.9`` not the Arabic decimal separator; ``3%`` not the
+Arabic percent sign. Identifiers (``ws_...``) are never passed through here —
+they stay ASCII in ``<code>``.
 """
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 
 from babel.core import Locale as BabelLocale
@@ -15,23 +21,65 @@ from babel.dates import format_datetime as _babel_datetime
 from cloudbot.core.locale import Locale
 from cloudbot.presentation.i18n.catalog import CATALOGS
 
-_ARABIC_DIGITS = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+#: Arabic-Indic (U+0660–U+0669) and Extended Arabic-Indic (U+06F0–U+06F9).
+_ARABIC_DIGITS = re.compile(r"[\u0660-\u0669\u06f0-\u06f9]")
 
 
 def localize_digits(text: str, locale: Locale) -> str:
-    """Translate ASCII digits to Arabic-Indic for ``ar``."""
-    if locale is Locale.AR:
-        return text.translate(_ARABIC_DIGITS)
+    """Return ``text`` unchanged — digits are ASCII in every locale.
+
+    Kept on purpose: it is the single seam a future locale would use if it ever
+    needed different numerals, and it is the name the tests assert against. Today
+    it is a pass-through so that no caller (there are over a hundred) has to
+    change and no formatter can accidentally reintroduce Arabic-Indic digits.
+    """
     return text
+
+
+def has_arabic_digits(text: str) -> bool:
+    """Whether ``text`` contains an Arabic-Indic digit (either Unicode block)."""
+    return _ARABIC_DIGITS.search(text) is not None
+
+
+def assert_no_arabic_digits(text: str) -> None:
+    """Fail if ``text`` contains an Arabic-Indic or Extended Arabic-Indic digit.
+
+    The test-facing helper shared by the catalog guard, the rendered-screen guard
+    and the formatter unit tests, so all three cannot drift apart.
+    """
+    match = _ARABIC_DIGITS.search(text)
+    assert match is None, f"Arabic-Indic digit {match.group()!r} in {text!r}"
 
 
 def _localize(text: str, locale: Locale) -> str:
-    if locale is Locale.AR:
-        text = text.translate(_ARABIC_DIGITS)
-        text = text.replace(",", "،")
-        text = text.replace("%", "٪")
-        text = text.replace(".", "٫")
+    """Locale punctuation seam — deliberately a pass-through today.
+
+    Decision: punctuation is **not** swapped automatically any more.
+
+    * the ASCII full stop → Arabic decimal separator (U+066B) and ``%`` →
+      Arabic percent sign (U+066A) replacements are gone: a decimal point and a
+      percent sign are not numerals, and the rule is ``3.9 MB`` / ``3%`` in
+      Arabic too.
+    * ``,`` → ``،`` is gone as well. The helper cannot tell a date/list comma
+      from a number's thousands separator, so swapping would turn a formatted
+      ``1,200`` into ``1،200``. Arabic catalogs already type ``،`` where they
+      mean it; a number keeps its ASCII thousand separator.
+
+    Keeping the function makes the seam explicit for a future locale that has a
+    different convention, without changing any caller.
+    """
     return text
+
+
+# -- integers ----------------------------------------------------------------
+def format_int(value: int, locale: Locale) -> str:
+    """Grouped ASCII integer: ``1200`` → ``1,200`` in every locale.
+
+    The separator is always the ASCII comma. It is *not* swapped to the Arabic
+    comma (U+060C): that would change a number into punctuation the user could
+    not parse as a number.
+    """
+    return f"{value:,}"
 
 
 # -- bytes -------------------------------------------------------------------
@@ -69,7 +117,8 @@ def _trim(value: float) -> str:
 def format_bytes(n: int | float, locale: Locale) -> str:
     number, unit = _human_bytes(float(n))
     if locale is Locale.AR:
-        number = number.replace(".", "٫").translate(_ARABIC_DIGITS)
+        # The unit is translated; the number keeps ASCII digits and its ASCII
+        # decimal point (``3.9``), because a numeral is Latin in every locale.
         return f"{number} {_ARABIC_UNITS[unit]}"
     return f"{number} {unit}"
 
@@ -93,8 +142,7 @@ def format_bytes_pair(
 # -- percent -----------------------------------------------------------------
 def format_percent(percent: float, locale: Locale) -> str:
     rounded = round(percent)
-    if locale is Locale.AR:
-        return f"{localize_digits(str(rounded), locale)}٪"
+    # ``%`` stays ASCII in Arabic: a percent sign is punctuation, not a numeral.
     return f"{rounded}%"
 
 
@@ -113,7 +161,7 @@ def format_seconds(seconds: float, locale: Locale) -> str:
 
 
 def format_duration(seconds: float, locale: Locale) -> str:
-    """Compact ``2m 05s`` / ``٢ د ٠٥ ث``."""
+    """Compact ``2m 05s`` / ``2 د 05 ث`` (same numerals, Arabic units)."""
     total = max(0, int(round(seconds)))
     minutes, secs = divmod(total, 60)
     hours, minutes = divmod(minutes, 60)
@@ -123,7 +171,7 @@ def format_duration(seconds: float, locale: Locale) -> str:
     if minutes:
         parts.append(f"{minutes:02d}m" if locale is Locale.EN else f"{minutes:02d} د")
     elif hours:
-        parts.append("00m" if locale is Locale.EN else "٠٠ د")
+        parts.append("00m" if locale is Locale.EN else "00 د")
     parts.append(f"{secs:02d}s" if locale is Locale.EN else f"{secs:02d} ث")
     text = " ".join(parts)
     return _localize(text, locale)
@@ -191,15 +239,18 @@ def format_datetime(dt: datetime | None, locale: Locale) -> str:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     babel_locale = "en" if locale is Locale.EN else "ar"
-    pattern = "d MMM y, HH:mm"
+    # The Arabic pattern spells its own Arabic comma: punctuation belongs in the
+    # pattern, not in a blind post-replace that could hit a numeral. Babel's
+    # Arabic locale uses Latin digits by default, so no digit translation here.
+    pattern = "d MMM y, HH:mm" if locale is Locale.EN else "d MMM y، HH:mm"
     try:
         text = _babel_datetime(dt, format=pattern, locale=BabelLocale.parse(babel_locale))
     except Exception:  # noqa: BLE001
         text = dt.strftime("%d %b %Y, %H:%M")
+        if locale is Locale.AR:
+            text = text.replace(",", "،")
     if locale is Locale.AR:
         text = text.replace("\u200f", "").replace("\u200e", "")
-        text = text.replace(",", "،")
-        text = text.translate(_ARABIC_DIGITS)
     return text
 
 
@@ -217,7 +268,9 @@ def pluralize(key: str, n: int, locale: Locale) -> str:
         return f"{n}"
     category = _plural_category(locale, n)
     template = plurals.get(category) or plurals.get("other") or plurals.get("many") or ""
-    rendered = template.format(n=localize_digits(str(n), locale))
+    # A count is grouped with the ASCII comma in every locale (``1,200``), never
+    # the Arabic comma (``1،200``) and never Arabic-Indic digits.
+    rendered = template.format(n=format_int(n, locale))
     return rendered
 
 

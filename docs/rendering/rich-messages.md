@@ -206,10 +206,10 @@ enforced by an architecture test that greps for `send_message`, `send_photo`,
 <table>
   <tr><th>بيئة التشغيل</th><td>python3</td></tr>
   <tr><th>المعالج</th><td>نواة واحدة</td></tr>
-  <tr><th>الذاكرة</th><td>٥١٢ ميغابايت</td></tr>
-  <tr><th>القرص</th><td>٢٫٣ ميغابايت / ٢٥٦ ميغابايت (١٪)</td></tr>
-  <tr><th>التشغيلات</th><td>٣ (١ نشِط)</td></tr>
-  <tr><th>أُنشئت</th><td>٣ نوفمبر ٢٠٢٦، ٢٠:٤١</td></tr>
+  <tr><th>الذاكرة</th><td>512 ميغابايت</td></tr>
+  <tr><th>القرص</th><td>2.3 ميغابايت / 256 ميغابايت (1%)</td></tr>
+  <tr><th>التشغيلات</th><td>3 (1 نشِط)</td></tr>
+  <tr><th>أُنشئت</th><td>3 نوفمبر 2026، 20:41</td></tr>
 </table>
 <hr>
 <p><code>ws_01M6HJASCWM9Z1PF755GT89NK4</code></p>

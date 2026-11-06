@@ -47,17 +47,21 @@ def test_format_bytes_english_and_arabic():
     assert formatters.format_bytes(2_411_724, Locale.EN) == "2.3 MB"
     ar = formatters.format_bytes(2_411_724, Locale.AR)
     assert "ميغابايت" in ar
-    assert "٢" in ar  # Arabic-Indic digits
+    # TASK digits: Arabic copy, Latin numerals and a Latin decimal point.
+    assert "2.3" in ar
+    assert "٢" not in ar
 
 
 def test_format_percent():
     assert formatters.format_percent(3, Locale.EN) == "3%"
-    assert formatters.format_percent(3, Locale.AR) == "٣٪"
+    # TASK digits: a percent sign is punctuation, not a numeral; it stays ASCII.
+    assert formatters.format_percent(3, Locale.AR) == "3%"
 
 
 def test_format_duration():
     assert formatters.format_duration(125, Locale.EN) == "02m 05s"
-    assert formatters.format_duration(125, Locale.AR).startswith("٠٢")
+    # TASK digits: same numerals in both locales; only the unit words differ.
+    assert formatters.format_duration(125, Locale.AR).startswith("02")
 
 
 def test_format_relative():
@@ -76,3 +80,50 @@ def test_format_datetime():
     assert "نوفمبر" in ar
     # ids stay ASCII — not tested here, but digits localize in dates
     assert ar != en
+
+
+# -- TASK digits: Latin numerals in every locale ------------------------------
+def test_localize_digits_is_a_pass_through():
+    assert formatters.localize_digits("50", Locale.AR) == "50"
+    assert formatters.localize_digits("50", Locale.EN) == "50"
+    assert formatters.localize_digits("0123456789", Locale.AR) == "0123456789"
+
+
+def test_localize_stops_swapping_decimal_and_percent():
+    # A decimal point and a percent sign are punctuation, not numerals.
+    assert formatters._localize("3.9 MB", Locale.AR) == "3.9 MB"
+    assert formatters._localize("3%", Locale.AR) == "3%"
+    # Arabic text with no digits is untouched.
+    arabic = "تم إنشاء المساحة بنجاح"
+    assert formatters._localize(arabic, Locale.AR) == arabic
+
+
+def test_thousands_separator_stays_ascii():
+    # The catalog plural keeps its Arabic wording; only the number changes, and
+    # its thousands separator is the ASCII comma — never ``،`` and never ``١٢٠٠``.
+    rendered = formatters.format_count("count.workspaces", 1200, Locale.AR)
+    assert rendered.startswith("1,200")
+    assert "1،200" not in rendered
+    assert formatters.format_count("count.workspaces", 1200, Locale.EN) == "1,200 workspaces"
+
+
+def test_format_int_groups_with_ascii_comma():
+    assert formatters.format_int(1200, Locale.EN) == "1,200"
+    # TASK digits: the thousands separator is a comma even in Arabic — never
+    # the Arabic comma (U+060C), which would stop reading as a number.
+    assert formatters.format_int(1200, Locale.AR) == "1,200"
+
+
+def test_assert_no_arabic_digits_helper():
+    formatters.assert_no_arabic_digits("50 و 3.9 MB و 3%")
+    with pytest.raises(AssertionError):
+        formatters.assert_no_arabic_digits("٥٠")
+    with pytest.raises(AssertionError):
+        formatters.assert_no_arabic_digits("۱")  # Extended Arabic-Indic
+
+
+def test_arabic_rtl_flag_is_still_true():
+    from cloudbot.presentation.rich.document import RichDoc
+
+    assert RichDoc(Locale.AR).build().is_rtl is True
+    assert RichDoc(Locale.EN).build().is_rtl is False

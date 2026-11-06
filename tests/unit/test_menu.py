@@ -61,8 +61,8 @@ def test_a_sixth_workspace_is_not_silently_dropped(locale):
         assert "… and 3 more" in html
         assert "See all 8 in My workspaces." in html
     else:
-        assert "… و٣ أخرى" in html
-        assert "اعرض كل الـ٨ في «مساحاتي»." in html
+        assert "… و3 أخرى" in html
+        assert "اعرض كل الـ8 في «مساحاتي»." in html
     # Every workspace the board did show is really there.
     for ws in workspaces[: menu_screens.MENU_WORKSPACE_LINES]:
         assert ws.name in html

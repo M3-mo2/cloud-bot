@@ -256,7 +256,8 @@ async def test_dispatcher_sends_one_cap_message_with_the_real_count(log, state):
     assert len(sent) == 4
     suppression_html = sent[-1][1].html
     # The suppressed count is 27 (30 - 3); assert the number is in the message.
-    assert "٢٧" in suppression_html or "27" in suppression_html
+    # TASK digits: the suppressed count is ASCII 27 in every locale.
+    assert "27" in suppression_html
     assert state.cursor == 30
 
 

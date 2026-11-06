@@ -151,7 +151,7 @@ def test_run_history_pages_like_every_other_list(locale):
     page = _runs(10)
     screen = history_screens.run_history(page, WS, locale, now=NOW, page_index=0)
     html = screen.doc.html
-    assert "Page 1 of" in html or "صفحة ١ من" in html
+    assert "Page 1 of" in html or "صفحة 1 من" in html
 
 
 # -- 2b. admin lists lose the columns a phone cannot show ---------------------
@@ -274,5 +274,5 @@ def test_the_run_screen_keeps_the_information_history_stopped_showing(locale):
     # Command, duration and exit code all live here, so the compact history row
     # never dropped information, only moved it.
     assert "python3" in html or "main.py" in html
-    assert ("0" in html) or ("٠" in html)
+    assert "0" in html  # TASK digits: ASCII in every locale
     assert "duration" in html.lower() or "المدة" in html
