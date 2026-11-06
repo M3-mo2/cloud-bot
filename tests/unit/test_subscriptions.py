@@ -77,6 +77,8 @@ def test_the_commitment_is_rewarded():
 
 
 # -- status derivation -------------------------------------------------------
+WS = "ws_1"
+
 def _sub(days: int, *, source=SubscriptionSource.STARS, start=NOW) -> Subscription:
     return Subscription(
         tg_id=1,
@@ -84,6 +86,7 @@ def _sub(days: int, *, source=SubscriptionSource.STARS, start=NOW) -> Subscripti
         started_at=start,
         expires_at=start + timedelta(days=days),
         source=source,
+        ws_id=WS,
     )
 
 
@@ -122,6 +125,7 @@ def test_days_left_rounds_up_and_never_negative():
         started_at=NOW,
         expires_at=NOW + timedelta(hours=2),
         source=SubscriptionSource.STARS,
+        ws_id=WS,
     )
     assert derive_status(sub, NOW).days_left == 1
     assert derive_status(sub, NOW + timedelta(days=1)).days_left == 0
@@ -130,7 +134,7 @@ def test_days_left_rounds_up_and_never_negative():
 def test_extend_continues_from_the_current_expiry():
     current = _sub(5)
     extended = extend(
-        current, tg_id=1, plan_code="month", days=30,
+        current, tg_id=1, ws_id=WS, plan_code="month", days=30,
         source=SubscriptionSource.STARS, now=NOW,
     )
     assert extended.expires_at == current.expires_at + timedelta(days=30)
@@ -195,7 +199,7 @@ async def test_balance_always_equals_the_ledger_after_a_random_sequence(store):
 # -- purchase ----------------------------------------------------------------
 async def test_purchase_with_enough_balance_activates_and_debits(store):
     await store.credit(1, 200, "topup", actor=1)
-    sub = await store.purchase(1, "month")
+    sub = await store.purchase(1, "ws_a", "month")
     wallet = await store.wallet(1)
     assert wallet.balance_stars == 50
     assert wallet.ledger[-1].amount == -150
@@ -208,17 +212,17 @@ async def test_purchase_with_enough_balance_activates_and_debits(store):
 async def test_purchase_without_enough_balance_is_refused_untouched(store):
     await store.credit(1, 149, "topup", actor=1)
     with pytest.raises(InsufficientFunds):
-        await store.purchase(1, "month")
+        await store.purchase(1, "ws_a", "month")
     wallet = await store.wallet(1)
     assert wallet.balance_stars == 149
     assert len(wallet.ledger) == 1
-    assert await store.get(1) is None
+    assert await store.get(1, "ws_a") is None
 
 
 async def test_purchase_extends_an_active_plan(store):
     await store.credit(1, 100, "topup", actor=1)
-    first = await store.purchase(1, "week")
-    second = await store.purchase(1, "week")
+    first = await store.purchase(1, "ws_a", "week")
+    second = await store.purchase(1, "ws_a", "week")
     assert second.expires_at == first.expires_at + timedelta(days=7)
     assert (await store.wallet(1)).balance_stars == 0
 
@@ -226,9 +230,9 @@ async def test_purchase_extends_an_active_plan(store):
 async def test_unknown_or_trial_plan_is_not_purchasable(store):
     await store.credit(1, 1000, "topup", actor=1)
     with pytest.raises(UnknownPlan):
-        await store.purchase(1, "trial")
+        await store.purchase(1, "ws_a", "trial")
     with pytest.raises(UnknownPlan):
-        await store.purchase(1, "decade")
+        await store.purchase(1, "ws_a", "decade")
     assert (await store.wallet(1)).balance_stars == 1000
 
 
@@ -236,7 +240,7 @@ async def test_two_concurrent_purchases_cannot_both_succeed(store):
     """The proof: one balance, two concurrent purchases, exactly one wins."""
     await store.credit(1, 50, "topup", actor=1)
     results = await asyncio.gather(
-        store.purchase(1, "week"), store.purchase(1, "week"), return_exceptions=True
+        store.purchase(1, "ws_a", "week"), store.purchase(1, "ws_a", "week"), return_exceptions=True
     )
     successes = [r for r in results if not isinstance(r, Exception)]
     failures = [r for r in results if isinstance(r, InsufficientFunds)]
@@ -267,7 +271,7 @@ async def test_two_connections_cannot_both_spend_one_balance(tmp_path):
     await first.credit(1, 50, "topup", actor=1)
 
     results = await asyncio.gather(
-        first.purchase(1, "week"), second.purchase(1, "week"),
+        first.purchase(1, "ws_a", "week"), second.purchase(1, "ws_a", "week"),
         return_exceptions=True,
     )
     successes = [r for r in results if not isinstance(r, Exception)]
@@ -289,8 +293,8 @@ async def test_replaying_a_credit_key_does_not_credit_twice(store):
 
 async def test_replaying_a_purchase_key_does_not_extend_twice(store):
     await store.credit(1, 500, "topup", actor=1)
-    first = await store.purchase(1, "month", idempotency_key="p1")
-    second = await store.purchase(1, "month", idempotency_key="p1")
+    first = await store.purchase(1, "ws_a", "month", idempotency_key="p1")
+    second = await store.purchase(1, "ws_a", "month", idempotency_key="p1")
     assert second.expires_at == first.expires_at
     assert (await store.wallet(1)).balance_stars == 350
 
@@ -314,11 +318,11 @@ async def test_refund_appends_a_positive_movement(store):
 
 # -- trial -------------------------------------------------------------------
 async def test_trial_is_granted_once_and_never_extended(store):
-    trial = await store.start_trial(1)
+    trial = await store.start_trial(1, "ws_a")
     assert trial is not None
     assert trial.source is SubscriptionSource.TRIAL
-    assert (trial.expires_at - trial.started_at) == timedelta(days=7)
-    again = await store.start_trial(1)
+    assert (trial.expires_at - trial.started_at) == timedelta(days=3)
+    again = await store.start_trial(1, "ws_a")
     assert again is not None
     assert again.expires_at == trial.expires_at
     assert await store.trial_granted(1) is True
@@ -326,33 +330,33 @@ async def test_trial_is_granted_once_and_never_extended(store):
 
 async def test_trial_does_not_overwrite_a_paid_subscription(store):
     await store.credit(1, 50, "topup", actor=1)
-    paid = await store.purchase(1, "week")
+    paid = await store.purchase(1, "ws_a", "week")
     # Even if the trial path were reached later, it must not be granted.
-    result = await store.start_trial(1)
+    result = await store.start_trial(1, "ws_a")
     assert result is not None
     assert result.expires_at == paid.expires_at
 
 
 # -- admin grant / revoke ----------------------------------------------------
 async def test_admin_grant_extends_and_shortens(store):
-    granted = await store.grant(1, "month", 30, actor=999, reason="support")
+    granted = await store.grant(1, "ws_a", "month", 30, actor=999, reason="support")
     assert granted is not None and derive_status(granted, granted.started_at).is_active
-    extended = await store.grant(1, "month", 5, actor=999, reason="goodwill")
+    extended = await store.grant(1, "ws_a", "month", 5, actor=999, reason="goodwill")
     assert extended.expires_at == granted.expires_at + timedelta(days=5)
-    shortened = await store.grant(1, "month", -10, actor=999, reason="correction")
+    shortened = await store.grant(1, "ws_a", "month", -10, actor=999, reason="correction")
     assert shortened.expires_at == extended.expires_at - timedelta(days=10)
 
 
 async def test_admin_revoke_ends_it_and_locks(store):
-    granted = await store.grant(1, "month", 30, actor=999, reason="support")
-    revoked = await store.revoke(1, actor=999, reason="refund")
+    granted = await store.grant(1, "ws_a", "month", 30, actor=999, reason="support")
+    revoked = await store.revoke(1, "ws_a", actor=999, reason="refund")
     assert revoked is not None
     assert derive_status(revoked, revoked.expires_at).is_active is False
     assert lock_state("active", revoked, revoked.expires_at) == "locked"
 
 
 async def test_revoke_without_a_subscription_is_a_no_op(store):
-    assert await store.revoke(1, actor=999, reason="none") is None
+    assert await store.revoke(1, "ws_a", actor=999, reason="none") is None
 
 
 # -- wiring: the existing workspace path uses the new model ------------------
@@ -360,10 +364,11 @@ async def test_creating_the_first_workspace_starts_the_trial(services, users):
     from cloudbot.core.locale import Locale
 
     await users.get_or_create(5, default_locale=Locale.EN)
-    await services.workspaces.create(5, "first")
-    subscription = await services.admin.subscription(5)
+    ws = await services.workspaces.create(5, "first", plan_code="trial")
+    subscription = await services.admin.subscription(5, str(ws.id))
     assert subscription is not None
     assert subscription.source is SubscriptionSource.TRIAL
+    assert subscription.ws_id == str(ws.id)
     assert await services.workspaces._subscriptions.trial_granted(5) is True
 
 
@@ -371,7 +376,7 @@ async def test_an_inactive_subscription_derives_locked_workspaces(services, user
     from cloudbot.core.locale import Locale
 
     await users.get_or_create(6, default_locale=Locale.EN)
-    await services.workspaces.create(6, "demo")
+    await services.workspaces.create(6, "demo", plan_code="trial")
     # The trial is active: the workspace reads active.
     listed = await services.workspaces.list(6)
     assert listed and listed[0].status is WorkspaceStatus.ACTIVE
@@ -410,7 +415,7 @@ async def test_existing_database_upgrades_without_data_loss(tmp_path):
 
     database = Database(f"sqlite+aiosqlite:///{path}")
     await database.connect()
-    assert await database.migrate() == [5, 6]
+    assert await database.migrate() == [5, 6, 7]
 
     conn = await database.connect()
     async with conn.execute("SELECT tg_id, locale, display_name FROM users") as cur:

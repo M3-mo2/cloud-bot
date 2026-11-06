@@ -34,11 +34,19 @@ MovementKind = Literal["credit", "debit", "admin_set", "refund", "reversal"]
 
 @dataclass(frozen=True)
 class Subscription:
+    """A plan attached to **one workspace**.
+
+    ``tg_id`` is the owner, kept for authorisation and for the admin's account
+    view; it is deliberately not the identity of the subscription. A user may own
+    several workspaces on different plans and each derives its own state.
+    """
+
     tg_id: int
     plan_code: str
     started_at: datetime
     expires_at: datetime
     source: SubscriptionSource
+    ws_id: str = ""
 
     def is_active(self, now: datetime) -> bool:
         return now < self.expires_at
@@ -93,11 +101,11 @@ class SubscriptionStatus:
 
 
 def derive_status(subscription: Subscription | None, now: datetime) -> SubscriptionStatus:
-    """The **single** place subscription state is derived.
+    """The **single** place one workspace's subscription state is derived.
 
-    ``trialing`` and ``active`` are both usable; ``expired`` and ``none`` lock
-    every workspace. ``days_left`` rounds up (a subscription ending in 2 h still
-    has one day left) and is zero when not active.
+    ``trialing`` and ``active`` are both usable; ``expired`` and ``none`` lock the
+    workspace whose subscription this is. ``days_left`` rounds up (a subscription
+    ending in 2 h still has one day left) and is zero when not active.
     """
     if subscription is None:
         return SubscriptionStatus(SubscriptionState.NONE, False, 0)
@@ -117,6 +125,7 @@ def extend(
     subscription: Subscription | None,
     *,
     tg_id: int,
+    ws_id: str,
     plan_code: str,
     days: int,
     source: SubscriptionSource,
@@ -139,6 +148,7 @@ def extend(
         started_at=started_at,
         expires_at=base + timedelta(days=days),
         source=source,
+        ws_id=ws_id,
     )
 
 

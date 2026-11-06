@@ -125,7 +125,7 @@ async def _harness(*, shorten_follow: bool = True):
     container = build(settings)
     assert isinstance(container.engine, FakeEngine)
     await container.database.migrate()
-    ws = await container.services.workspaces.create(TG, "mine")
+    ws = await container.services.workspaces.create(TG, "mine", plan_code="trial")
     session = await container.services.sessions.open(TG, ws.id)
 
     sends: list[tuple[int, str, str, str]] = []

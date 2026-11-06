@@ -162,7 +162,7 @@ async def _container():
     container = build(settings)
     await container.database.migrate()
     await container.users.get_or_create(TG, default_locale=Locale.EN)
-    ws = await container.services.workspaces.create(TG, "mine")
+    ws = await container.services.workspaces.create(TG, "mine", plan_code="trial")
     return container, ws
 
 

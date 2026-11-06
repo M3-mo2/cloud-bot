@@ -126,17 +126,21 @@ class AdminService:
 
     # -- users ---------------------------------------------------------------
     async def plan_label(self, tg_id: int, *, now: datetime | None = None) -> str:
-        """The user's plan, derived from the subscription (never ``users.plan``)."""
+        """The user's plan label, derived from their workspace subscriptions.
+
+        A user may hold several plans (one per workspace); the label is the first
+        *usable* one, else ``expired``, else ``free`` — enough for the list.
+        """
         if self._subscriptions is None:
             return "free"
         now = now or datetime.now(timezone.utc)
-        subscription = await self._subscriptions.get(tg_id)
-        status = derive_status(subscription, now)
-        if status.state is SubscriptionState.NONE:
+        subscriptions = await self._subscriptions.for_user(tg_id)
+        if not subscriptions:
             return "free"
-        if status.state is SubscriptionState.EXPIRED:
-            return "expired"
-        return subscription.plan_code if subscription is not None else "free"
+        for subscription in subscriptions:
+            if derive_status(subscription, now).is_active:
+                return subscription.plan_code
+        return "expired"
 
     async def users_page(
         self, *, query: str = "", offset: int = 0, limit: int = 10
@@ -232,10 +236,17 @@ class AdminService:
             raise RuntimeError("subscription store is not configured")
         return await self._subscriptions.wallet(tg_id)
 
-    async def subscription(self, tg_id: int):
+    async def subscription(self, tg_id: int, ws_id: str | None = None):
         if self._subscriptions is None:
             return None
-        return await self._subscriptions.get(tg_id)
+        if ws_id is not None:
+            return await self._subscriptions.get(tg_id, ws_id)
+        existing = await self._subscriptions.for_user(tg_id)
+        return existing[0] if existing else None
+
+    async def _first_workspace(self, tg_id: int) -> str | None:
+        owned = await self._users.owned_workspaces(tg_id)
+        return str(owned[0]) if owned else None
 
     async def credit(
         self, tg_id: int, amount: int, reason: str, *, actor: int, idempotency_key: str = ""
@@ -272,12 +283,35 @@ class AdminService:
         reason: str,
         *,
         actor: int,
+        ws_id: str | None = None,
         idempotency_key: str = "",
     ):
         if self._subscriptions is None:
             raise RuntimeError("subscription store is not configured")
+        target = ws_id or await self._first_workspace(tg_id)
+        if target is None:
+            raise RuntimeError("user has no workspace to attach the plan to")
         return await self._subscriptions.grant(
-            tg_id, plan_code, days, actor, reason, idempotency_key=idempotency_key
+            tg_id, target, plan_code, days, actor, reason,
+            idempotency_key=idempotency_key,
+        )
+
+    async def revoke(
+        self,
+        tg_id: int,
+        reason: str,
+        *,
+        actor: int,
+        ws_id: str | None = None,
+        idempotency_key: str = "",
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        target = ws_id or await self._first_workspace(tg_id)
+        if target is None:
+            return None
+        return await self._subscriptions.revoke(
+            tg_id, target, actor, reason, idempotency_key=idempotency_key
         )
 
     async def reverse(
@@ -293,15 +327,6 @@ class AdminService:
         if self._subscriptions is None:
             return ()
         return await self._subscriptions.payments_for(tg_id)
-
-    async def revoke(
-        self, tg_id: int, reason: str, *, actor: int, idempotency_key: str = ""
-    ):
-        if self._subscriptions is None:
-            raise RuntimeError("subscription store is not configured")
-        return await self._subscriptions.revoke(
-            tg_id, actor, reason, idempotency_key=idempotency_key
-        )
 
     # -- notifications -------------------------------------------------------
     async def subscriptions(self, admin_id: int) -> dict[str, bool]:

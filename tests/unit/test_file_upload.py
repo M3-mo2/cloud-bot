@@ -106,7 +106,7 @@ async def _harness(blob: bytes = CONTENT):
     container = build(settings)
     assert isinstance(container.engine, FakeEngine)
     await container.database.migrate()
-    ws = await container.services.workspaces.create(TG, "mine")
+    ws = await container.services.workspaces.create(TG, "mine", plan_code="trial")
 
     received: list[bytes] = []
     engine = container.engine

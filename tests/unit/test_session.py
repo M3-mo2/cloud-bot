@@ -65,7 +65,7 @@ async def test_enter_refuses_foreign_and_nonexistent_identically(services, engin
 
 async def test_enter_persists_when_owned(services, users):
     await users.get_or_create(TG, default_locale=Locale.EN)
-    ws = await services.workspaces.create(TG, "mine")
+    ws = await services.workspaces.create(TG, "mine", plan_code="trial")
     await services.session.enter(TG, ws.id)
     assert await users.current_workspace(TG) == ws.id
 
@@ -73,7 +73,7 @@ async def test_enter_persists_when_owned(services, users):
 # -- self-healing ------------------------------------------------------------
 async def test_current_self_heals_when_workspace_deleted(services, users):
     await users.get_or_create(TG, default_locale=Locale.EN)
-    ws = await services.workspaces.create(TG, "doomed")
+    ws = await services.workspaces.create(TG, "doomed", plan_code="trial")
     await services.session.enter(TG, ws.id)
     assert await services.session.current(TG) is not None
     # Delete the workspace after entering (as the user or the admin panel would).
@@ -86,7 +86,7 @@ async def test_current_self_heals_when_workspace_deleted(services, users):
 async def test_current_self_heals_when_engine_lost_it(services, users, engine):
     """Ownership row survives, but the engine no longer has the workspace."""
     await users.get_or_create(TG, default_locale=Locale.EN)
-    ws = await services.workspaces.create(TG, "vanished")
+    ws = await services.workspaces.create(TG, "vanished", plan_code="trial")
     await services.session.enter(TG, ws.id)
     await engine.delete_workspace(ws.id)  # engine-side delete, row still present
     assert await services.session.current(TG) is None
@@ -98,7 +98,7 @@ async def test_leave_is_idempotent(services, users):
     await users.get_or_create(TG, default_locale=Locale.EN)
     # Leaving while not inside is a success, not an error.
     await services.session.leave(TG)
-    ws = await services.workspaces.create(TG, "mine")
+    ws = await services.workspaces.create(TG, "mine", plan_code="trial")
     await services.session.enter(TG, ws.id)
     await services.session.leave(TG)
     await services.session.leave(TG)  # again: still a success
@@ -222,7 +222,7 @@ async def test_start_while_inside_renders_the_workspace_not_the_chooser():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        ws = await container.services.workspaces.create(TG, "mine")
+        ws = await container.services.workspaces.create(TG, "mine", plan_code="trial")
         await container.services.session.enter(TG, ws.id)
         await dispatcher.feed_update(bot, _message(1, TG, "/start"))
         html = bot.sent[-1]["html"]
@@ -243,7 +243,7 @@ async def test_start_while_inside_with_exactly_one_workspace_still_resumes():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        ws = await container.services.workspaces.create(TG, "onlyone")
+        ws = await container.services.workspaces.create(TG, "onlyone", plan_code="trial")
         await container.services.session.enter(TG, ws.id)
         # Exactly one owned workspace.
         assert len(await container.services.workspaces.list(TG)) == 1
@@ -259,7 +259,7 @@ async def test_start_twice_is_idempotent():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        ws = await container.services.workspaces.create(TG, "mine")
+        ws = await container.services.workspaces.create(TG, "mine", plan_code="trial")
         await container.services.session.enter(TG, ws.id)
         await dispatcher.feed_update(bot, _message(1, TG, "/start"))
         first_actions = _actions(bot.sent[-1]["markup"])
@@ -278,7 +278,7 @@ async def test_logout_then_start_shows_the_chooser_again():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        ws = await container.services.workspaces.create(TG, "mine")
+        ws = await container.services.workspaces.create(TG, "mine", plan_code="trial")
         await container.services.session.enter(TG, ws.id)
         # Press the log-out button (its ws:logout callback carries no key).
         await dispatcher.feed_update(bot, _callback(1, TG, "ws:logout"))

@@ -71,6 +71,29 @@ class InvalidInput(DomainError):
         self.reason = reason
 
 
+class SubscriptionError(DomainError):
+    """A subscription/wallet operation was refused."""
+
+    code = "subscription_error"
+
+class InsufficientFunds(SubscriptionError):
+    code = "insufficient_funds"
+
+    def __init__(self, required: int, available: int) -> None:
+        super().__init__(f"needs {required} stars, has {available}")
+        self.required = required
+        self.available = available
+
+class PlanRequired(DomainError):
+    """A workspace cannot be created without choosing a plan."""
+
+    code = "plan_required"
+
+class TrialUsed(DomainError):
+    """The user already used their one free trial."""
+
+    code = "trial_used"
+
 class RateLimited(DomainError):
     code = "rate_limited"
 

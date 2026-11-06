@@ -255,8 +255,17 @@ Arabic: `<p><i>هناك تشغيل جارٍ بالفعل.</i></p>`
 
 ## 3. Create a workspace
 
-Creation is a small wizard. Step 1 uses a **`force_reply=True`** prompt to collect
-the name; then, when the engine advertises profiles, a profile choice follows.
+Creation is one linear flow — no sections inside sections:
+
+```
+name → network (internet + public links) → «متابعة» → plan → created
+```
+
+The engine's default runtime is used automatically: the runtime/profile picker is
+**not** in the flow any more (it was the "section inside a section" the report
+objected to, and a workspace's toolchain can be decided after it exists). The
+plan picker is the step that makes a workspace; there is no other way to create
+one.
 
 ### 3.1 Name prompt (send, `force_reply=True`)
 
@@ -282,69 +291,53 @@ Keyboard (markup has `force_reply=True`):
 | --- | --- | --- | --- | --- |
 | ✖️ إلغاء | ✖️ Cancel | inline | primary | — |
 
-### 3.2 Profile choice (only if `meta.profiles.profiles` has >1 entry)
+### 3.3 Network and links
+
+The old numeric limits table is gone: **the plan sets cpu, memory and disk**, so
+the user is never offered a picker. The only thing a plan cannot know is what the
+workspace may reach, so this step carries the two switches and a «متابعة»
+(continue) button.
 
 English:
 
 ```html
-<h2>🧰 Choose a runtime</h2>
-<p>Pick the toolchain this workspace will use.</p>
-```
-
-Arabic:
-
-```html
-<h2>🧰 اختر بيئة التشغيل</h2>
-<p>اختر مجموعة الأدوات التي ستستخدمها مساحة العمل.</p>
-```
-
-Keyboard (one button per `profiles[].name`, default marked):
-
-| Label (AR) | Label (EN) | Type | Style | Flags |
-| --- | --- | --- | --- | --- |
-| 🐍 Python ✓ | 🐍 Python ✓ | inline | success | default profile |
-| 📦 أخرى | 📦 Other | inline | primary | — |
-| ✖️ إلغاء | ✖️ Cancel | inline | primary | — |
-
-Profile descriptions come from `meta.profiles.profiles[].description`, shown as a
-`<details>` block per profile if the user taps info. Only names the engine offers
-are ever shown (the engine refuses unknown profiles).
-
-### 3.3 Limits (optional, advanced)
-
-Hidden by default. An "Advanced ⚙️" inline button (primary) opens a screen whose
-sliders are **bounded by `meta.limits_defaults` and `meta.limits_maxima`** — the
-bot never offers a value the engine would refuse with `422`.
-
-English:
-
-```html
-<h2>⚙️ Advanced</h2>
+<h2>🌐 Network & links</h2>
+<p>Decide what this workspace may reach, then continue to the plans.</p>
 <table is_bordered="true">
-  <tr><th>CPU</th><td>1 core <i>(max 4)</i></td></tr>
-  <tr><th>Memory</th><td>512 MB <i>(max 4096 MB)</i></td></tr>
-  <tr><th>Disk</th><td>256 MB <i>(max 10240 MB)</i></td></tr>
-  <tr><th>Network</th><td>Off</td></tr>
+  <tr><th>Network</th><td>On</td></tr>
+  <tr><th>Public links</th><td>Off</td></tr>
 </table>
-<p><i>Limits apply to the next run.</i></p>
 ```
 
 Arabic (`is_rtl=True`):
 
 ```html
-<h2>⚙️ إعدادات متقدمة</h2>
+<h2>🌐 الشبكة والروابط</h2>
+<p>حدّد ما يمكن لمساحة العمل الوصول إليه، ثم تابع إلى الخطط.</p>
 <table is_bordered="true">
-  <tr><th>المعالج</th><td>نواة واحدة <i>(الأقصى ٤)</i></td></tr>
-  <tr><th>الذاكرة</th><td>٥١٢ ميغابايت <i>(الأقصى ٤٠٩٦ ميغابايت)</i></td></tr>
-  <tr><th>القرص</th><td>٢٥٦ ميغابايت <i>(الأقصى ١٠٢٤٠ ميغابايت)</i></td></tr>
-  <tr><th>الشبكة</th><td>مُعطّلة</td></tr>
+  <tr><th>الشبكة</th><td>مُفعّلة</td></tr>
+  <tr><th>الروابط العامة</th><td>مُعطّلة</td></tr>
 </table>
-<p><i>تُطبّق الحدود على التشغيل التالي.</i></p>
 ```
 
-Keyboard: **✅ Create** (success, confirm), **✖️ Cancel** (primary).
+Keyboard: two toggles (`🌐 Network: On/Off`, `🌐 Public links: On/Off`), then
+**متابعة** (success) and **✖️ Cancel** (primary).
 
-### 3.4 Success
+### 3.4 Plans — the step that makes a workspace
+
+**A workspace cannot exist without a plan.** «متابعة» opens the plan picker, and
+no workspace row is written until a plan is chosen. Each row shows the plan, its
+period, its price and the allowances it grants; the trial row reads differently
+(free, once, 3 days) and disappears once it has been used.
+
+- **Trial** (if unused): 3 days, 0 Stars — creates at once.
+- **Paid plan**: charged from the wallet in the same tap. Enough balance → the
+  workspace is created with that plan's `to_limits(maxima)` and that plan's
+  expiry. Not enough → nothing is created, the balance is untouched, the screen
+  says exactly how many Stars are missing and offers **شراء نجوم**; the wizard
+  state (name + network) is kept so the user returns to the same plan step.
+
+### 3.5 Success
 
 After the engine returns, the workspace is registered and its detail screen is
 shown. A short confirmation block is prepended:
@@ -483,7 +476,7 @@ Result:
 | --- | --- | --- |
 | Menu | "My Workspaces" | list |
 | List | tap workspace | detail |
-| List | "New Workspace" | name prompt (force_reply) → profile → create → detail |
+| List | "New Workspace" | name prompt (force_reply) → network → plan → detail |
 | Detail | "Files" | file browser |
 | Detail | "Run" | execution screen |
 | Detail | "Runs" | run history |

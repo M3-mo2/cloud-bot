@@ -914,3 +914,50 @@ and the trial's behaviour unchanged, and it is what the new test pins.
 callbacks; the nav block gained one destination (`pay:wallet`), so the menu board is one row taller
 (still two columns, and the nav block is three rows); goldens for `menu*`, the nav keyboards,
 `dev_sections` and the new `wallet*` screens were regenerated.
+
+## CB-39 — A subscription belongs to a workspace; the create flow goes through a plan
+
+**The measured defect.** `subscriptions` was keyed by `tg_id` (one plan per **user**) and
+`lock_state()` was called with that single row for every workspace. So a plan was never attached to a
+workspace: one plan covered all of a user's workspaces, and the wizard `name → profile → advanced →
+create` never consulted a plan at all — a workspace could be created with no plan step.
+
+**Decision — the subscription is the workspace's.** `subscriptions` is now keyed by `ws_id`, with
+`tg_id` kept as a non-unique owner column. `derive_status` / `extend` / `lock_state` take that
+workspace's row, and every caller passes it (`lock_state` in the workspace list/detail, the entry
+gate, the wallet screen). Two workspaces on different plans therefore derive two different states,
+which is the acceptance test (`tests/unit/test_planws.py`).
+
+**The wallet stays per user.** A wallet is the user's money, spent across their workspaces; the ledger
+was not moved and the two money invariants are unchanged (no negative balance; balance == sum of the
+ledger).
+
+**The trial stays once per user.** `subscription_trials` remains keyed by `tg_id`. A trial is a thing a
+*person* uses once; granting it per workspace would let a user farm free workspaces forever. A second
+workspace that asks for `trial` is refused (and the workspace is compensated away, so no planless
+workspace is left behind).
+
+**Legacy rows (what the migration did, and why).** Verified before writing it: this database is
+pre-launch and no real Stars have been spent — `SELECT COUNT(*) FROM wallet_ledger WHERE kind='credit'`
+was **0** (the only ledger rows are a `debit` from a manual plan purchase and an admin-set credit).
+Migration `0007_workspace_subscriptions.sql` therefore rebuilds the table and, for **every** legacy
+row, moves it onto that user's **first workspace** (`ORDER BY created_at, ws_id`, so the choice is
+deterministic). A legacy row whose owner has no workspace at all is **preserved** in
+`subscriptions_legacy_orphans` — nothing is silently deleted. The migration test proves the move,
+the orphan preservation, and that the ledger sum identity still holds.
+
+**The create flow (Mohamed's own sequence).** `ws:new` → name → network (`allow_net` +
+`allow_tunnels`, with «متابعة») → **plan picker** → create. The plan is the source of the workspace's
+limits (`limits=plan.to_limits(maxima)`) and expiry. The old numeric advanced screen, the profile
+picker and their `Input.waiting_advanced` / `Input.waiting_profile` states are gone; the profile is the
+engine's default. Picking a plan is the commitment: a paid plan is charged from the balance in the
+same tap; a short balance creates nothing, moves no money, shows the exact shortfall, offers the Stars
+packs, and keeps the wizard state so «متابعة»/the pack's Back returns to the same plan step.
+
+**TRIAL_DAYS = 3.** One constant (`domain/plans.py`); the copy in both locales, the tests and the docs
+read from it or state 3.
+
+**Consequences.** New migration `0007_workspace_subscriptions.sql`; `Subscription` gained `ws_id`;
+store/port methods take `ws_id`; `workspaces.create` requires `plan_code`; the wallet screen lists one
+row per workspace; goldens `ws_create_advanced`/`ws_create_profile` removed and `ws_create_network` +
+`ws_create_plan*` added; the `wallet*` goldens changed (per-workspace table).

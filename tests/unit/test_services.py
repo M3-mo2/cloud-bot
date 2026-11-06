@@ -6,6 +6,7 @@ import pytest
 
 from cloudbot.core.errors import EngineRefused, InvalidInput
 from cloudbot.core.locale import Locale
+from cloudbot.domain import plans
 from cloudbot.domain.value_objects import Limits, WorkspaceId
 
 WS = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4")
@@ -26,30 +27,39 @@ async def test_set_locale(services):
 
 
 async def test_create_registers_ownership(services, users):
-    ws = await services.workspaces.create(5, "myws")
+    ws = await services.workspaces.create(5, "myws", plan_code="trial")
     assert await users.owns(5, ws.id)
     assert ws.owner_tg_id == 5
 
 
 async def test_create_rejects_empty_name(services):
     with pytest.raises(InvalidInput):
-        await services.workspaces.create(5, "   ")
+        await services.workspaces.create(5, "   ", plan_code="trial")
 
 
 async def test_create_rejects_name_too_long(services):
     with pytest.raises(InvalidInput):
-        await services.workspaces.create(5, "x" * 129)
+        await services.workspaces.create(5, "x" * 129, plan_code="trial")
 
 
-async def test_create_rejects_limits_above_maxima(services):
+async def test_the_plan_not_the_user_sets_the_limits(services):
+    """The numeric pickers are gone: the plan's allowance is what is created.
+
+    A user-supplied ``limits`` now only carries the network toggles; cpu, memory
+    and disk always come from the plan (capped by the engine's maxima).
+    """
     maxima = (await services.workspaces.meta()).limits_maxima
-    over = Limits(cpu_cores=maxima.cpu_cores + 1)
-    with pytest.raises(InvalidInput):
-        await services.workspaces.create(5, "big", limits=over)
+    ws = await services.workspaces.create(
+        5, "planned", plan_code="trial", limits=Limits(cpu_cores=maxima.cpu_cores)
+    )
+    plan = plans.plan("trial")
+    assert ws.limits.cpu_cores == plan.limits.cpu_cores
+    assert ws.limits.memory_mb == plan.limits.memory_mb
+    assert ws.limits.disk_mb == plan.limits.disk_mb
 
 
 async def test_list_only_owned(services, users):
-    ws = await services.workspaces.create(5, "a")
+    ws = await services.workspaces.create(5, "a", plan_code="trial")
     await users.get_or_create(6, default_locale=Locale.EN)
     mine = await services.workspaces.list(5)
     theirs = await services.workspaces.list(6)
@@ -58,7 +68,7 @@ async def test_list_only_owned(services, users):
 
 
 async def test_delete_removes_registration(services, users):
-    ws = await services.workspaces.create(5, "gone")
+    ws = await services.workspaces.create(5, "gone", plan_code="trial")
     await services.workspaces.delete(5, ws.id)
     assert not await users.owns(5, ws.id)
 
@@ -81,7 +91,7 @@ async def test_exec_clamps_timeout(services):
 
 
 async def test_run_and_log_offset_protocol(services, users):
-    ws = await services.workspaces.create(5, "runner")
+    ws = await services.workspaces.create(5, "runner", plan_code="trial")
     run = await services.execution.run_command(5, ws.id, ["echo", "hi"])
     assert run.status.value == "queued"
     # Read logs once; then advance the fake run and read again.

@@ -10,7 +10,14 @@ from datetime import datetime, timezone
 
 import structlog
 
-from cloudbot.core.errors import EngineRefused, InvalidInput, NotOwned
+from cloudbot.core.errors import (
+    EngineRefused,
+    InvalidInput,
+    NotOwned,
+    PlanRequired,
+    TrialUsed,
+    InsufficientFunds,
+)
 from cloudbot.domain import plans
 from cloudbot.domain.entities import Workspace
 from cloudbot.domain.meta import EngineMeta
@@ -70,26 +77,38 @@ class WorkspacesService:
         return limits
 
     async def plan_maxima(
-        self, tg_id: int, engine_maxima: Limits, *, now: datetime | None = None
+        self,
+        tg_id: int,
+        ws_id: WorkspaceId,
+        engine_maxima: Limits,
+        *,
+        now: datetime | None = None,
     ) -> Limits:
-        """The **ceiling** a workspace may ask for: the plan capped by the engine.
+        """The ceiling **this workspace's** plan allows, capped by the engine.
 
-        ``limits`` is what the engine enforces and ``max_limits`` is the most a
-        workspace may *request*. A plan therefore sets the ceiling a user may
-        request; the enforced values for a create that names nothing stay the
-        engine's ``limits_defaults`` (part 1's model). With no subscription the
-        engine's own maxima apply unchanged.
+        A plan sets the ceiling a workspace may request. Each workspace reads its
+        own subscription, so two workspaces on different plans cannot borrow each
+        other's allowance. With no active subscription the engine's own maxima
+        apply unchanged.
         """
         if self._subscriptions is None:
             return engine_maxima
         now = now or datetime.now(timezone.utc)
-        subscription = await self._subscriptions.get(tg_id)
+        subscription = await self._subscriptions.get(tg_id, str(ws_id))
         if subscription is None or not derive_status(subscription, now).is_active:
             return engine_maxima
         plan = plans.PLANS.get(subscription.plan_code)
         if plan is None:
             return engine_maxima
         return plan.to_limits(engine_maxima)
+
+    async def plan_options(self, tg_id: int) -> tuple[plans.Plan, ...]:
+        """The plans the picker may offer: the trial (once) then the paid ones."""
+        if self._subscriptions is None:
+            return plans.paid_plans()
+        granted = await self._subscriptions.trial_granted(tg_id)
+        paid = plans.paid_plans()
+        return paid if granted else (plans.plan("trial"),) + paid
 
     async def list(self, tg_id: int) -> list[Workspace]:
         owned = set(await self._users.owned_workspaces(tg_id))
@@ -115,11 +134,15 @@ class WorkspacesService:
         """
         if self._subscriptions is None:
             return workspaces
-        subscription = await self._subscriptions.get(tg_id)
-        active = derive_status(subscription, datetime.now(timezone.utc)).is_active
-        if active:
-            return workspaces
-        return [self._locked(ws) for ws in workspaces]
+        now = datetime.now(timezone.utc)
+        result: list[Workspace] = []
+        for ws in workspaces:
+            subscription = await self._subscriptions.get(tg_id, str(ws.id))
+            if derive_status(subscription, now).is_active:
+                result.append(ws)
+            else:
+                result.append(self._locked(ws))
+        return result
 
     @staticmethod
     def _locked(ws: Workspace) -> Workspace:
@@ -142,18 +165,51 @@ class WorkspacesService:
         tg_id: int,
         name: str,
         *,
+        plan_code: str,
         profile: str | None = None,
         limits: Limits | None = None,
     ) -> Workspace:
+        """Create a workspace **with a plan attached**.
+
+        The plan is mandatory: it is the source of the workspace's limits and its
+        expiry. A trial is granted at once; a paid plan is charged from the wallet
+        *before* the engine is called, so a short balance leaves no workspace
+        behind. ``limits``, when given, only carries the wizard's network toggles;
+        cpu/memory/disk always come from the plan.
+        """
+        if self._subscriptions is None:
+            raise PlanRequired()
+        try:
+            plan = plans.plan(plan_code)
+        except KeyError as exc:
+            raise PlanRequired() from exc
+
         meta = await self._engine.meta()
         clean_name = self.validate_name(name)
-        # The plan sets the ceiling a user may request; that ceiling is itself
-        # capped by the engine's maxima. ``max_limits`` is then what is enforced.
-        ceiling = await self.plan_maxima(tg_id, meta.limits_maxima)
-        self.validate_limits(limits, ceiling)
+        plan_limits = plan.to_limits(meta.limits_maxima)
+        if limits is not None:
+            plan_limits = Limits(
+                cpu_cores=plan_limits.cpu_cores,
+                memory_mb=plan_limits.memory_mb,
+                disk_mb=plan_limits.disk_mb,
+                max_wall_time_sec=plan_limits.max_wall_time_sec,
+                max_runs=plan_limits.max_runs,
+                allow_net=limits.allow_net and plan_limits.allow_net,
+                allow_unlimited_runs=plan_limits.allow_unlimited_runs,
+                allow_tunnels=limits.allow_tunnels and plan_limits.allow_tunnels,
+                write_rate_mb_s=plan_limits.write_rate_mb_s,
+            )
+        self.validate_limits(plan_limits, meta.limits_maxima)
+
+        # Never call the engine when the money is already known to be short.
+        if plan.purchasable:
+            wallet = await self._subscriptions.wallet(tg_id)
+            if wallet.balance_stars < plan.amount_stars:
+                raise InsufficientFunds(plan.amount_stars, wallet.balance_stars)
+
         selected_profile = profile or meta.default_profile
         ws = await self._engine.create_workspace(
-            name=clean_name, profile=selected_profile, limits=limits
+            name=clean_name, profile=selected_profile, limits=plan_limits
         )
         try:
             await self._users.add_workspace(tg_id, ws.id)
@@ -165,21 +221,24 @@ class WorkspacesService:
             except Exception:  # noqa: BLE001
                 log.error("workspace.compensation_failed", ws_id=str(ws.id))
             raise
-        await self._start_trial_if_new(tg_id)
+
+        try:
+            if plan.code == "trial":
+                subscription = await self._subscriptions.start_trial(tg_id, str(ws.id))
+                if subscription is None or subscription.plan_code != "trial":
+                    raise TrialUsed()
+            else:
+                await self._subscriptions.purchase(tg_id, str(ws.id), plan.code)
+        except Exception:
+            # The plan could not be attached (trial already used, or a concurrent
+            # spend took the balance): do not leave a planless workspace behind.
+            try:
+                await self._engine.delete_workspace(ws.id)
+                await self._users.remove_workspace(tg_id, ws.id)
+            except Exception:  # noqa: BLE001
+                log.error("workspace.plan_compensation_failed", ws_id=str(ws.id))
+            raise
         return self._with_owner(ws, tg_id)
-
-    async def _start_trial_if_new(self, tg_id: int) -> None:
-        """The free trial starts the first time a user creates a workspace.
-
-        ``start_trial`` is idempotent (the trial flag can only be written once),
-        and it is only attempted when the user has no subscription at all, so a
-        paying user is never pushed onto a trial.
-        """
-        if self._subscriptions is None:
-            return
-        if await self._subscriptions.get(tg_id) is not None:
-            return
-        await self._subscriptions.start_trial(tg_id)
 
     async def get(self, tg_id: int, ws_id: WorkspaceId) -> Workspace:
         await self._ownership.assert_owned(tg_id, ws_id)
@@ -202,7 +261,7 @@ class WorkspacesService:
             name = self.validate_name(name)
         if limits is not None:
             meta = await self._engine.meta()
-            ceiling = await self.plan_maxima(tg_id, meta.limits_maxima)
+            ceiling = await self.plan_maxima(tg_id, ws_id, meta.limits_maxima)
             self.validate_limits(limits, ceiling)
         ws = await self._engine.patch_workspace(ws_id, name=name, limits=limits)
         return self._with_owner(ws, tg_id)

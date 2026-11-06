@@ -68,20 +68,26 @@ class BillingService:
     async def wallet(self, tg_id: int):
         return await self._subscriptions.wallet(tg_id)
 
-    async def subscription(self, tg_id: int) -> Subscription | None:
-        return await self._subscriptions.get(tg_id)
+    async def subscription(self, tg_id: int, ws_id: str) -> Subscription | None:
+        return await self._subscriptions.get(tg_id, ws_id)
+
+    async def subscriptions(self, tg_id: int) -> tuple[Subscription, ...]:
+        return await self._subscriptions.for_user(tg_id)
 
     async def status(
-        self, tg_id: int, *, now: datetime | None = None
+        self, tg_id: int, ws_id: str, *, now: datetime | None = None
     ) -> SubscriptionStatus:
         now = now or datetime.now(timezone.utc)
-        return derive_status(await self._subscriptions.get(tg_id), now)
+        return derive_status(await self._subscriptions.get(tg_id, ws_id), now)
 
     async def buy_plan(
-        self, tg_id: int, plan_code: str, *, now: datetime | None = None
+        self, tg_id: int, ws_id: str, plan_code: str, *, now: datetime | None = None
     ) -> Subscription:
-        """Buy a plan from the balance. Raises ``InsufficientFunds`` untouched."""
-        return await self._subscriptions.purchase(tg_id, plan_code)
+        """Buy a plan for one workspace from the balance.
+
+        Raises ``InsufficientFunds`` untouched (no workspace, no money moved).
+        """
+        return await self._subscriptions.purchase(tg_id, ws_id, plan_code)
 
     async def deliver_payment(
         self,

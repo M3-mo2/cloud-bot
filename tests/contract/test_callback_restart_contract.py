@@ -119,7 +119,7 @@ async def _container():
         ("ws_01M6HJASCWM9Z1PF755GT89NK6", "legacy", WorkspaceStatus.LOCKED),
     ):
         container.engine._seed_workspace(ws_id, name, status)
-    await container.services.workspaces.create(TG, "mine")
+    await container.services.workspaces.create(TG, "mine", plan_code="trial")
     return container
 
 

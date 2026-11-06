@@ -342,86 +342,37 @@ def create_name_prompt(locale: Locale) -> Screen:
     return Screen(doc=doc, markup=markup, send_new=True)
 
 
-def create_profile(locales: list[tuple[str, bool]], locale: Locale, default: str) -> Screen:
-    doc = RichDoc(locale)
-    doc.h(2, catalog.t("ws.create.profile_title", locale))
-    doc.p(catalog.t("ws.create.profile_body", locale))
-    rows = []
-    for name, is_default in locales:
-        label = f"✓ {name}" if is_default else name
-        icon = "🐍 " if name == "python" else "📦 "
-        intent = Intent.SUCCESS if is_default else Intent.PRIMARY
-        rows.append([inline(f"{icon}{label}", _cb("ws:profile", name), intent=intent)])
-    rows.append([inline(catalog.t("common.cancel", locale), "nav:cancel", intent=Intent.PRIMARY)])
-    return Screen(doc=doc, markup=inline_markup(rows))
-
-
-def create_advanced(
-    limits: Limits,
-    maxima: Limits,
+def create_network(
+    defaults: Limits,
     locale: Locale,
     *,
-    selected_profile: str,
     allow_net: bool | None = None,
     allow_tunnels: bool | None = None,
 ) -> Screen:
-    """Advanced create options: numeric limits plus the two boolean switches.
+    """The create flow's second step: the two network switches, then «متابعة».
 
-    ``allow_net`` and ``allow_tunnels`` were already on the domain ``Limits``;
-    this screen makes them reachable (a user could not enable publishing at all
-    before). Each is a toggle button whose callback flips the value in the wizard
-    state and re-renders this screen.
+    This replaces the old numeric "advanced" table. The plan decides cpu, memory
+    and disk; this screen only carries the two booleans a plan cannot know. One
+    linear path: toggles, «متابعة», or cancel.
     """
-    net = limits.allow_net if allow_net is None else allow_net
-    tunnels = limits.allow_tunnels if allow_tunnels is None else allow_tunnels
+    net = defaults.allow_net if allow_net is None else allow_net
+    tunnels = defaults.allow_tunnels if allow_tunnels is None else allow_tunnels
 
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("ws.create.advanced_title", locale))
-    cpu_line = catalog.t(
-        "ws.create.cpu_value",
-        locale,
-        n=_num(int(limits.cpu_cores), locale),
-        max=_num(int(maxima.cpu_cores), locale),
-    )
-    doc.table(
-        None,
+    doc.h(2, catalog.t("ws.create.network_title", locale))
+    doc.p(catalog.t("ws.create.network_body", locale))
+    doc.kv_table(
         [
-            [_th(catalog.t("ws.detail.cpu", locale)), _raw(cpu_line)],
-            [
-                _th(catalog.t("ws.detail.memory", locale)),
-                _raw(
-                    catalog.t(
-                        "ws.create.limit_value",
-                        locale,
-                        n=_num(limits.memory_mb, locale),
-                        unit="MB",
-                        max=_num(maxima.memory_mb, locale),
-                    )
-                ),
-            ],
-            [
-                _th(catalog.t("ws.detail.disk", locale)),
-                _raw(
-                    catalog.t(
-                        "ws.create.limit_value",
-                        locale,
-                        n=_num(limits.disk_mb, locale),
-                        unit="MB",
-                        max=_num(maxima.disk_mb, locale),
-                    )
-                ),
-            ],
-            [
-                _th(catalog.t("ws.create.network_label", locale)),
+            (
+                catalog.t("ws.create.network_label", locale),
                 catalog.t("ws.create.network_on" if net else "ws.create.network_off", locale),
-            ],
-            [
-                _th(catalog.t("ws.create.tunnels_label", locale)),
+            ),
+            (
+                catalog.t("ws.create.tunnels_label", locale),
                 catalog.t("ws.create.network_on" if tunnels else "ws.create.network_off", locale),
-            ],
-        ],
+            ),
+        ]
     )
-    doc.p(italic(catalog.t("ws.create.advanced_hint", locale)))
 
     def _toggle(active: bool, label: str, action: str):
         text = catalog.t(
@@ -437,22 +388,109 @@ def create_advanced(
                 _toggle(net, catalog.t("ws.create.network_label", locale), _cb("ws:tgl", "net")),
                 _toggle(tunnels, catalog.t("ws.create.tunnels_label", locale), _cb("ws:tgl", "tnl")),
             ],
-            [
-                inline(catalog.t("common.create", locale), _cb("ws:create", selected_profile), intent=Intent.SUCCESS),
-                inline(catalog.t("common.cancel", locale), "nav:cancel", intent=Intent.PRIMARY),
-            ],
+            [inline(catalog.t("ws.create.continue", locale), "ws:continue", intent=Intent.SUCCESS)],
+            [inline(catalog.t("common.cancel", locale), "nav:cancel", intent=Intent.PRIMARY)],
         ]
     )
     return Screen(doc=doc, markup=markup)
 
+def create_plan_picker(
+    options: tuple,
+    balance: int,
+    locale: Locale,
+    *,
+    workspace_name: str = "",
+    needed_plan: str | None = None,
+) -> Screen:
+    """The plan step the create flow was missing.
 
-def wizard_limits(defaults: Limits, data: dict) -> Limits:
-    """Build the create wizard's limits from the FSM data, defaulting safely.
-
-    Only the two boolean switches are user-toggled today; the numeric values come
-    from the engine's ``limits_defaults``. ``allow_tunnels`` is shown here so a
-    user can actually enable publishing at create time.
+    Each row says the period, the price and the allowance the plan grants — the
+    plan is the source of the workspace's limits. The trial (when it is still
+    available) reads differently: free, once, 3 days. A short balance is not a
+    dead end: the screen says exactly how many Stars are missing and offers the
+    packs.
     """
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("ws.create.plan_title", locale))
+    if workspace_name:
+        doc.p(_raw(catalog.t("ws.create.plan_for", locale, name=workspace_name)))
+    doc.p(catalog.t("ws.create.plan_body", locale))
+
+    if needed_plan is not None:
+        needed = next((p for p in options if p.code == needed_plan), None)
+        if needed is not None and balance < needed.amount_stars:
+            missing = needed.amount_stars - balance
+            doc.blockquote(
+                fragment(
+                    catalog.t(
+                        "ws.create.plan_need_more",
+                        locale,
+                        needed=_num(needed.amount_stars, locale),
+                        have=_num(balance, locale),
+                        missing=_num(missing, locale),
+                    )
+                )
+            )
+
+    rows = []
+    for plan in options:
+        if plan.amount_stars == 0:
+            price = catalog.t("ws.create.plan_free", locale)
+            plan_label = catalog.t("plan.trial", locale)
+        else:
+            price = _stars(plan.amount_stars, locale)
+            plan_label = catalog.t(f"plan.{plan.code}", locale)
+        rows.append(
+            [
+                _raw(plan_label),
+                _raw(catalog.t("wallet.plan.period", locale, days=_num(plan.period_days, locale))),
+                _raw(price),
+                _raw(
+                    catalog.t(
+                        "wallet.plan.allowance",
+                        locale,
+                        ws=_num(plan.max_workspaces, locale),
+                        cpu=_num(int(plan.limits.cpu_cores), locale),
+                        ram=_num(plan.limits.memory_mb, locale),
+                        disk=_num(plan.limits.disk_mb, locale),
+                    )
+                ),
+            ]
+        )
+    doc.table(
+        [
+            catalog.t("wallet.plan.col.plan", locale),
+            catalog.t("wallet.plan.col.period", locale),
+            catalog.t("wallet.plan.col.price", locale),
+            catalog.t("wallet.plan.col.includes", locale),
+        ],
+        rows,
+    )
+    doc.p(_raw(catalog.t("ws.create.plan_balance", locale, stars=_stars(balance, locale))))
+
+    kb: list[list] = []
+    for plan in options:
+        mark = " ✓" if plan.code == needed_plan else ""
+        if plan.amount_stars == 0:
+            label = catalog.t("ws.create.plan_trial_button", locale) + mark
+        else:
+            label = catalog.t(
+                "ws.create.plan_buy_button",
+                locale,
+                plan=catalog.t(f"plan.{plan.code}", locale),
+                stars=_num(plan.amount_stars, locale),
+            ) + mark
+        kb.append([inline(label, _cb("ws:plan", plan.code), intent=Intent.SUCCESS)])
+    short = needed_plan is not None and not any(
+        p.code == needed_plan and balance >= p.amount_stars for p in options
+    )
+    if short:
+        kb.append([inline(catalog.t("wallet.buy_stars", locale), "ws:packs", intent=Intent.SUCCESS)])
+    kb.append([inline(catalog.t("common.back", locale), "ws:back_net", intent=Intent.PRIMARY)])
+    return Screen(doc=doc, markup=inline_markup(kb))
+
+def wizard_network(defaults: Limits, data: dict) -> Limits:
+    """The network toggles from the wizard FSM data, defaulting to the engine's."""
     return Limits(
         cpu_cores=defaults.cpu_cores,
         memory_mb=defaults.memory_mb,
@@ -465,6 +503,8 @@ def wizard_limits(defaults: Limits, data: dict) -> Limits:
         write_rate_mb_s=defaults.write_rate_mb_s,
     )
 
+def _stars(n: int, locale: Locale) -> str:
+    return catalog.t("wallet.stars", locale, n=_num(n, locale))
 
 # -- lifecycle confirms / results -------------------------------------------
 def delete_confirm(ws: Workspace, locale: Locale) -> Screen:

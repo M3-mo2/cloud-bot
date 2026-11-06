@@ -43,6 +43,9 @@ class WalletView:
     now: datetime
     #: A transient banner (a receipt, a needed-stars note) shown above the body.
     banner: Html | None = None
+    #: One entry per workspace, because a plan belongs to a workspace now:
+    #: ``(workspace name, subscription, its derived status)``.
+    workspaces: tuple[tuple[str, "Subscription | None", SubscriptionStatus], ...] = ()
 
 
 def _num(value: int, locale: Locale) -> str:
@@ -93,16 +96,37 @@ def wallet_screen(view: WalletView) -> Screen:
     if view.banner is not None:
         doc.blockquote(view.banner)
 
-    # Current plan first: it is the answer to "what am I paying for?".
-    doc.kv_table(
-        [
-            (catalog.t("wallet.plan_label", locale), _status_line(view)),
-            (
-                catalog.t("wallet.balance_label", locale),
-                _stars(view.balance, locale),
-            ),
-        ]
-    )
+    # Current plan first: it is the answer to "what am I paying for?". When the
+    # caller supplies per-workspace state, each workspace shows its own plan,
+    # because a plan is attached to a workspace, not to the account.
+    if view.workspaces:
+        rows = []
+        for ws_name, subscription, status in view.workspaces:
+            rows.append(
+                [
+                    _raw(ws_name),
+                    _raw(_plan_and_state(subscription, status, locale)),
+                    _raw(_num(status.days_left, locale)),
+                ]
+            )
+        doc.table(
+            [
+                catalog.t("wallet.ws.col.workspace", locale),
+                catalog.t("wallet.ws.col.plan", locale),
+                catalog.t("wallet.ws.col.days", locale),
+            ],
+            rows,
+        )
+    else:
+        doc.kv_table(
+            [
+                (catalog.t("wallet.plan_label", locale), _status_line(view)),
+                (
+                    catalog.t("wallet.balance_label", locale),
+                    _stars(view.balance, locale),
+                ),
+            ]
+        )
 
     if view.subscription is not None and view.subscription.expires_at:
         doc.p(
@@ -136,8 +160,23 @@ def wallet_screen(view: WalletView) -> Screen:
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
+def _plan_and_state(
+    subscription: "Subscription | None",
+    status: SubscriptionStatus,
+    locale: Locale,
+) -> str:
+    """One workspace's plan and state, in words (never a raw enum)."""
+    if status.state is SubscriptionState.NONE or subscription is None:
+        return catalog.t("wallet.ws.no_plan", locale)
+    name = _plan_name(subscription.plan_code, locale)
+    if status.state is SubscriptionState.EXPIRED:
+        return catalog.t("wallet.ws.expired", locale, plan=name)
+    if status.state is SubscriptionState.TRIALING:
+        return catalog.t("wallet.ws.trialing", locale, plan=name)
+    return catalog.t("wallet.ws.active", locale, plan=name, days=_num(status.days_left, locale))
+
 def plan_picker_screen(
-    view: WalletView, *, needed_plan: str | None = None
+    view: WalletView, *, needed_plan: str | None = None, ws_id: str | None = None
 ) -> Screen:
     """The three plans: period, price and allowance, the current one marked.
 
@@ -208,6 +247,9 @@ def plan_picker_screen(
                 ]
             )
         else:
+            action = (
+                f"pay:buy:{ws_id}:{plan.code}" if ws_id else f"pay:buy:{plan.code}"
+            )
             kb.append(
                 [
                     inline(
@@ -217,7 +259,7 @@ def plan_picker_screen(
                             plan=_plan_name(plan.code, locale),
                             stars=_num(plan.amount_stars, locale),
                         ),
-                        f"pay:buy:{plan.code}",
+                        action,
                         intent=Intent.SUCCESS,
                     )
                 ]
@@ -226,8 +268,12 @@ def plan_picker_screen(
     return Screen(doc=doc, markup=inline_markup(kb))
 
 
-def packs_screen(view: WalletView) -> Screen:
-    """The Star packs to buy through Telegram Stars."""
+def packs_screen(view: WalletView, *, back_action: str = "pay:wallet") -> Screen:
+    """The Star packs to buy through Telegram Stars.
+
+    ``back_action`` lets the create wizard return to its plan step instead of the
+    wallet, so buying Stars mid-flow does not lose the half-built workspace.
+    """
     locale = view.locale
     doc = RichDoc(locale)
     doc.h(2, catalog.t("wallet.packs.title", locale))

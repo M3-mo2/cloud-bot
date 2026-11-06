@@ -156,7 +156,7 @@ class DevSandbox:
             ("ws_01M6HJASCWM9Z1PF755GT89NK6", "legacy", WorkspaceStatus.LOCKED),
         ):
             container.engine._seed_workspace(ws_id, name, status)
-        await container.services.workspaces.create(tg_id, "mine")
+        await container.services.workspaces.create(tg_id, "mine", plan_code="trial")
         _detach_routers()
         bot = bot if bot is not None else FakeBot()
         dispatcher = build_dispatcher(container, bot)

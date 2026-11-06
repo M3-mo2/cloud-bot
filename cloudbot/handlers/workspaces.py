@@ -7,11 +7,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from cloudbot.core.errors import InvalidInput
+from cloudbot.handlers import billing
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.keyboards.callbacks import decode, decode_required
 from cloudbot.presentation.rich.sender import RichSender
+from cloudbot.presentation.screens import wallet as wallet_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import RequestEvents
@@ -139,12 +141,39 @@ async def on_logout(cb: CallbackQuery, ctx: UserContext, services: Services, sen
     )
 
 
-# -- create wizard -----------------------------------------------------------
+# -- create wizard: name -> network -> plan -> create ------------------------
+async def _show_network(event, ctx, services, sender, state) -> None:
+    meta = await services.workspaces.meta()
+    data = await state.get_data()
+    limits = ws_screens.wizard_network(meta.limits_defaults, data)
+    screen = ws_screens.create_network(
+        meta.limits_defaults,
+        ctx.locale,
+        allow_net=limits.allow_net,
+        allow_tunnels=limits.allow_tunnels,
+    )
+    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
+
+async def _show_plan_picker(
+    event, ctx, services, sender, state, *, needed_plan: str | None = None
+) -> None:
+    data = await state.get_data()
+    options = await services.workspaces.plan_options(ctx.tg_id)
+    balance = (await services.billing.wallet(ctx.tg_id)).balance_stars
+    screen = ws_screens.create_plan_picker(
+        options,
+        balance,
+        ctx.locale,
+        workspace_name=data.get("ws_name", ""),
+        needed_plan=needed_plan,
+    )
+    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
+
 @router.callback_query(F.data == "ws:new")
 async def on_new(cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext) -> None:
+    await state.clear()
     await state.set_state(Input.waiting_name)
     await show_screen(cb, ws_screens.create_name_prompt(ctx.locale), ctx=ctx, sender=sender)
-
 
 @router.message(Input.waiting_name)
 async def on_name(
@@ -160,87 +189,52 @@ async def on_name(
         await show_screen(message, error_screen(II("name", reason), ctx.locale), ctx=ctx, sender=sender)
         return
     await state.update_data(ws_name=name)
-    meta = await services.workspaces.meta()
-    profiles = list(meta.profiles.profiles) or []
-    if len(profiles) > 1:
-        await state.set_state(Input.waiting_profile)
-        listing = [(p.name, p.name == meta.default_profile) for p in profiles]
-        await show_screen(message, ws_screens.create_profile(listing, ctx.locale, meta.default_profile), ctx=ctx, sender=sender)
-        return
-    await state.update_data(ws_profile=meta.default_profile)
-    await _show_advanced(message, ctx, services, sender, state)
-
-
-async def _show_advanced(event, ctx, services, sender, state) -> None:
-    """Render the advanced create screen with the wizard's current toggles."""
-    meta = await services.workspaces.meta()
-    data = await state.get_data()
-    await state.set_state(Input.waiting_advanced)
-    limits = ws_screens.wizard_limits(meta.limits_defaults, data)
-    screen = ws_screens.create_advanced(
-        limits,
-        meta.limits_maxima,
-        ctx.locale,
-        selected_profile=data.get("ws_profile", meta.default_profile),
-        allow_net=limits.allow_net,
-        allow_tunnels=limits.allow_tunnels,
-    )
-    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=isinstance(event, Message))
-
-
-@router.callback_query(F.data.startswith("ws:profile"))
-async def on_profile(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
-) -> None:
-    decoded = decode_required(cb.data, 1)
-    profile = decoded.key[0]
-    await state.update_data(ws_profile=profile)
-    await _show_advanced(cb, ctx, services, sender, state)
-
-
-@router.message(Input.waiting_profile)
-async def on_profile_text(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
-) -> None:
-    await state.update_data(ws_profile=message.text.strip())
-    await _show_advanced(message, ctx, services, sender, state)
-
+    await _show_network(message, ctx, services, sender, state)
 
 @router.callback_query(F.data.startswith("ws:tgl"))
 async def on_toggle(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    """Flip one boolean switch on the advanced create screen (net / tunnels)."""
+    """Flip one boolean switch on the network step (net / tunnels)."""
     which = decode_required(cb.data, 1).key[0]
     data = await state.get_data()
     key = "ws_allow_net" if which == "net" else "ws_allow_tunnels"
     await state.update_data(**{key: not bool(data.get(key, False))})
-    await _show_advanced(cb, ctx, services, sender, state)
+    await _show_network(cb, ctx, services, sender, state)
 
+@router.callback_query(F.data == "ws:back_net")
+async def on_back_network(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    await _show_network(cb, ctx, services, sender, state)
 
-async def _do_create(event, ctx, services, sender, state, *, profile: str | None = None, events=None) -> None:
+@router.callback_query(F.data == "ws:continue")
+async def on_continue(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    """«متابعة»: the plan step. No workspace exists yet."""
     data = await state.get_data()
-    name = data.get("ws_name", "")
-    limits = await _wizard_limits(services, data)
-    profile = profile or data.get("ws_profile")
-    await state.clear()
-    ws = await services.workspaces.create(ctx.tg_id, name, profile=profile, limits=limits)
-    if events is not None:
-        events.workspace_created(tg_id=ctx.tg_id, ws_id=str(ws.id), name=ws.name)
-    screen = ws_screens.workspace_detail(
-        ws, ctx.locale, confirmation=catalog.t("ws.create.ready", ctx.locale, name=ws.name)
+    if not data.get("ws_name"):
+        await state.set_state(Input.waiting_name)
+        await show_screen(cb, ws_screens.create_name_prompt(ctx.locale), ctx=ctx, sender=sender)
+        return
+    await _show_plan_picker(cb, ctx, services, sender, state)
+
+@router.callback_query(F.data == "ws:packs")
+async def on_packs(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
+) -> None:
+    """Buy Stars, then come straight back to the plan step (state is kept)."""
+    view = await billing._view(services, ctx.tg_id, ctx.locale)
+    await show_screen(
+        cb,
+        wallet_screens.packs_screen(view, back_action="ws:continue"),
+        ctx=ctx,
+        sender=sender,
     )
-    await show_screen(event, screen, ctx=ctx, sender=sender, force_send=True)
 
-
-async def _wizard_limits(services: Services, data: dict):
-    meta = await services.workspaces.meta()
-    return ws_screens.wizard_limits(meta.limits_defaults, data)
-
-
-# -- lifecycle ---------------------------------------------------------------
-@router.callback_query(F.data.startswith("ws:create"))
-async def on_create(
+@router.callback_query(F.data.startswith("ws:plan"))
+async def on_plan(
     cb: CallbackQuery,
     ctx: UserContext,
     services: Services,
@@ -248,9 +242,38 @@ async def on_create(
     state: FSMContext,
     events: RequestEvents,
 ) -> None:
-    """Create from the advanced screen (the wizard's final step)."""
-    await _do_create(cb, ctx, services, sender, state, events=events)
+    """Pick a plan and create the workspace with it — the money step is the commit."""
+    from cloudbot.core.errors import InsufficientFunds, TrialUsed
 
+    plan_code = decode_required(cb.data, 1).key[0]
+    data = await state.get_data()
+    name = data.get("ws_name", "")
+    if not name:
+        await state.set_state(Input.waiting_name)
+        await show_screen(cb, ws_screens.create_name_prompt(ctx.locale), ctx=ctx, sender=sender)
+        return
+    limits = ws_screens.wizard_network(
+        (await services.workspaces.meta()).limits_defaults, data
+    )
+    try:
+        ws = await services.workspaces.create(
+            ctx.tg_id, name, plan_code=plan_code, limits=limits
+        )
+    except InsufficientFunds:
+        # Not enough Stars: no workspace, no debit, state kept for a retry.
+        await _show_plan_picker(cb, ctx, services, sender, state, needed_plan=plan_code)
+        return
+    except TrialUsed:
+        await _show_plan_picker(cb, ctx, services, sender, state)
+        return
+    await state.clear()
+    events.workspace_created(tg_id=ctx.tg_id, ws_id=str(ws.id), name=ws.name)
+    screen = ws_screens.workspace_detail(
+        ws, ctx.locale, confirmation=catalog.t("ws.create.ready", ctx.locale, name=ws.name)
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender, force_send=True)
+
+# -- lifecycle ---------------------------------------------------------------
 
 @router.callback_query(F.data.startswith("ws:delete_confirm"))
 async def on_delete_confirm(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
@@ -348,9 +371,9 @@ async def on_renew(cb: CallbackQuery, ctx: UserContext, services: Services, send
     """
     from cloudbot.handlers import billing
 
-    decode_required(cb.data, 1)
+    decoded = decode_required(cb.data, 1)
     await cb.answer()
-    await billing.open_plans(cb, ctx, services, sender)
+    await billing.open_plans(cb, ctx, services, sender, ws_id=decoded.key[0])
 
 
 def _wid(text: str):

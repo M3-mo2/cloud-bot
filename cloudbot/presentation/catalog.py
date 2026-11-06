@@ -626,6 +626,11 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
     )
 
 
+def plans_plan(code: str):
+    from cloudbot.domain.plans import plan as _plan
+
+    return _plan(code)
+
 def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False):
     from cloudbot.domain.subscription import (
         Subscription,
@@ -665,6 +670,7 @@ def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False
         subscription=subscription,
         status=status,
         now=NOW,
+        workspaces=(("demo", subscription, status),),
     )
 
 def _admin_entered_view(locale: Locale) -> AdminView:
@@ -707,8 +713,28 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "ws_detail_suspended": lambda f, loc: ws_screens.workspace_detail(f["suspended"], loc, now=NOW),
     "ws_detail_locked": lambda f, loc: ws_screens.workspace_detail(f["locked"], loc, now=NOW),
     "ws_create_name": lambda f, loc: ws_screens.create_name_prompt(loc),
-    "ws_create_profile": lambda f, loc: ws_screens.create_profile([("python", True), ("node", False)], loc, "python"),
-    "ws_create_advanced": lambda f, loc: ws_screens.create_advanced(Limits(), Limits(cpu_cores=8, memory_mb=8192, disk_mb=51200), loc, selected_profile="python"),
+    "ws_create_network": lambda f, loc: ws_screens.create_network(
+        Limits(allow_net=True, allow_tunnels=True), loc
+    ),
+    "ws_create_plan": lambda f, loc: ws_screens.create_plan_picker(
+        (plans_plan("trial"), plans_plan("week"), plans_plan("month"), plans_plan("year")),
+        350,
+        loc,
+        workspace_name="demo",
+    ),
+    "ws_create_plan_short": lambda f, loc: ws_screens.create_plan_picker(
+        (plans_plan("trial"), plans_plan("week"), plans_plan("month"), plans_plan("year")),
+        20,
+        loc,
+        workspace_name="demo",
+        needed_plan="month",
+    ),
+    "ws_create_plan_trial_used": lambda f, loc: ws_screens.create_plan_picker(
+        (plans_plan("week"), plans_plan("month"), plans_plan("year")),
+        350,
+        loc,
+        workspace_name="demo",
+    ),
     "ws_delete_confirm": lambda f, loc: ws_screens.delete_confirm(f["ws"], loc),
     "ws_stop_confirm": lambda f, loc: ws_screens.stop_confirm(f["ws"], loc),
     "ws_suspend_confirm": lambda f, loc: ws_screens.suspend_confirm(f["ws"], loc),

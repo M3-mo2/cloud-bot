@@ -139,7 +139,10 @@ class FakeEngine:
                 profiles=(ProfileInfo(name="python", description="Python 3 toolchain"),),
             ),
             limits_defaults=Limits(),
-            limits_maxima=Limits(cpu_cores=8, memory_mb=8192, disk_mb=51200, max_wall_time_sec=3600),
+            limits_maxima=Limits(
+                cpu_cores=8, memory_mb=8192, disk_mb=51200, max_wall_time_sec=3600,
+                allow_net=True, allow_tunnels=True,
+            ),
             tunnels=Tunnels(
                 enabled=True,
                 ready=True,

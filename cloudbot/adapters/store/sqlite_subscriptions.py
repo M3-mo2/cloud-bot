@@ -25,6 +25,7 @@ import aiosqlite
 
 from cloudbot.adapters.persistence.database import Database
 from cloudbot.adapters.persistence.models import parse_dt
+from cloudbot.core.errors import InsufficientFunds, SubscriptionError
 from cloudbot.domain import plans
 from cloudbot.domain.billing import StarsPayment
 from cloudbot.domain.subscription import (
@@ -34,19 +35,6 @@ from cloudbot.domain.subscription import (
     Wallet,
     extend,
 )
-
-
-class SubscriptionError(Exception):
-    code = "subscription_error"
-
-
-class InsufficientFunds(SubscriptionError):
-    code = "insufficient_funds"
-
-    def __init__(self, required: int, available: int) -> None:
-        super().__init__(f"needs {required} stars, has {available}")
-        self.required = required
-        self.available = available
 
 
 class UnknownPlan(SubscriptionError):
@@ -63,9 +51,18 @@ class SqliteSubscriptions:
         self._lock = asyncio.Lock()
 
     # -- reads ---------------------------------------------------------------
-    async def get(self, tg_id: int) -> Subscription | None:
+    async def get(self, tg_id: int, ws_id: str) -> Subscription | None:
         conn = await self._db.connect()
-        return await self._get(conn, tg_id)
+        return await self._get(conn, ws_id)
+
+    async def for_user(self, tg_id: int) -> tuple[Subscription, ...]:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT * FROM subscriptions WHERE tg_id = ? ORDER BY started_at, ws_id",
+            (tg_id,),
+        ) as cur:
+            rows = await cur.fetchall()
+        return tuple(_row_to_subscription(r) for r in rows)
 
     async def wallet(self, tg_id: int) -> Wallet:
         conn = await self._db.connect()
@@ -165,7 +162,12 @@ class SqliteSubscriptions:
         )
 
     async def purchase(
-        self, tg_id: int, plan_code: str, *, idempotency_key: str = ""
+        self,
+        tg_id: int,
+        ws_id: str,
+        plan_code: str,
+        *,
+        idempotency_key: str = "",
     ) -> Subscription:
         try:
             plan = plans.plan(plan_code)
@@ -179,7 +181,7 @@ class SqliteSubscriptions:
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 if idempotency_key and await self._seen(conn, idempotency_key):
-                    existing = await self._get(conn, tg_id)
+                    existing = await self._get(conn, ws_id)
                     await conn.execute("ROLLBACK")
                     if existing is None:
                         raise SubscriptionError("replayed purchase has no subscription")
@@ -194,14 +196,14 @@ class SqliteSubscriptions:
                     conn, tg_id, "debit", -plan.amount_stars,
                     f"purchase:{plan.code}", now, tg_id, idempotency_key,
                 )
-                current = await self._get(conn, tg_id)
+                current = await self._get(conn, ws_id)
                 new = extend(
-                    current, tg_id=tg_id, plan_code=plan.code,
+                    current, tg_id=tg_id, ws_id=ws_id, plan_code=plan.code,
                     days=plan.period_days, source=SubscriptionSource.STARS, now=now,
                 )
                 await self._put(conn, new, now)
                 await self._append_event(
-                    conn, tg_id, "purchase", plan.code, plan.period_days,
+                    conn, tg_id, ws_id, "purchase", plan.code, plan.period_days,
                     tg_id, f"purchase:{plan.code}", now, idempotency_key,
                 )
                 await conn.execute("COMMIT")
@@ -213,6 +215,7 @@ class SqliteSubscriptions:
     async def grant(
         self,
         tg_id: int,
+        ws_id: str,
         plan_code: str,
         days: int,
         actor: int,
@@ -232,12 +235,12 @@ class SqliteSubscriptions:
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 if idempotency_key and await self._seen(conn, idempotency_key):
-                    current = await self._get(conn, tg_id)
+                    current = await self._get(conn, ws_id)
                     await conn.execute("ROLLBACK")
                     return current
 
                 now = datetime.now(timezone.utc)
-                current = await self._get(conn, tg_id)
+                current = await self._get(conn, ws_id)
                 if current is None and days < 0:
                     await conn.execute("ROLLBACK")
                     return None
@@ -249,16 +252,17 @@ class SqliteSubscriptions:
                         started_at=current.started_at,
                         expires_at=current.expires_at + timedelta(days=days),
                         source=SubscriptionSource.ADMIN,
+                        ws_id=ws_id,
                     )
                 else:
                     new = extend(
-                        current, tg_id=tg_id, plan_code=plan_code, days=days,
-                        source=SubscriptionSource.ADMIN, now=now,
+                        current, tg_id=tg_id, ws_id=ws_id, plan_code=plan_code,
+                        days=days, source=SubscriptionSource.ADMIN, now=now,
                     )
                 await self._put(conn, new, now)
                 await self._append_event(
-                    conn, tg_id, "grant" if days > 0 else "shorten", plan_code,
-                    days, actor, reason, now, idempotency_key,
+                    conn, tg_id, ws_id, "grant" if days > 0 else "shorten",
+                    plan_code, days, actor, reason, now, idempotency_key,
                 )
                 await conn.execute("COMMIT")
                 return new
@@ -269,6 +273,7 @@ class SqliteSubscriptions:
     async def revoke(
         self,
         tg_id: int,
+        ws_id: str,
         actor: int,
         reason: str,
         *,
@@ -279,12 +284,12 @@ class SqliteSubscriptions:
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 if idempotency_key and await self._seen(conn, idempotency_key):
-                    current = await self._get(conn, tg_id)
+                    current = await self._get(conn, ws_id)
                     await conn.execute("ROLLBACK")
                     return current
 
                 now = datetime.now(timezone.utc)
-                current = await self._get(conn, tg_id)
+                current = await self._get(conn, ws_id)
                 if current is None:
                     await conn.execute("ROLLBACK")
                     return None
@@ -294,11 +299,12 @@ class SqliteSubscriptions:
                     started_at=current.started_at,
                     expires_at=now,
                     source=current.source,
+                    ws_id=ws_id,
                 )
                 await self._put(conn, revoked, now)
                 await self._append_event(
-                    conn, tg_id, "revoke", current.plan_code, 0, actor, reason,
-                    now, idempotency_key,
+                    conn, tg_id, ws_id, "revoke", current.plan_code, 0, actor,
+                    reason, now, idempotency_key,
                 )
                 await conn.execute("COMMIT")
                 return revoked
@@ -306,7 +312,15 @@ class SqliteSubscriptions:
                 await self._rollback(conn)
                 raise
 
-    async def start_trial(self, tg_id: int) -> Subscription | None:
+    async def start_trial(self, tg_id: int, ws_id: str) -> Subscription | None:
+        """Grant the free trial to ``ws_id``. Once per **user**, never per ws.
+
+        The flag in ``subscription_trials`` is keyed by ``tg_id``: a user who has
+        used the trial cannot take it again on a second workspace, which is what
+        stops free-workspace farming. If the flag is already set (or this
+        workspace already has a plan) nothing changes and the current workspace
+        subscription is returned.
+        """
         async with self._lock:
             conn = await self._db.connect()
             await conn.execute("BEGIN IMMEDIATE")
@@ -315,19 +329,12 @@ class SqliteSubscriptions:
                     "SELECT 1 FROM subscription_trials WHERE tg_id = ?", (tg_id,)
                 ) as cur:
                     already = await cur.fetchone() is not None
-                if already:
-                    current = await self._get(conn, tg_id)
+                current = await self._get(conn, ws_id)
+                if already or current is not None:
                     await conn.execute("ROLLBACK")
                     return current
 
                 now = datetime.now(timezone.utc)
-                # The trial exists only for a user who has never had a plan; an
-                # existing (even expired) subscription means "already past it".
-                current = await self._get(conn, tg_id)
-                if current is not None:
-                    await conn.execute("ROLLBACK")
-                    return current
-
                 await conn.execute(
                     "INSERT OR IGNORE INTO subscription_trials (tg_id, granted_at) "
                     "VALUES (?, ?)",
@@ -335,14 +342,14 @@ class SqliteSubscriptions:
                 )
                 trial_plan = plans.plan("trial")
                 new = extend(
-                    current, tg_id=tg_id, plan_code=trial_plan.code,
+                    current, tg_id=tg_id, ws_id=ws_id, plan_code=trial_plan.code,
                     days=trial_plan.period_days,
                     source=SubscriptionSource.TRIAL, now=now,
                 )
                 await self._put(conn, new, now)
                 await self._append_event(
-                    conn, tg_id, "trial", trial_plan.code, trial_plan.period_days,
-                    tg_id, "trial", now, "",
+                    conn, tg_id, ws_id, "trial", trial_plan.code,
+                    trial_plan.period_days, tg_id, "trial", now, "",
                 )
                 await conn.execute("COMMIT")
                 return new
@@ -493,20 +500,12 @@ class SqliteSubscriptions:
             ledger=ledger,
         )
 
-    async def _get(self, conn: aiosqlite.Connection, tg_id: int) -> Subscription | None:
+    async def _get(self, conn: aiosqlite.Connection, ws_id: str) -> Subscription | None:
         async with conn.execute(
-            "SELECT * FROM subscriptions WHERE tg_id = ?", (tg_id,)
+            "SELECT * FROM subscriptions WHERE ws_id = ?", (ws_id,)
         ) as cur:
             row = await cur.fetchone()
-        if row is None:
-            return None
-        return Subscription(
-            tg_id=int(row["tg_id"]),
-            plan_code=str(row["plan_code"]),
-            started_at=parse_dt(row["started_at"]),
-            expires_at=parse_dt(row["expires_at"]),
-            source=SubscriptionSource(str(row["source"])),
-        )
+        return _row_to_subscription(row) if row is not None else None
 
     async def _put(
         self, conn: aiosqlite.Connection, sub: Subscription, now: datetime
@@ -514,13 +513,14 @@ class SqliteSubscriptions:
         stamp = now.isoformat().replace("+00:00", "Z")
         await conn.execute(
             "INSERT INTO subscriptions "
-            "(tg_id, plan_code, started_at, expires_at, source, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?) "
-            "ON CONFLICT(tg_id) DO UPDATE SET "
-            "plan_code=excluded.plan_code, started_at=excluded.started_at, "
-            "expires_at=excluded.expires_at, source=excluded.source, "
-            "updated_at=excluded.updated_at",
+            "(ws_id, tg_id, plan_code, started_at, expires_at, source, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(ws_id) DO UPDATE SET "
+            "tg_id=excluded.tg_id, plan_code=excluded.plan_code, "
+            "started_at=excluded.started_at, expires_at=excluded.expires_at, "
+            "source=excluded.source, updated_at=excluded.updated_at",
             (
+                sub.ws_id,
                 sub.tg_id,
                 sub.plan_code,
                 sub.started_at.isoformat().replace("+00:00", "Z"),
@@ -560,6 +560,7 @@ class SqliteSubscriptions:
         self,
         conn: aiosqlite.Connection,
         tg_id: int,
+        ws_id: str,
         action: str,
         plan_code: str,
         days_delta: int,
@@ -570,10 +571,11 @@ class SqliteSubscriptions:
     ) -> None:
         await conn.execute(
             "INSERT INTO subscription_events "
-            "(tg_id, action, plan_code, days_delta, actor_tg_id, reason, at, "
-            "idempotency_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "(tg_id, ws_id, action, plan_code, days_delta, actor_tg_id, reason, at, "
+            "idempotency_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 tg_id,
+                ws_id,
                 action,
                 plan_code,
                 days_delta,
@@ -584,6 +586,16 @@ class SqliteSubscriptions:
             ),
         )
 
+
+def _row_to_subscription(row: aiosqlite.Row) -> Subscription:
+    return Subscription(
+        tg_id=int(row["tg_id"]),
+        plan_code=str(row["plan_code"]),
+        started_at=parse_dt(row["started_at"]),
+        expires_at=parse_dt(row["expires_at"]),
+        source=SubscriptionSource(str(row["source"])),
+        ws_id=str(row["ws_id"]),
+    )
 
 def _row_to_payment(row: aiosqlite.Row) -> StarsPayment:
     from cloudbot.adapters.persistence.models import parse_dt

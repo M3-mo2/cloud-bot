@@ -274,20 +274,26 @@ async def test_insufficient_balance_says_how_many_stars_are_needed():
     dispatcher = build_dispatcher(container, bot)
     try:
         await container.subscriptions.credit(USER, 20, "seed", actor=ADMIN)
-        await dispatcher.feed_update(bot, _callback(1, USER, "pay:buy:month"))
+        # A plan belongs to a workspace: create one on the trial, then renew it.
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="trial")
+        await dispatcher.feed_update(bot, _callback(1, USER, f"pay:buy:{ws.id}:month"))
         html = bot.sent[-1]
         # 150 needed, 20 held, so 130 more.
         assert "130" in html and "150" in html
-        # And nothing was bought.
-        assert await container.subscriptions.get(USER) is None
+        # And the workspace still has only its trial plan, nothing was debited.
+        sub = await container.subscriptions.get(USER, str(ws.id))
+        assert sub is not None and sub.plan_code == "trial"
+        assert (await container.subscriptions.wallet(USER)).balance_stars == 20
     finally:
         await container.aclose()
 
 # -- purchase, expiry, lock, renew (through the real handlers) --------------
-async def _set_expired(container, tg_id: int, *, days_ago: int = 1) -> None:
+async def _set_expired(container, tg_id: int, ws_id: str, *, days_ago: int = 1) -> None:
     conn = await container.database.connect()
     past = (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat().replace("+00:00", "Z")
-    await conn.execute("UPDATE subscriptions SET expires_at = ? WHERE tg_id = ?", (past, tg_id))
+    await conn.execute(
+        "UPDATE subscriptions SET expires_at = ? WHERE ws_id = ?", (past, ws_id)
+    )
 
 async def test_purchase_then_expiry_locks_then_renew_is_active_again():
     container = await _container()
@@ -296,26 +302,24 @@ async def test_purchase_then_expiry_locks_then_renew_is_active_again():
     try:
         # Credits come from the admin, never Telegram.
         await container.services.admin.credit(USER, 50, "test", actor=ADMIN)
-        # Two taps: wallet → buy week.
-        await dispatcher.feed_update(bot, _callback(1, USER, "pay:buy:week"))
-        subscription = await container.subscriptions.get(USER)
-        assert subscription is not None
+        # Creating a workspace with the week plan buys it in one step.
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="week")
+        subscription = await container.subscriptions.get(USER, str(ws.id))
+        assert subscription is not None and subscription.plan_code == "week"
         assert (await container.subscriptions.wallet(USER)).balance_stars == 0
 
-        # The user creates a workspace while active.
-        ws = await container.services.workspaces.create(USER, "mine")
         listed = await container.services.workspaces.list(USER)
         assert listed and listed[0].status is WorkspaceStatus.ACTIVE
 
         # Time passes: the plan expires; the workspace renders LOCKED, files kept.
-        await _set_expired(container, USER, days_ago=1)
+        await _set_expired(container, USER, str(ws.id), days_ago=1)
         listed = await container.services.workspaces.list(USER)
         assert listed and listed[0].status is WorkspaceStatus.LOCKED
         assert listed[0].id == ws.id
 
-        # Renew: an admin credit funds a new week, then the wallet buy is active again.
+        # Renew: an admin credit funds a new week, then the renew buy is active again.
         await container.services.admin.credit(USER, 50, "renewal test", actor=ADMIN)
-        await dispatcher.feed_update(bot, _callback(2, USER, "pay:buy:week"))
+        await dispatcher.feed_update(bot, _callback(2, USER, f"pay:buy:{ws.id}:week"))
         listed = await container.services.workspaces.list(USER)
         assert listed and listed[0].status is WorkspaceStatus.ACTIVE
     finally:
@@ -325,16 +329,17 @@ async def test_purchase_then_expiry_locks_then_renew_is_active_again():
 async def test_a_trial_never_becomes_a_paid_plan_without_payment():
     container = await _container()
     try:
-        trial = await container.subscriptions.start_trial(USER)
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="trial")
+        trial = await container.subscriptions.get(USER, str(ws.id))
         assert trial is not None and trial.source is SubscriptionSource.TRIAL
-        status = await container.services.billing.status(USER)
+        status = await container.services.billing.status(USER, str(ws.id))
         assert status.state is SubscriptionState.TRIALING
         # No payment: even after the trial lapses, it is EXPIRED, never ACTIVE
         # (and never charged for).
-        await _set_expired(container, USER, days_ago=1)
-        status = await container.services.billing.status(USER)
+        await _set_expired(container, USER, str(ws.id), days_ago=1)
+        status = await container.services.billing.status(USER, str(ws.id))
         assert status.state is SubscriptionState.EXPIRED
-        subscription = await container.subscriptions.get(USER)
+        subscription = await container.subscriptions.get(USER, str(ws.id))
         assert subscription.source is SubscriptionSource.TRIAL
         assert (await container.subscriptions.wallet(USER)).balance_stars == 0
     finally:
@@ -395,8 +400,8 @@ async def test_admin_credit_lets_a_user_buy_a_plan_with_nothing_from_telegram():
     try:
         assert (await container.subscriptions.wallet(USER)).balance_stars == 0
         await container.services.admin.credit(USER, 50, "gift", actor=ADMIN)
-        await dispatcher.feed_update(bot, _callback(1, USER, "pay:buy:week"))
-        subscription = await container.subscriptions.get(USER)
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="week")
+        subscription = await container.subscriptions.get(USER, str(ws.id))
         assert subscription is not None
         assert subscription.source is SubscriptionSource.STARS
         # No Telegram invoice was ever sent.
@@ -444,33 +449,38 @@ async def test_admin_grant_extend_shorten_and_revoke_through_the_panel():
     bot = RecordingBot()
     dispatcher = build_dispatcher(container, bot)
     try:
+        # A plan now belongs to a workspace, so the subject owns one first.
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="trial")
+        await container.services.billing._subscriptions.revoke(
+            USER, str(ws.id), actor=ADMIN, reason="reset"
+        )
         # Grant month for 30 days: plan picker → days → reason.
         await dispatcher.feed_update(bot, _callback(1, ADMIN, f"adm:wop:grant:{USER}:ask"))
         await dispatcher.feed_update(bot, _callback(2, ADMIN, f"adm:wplan:grant:{USER}:month:ask"))
         await _text(dispatcher, bot, 3, ADMIN, "30")
         await _text(dispatcher, bot, 4, ADMIN, "support")
-        sub = await container.services.billing.subscription(USER)
+        sub = await container.services.billing.subscription(USER, str(ws.id))
         assert sub is not None and sub.plan_code == "month"
 
         # Extend by 5 days.
         await dispatcher.feed_update(bot, _callback(5, ADMIN, f"adm:wop:extend:{USER}:ask"))
         await _text(dispatcher, bot, 6, ADMIN, "5")
         await _text(dispatcher, bot, 7, ADMIN, "goodwill")
-        extended = await container.services.billing.subscription(USER)
+        extended = await container.services.billing.subscription(USER, str(ws.id))
         assert extended.expires_at == sub.expires_at + timedelta(days=5)
 
         # Shorten by 3 days.
         await dispatcher.feed_update(bot, _callback(8, ADMIN, f"adm:wop:shorten:{USER}:ask"))
         await _text(dispatcher, bot, 9, ADMIN, "3")
         await _text(dispatcher, bot, 10, ADMIN, "correction")
-        shortened = await container.services.billing.subscription(USER)
+        shortened = await container.services.billing.subscription(USER, str(ws.id))
         assert shortened.expires_at == extended.expires_at - timedelta(days=3)
 
         # Revoke.
         await dispatcher.feed_update(bot, _callback(11, ADMIN, f"adm:wop:revoke:{USER}:ask"))
         await _text(dispatcher, bot, 12, ADMIN, "refund")
-        revoked = await container.services.billing.subscription(USER)
-        status = await container.services.billing.status(USER)
+        revoked = await container.services.billing.subscription(USER, str(ws.id))
+        status = await container.services.billing.status(USER, str(ws.id))
         assert status.is_active is False
     finally:
         await container.aclose()
@@ -534,43 +544,47 @@ async def test_a_locked_workspace_renew_opens_the_plan_picker():
     bot = RecordingBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        ws = await container.services.workspaces.create(USER, "mine")
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="trial")
         # If the plan is active the workspace is active; a revocation locks it.
-        await container.services.billing._subscriptions.revoke(USER, actor=ADMIN, reason="test")
+        await container.services.billing._subscriptions.revoke(
+            USER, str(ws.id), actor=ADMIN, reason="test"
+        )
         await dispatcher.feed_update(bot, _callback(1, USER, f"ws:renew:{ws.id}"))
         html = bot.sent[-1]
         assert "Choose a plan" in html
         actions = {
             b.callback_data for row in bot.markups[-1].inline_keyboard for b in row
         }
-        assert "pay:buy:week" in actions
+        assert any(a and a.startswith("pay:buy:") and a.endswith(":week") for a in actions)
     finally:
         await container.aclose()
 
 # -- enforcement: the plan sets the ceiling a workspace may ASK for ---------
 async def test_the_plan_sets_the_request_ceiling_not_the_enforced_default():
-    from cloudbot.core.errors import InvalidInput
     from cloudbot.domain.value_objects import Limits
 
     container = await _container()
     try:
         await container.services.admin.credit(USER, 50, "test", actor=ADMIN)
-        await container.services.billing.buy_plan(USER, "week")
+        ws = await container.services.workspaces.create(USER, "mine", plan_code="week")
         meta = await container.services.workspaces.meta()
-        ceiling = await container.services.workspaces.plan_maxima(USER, meta.limits_maxima)
+        ceiling = await container.services.workspaces.plan_maxima(
+            USER, ws.id, meta.limits_maxima
+        )
         # The week plan's allowance, capped by the engine.
         assert ceiling.cpu_cores == 1.0
         assert ceiling.memory_mb == 512
         assert ceiling.disk_mb == 1024
-        # Asking above the plan's ceiling is refused before the engine is called.
-        with pytest.raises(InvalidInput):
-            await container.services.workspaces.create(
-                USER, "too-big", limits=Limits(cpu_cores=2.0)
-            )
-        # Naming nothing still gets the engine's default — limits stay what the
-        # engine enforces; the plan only bounds what may be requested.
-        ws = await container.services.workspaces.create(USER, "fits")
-        assert ws.limits.cpu_cores == meta.limits_defaults.cpu_cores
+        # The created workspace's limits ARE the plan's, not the engine defaults.
+        assert ws.limits.cpu_cores == 1.0
+        assert ws.limits.memory_mb == 512
+        assert ws.limits.disk_mb == 1024
+        # A network toggle is the only user-supplied limit that survives.
+        ws2 = await container.services.workspaces.create(
+            USER, "fits", plan_code="trial", limits=Limits(allow_net=True)
+        )
+        assert ws2.limits.allow_net is True
+        assert ws2.limits.cpu_cores == plans.plan("trial").limits.cpu_cores
     finally:
         await container.aclose()
 

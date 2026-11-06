@@ -13,8 +13,8 @@ Price reasoning (the commitment must be rewarded):
   year is the strongest commitment discount while staying a round, memorable
   number.
 
-The trial is a catalogue entry too (``trial``): 7 free days, once per user, with
-the ``week`` allowance. It is not purchasable because ``amount_stars == 0`` and
+The trial is a catalogue entry too (``trial``): 3 free days, once per **user**,
+with the ``week`` allowance. It is not purchasable because ``amount_stars == 0`` and
 the store refuses to buy it.
 """
 
@@ -24,8 +24,8 @@ from dataclasses import dataclass
 
 from cloudbot.domain.value_objects import Limits
 
-#: 7 days free, once per user (the first workspace starts it).
-TRIAL_DAYS = 7
+#: 3 days free, once per user (the first workspace that picks it starts it).
+TRIAL_DAYS = 3
 
 
 @dataclass(frozen=True)
@@ -65,28 +65,40 @@ PLANS: dict[str, Plan] = {
         code="week",
         period_days=7,
         amount_stars=50,
-        limits=Limits(cpu_cores=1.0, memory_mb=512, disk_mb=1024),
+        limits=Limits(
+            cpu_cores=1.0, memory_mb=512, disk_mb=1024,
+            allow_net=True, allow_tunnels=True,
+        ),
         max_workspaces=2,
     ),
     "month": Plan(
         code="month",
         period_days=30,
         amount_stars=150,
-        limits=Limits(cpu_cores=2.0, memory_mb=1024, disk_mb=5120),
+        limits=Limits(
+            cpu_cores=2.0, memory_mb=1024, disk_mb=5120,
+            allow_net=True, allow_tunnels=True,
+        ),
         max_workspaces=3,
     ),
     "year": Plan(
         code="year",
         period_days=365,
         amount_stars=1200,
-        limits=Limits(cpu_cores=2.0, memory_mb=2048, disk_mb=10240),
+        limits=Limits(
+            cpu_cores=2.0, memory_mb=2048, disk_mb=10240,
+            allow_net=True, allow_tunnels=True,
+        ),
         max_workspaces=5,
     ),
     "trial": Plan(
         code="trial",
         period_days=TRIAL_DAYS,
         amount_stars=0,
-        limits=Limits(cpu_cores=1.0, memory_mb=512, disk_mb=1024),
+        limits=Limits(
+            cpu_cores=1.0, memory_mb=512, disk_mb=1024,
+            allow_net=True, allow_tunnels=True,
+        ),
         max_workspaces=2,
     ),
 }

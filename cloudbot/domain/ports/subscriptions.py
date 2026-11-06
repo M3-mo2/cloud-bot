@@ -17,7 +17,13 @@ from cloudbot.domain.subscription import Subscription, Wallet
 
 
 class Subscriptions(Protocol):
-    async def get(self, tg_id: int) -> Subscription | None: ...
+    async def get(self, tg_id: int, ws_id: str) -> Subscription | None:
+        """The subscription attached to **one workspace**, or ``None``."""
+        ...
+
+    async def for_user(self, tg_id: int) -> tuple[Subscription, ...]:
+        """Every workspace subscription this user owns (one per workspace)."""
+        ...
 
     async def wallet(self, tg_id: int) -> Wallet: ...
 
@@ -76,6 +82,7 @@ class Subscriptions(Protocol):
     async def purchase(
         self,
         tg_id: int,
+        ws_id: str,
         plan_code: str,
         *,
         idempotency_key: str = "",
@@ -84,6 +91,7 @@ class Subscriptions(Protocol):
     async def grant(
         self,
         tg_id: int,
+        ws_id: str,
         plan_code: str,
         days: int,
         actor: int,
@@ -95,13 +103,16 @@ class Subscriptions(Protocol):
     async def revoke(
         self,
         tg_id: int,
+        ws_id: str,
         actor: int,
         reason: str,
         *,
         idempotency_key: str = "",
     ) -> Subscription | None: ...
 
-    async def start_trial(self, tg_id: int) -> Subscription | None: ...
+    async def start_trial(self, tg_id: int, ws_id: str) -> Subscription | None:
+        """Grant the once-per-user free trial to ``ws_id`` if unused."""
+        ...
 
     async def trial_granted(self, tg_id: int) -> bool: ...
 

@@ -15,7 +15,7 @@ async def test_migrations_apply_and_are_idempotent():
     await db.connect()
     applied = await db.migrate()
     # Updated when 0006_stars_payments was added: forward-only, every file applies once.
-    assert applied == [1, 2, 3, 4, 5, 6]
+    assert applied == [1, 2, 3, 4, 5, 6, 7]
     again = await db.migrate()
     assert again == []  # forward-only, idempotent
     await db.close()

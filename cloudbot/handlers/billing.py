@@ -48,14 +48,28 @@ async def _view(
     from datetime import datetime, timezone
 
     now = datetime.now(timezone.utc)
+    # A plan belongs to a workspace, so the wallet lists each workspace's own
+    # plan and state. The single ``subscription``/``status`` fields stay for the
+    # banner and the "first plan" summary.
+    subscriptions = {s.ws_id: s for s in await services.billing.subscriptions(tg_id)}
+    rows: list[tuple[str, object, object]] = []
+    first_ws = ""
+    for ws in await services.workspaces.list(tg_id):
+        subscription = subscriptions.get(str(ws.id))
+        status = await services.billing.status(tg_id, str(ws.id), now=now)
+        rows.append((ws.name, subscription, status))
+        if not first_ws:
+            first_ws = str(ws.id)
+    primary = subscriptions.get(first_ws) or next(iter(subscriptions.values()), None)
     return WalletView(
         locale=locale,
         tg_id=tg_id,
         balance=(await services.billing.wallet(tg_id)).balance_stars,
-        subscription=await services.billing.subscription(tg_id),
-        status=await services.billing.status(tg_id, now=now),
+        subscription=primary,
+        status=await services.billing.status(tg_id, primary.ws_id if primary else ""),
         now=now,
         banner=banner,
+        workspaces=tuple(rows),  # type: ignore[arg-type]
     )
 
 async def open_wallet(
@@ -65,13 +79,19 @@ async def open_wallet(
     await show_screen(event, wallet_screens.wallet_screen(view), ctx=ctx, sender=sender)
 
 async def open_plans(
-    event, ctx: UserContext, services: Services, sender: RichSender, *, needed_plan=None
+    event,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    *,
+    needed_plan=None,
+    ws_id: str | None = None,
 ) -> None:
     """The plan picker — the renewal route a locked workspace points at."""
     view = await _view(services, ctx.tg_id, ctx.locale)
     await show_screen(
         event,
-        wallet_screens.plan_picker_screen(view, needed_plan=needed_plan),
+        wallet_screens.plan_picker_screen(view, needed_plan=needed_plan, ws_id=ws_id),
         ctx=ctx,
         sender=sender,
     )
@@ -92,31 +112,44 @@ async def on_packs(cb: CallbackQuery, ctx: UserContext, services: Services, send
 
 @router.callback_query(F.data.startswith("pay:buy"))
 async def on_buy(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    from cloudbot.adapters.store.sqlite_subscriptions import InsufficientFunds
+    from cloudbot.core.errors import InsufficientFunds
 
     decoded = decode(cb.data)
-    plan_code = decoded.key[0] if decoded.key else ""
+    key = decoded.key
+    if len(key) >= 2:
+        ws_id, plan_code = key[0], key[1]
+    else:
+        ws_id, plan_code = None, (key[0] if key else "")
     plan = PLANS.get(plan_code)
     view = await _view(services, ctx.tg_id, ctx.locale)
-    if plan is None or not plan.purchasable:
-        await show_screen(cb, wallet_screens.plan_picker_screen(view), ctx=ctx, sender=sender)
+    if ws_id is None:
+        # A plan is attached to a workspace; renew the first one if any.
+        owned = await services.workspaces.list(ctx.tg_id)
+        ws_id = str(owned[0].id) if owned else None
+    if plan is None or not plan.purchasable or ws_id is None:
+        await show_screen(
+            cb,
+            wallet_screens.plan_picker_screen(view, needed_plan=plan_code, ws_id=ws_id),
+            ctx=ctx,
+            sender=sender,
+        )
         return
     # Balance is the only thing between the user and a plan: two taps, no checkout.
     if view.balance < plan.amount_stars:
         await show_screen(
             cb,
-            wallet_screens.plan_picker_screen(view, needed_plan=plan_code),
+            wallet_screens.plan_picker_screen(view, needed_plan=plan_code, ws_id=ws_id),
             ctx=ctx,
             sender=sender,
         )
         return
     try:
-        subscription = await services.billing.buy_plan(ctx.tg_id, plan_code)
+        await services.billing.buy_plan(ctx.tg_id, ws_id, plan_code)
     except InsufficientFunds:  # a concurrent purchase took the balance first
         fresh = await _view(services, ctx.tg_id, ctx.locale)
         await show_screen(
             cb,
-            wallet_screens.plan_picker_screen(fresh, needed_plan=plan_code),
+            wallet_screens.plan_picker_screen(fresh, needed_plan=plan_code, ws_id=ws_id),
             ctx=ctx,
             sender=sender,
         )
