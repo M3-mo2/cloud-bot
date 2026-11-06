@@ -170,6 +170,7 @@ def workspace_detail(
     mode: RunMode = RunMode.PRODUCTION,
     session: bool = True,
     more: bool = False,
+    plan_state: str | None = None,
 ) -> Screen:
     """The workspace home: identity, age, then the specification on request.
 
@@ -210,8 +211,14 @@ def workspace_detail(
     )
     doc.p(rule)
 
+    # The status line answers the question a paying user actually has: is my plan
+    # alive, and until when. It used to print the *engine's* own state, whose
+    # ``unlimited`` value means "no run-time cap" — a fact about the sandbox, not
+    # about the subscription — so every workspace read "بلا انتهاء". ``plan_state``
+    # is the same derived string the list and the wallet print (one source).
     label_key, _emoji = display_state(ws.status, ws.summary.state)
-    doc.p(_raw(f"<b>{catalog.t('ws.detail.status', locale)}</b> {catalog.t(label_key, locale)}"))
+    state_text = plan_state or catalog.t(label_key, locale)
+    doc.p(_raw(f"<b>✦ {catalog.t('ws.detail.plan_label', locale)} ⟸ </b><b>{state_text}</b>"))
 
     # Transient, actionable state first: a locked plan, a run already going. These
     # change what the user can do, so they belong above any reference material.

@@ -70,6 +70,25 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
     await _show_list(cb, ctx, services, sender, page)
 
 
+async def _plan_state(services: Services, tg_id: int, ws, locale) -> str:
+    """This workspace's plan and the day it ends — the same wording as the list.
+
+    Derived once here from the subscription (never from the engine's ``summary``,
+    whose ``unlimited`` means "no run-time cap"), and shared with the menu and the
+    wallet so the three screens cannot drift apart.
+    """
+    from datetime import datetime as _dt
+    from datetime import timezone as _tz
+
+    from cloudbot.presentation.screens.wallet import plan_state_short
+
+    now = _dt.now(_tz.utc)
+    subs = {s.ws_id: s for s in await services.billing.subscriptions(tg_id)}
+    sub = subs.get(str(ws.id))
+    status = await services.billing.status(tg_id, str(ws.id), now=now)
+    return plan_state_short(sub, status, locale)
+
+
 @router.callback_query(F.data.startswith("ws:view"))
 async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     decoded = decode_required(cb.data, 1)
@@ -79,7 +98,11 @@ async def on_view(cb: CallbackQuery, ctx: UserContext, services: Services, sende
     await services.session.enter(ctx.tg_id, _wid(ws_id))
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     screen = ws_screens.workspace_detail(
-        ws, ctx.locale, active_run=ws.summary.runs_active > 0, mode=ctx.mode
+        ws,
+        ctx.locale,
+        active_run=ws.summary.runs_active > 0,
+        mode=ctx.mode,
+        plan_state=await _plan_state(services, ctx.tg_id, ws, ctx.locale),
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
@@ -123,7 +146,11 @@ async def on_less(cb: CallbackQuery, ctx: UserContext, services: Services, sende
     ws_id = decoded.key[0]
     ws = await services.workspaces.get(ctx.tg_id, _wid(ws_id))
     screen = ws_screens.workspace_detail(
-        ws, ctx.locale, active_run=ws.summary.runs_active > 0, mode=ctx.mode
+        ws,
+        ctx.locale,
+        active_run=ws.summary.runs_active > 0,
+        mode=ctx.mode,
+        plan_state=await _plan_state(services, ctx.tg_id, ws, ctx.locale),
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 

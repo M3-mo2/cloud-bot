@@ -191,6 +191,7 @@ MESSAGES: dict[str, str] = {
 
     # -- workspaces: detail --------------------------------------------------
     "ws.detail.status": "الحالة:",
+    "ws.detail.plan_label": "الخطة",
     "ws.detail.runtime": "بيئة التشغيل",
     "ws.detail.profile": "الملف التعريفي",
     "ws.detail.cpu": "المعالج",

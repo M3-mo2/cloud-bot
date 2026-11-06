@@ -192,6 +192,7 @@ MESSAGES: dict[str, str] = {
 
     # -- workspaces: detail --------------------------------------------------
     "ws.detail.status": "Status:",
+    "ws.detail.plan_label": "Plan",
     "ws.detail.runtime": "Runtime",
     "ws.detail.profile": "Profile",
     "ws.detail.cpu": "CPU",
