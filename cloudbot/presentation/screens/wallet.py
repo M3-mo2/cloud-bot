@@ -11,6 +11,8 @@ labelled a plan, so it can never be mistaken for one.
 
 from __future__ import annotations
 
+import re
+
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -214,7 +216,9 @@ def plan_state_short(subscription, status: SubscriptionStatus, locale: Locale) -
     name = _plan_name(subscription.plan_code, locale)
     if status.state is SubscriptionState.EXPIRED:
         return catalog.t("wallet.ws.expired", locale, plan=name)
-    day = format_datetime(subscription.expires_at, locale).split(",")[0]
+    # Both commas: the Arabic pattern spells its own «،», so splitting on the
+    # ASCII one alone left the clock on the line for Arabic users.
+    day = re.split(r"[,،]", format_datetime(subscription.expires_at, locale))[0]
     if status.state is SubscriptionState.TRIALING:
         return catalog.t("wallet.ws.trialing_day", locale, when=day)
     return catalog.t("wallet.ws.active_day", locale, plan=name, when=day)
