@@ -18,6 +18,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    footer as page_footer,
+    pager_rows as _pager_rows,
+    window,
+)
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens.screen import Screen
@@ -56,12 +61,23 @@ def _owner_label(entry: PortEntry, locale: Locale) -> str:
     if not entry.attributed or entry.pid is None:
         # Never hide and never guess: say the owner is unknown.
         return catalog.t("port.unattributed", locale)
-    kind = _kind_label(entry.kind, locale)
-    pid = catalog.t("port.owner_pid", locale, pid=_num(entry.pid, locale))
-    return f"{kind} · {pid}" if kind else pid
+    # The pid is deliberately **not** shown in the default view: it is not the
+    # address any action accepts (stop uses the stable ``proc_`` id) and
+    # ``run · pid 890648`` was the longest cell on the longest screen.
+    return _kind_label(entry.kind, locale) or catalog.t("port.unattributed", locale)
 
 
-def ports_screen(report: PortReport, ws_id: WorkspaceId, locale: Locale) -> Screen:
+def ports_screen(
+    report: PortReport, ws_id: WorkspaceId, locale: Locale, *, page: int = 0
+) -> Screen:
+    # Ports and unix sockets share one page window: a unix socket is not a port,
+    # so it keeps its own table, but one pager must cover both or the screen can
+    # still grow without bound.
+    entries = list(report.ports) + list(report.unix)
+    page_items, total_pages, _has_more = window(entries, page)
+    ports = [item for item in page_items if isinstance(item, PortEntry)]
+    sockets = [item for item in page_items if isinstance(item, UnixSocket)]
+
     doc = RichDoc(locale)
     doc.h(2, catalog.t("port.title", locale))
     doc.p(catalog.t("port.count", locale, n=_num(report.count, locale)))
@@ -69,9 +85,9 @@ def ports_screen(report: PortReport, ws_id: WorkspaceId, locale: Locale) -> Scre
     if not report.ports:
         doc.p(catalog.t("port.empty", locale))
         doc.p(italic(catalog.t("port.empty_hint", locale)))
-    else:
+    elif ports:
         rows = []
-        for entry in report.ports:
+        for entry in ports:
             state = entry.state if entry.state else catalog.t("port.no_state", locale)
             rows.append(
                 [
@@ -115,11 +131,11 @@ def ports_screen(report: PortReport, ws_id: WorkspaceId, locale: Locale) -> Scre
     )
 
     # Unix sockets are a separate section — not ports.
-    if report.unix:
+    if sockets:
         doc.div()
         doc.p(_raw(f"<b>{catalog.t('port.unix_title', locale)}</b>"))
         rows = []
-        for sock in report.unix:
+        for sock in sockets:
             rows.append(
                 [
                     _raw(f"<code>{esc(sock.path)}</code>"),
@@ -138,24 +154,32 @@ def ports_screen(report: PortReport, ws_id: WorkspaceId, locale: Locale) -> Scre
             rows,
         )
 
-    return Screen(doc=doc, markup=ports_markup(ws_id, locale))
+    if entries:
+        doc.p(page_footer(page, total_pages, locale))
+
+    return Screen(
+        doc=doc,
+        markup=ports_markup(ws_id, locale, page=page, total_pages=total_pages),
+    )
 
 
 def _unix_owner(sock: UnixSocket, locale: Locale) -> str:
     if not sock.attributed or sock.pid is None:
         return catalog.t("port.unattributed", locale)
-    kind = _kind_label(sock.kind, locale)
-    pid = catalog.t("port.owner_pid", locale, pid=_num(sock.pid, locale))
-    return f"{kind} · {pid}" if kind else pid
+    return _kind_label(sock.kind, locale) or catalog.t("port.unattributed", locale)
 
 
-def ports_markup(ws_id: WorkspaceId, locale: Locale):
-    return inline_markup(
+def ports_markup(
+    ws_id: WorkspaceId, locale: Locale, *, page: int = 0, total_pages: int = 1
+):
+    rows = [
         [
-            [
-                inline(catalog.t("port.refresh", locale), _cb("port:list", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("port.publish", locale), _cb("tnl:publish", ws_id), intent=Intent.SUCCESS),
-            ],
-            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
+            inline(catalog.t("port.refresh", locale), _cb("port:list", ws_id), intent=Intent.PRIMARY),
+            inline(catalog.t("port.publish", locale), _cb("tnl:publish", ws_id), intent=Intent.SUCCESS),
         ]
+    ]
+    rows += _pager_rows(
+        page, total_pages, lambda target: _cb("port:list", ws_id, target), locale
     )
+    rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
+    return inline_markup(rows)

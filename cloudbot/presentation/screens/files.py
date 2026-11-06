@@ -11,11 +11,15 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import PAGE_SIZE as _PAGE_SIZE
+from cloudbot.presentation.pagination import footer as _footer
+from cloudbot.presentation.pagination import pager_rows as _pager_rows
+from cloudbot.presentation.pagination import total_pages_for as _total_pages_for
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, italic
 from cloudbot.presentation.screens.screen import Screen
 
-PAGE_SIZE = 10
+PAGE_SIZE = _PAGE_SIZE
 
 
 def _num(value: int, locale: Locale) -> str:
@@ -79,16 +83,14 @@ def file_browser(
             ],
             rows,
         )
-        total_pages = max(1, (page.total + PAGE_SIZE - 1) // PAGE_SIZE)
+        total_pages = _total_pages_for(page.total)
         doc.p(
-            italic(
-                catalog.t(
-                    "file.footer",
-                    locale,
-                    count=_num(page.total, locale),
-                    page=_num(page_index + 1, locale),
-                    total=_num(total_pages, locale),
-                )
+            _footer(
+                page_index,
+                total_pages,
+                locale,
+                key="file.footer",
+                count=_num(page.total, locale),
             )
         )
     if page.truncated:
@@ -123,8 +125,12 @@ def file_browser_markup(page: FilePage, ws_id: WorkspaceId, locale: Locale, *, p
 
     rows.append([inline(catalog.t("file.upload", locale), _cb("file:upload", ws_id, path), intent=Intent.SUCCESS)])
     rows.append([inline(catalog.t("file.new_folder", locale), _cb("file:mkdir", ws_id, path), intent=Intent.PRIMARY)])
-    if page.total > (page_index + 1) * PAGE_SIZE:
-        rows.append([inline(catalog.t("common.load_more", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)])
+    rows += _pager_rows(
+        page_index,
+        _total_pages_for(page.total),
+        lambda target: _cb("file:ls", ws_id, target),
+        locale,
+    )
     if path != "/":
         rows.append([inline(catalog.t("file.up", locale), _cb("file:cd", ws_id, _parent(path)), intent=Intent.PRIMARY)])
     rows.append([inline(catalog.t("file.workspace", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])

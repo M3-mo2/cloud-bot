@@ -17,6 +17,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    footer as page_footer,
+    pager_rows as _pager_rows,
+    window,
+)
 from cloudbot.presentation.rich.components import RawPayloadDetails
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
@@ -36,7 +41,10 @@ def _raw(text: str) -> Html:
 
 
 # -- installed list ----------------------------------------------------------
-def packages_screen(pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale) -> Screen:
+def packages_screen(
+    pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale, *, page: int = 0
+) -> Screen:
+    page_items, total_pages, _has_more = window(list(pkg_list.packages), page)
     doc = RichDoc(locale)
     doc.h(2, catalog.t("package.title", locale))
     doc.p(catalog.t("package.count", locale, n=_num(pkg_list.count, locale)))
@@ -46,7 +54,7 @@ def packages_screen(pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale) -
         doc.p(italic(catalog.t("package.empty_hint", locale)))
     else:
         rows = []
-        for package in pkg_list.packages:
+        for package in page_items:
             rows.append(
                 [
                     _raw(f"🐍 <code>{esc(package.name)}</code>"),
@@ -60,6 +68,7 @@ def packages_screen(pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale) -
             ],
             rows,
         )
+        doc.p(page_footer(page, total_pages, locale))
     if pkg_list.truncated:
         doc.p(catalog.t("package.truncated", locale))
 
@@ -79,10 +88,22 @@ def packages_screen(pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale) -
             )
         )
 
-    return Screen(doc=doc, markup=packages_markup(pkg_list, ws_id, locale))
+    return Screen(
+        doc=doc,
+        markup=packages_markup(
+            pkg_list, ws_id, locale, page=page, total_pages=total_pages
+        ),
+    )
 
 
-def packages_markup(pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale):
+def packages_markup(
+    pkg_list: PackageList,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    page: int = 0,
+    total_pages: int = 1,
+):
     rows: list[list] = [
         [inline(catalog.t("package.install", locale), _cb("pkg:install", ws_id), intent=Intent.SUCCESS)]
     ]
@@ -93,6 +114,13 @@ def packages_markup(pkg_list: PackageList, ws_id: WorkspaceId, locale: Locale):
                 inline(catalog.t("package.remove_all", locale), _cb("pkg:rm_all_confirm", ws_id), intent=Intent.DANGER),
             ]
         )
+    if len(pkg_list.packages) > total_pages * 1:
+        pass
+    if len(pkg_list.packages) > total_pages * 1:
+        pass
+    rows += _pager_rows(
+        page, total_pages, lambda target: _cb("pkg:list", ws_id, target), locale
+    )
     rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
     return inline_markup(rows)
 

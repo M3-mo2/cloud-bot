@@ -25,6 +25,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    footer as page_footer,
+    pager_rows as _pager_rows,
+    window,
+)
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, italic
 from cloudbot.presentation.screens.screen import Screen
@@ -81,6 +86,7 @@ def tunnels_screen(
     max_tunnels: int | None = None,
     note: str | None = None,
     gate: str | None = None,
+    page: int = 0,
 ) -> Screen:
     """The public-links list, its gate, and (when known) its own ceiling.
 
@@ -94,6 +100,7 @@ def tunnels_screen(
     the publish refusal uses it to show the **engine's own** reason (F-05) instead
     of the bot's possibly-stale cached limits.
     """
+    page_tunnels, total_pages, _has_more = window(list(tunnels.tunnels), page)
     doc = RichDoc(locale)
     doc.h(2, catalog.t("tunnel.title", locale))
     at_cap = max_tunnels is not None and tunnels.count >= max_tunnels
@@ -106,7 +113,7 @@ def tunnels_screen(
         doc.p(italic(catalog.t("tunnel.empty_hint", locale)))
     else:
         rows = []
-        for tunnel in tunnels.tunnels:
+        for tunnel in page_tunnels:
             rows.append(
                 [
                     _raw(f"<code>{_num(tunnel.port, locale)}</code>"),
@@ -120,11 +127,12 @@ def tunnels_screen(
             ],
             rows,
         )
+        doc.p(page_footer(page, total_pages, locale))
         # The URL is ephemeral; say so and never print it as text.
         doc.blockquote(catalog.t("tunnel.ephemeral", locale))
         # F-07: a non-active tunnel's link no longer serves — say so, do not
         # keep a live-looking Open button for it.
-        if any(_is_live(t.status) is False for t in tunnels.tunnels):
+        if any(_is_live(t.status) is False for t in page_tunnels):
             doc.blockquote(catalog.t("tunnel.stopped_note", locale))
 
     # The ceiling is always stated when the engine reports one (R2).
@@ -163,6 +171,9 @@ def tunnels_screen(
             server_enabled=server_enabled,
             status=status,
             max_tunnels=max_tunnels,
+            page=page,
+            total_pages=total_pages,
+            page_tunnels=page_tunnels,
         ),
     )
 
@@ -177,13 +188,18 @@ def tunnels_markup(
     server_enabled: bool = True,
     status: WorkspaceStatus = WorkspaceStatus.ACTIVE,
     max_tunnels: int | None = None,
+    page: int = 0,
+    total_pages: int = 1,
+    page_tunnels: list[Tunnel] | None = None,
 ):
+    if page_tunnels is None:
+        page_tunnels, total_pages, _has_more = window(list(tunnels.tunnels), page)
     rows: list[list] = []
     # A LINK button per URL — the only place the ephemeral URL appears. A tunnel
     # that is not ``active`` no longer serves: its URL is **removed** and replaced
     # by a muted "not serving" button (F-07), so the user is never invited to a
     # dead link. An unknown status is treated as not-live (fail safe).
-    for tunnel in tunnels.tunnels:
+    for tunnel in page_tunnels:
         if not tunnel.url:
             continue
         if _is_live(tunnel.status) is True:
@@ -234,7 +250,8 @@ def tunnels_markup(
                 )
             ]
         )
-    for tunnel in tunnels.tunnels:
+    # Remove buttons follow the page, never the whole list.
+    for tunnel in page_tunnels:
         rows.append(
             [
                 inline(
@@ -244,6 +261,9 @@ def tunnels_markup(
                 )
             ]
         )
+    rows += _pager_rows(
+        page, total_pages, lambda target: _cb("tnl:list", ws_id, target), locale
+    )
     rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
     return inline_markup(rows)
 

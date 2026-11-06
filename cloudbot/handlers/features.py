@@ -51,12 +51,29 @@ def _wid(text: str):
     return WorkspaceId(text)
 
 
+def _page_of(key: tuple) -> int:
+    """The optional page part of a ``prefix:name:<ws>[:<page>]`` callback."""
+    if len(key) < 2:
+        return 0
+    try:
+        return max(0, int(key[1]))
+    except (TypeError, ValueError):
+        return 0
+
+
 # ============================================================ packages (2a) ===
 @router.callback_query(F.data.startswith("pkg:list"))
 async def on_packages(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode_required(cb.data, 1).key[0])
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    page = _page_of(decoded.key)
     pkg_list = await services.packages.list(ctx.tg_id, ws_id)
-    await show_screen(cb, pkg_screens.packages_screen(pkg_list, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await show_screen(
+        cb,
+        pkg_screens.packages_screen(pkg_list, ws_id, ctx.locale, page=page),
+        ctx=ctx,
+        sender=sender,
+    )
 
 
 @router.callback_query(F.data.startswith("pkg:install"))
@@ -207,6 +224,7 @@ async def _tunnels_screen(
     note: str | None = None,
     status=None,
     gate: str | None = None,
+    page: int = 0,
 ):
     """Render the tunnels screen with the workspace's gate state and ceiling.
 
@@ -263,8 +281,12 @@ async def _tunnel_refusal_screen(
 
 @router.callback_query(F.data.startswith("tnl:list"))
 async def on_tunnels(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode_required(cb.data, 1).key[0])
-    await show_screen(cb, await _tunnels_screen(ctx, services, ws_id), ctx=ctx, sender=sender)
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    page = _page_of(decoded.key)
+    await show_screen(
+        cb, await _tunnels_screen(ctx, services, ws_id, page=page), ctx=ctx, sender=sender
+    )
 
 
 @router.callback_query(F.data.startswith("tnl:publish"))
@@ -394,9 +416,16 @@ async def on_remove(cb: CallbackQuery, ctx: UserContext, services: Services, sen
 # ============================================================ ports (2c) =====
 @router.callback_query(F.data.startswith("port:list"))
 async def on_ports(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode_required(cb.data, 1).key[0])
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    page = _page_of(decoded.key)
     report = await services.ports.list(ctx.tg_id, ws_id)
-    await show_screen(cb, port_screens.ports_screen(report, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await show_screen(
+        cb,
+        port_screens.ports_screen(report, ws_id, ctx.locale, page=page),
+        ctx=ctx,
+        sender=sender,
+    )
 
 
 def _invalid(field: str, reason: str):
@@ -408,17 +437,31 @@ def _invalid(field: str, reason: str):
 # ============================================================ metrics (2d) ===
 @router.callback_query(F.data.startswith("met:view"))
 async def on_metrics(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode_required(cb.data, 1).key[0])
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    page = _page_of(decoded.key)
     metrics = await services.metrics.snapshot(ctx.tg_id, ws_id)
-    await show_screen(cb, met_screens.metrics_screen(metrics, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await show_screen(
+        cb,
+        met_screens.metrics_screen(metrics, ws_id, ctx.locale, page=page),
+        ctx=ctx,
+        sender=sender,
+    )
 
 
 # ========================================================== processes (2e) ===
 @router.callback_query(F.data.startswith("proc:list"))
 async def on_processes(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    ws_id = _wid(decode_required(cb.data, 1).key[0])
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    page = _page_of(decoded.key)
     process_list = await services.processes.list(ctx.tg_id, ws_id)
-    await show_screen(cb, proc_screens.processes_screen(process_list, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await show_screen(
+        cb,
+        proc_screens.processes_screen(process_list, ws_id, ctx.locale, page=page),
+        ctx=ctx,
+        sender=sender,
+    )
 
 
 @router.callback_query(F.data.startswith("proc:stop_confirm"))
@@ -640,6 +683,38 @@ async def on_archive_export_text(
     )
 
 
+#: The most recent archive result per (user, workspace), so the result screen can
+#: page through its entry table. Bounded; after a restart a stale pager button
+#: simply falls back to the archive menu (a correctable screen, never a crash).
+_LAST_ARCHIVE_RESULT: "dict[tuple[int, str], object]" = {}
+_MAX_ARCHIVE_RESULTS = 32
+
+
+def _remember_archive_result(tg_id: int, ws_id, result) -> None:
+    if len(_LAST_ARCHIVE_RESULT) >= _MAX_ARCHIVE_RESULTS:
+        _LAST_ARCHIVE_RESULT.pop(next(iter(_LAST_ARCHIVE_RESULT)), None)
+    _LAST_ARCHIVE_RESULT[(tg_id, str(ws_id))] = result
+
+
+@router.callback_query(F.data.startswith("arc:result"))
+async def on_archive_result(
+    cb: CallbackQuery, ctx: UserContext, sender: RichSender
+) -> None:
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    page = _page_of(decoded.key)
+    result = _LAST_ARCHIVE_RESULT.get((ctx.tg_id, str(ws_id)))
+    if result is None:
+        await show_screen(cb, arc_screens.archive_menu(ws_id, ctx.locale), ctx=ctx, sender=sender)
+        return
+    await show_screen(
+        cb,
+        arc_screens.archive_result_screen(result, ws_id, ctx.locale, page=page),
+        ctx=ctx,
+        sender=sender,
+    )
+
+
 @router.callback_query(F.data.startswith("arc:apply"))
 async def on_archive_apply(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
@@ -662,6 +737,7 @@ async def on_archive_apply(
         result = await services.archives.extract(
             ctx.tg_id, ws_id, path=target, dry_run=False
         )
+    _remember_archive_result(ctx.tg_id, ws_id, result)
     await show_screen(
         cb, arc_screens.archive_result_screen(result, ws_id, ctx.locale), ctx=ctx, sender=sender
     )

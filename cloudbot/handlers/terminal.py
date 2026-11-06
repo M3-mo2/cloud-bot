@@ -111,22 +111,21 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 
 
 async def _show_list(cb, ctx, sender, sessions, ws_id, *, page: int = 0) -> None:
-    """Render one page of *my terminals* (same page contract as the ws list)."""
+    """Render one page of *my terminals* (the one project pager contract)."""
+    from cloudbot.presentation import pagination
+
     ordered = term_screens.order_sessions(sessions)
-    page_size = term_screens.PAGE_SIZE
-    total_pages = max(1, (len(ordered) + page_size - 1) // page_size)
-    # Clamp a stale/out-of-range page (e.g. a message drawn before a session was
-    # forgotten) so the screen never shows an empty page out of range.
+    # ``window`` clamps a stale/out-of-range page (e.g. a message drawn before a
+    # session was forgotten) so the screen never shows an empty page.
+    window, total_pages, has_more = pagination.window(ordered, page)
     page = max(0, min(page, total_pages - 1))
-    start = page * page_size
-    window = ordered[start : start + page_size]
     screen = term_screens.my_terminals(
         window,
         ws_id,
         ctx.locale,
         page=page,
         total_pages=total_pages,
-        has_more=(start + page_size) < len(ordered),
+        has_more=has_more,
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 

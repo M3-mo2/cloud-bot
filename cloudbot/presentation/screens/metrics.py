@@ -18,6 +18,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    footer as page_footer,
+    pager_rows as _pager_rows,
+    window,
+)
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens.screen import Screen
@@ -51,31 +56,35 @@ def metric_value(
 
 
 def metrics_screen(
-    metrics: WorkspaceMetrics, ws_id: WorkspaceId, locale: Locale
+    metrics: WorkspaceMetrics, ws_id: WorkspaceId, locale: Locale, *, page: int = 0
 ) -> Screen:
+    # Four fixed metrics rows fit on one page — but they still go through the one
+    # pager so no list screen is the odd one out, and so the row set can grow
+    # (a future metric) without ever exceeding a page.
+    rows = [
+        (catalog.t("metrics.ram", locale), metric_value(
+            metrics.ram_used_bytes,
+            metrics.ram_limit_bytes,
+            metrics.ram_percent,
+            metrics.ram_complete,
+            locale,
+        )),
+        (catalog.t("metrics.disk", locale), metric_value(
+            metrics.disk_used_bytes,
+            metrics.disk_limit_bytes,
+            metrics.disk_percent,
+            metrics.disk_complete,
+            locale,
+        )),
+        (catalog.t("metrics.live_runs", locale), _num(metrics.live_runs, locale)),
+        (catalog.t("metrics.live_cgroups", locale), _num(metrics.live_cgroups, locale)),
+    ]
+    page_rows, total_pages, _has_more = window(rows, page)
+
     doc = RichDoc(locale)
     doc.h(2, catalog.t("metrics.title", locale))
 
-    doc.kv_table(
-        [
-            (catalog.t("metrics.ram", locale), metric_value(
-                metrics.ram_used_bytes,
-                metrics.ram_limit_bytes,
-                metrics.ram_percent,
-                metrics.ram_complete,
-                locale,
-            )),
-            (catalog.t("metrics.disk", locale), metric_value(
-                metrics.disk_used_bytes,
-                metrics.disk_limit_bytes,
-                metrics.disk_percent,
-                metrics.disk_complete,
-                locale,
-            )),
-            (catalog.t("metrics.live_runs", locale), _num(metrics.live_runs, locale)),
-            (catalog.t("metrics.live_cgroups", locale), _num(metrics.live_cgroups, locale)),
-        ]
-    )
+    doc.kv_table(page_rows)
 
     if not metrics.ram_complete or not metrics.disk_complete:
         doc.blockquote(catalog.t("metrics.incomplete_note", locale))
@@ -94,17 +103,26 @@ def metrics_screen(
             )
         )
     )
+    if total_pages >= 1:
+        doc.p(page_footer(page, total_pages, locale))
 
-    return Screen(doc=doc, markup=metrics_markup(ws_id, locale))
-
-
-def metrics_markup(ws_id: WorkspaceId, locale: Locale):
-    return inline_markup(
-        [
-            [
-                inline(catalog.t("metrics.refresh", locale), _cb("met:view", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("ws.processes", locale), _cb("proc:list", ws_id), intent=Intent.PRIMARY),
-            ],
-            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
-        ]
+    return Screen(
+        doc=doc,
+        markup=metrics_markup(ws_id, locale, page=page, total_pages=total_pages),
     )
+
+
+def metrics_markup(
+    ws_id: WorkspaceId, locale: Locale, *, page: int = 0, total_pages: int = 1
+):
+    rows = [
+        [
+            inline(catalog.t("metrics.refresh", locale), _cb("met:view", ws_id), intent=Intent.PRIMARY),
+            inline(catalog.t("ws.processes", locale), _cb("proc:list", ws_id), intent=Intent.PRIMARY),
+        ]
+    ]
+    rows += _pager_rows(
+        page, total_pages, lambda target: _cb("met:view", ws_id, target), locale
+    )
+    rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
+    return inline_markup(rows)

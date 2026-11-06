@@ -24,12 +24,16 @@ from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.mapping.statuses import display_state
+from cloudbot.presentation.pagination import PAGE_SIZE as _PAGE_SIZE
+from cloudbot.presentation.pagination import footer as page_footer
+from cloudbot.presentation.pagination import pager_rows as _pager_rows
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, fragment, italic
 from cloudbot.presentation.screens import nav
 from cloudbot.presentation.screens.screen import Screen
 
-PAGE_SIZE = 10
+#: Kept as a module-level alias (one project-wide number now lives in pagination).
+PAGE_SIZE = _PAGE_SIZE
 
 
 def _num(value: int, locale: Locale) -> str:
@@ -79,7 +83,7 @@ def workspace_list(
         ],
         rows,
     )
-    doc.p(italic(catalog.t("ws.page", locale, page=_num(page + 1, locale), total=_num(total_pages, locale))))
+    doc.p(page_footer(page, total_pages, locale))
 
     kb_rows = []
     for ws in workspaces:
@@ -87,10 +91,7 @@ def workspace_list(
             [inline(catalog.t("ws.open", locale, name=ws.name), _cb("ws:view", ws.id), intent=Intent.PRIMARY)]
         )
     kb_rows.append([inline(catalog.t("menu.new_workspace", locale), "ws:new", intent=Intent.SUCCESS)])
-    if has_more:
-        kb_rows.append(
-            [inline(catalog.t("common.load_more", locale), _cb("ws:list", page + 1), intent=Intent.PRIMARY)]
-        )
+    kb_rows += _pager_rows(page, total_pages, lambda target: _cb("ws:list", target), locale)
     # The shared bottom nav block. We are on the workspaces list, so its own
     # destination (Workspaces, and Menu per R2) is dropped rather than muted.
     kb_rows += nav.nav_rows(locale, "workspaces", inside=inside)

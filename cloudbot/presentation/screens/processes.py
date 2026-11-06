@@ -22,6 +22,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    footer as page_footer,
+    pager_rows as _pager_rows,
+    window,
+)
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens.screen import Screen
@@ -62,8 +67,9 @@ def _source_label(entry: ProcessEntry, locale: Locale) -> Html:
 
 
 def processes_screen(
-    process_list: ProcessList, ws_id: WorkspaceId, locale: Locale
+    process_list: ProcessList, ws_id: WorkspaceId, locale: Locale, *, page: int = 0
 ) -> Screen:
+    page_items, total_pages, _has_more = window(list(process_list.processes), page)
     doc = RichDoc(locale)
     doc.h(2, catalog.t("process.title", locale))
     doc.p(catalog.t("process.count", locale, n=_num(process_list.count, locale)))
@@ -73,7 +79,7 @@ def processes_screen(
         doc.p(italic(catalog.t("process.empty_hint", locale)))
     else:
         rows = []
-        for entry in process_list.processes:
+        for entry in page_items:
             rows.append(
                 [
                     _raw(f"<code>{truncate_argv(entry.argv, locale)}</code>"),
@@ -90,15 +96,35 @@ def processes_screen(
             rows,
         )
         doc.p(italic(catalog.t("process.detached_note", locale)))
+        doc.p(page_footer(page, total_pages, locale))
 
     return Screen(
-        doc=doc, markup=processes_markup(process_list, ws_id, locale)
+        doc=doc,
+        markup=processes_markup(
+            process_list,
+            ws_id,
+            locale,
+            page=page,
+            total_pages=total_pages,
+            page_items=page_items,
+        ),
     )
 
 
-def processes_markup(process_list: ProcessList, ws_id: WorkspaceId, locale: Locale):
+def processes_markup(
+    process_list: ProcessList,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    page: int = 0,
+    total_pages: int = 1,
+    page_items: list[ProcessEntry] | None = None,
+):
+    if page_items is None:
+        page_items, total_pages, _has_more = window(list(process_list.processes), page)
     rows: list[list] = []
-    for entry in process_list.processes:
+    # Stop buttons follow the page, never the whole inventory.
+    for entry in page_items:
         rows.append(
             [
                 inline(
@@ -113,6 +139,9 @@ def processes_markup(process_list: ProcessList, ws_id: WorkspaceId, locale: Loca
             inline(catalog.t("process.refresh", locale), _cb("proc:list", ws_id), intent=Intent.PRIMARY),
             inline(catalog.t("metrics.title", locale), _cb("met:view", ws_id), intent=Intent.PRIMARY),
         ]
+    )
+    rows += _pager_rows(
+        page, total_pages, lambda target: _cb("proc:list", ws_id, target), locale
     )
     rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
     return inline_markup(rows)

@@ -28,13 +28,16 @@ from cloudbot.presentation.mapping.statuses import (
     session_reason_label,
     session_status_label,
 )
+from cloudbot.presentation.pagination import PAGE_SIZE as _PAGE_SIZE
+from cloudbot.presentation.pagination import footer as page_footer
+from cloudbot.presentation.pagination import pager_rows as _pager_rows
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens import terminal_callbacks as _term
 from cloudbot.presentation.screens.screen import Screen
 
-#: The same page size as the workspace list (one pagination contract, not two).
-PAGE_SIZE = 10
+#: The project-wide page size (one pagination contract, not two).
+PAGE_SIZE = _PAGE_SIZE
 #: Keep the last ~12 KB of PTY output (rich text cap is 32768 chars).
 MAX_OUTPUT_BYTES = 12 * 1024
 
@@ -122,11 +125,11 @@ def my_terminals(
                     f"<code>{esc(_short(session.id))}</code> · {esc(status)} · {esc(age)}"
                 )
             )
-        doc.p(italic(catalog.t("terminal.page", locale, page=_num(page + 1, locale), total=_num(total_pages, locale))))
+        doc.p(page_footer(page, total_pages, locale))
     return Screen(
         doc=doc,
         markup=my_terminals_markup(
-            sessions, ws_id, locale, page=page, has_more=has_more
+            sessions, ws_id, locale, page=page, total_pages=total_pages
         ),
     )
 
@@ -137,6 +140,7 @@ def my_terminals_markup(
     locale: Locale,
     *,
     page: int = 0,
+    total_pages: int = 1,
     has_more: bool = False,
 ):
     rows = []
@@ -148,13 +152,7 @@ def my_terminals_markup(
     ]
     for index in range(0, len(session_buttons), 2):
         rows.append(session_buttons[index : index + 2])
-    nav = []
-    if page > 0:
-        nav.append(inline(catalog.t("terminal.prev", locale), _term.list_(ws_id, page - 1), intent=Intent.PRIMARY))
-    if has_more:
-        nav.append(inline(catalog.t("terminal.next", locale), _term.list_(ws_id, page + 1), intent=Intent.PRIMARY))
-    if nav:
-        rows.append(nav)
+    rows += _pager_rows(page, total_pages, lambda target: _term.list_(ws_id, target), locale)
     # The fixed actions stay at the bottom on every page.
     rows.append([inline(catalog.t("terminal.open", locale), _term.open_terminal(ws_id), intent=Intent.SUCCESS)])
     rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])

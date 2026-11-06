@@ -20,6 +20,11 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
+from cloudbot.presentation.pagination import (
+    footer as page_footer,
+    pager_rows as _pager_rows,
+    window,
+)
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens.screen import Screen
@@ -131,18 +136,32 @@ def dry_run_prompt(
 
 
 def archive_result_screen(
-    result: ArchiveResult, ws_id: WorkspaceId, locale: Locale
+    result: ArchiveResult,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    page: int = 0,
 ) -> Screen:
-    doc = _result_doc(result, ws_id, locale, heading="archive.result_title")
-    markup = inline_markup(
-        [
-            [
-                inline(catalog.t("archive.title", locale), _cb("arc:menu", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
-            ]
-        ]
+    page_entries, total_pages, _has_more = window(list(result.entries), page)
+    doc = _result_doc(
+        result,
+        ws_id,
+        locale,
+        heading="archive.result_title",
+        page_entries=page_entries,
+        page=page,
+        total_pages=total_pages,
     )
-    return Screen(doc=doc, markup=markup)
+    rows = [
+        [
+            inline(catalog.t("archive.title", locale), _cb("arc:menu", ws_id), intent=Intent.PRIMARY),
+            inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
+        ]
+    ]
+    rows += _pager_rows(
+        page, total_pages, lambda target: _cb("arc:result", ws_id, target), locale
+    )
+    return Screen(doc=doc, markup=inline_markup(rows))
 
 
 def export_done_screen(
@@ -167,8 +186,22 @@ def export_done_screen(
 
 
 def _result_doc(
-    result: ArchiveResult, ws_id: WorkspaceId, locale: Locale, *, heading: str
+    result: ArchiveResult,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    heading: str,
+    page_entries: list | None = None,
+    page: int = 0,
+    total_pages: int = 1,
 ) -> RichDoc:
+    """The shared result body.
+
+    ``page_entries`` is supplied by the paginated result screen. The dry-run
+    preview passes ``None`` and keeps its old behaviour (every entry while it
+    still fits the readable cap, otherwise the omitted-line).
+    """
+    paginated = page_entries is not None
     doc = RichDoc(locale)
     doc.h(2, catalog.t(heading, locale))
     doc.kv_table(
@@ -193,9 +226,12 @@ def _result_doc(
             reason = _reason_sentence(entry.reason, locale)
             doc.p(_raw(f"• <code>{esc(entry.name)}</code> — {reason}"))
 
-    if result.entries and len(result.entries) <= MAX_ENTRIES_SHOWN:
+    shown = page_entries if paginated else (
+        list(result.entries) if result.entries and len(result.entries) <= MAX_ENTRIES_SHOWN else []
+    )
+    if shown:
         rows = []
-        for entry in result.entries:
+        for entry in shown:
             status = (
                 catalog.t("archive.entry.rejected", locale)
                 if entry.rejected
@@ -220,6 +256,8 @@ def _result_doc(
             ],
             rows,
         )
+        if paginated:
+            doc.p(page_footer(page, total_pages, locale))
     else:
         doc.p(italic(catalog.t("archive.entries_omitted", locale, n=_num(len(result.entries), locale))))
 
