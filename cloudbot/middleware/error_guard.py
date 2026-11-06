@@ -79,6 +79,7 @@ class ErrorGuardMiddleware(BaseMiddleware):
             mode=ctx.mode,
             is_admin=ctx.is_admin,
             raw_payload=_raw_payload(exc) if ctx.is_admin else None,
+            ws_id=_workspace_of(target, ctx),
         )
         try:
             if isinstance(target, CallbackQuery) and target.message is not None:
@@ -89,6 +90,25 @@ class ErrorGuardMiddleware(BaseMiddleware):
                 await self._sender.send(target.chat.id, screen.doc, markup=screen.markup)
         except Exception:  # noqa: BLE001
             log.error("error.render_failed", code=type(exc).__name__)
+
+
+def _workspace_of(target: TelegramObject, ctx: UserContext) -> str | None:
+    """The workspace an action was about, so a recovery button can name it.
+
+    The guard has no handler arguments — only the update — so it reads the id
+    back out of the callback's key parts (``ws:resume:<ws>``, ``file:ls:<ws>`` …)
+    and falls back to the admin's entered workspace. Never guesses: no id means
+    no Resume button, only the safe list destination.
+    """
+    data = getattr(target, "data", None)
+    if isinstance(data, str) and data:
+        from cloudbot.presentation.keyboards.callbacks import decode
+
+        for part in decode(data).key:
+            text = str(part)
+            if text.startswith("ws_"):
+                return text
+    return ctx.entered_ws_id or None
 
 
 def _raw_payload(exc: DomainError) -> str | None:

@@ -109,7 +109,8 @@ Rendered (AR):
 | EN | "That item no longer exists." |
 | AR | "هذا العنصر لم يعد موجودًا." |
 | Notes | Also the screen for the bot's own `NotOwned` / `WorkspaceMissing`. |
-| Buttons | Back (primary) |
+| Advice | EN "Go back, or open the workspace list and pick it again." / AR "ارجع أو افتح قائمة المساحات واختر العنصر من جديد." |
+| Buttons | 📦 Workspaces (primary), Back (primary) |
 
 ### 1.6 404 — ports disabled
 
@@ -141,21 +142,25 @@ Rendered (AR):
 | HTTP | 409 |
 | EN | "This workspace is paused." |
 | AR | "هذه المساحة متوقفة مؤقتًا." |
-| Buttons | ▶️ Resume (success), Back (primary) |
+| Hint | EN "Resume it to continue working." / AR "استأنفها للمتابعة." |
+| Advice | EN "Tap ▶️ Resume below to start it again." / AR "اضغط ▶️ استئناف في الأسفل لتشغيلها من جديد." |
+| Buttons | ▶️ Resume (success, `ws:resume:<workspace>`), Back (primary). With no workspace id the Resume button is **not** drawn; 📦 Workspaces takes its place. |
 
 Rendered (EN):
 
 ```html
 <h2>⏸️ Workspace paused</h2>
 <p>This workspace is paused.</p>
-<p><i>Resume it to continue working.</i></p>
+<p>Resume it to continue working.</p>
+<p>Tap ▶️ Resume below to start it again.</p>
 ```
 Rendered (AR, `is_rtl=True`):
 
 ```html
 <h2>⏸️ المساحة متوقفة</h2>
 <p>هذه المساحة متوقفة مؤقتًا.</p>
-<p><i>استأنفها للمتابعة.</i></p>
+<p>استأنفها للمتابعة.</p>
+<p>اضغط ▶️ استئناف في الأسفل لتشغيلها من جديد.</p>
 ```
 
 ### 1.9 409 — too many sessions
@@ -230,6 +235,7 @@ Rendered (AR, `is_rtl=True`):
 | EN | "That request couldn't be accepted." (plus a tailored sub-line when `details` names a field) |
 | AR | "تعذّر قبول هذا الطلب." (مع سطر مخصص عند تحديد الحقل) |
 | Notes | Covers limits above maxima, bad ranges, unbounded runs not permitted, signals, etc. **The adapter re-reads `/v1/meta` on this code** because the cause is often a stale cap. |
+| Advice | EN "Adjust the request to what is allowed, then try again." / AR "عدّل الطلب بما يناسب المسموح ثم أعد المحاولة." |
 | Buttons | Retry (primary), Back (primary) |
 
 Sub-lines by known `details.field`:

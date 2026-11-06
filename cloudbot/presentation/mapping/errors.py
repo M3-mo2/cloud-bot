@@ -144,9 +144,31 @@ def tunnels_disabled_message(details: dict, locale: Locale) -> str:
     return catalog.t(_tunnels_disabled_message_key(details), locale)
 
 
-def _extra_actions_for(code: str) -> tuple[tuple[str, str, Intent], ...]:
+#: Codes that get an explicit "what to do next" sentence under the body. The
+#: sentence is the action phrase the catalog-wide guard looks for; a code whose
+#: recovery is only a button does not need one (``unavailable`` says "try again"
+#: in its own body).
+_ADVICE_KEYS: dict[str, str] = {
+    "forbidden": "err.not_found.advice",
+    "not_found": "err.not_found.advice",
+    "workspace_suspended": "err.workspace_suspended.action",
+    "unprocessable": "err.unprocessable.advice",
+}
+
+
+def _extra_actions_for(
+    code: str, ws_id: str | None = None
+) -> tuple[tuple[str, str, Intent], ...]:
     if code == "workspace_suspended":
-        return (("err.resume", "ws:resume", Intent.SUCCESS),)
+        # Resume is the recovery route, and it needs the workspace it belongs to.
+        # Without one (a message-driven refusal) point at the list so the user can
+        # pick it; never draw a Resume button that cannot act.
+        if ws_id:
+            return (("err.resume", f"ws:resume:{ws_id}", Intent.SUCCESS),)
+        return (("menu.workspaces", "ws:list", Intent.PRIMARY),)
+    if code == "not_found" or code == "forbidden":
+        # The item is gone; the useful destination is the list it belonged to.
+        return (("menu.workspaces", "ws:list", Intent.PRIMARY),)
     if code == "subscription_expired":
         return (("err.renew", "ws:renew", Intent.SUCCESS),)
     if code == "unknown_profile":
@@ -160,7 +182,9 @@ def _extra_actions_for(code: str) -> tuple[tuple[str, str, Intent], ...]:
     return ()
 
 
-def view_for_error(err: DomainError) -> ErrorView:
+def view_for_error(
+    err: DomainError, *, ws_id: str | None = None
+) -> ErrorView:
     if isinstance(err, EngineRefused):
         code = err.engine_code if err.engine_code in ERROR_KEYS else "unknown"
         if code == "unknown":
@@ -175,7 +199,7 @@ def view_for_error(err: DomainError) -> ErrorView:
             title_key=title_key,
             message_key=message_key,
             retryable=code in _RETRY_CODES,
-            extra_actions=_extra_actions_for(code),
+            extra_actions=_extra_actions_for(code, ws_id),
         )
     if isinstance(err, EngineUnavailable):
         if not err.retryable:
@@ -192,7 +216,13 @@ def view_for_error(err: DomainError) -> ErrorView:
             retryable=True,
         )
     if isinstance(err, (NotOwned, WorkspaceMissing)):
-        return ErrorView("not_found", "err.not_found.title", "err.not_found", retryable=False)
+        return ErrorView(
+            "not_found",
+            "err.not_found.title",
+            "err.not_found",
+            retryable=False,
+            extra_actions=_extra_actions_for("not_found"),
+        )
     if isinstance(err, InvalidInput):
         key = "err.domain.invalid_input"
         if err.field == "package":
@@ -250,8 +280,9 @@ def error_screen(
     is_admin: bool = False,
     raw_payload: str | None = None,
     back_action: str = "nav:menu",
+    ws_id: str | None = None,
 ) -> Screen:
-    view = view_for_error(err)
+    view = view_for_error(err, ws_id=ws_id)
     doc = RichDoc(locale)
     doc.h(2, catalog.t(view.title_key, locale))
     doc.p(catalog.t(view.message_key, locale))
@@ -259,6 +290,9 @@ def error_screen(
         doc.p(catalog.t("err.workspace_suspended.hint", locale))
     elif view.retryable:
         doc.p(catalog.t("err.hint", locale))
+    if view.code in _ADVICE_KEYS:
+        # "What to do next", in the same breath as the problem.
+        doc.p(catalog.t(_ADVICE_KEYS[view.code], locale))
 
     rows: list[list] = []
     extra = [inline(catalog.t(k, locale), action, intent=intent) for k, action, intent in view.extra_actions]
@@ -279,14 +313,39 @@ def error_screen(
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
-def error_code_screen(code: str, locale: Locale, **kwargs) -> Screen:
-    """Render an error screen directly from a code (for tests and internal use)."""
+def error_code_screen(
+    code: str, locale: Locale, *, ws_id: str | None = None, **kwargs
+) -> Screen:
+    """Render an error screen directly from a code (for tests and internal use).
+
+    It renders the exact same body, advice sentence and recovery buttons as the
+    live ``error_screen`` so a golden and a live path cannot drift.
+    """
     known = code if code in ERROR_KEYS else "unknown"
     if code not in ERROR_KEYS:
         log.warning("error.unknown_code", code=code)
-    title_key, message_key = ERROR_KEYS[known]
+    view = ErrorView(
+        code=known,
+        title_key=ERROR_KEYS[known][0],
+        message_key=ERROR_KEYS[known][1],
+        retryable=known in _RETRY_CODES,
+        extra_actions=_extra_actions_for(known, ws_id),
+    )
     doc = RichDoc(locale)
-    doc.h(2, catalog.t(title_key, locale))
-    doc.p(catalog.t(message_key, locale))
-    rows = [[inline(catalog.t("common.back", locale), "nav:menu", intent=Intent.PRIMARY)]]
+    doc.h(2, catalog.t(view.title_key, locale))
+    doc.p(catalog.t(view.message_key, locale))
+    if view.code == "workspace_suspended":
+        doc.p(catalog.t("err.workspace_suspended.hint", locale))
+    elif view.retryable:
+        doc.p(catalog.t("err.hint", locale))
+    if view.code in _ADVICE_KEYS:
+        doc.p(catalog.t(_ADVICE_KEYS[view.code], locale))
+
+    rows: list[list] = []
+    extra = [inline(catalog.t(k, locale), action, intent=intent) for k, action, intent in view.extra_actions]
+    if view.retryable:
+        extra.append(inline(catalog.t("common.retry", locale), "nav:refresh", intent=Intent.PRIMARY))
+    if extra:
+        rows.append(extra)
+    rows.append([inline(catalog.t("common.back", locale), "nav:menu", intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(rows))

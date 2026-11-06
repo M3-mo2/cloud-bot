@@ -689,7 +689,9 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "terminal_ended": lambda f, loc: term_screens.ended_screen(f["ended_session"], f["ws"].id, loc),
     "terminal_command": lambda f, loc: term_screens.command_prompt(f["ws"].id, f["running_session"].id, loc),
     "err_unavailable": lambda f, loc: error_mapping.error_code_screen("unavailable", loc),
-    "err_workspace_suspended": lambda f, loc: error_mapping.error_code_screen("workspace_suspended", loc),
+    "err_workspace_suspended": lambda f, loc: error_mapping.error_code_screen(
+        "workspace_suspended", loc, ws_id=str(f["suspended"].id)
+    ),
     "err_unprocessable": lambda f, loc: error_mapping.error_code_screen("unprocessable", loc),
     "err_not_found": lambda f, loc: error_mapping.error_code_screen("not_found", loc),
     # -- Phase 2a: packages --------------------------------------------------
