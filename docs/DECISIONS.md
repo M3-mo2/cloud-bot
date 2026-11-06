@@ -753,3 +753,31 @@ dead button) shows the tool's own catalog check goes red.
 depend on `tests/`, and a production tool could not exist without the test suite. A second, tool-only screen list:
 exactly the duplication that rots. Classifying verdicts in the handler: the tool and the tests would drift, which
 is the maintainability failure the user named.
+
+---
+
+## CB-35 — One pager helper (`presentation/pagination.py`) for every list screen
+
+**Decision.** Every screen that renders a list which grows with the data pages through
+`cloudbot/presentation/pagination.py`: `PAGE_SIZE` (one project-wide default, 10 — the size the workspace
+list, terminal list, file browser and run history already used, and what fits a phone viewport), `window()`
+returns `(page_items, total_pages, has_more)` and clamps an out-of-range page, `footer()` renders the
+`common.page` line, and `pager_rows()` renders previous/next with an end's arrow **omitted** (the R1 rule the
+nav block follows), never muted. The six screens that had no pages (`port_list`, `process_list`,
+`package_list`, `metrics`, the tunnel list, `archive_result`) now take `page: int = 0`, render only the
+window, print the footer, add the pager row, and build the keyboard from the page. `ws_list`,
+`terminal_list` and `file_browser` were converted to the same helper so there is exactly one pager.
+
+**Why.** An audit of all screens found no shared pager: each screen hand-rolled its own, and six list screens
+had none at all, so a list grew without bound. `port_list` was the longest screen in the product.
+
+**Consequences.** `page` travels on the existing two-segment callbacks as an optional trailing key part
+(`port:list:<ws>:<page>`), restart-proof and well inside the 64-byte cap. `port_list` shares **one** window
+between its port and unix-socket tables, so the one pager covers both. The owner cell no longer prints the raw
+pid (`run · pid 890648` → `run`): the pid is not an address any action accepts, and it was the longest cell on
+the longest screen. `archive_result`'s pager remembers the last result per user+workspace in a bounded
+in-process map; a stale pager button after a restart falls back to the archive menu. A test walks
+`catalog.SCREEN_BUILDERS` and fails any screen that renders more than `PAGE_SIZE` data rows without a pager.
+
+**Alternatives rejected.** A second pager for the screens that "would never grow" (metrics, archive result):
+that is exactly how six screens ended up without one.

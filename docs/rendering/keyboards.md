@@ -312,7 +312,8 @@ Action namespaces:
 | Stop (kill all) | inline | danger | confirm |
 | Delete workspace | inline | danger | confirm |
 | Purge runs | inline | danger | confirm |
-| Page indicator | inline | — | `disabled=True` |
+| Page footer (`Page n of m`) | body italic | — | — |
+| Pager previous/next | inline | primary | the arrow at an end is **omitted** (R1), never muted |
 | Docs / tunnel URL | inline (url) | link | — |
 | Input prompt (name/path/command) | inline markup | — | `force_reply=True` |
 | Legacy reply-keyboard removal | `ReplyKeyboardRemove` | — | once, on `/start` only |
