@@ -298,7 +298,7 @@ def packs_screen(view: WalletView, *, back_action: str = "pay:wallet") -> Screen
             row = []
     if row:
         kb.append(row)
-    kb.append([inline(catalog.t("common.back", locale), "pay:wallet", intent=Intent.PRIMARY)])
+    kb.append([inline(catalog.t("common.back", locale), back_action, intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(kb))
 
 

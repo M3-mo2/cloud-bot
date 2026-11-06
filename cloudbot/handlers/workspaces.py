@@ -189,6 +189,7 @@ async def on_name(
         await show_screen(message, error_screen(II("name", reason), ctx.locale), ctx=ctx, sender=sender)
         return
     await state.update_data(ws_name=name)
+    await state.set_state(Input.creating)
     await _show_network(message, ctx, services, sender, state)
 
 @router.callback_query(F.data.startswith("ws:tgl"))

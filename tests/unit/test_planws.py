@@ -149,7 +149,13 @@ async def test_the_create_flow_reaches_the_plan_picker_and_creates_nothing_befor
         assert "ws:plan:week" in actions
         assert await container.services.workspaces.list(USER) == []
 
-        await dispatcher.feed_update(bot, _callback(4, USER, "ws:plan:trial"))
+        # The Stars packs bought mid-flow return to the plan step, state intact.
+        await dispatcher.feed_update(bot, _callback(4, USER, "ws:packs"))
+        assert "ws:continue" in _actions(bot)
+        await dispatcher.feed_update(bot, _callback(5, USER, "ws:continue"))
+        assert "ws:plan:trial" in _actions(bot)
+
+        await dispatcher.feed_update(bot, _callback(6, USER, "ws:plan:trial"))
         listed = await container.services.workspaces.list(USER)
         assert len(listed) == 1
         assert listed[0].name == "project"
