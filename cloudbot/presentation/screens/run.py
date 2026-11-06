@@ -211,14 +211,23 @@ def live_logs(
         doc.p(italic(catalog.t("run.output_bounded", locale, kb=_num(bounded_kb or 12, locale))))
 
     if run.status.is_terminal:
-        doc.table(
-            None,
-            [
-                [_th(catalog.t("run.duration", locale)), _run_duration(run, elapsed_s, locale)],
-                [_th(catalog.t("run.output", locale)), format_bytes(run.stdout_bytes + run.stderr_bytes, locale)],
-            ],
+        # The command is here because the history row no longer carries it; this
+        # is the run's own screen and the one place its full identity lives.
+        facts = [
+            (catalog.t("run.column.command", locale), _raw(f"<code>{_esc(run.command_display)}</code>")),
+        ]
+        if run.exit_code is not None:
+            facts.append(
+                (catalog.t("run.exit_code", locale), _raw(f"<code>{_num(run.exit_code, locale)}</code>"))
+            )
+        facts.append((catalog.t("run.duration", locale), _run_duration(run, elapsed_s, locale)))
+        facts.append(
+            (catalog.t("run.output", locale), format_bytes(run.stdout_bytes + run.stderr_bytes, locale))
         )
+        doc.kv_table(facts)
     else:
+        doc.p(_raw(f"<b>{catalog.t('run.column.command', locale)}:</b> "
+                   f"<code>{_esc(run.command_display)}</code>"))
         doc.p(italic(_progress_line(run, elapsed_s, locale)))
 
     markup = live_logs_markup(run, locale)

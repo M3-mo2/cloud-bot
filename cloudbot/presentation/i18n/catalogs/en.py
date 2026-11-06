@@ -263,6 +263,7 @@ MESSAGES: dict[str, str] = {
     "run.progress": "progress {pct}% · {elapsed} / {limit}",
     "run.running_elapsed": "running · {elapsed}",
     "run.duration": "Duration",
+    "run.exit_code": "Exit code",
     "run.output": "Output",
     "run.log_truncated": "⚠️ Older output was dropped (log size limit).",
     "run.output_bounded": "Showing the latest {kb} KB of output.",

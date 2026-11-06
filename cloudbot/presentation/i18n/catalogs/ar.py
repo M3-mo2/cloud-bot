@@ -263,6 +263,7 @@ MESSAGES: dict[str, str] = {
     "run.progress": "التقدّم {pct}٪ · {elapsed} / {limit}",
     "run.running_elapsed": "قيد التشغيل · {elapsed}",
     "run.duration": "المدة",
+    "run.exit_code": "رمز الخروج",
     "run.output": "المخرجات",
     "run.log_truncated": "⚠️ تم حذف المخرجات الأقدم (حدّ حجم السجل).",
     "run.output_bounded": "يتم عرض آخر {kb} كيلوبايت من المخرجات.",

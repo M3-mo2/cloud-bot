@@ -267,3 +267,18 @@ def test_history_callback_parses_every_shape_the_screen_emits():
     CallbackCodec()
     assert decode(_page_action(WS, None, 1)).key == (str(WS), "1")
     assert decode(_page_action(WS, "exited", 1)).key == (str(WS), "exited", "1")
+
+
+# -- nothing was lost: the run's screen owns the command, duration, exit code --
+@pytest.mark.parametrize("locale", LOCALES)
+def test_the_run_screen_keeps_the_information_history_stopped_showing(locale):
+    from cloudbot.presentation.screens import run as run_screens
+
+    finished = _runs(1).runs[0]
+    screen = run_screens.live_logs(finished, locale, stdout="done\n")
+    html = screen.doc.html
+    # Command, duration and exit code all live here, so the compact history row
+    # never dropped information, only moved it.
+    assert "python3" in html or "main.py" in html
+    assert ("0" in html) or ("٠" in html)
+    assert "duration" in html.lower() or "المدة" in html

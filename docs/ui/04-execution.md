@@ -265,10 +265,16 @@ English:
 </code></pre>
 <details><summary>stderr (empty)</summary><pre><code></code></pre></details>
 <table is_bordered="true">
+  <tr><th>Command</th><td><code>python3 main.py</code></td></tr>
+  <tr><th>Exit code</th><td><code>0</code></td></tr>
   <tr><th>Duration</th><td>4.2 s</td></tr>
   <tr><th>Output</th><td>1.4 KB</td></tr>
 </table>
 ```
+> **The run's screen owns its identity (screens-b).** Command, exit code, duration
+> and output are shown here, and while a run is live its command line is printed
+> above the progress line. This is why the history row can be three columns.
+
 Arabic:
 
 ```html
