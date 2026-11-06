@@ -1,11 +1,15 @@
-"""Top-level navigation: the shared inline nav block on every top-level screen.
+"""Top-level navigation: the main menu is the only hub (TASK nav-onehub).
 
-There is no reply keyboard. Every top-level screen ends in the same nav block
-(Workspaces / Settings / Language / Help, plus Menu where the screen is not the
-menu). **A nav entry never points at the screen you are already on (R1): the
-current destination is omitted, not muted.** On the workspaces list Menu is
-dropped too (R2), because the menu's body duplicates the list. The block never
-exceeds two columns or three rows.
+There is no reply keyboard. The **main menu** is the only screen that offers the
+account's destinations (My workspaces, Wallet, Settings). Every other screen
+outside a workspace carries exactly one nav entry — **🏠 Home** (``nav:menu``).
+**A nav entry never points at the screen you are already on (R1): the current
+destination is omitted, not muted.** The block never exceeds two columns or
+three rows.
+
+History: before this task every top-level screen repeated the account's four
+destinations plus Menu. That is the duplication the operator asked to end; the
+old assertions below were rewritten to the one-hub contract, not deleted.
 """
 
 from __future__ import annotations
@@ -140,8 +144,15 @@ def test_the_menu_boards_do_not_offer_a_tappable_menu(locale):
 
 
 def test_the_four_destinations_are_reachable_from_the_menu():
+    """The menu is the hub: new + workspaces + wallet + settings.
+
+    Help and Language moved under Settings (his words), so offering them here
+    too would be the duplication this task removes.
+    """
     actions = {_callback(b) for row in _rows(_screen_cases()["main_menu"]) for b in row}
-    assert {"ws:list", "nav:settings", "nav:language", "nav:help"} <= actions
+    assert {"ws:new", "ws:list", "pay:wallet", "nav:settings"} <= actions
+    assert "nav:help" not in actions
+    assert "nav:language" not in actions
 
 
 def test_menu_is_not_offered_on_the_menu_itself():
@@ -149,23 +160,27 @@ def test_menu_is_not_offered_on_the_menu_itself():
     assert "nav:menu" not in actions
 
 
-def test_menu_is_offered_on_non_menu_top_level_screens():
-    # R2: the workspaces list drops Menu (it duplicates the list), so it is not
-    # in this set; every other non-menu screen still offers it.
-    for name in ("help", "settings", "language_picker"):
+def test_menu_is_offered_on_every_non_menu_top_level_screen():
+    """The one nav entry outside the menu: home is on every screen, including
+    the workspaces list (it used to drop Menu under R2; the hub rule wins now)."""
+    # The welcome board *is* the menu's empty state (current == "menu"), so it is
+    # a hub, not a screen that needs a way home.
+    for name in ("help", "settings", "ws_list", "ws_list_empty", "language_picker"):
         actions = {_callback(b) for row in _rows(_screen_cases()[name]) for b in row}
-        assert "nav:menu" in actions, f"{name} does not offer Menu"
+        assert "nav:menu" in actions, f"{name} does not offer the home entry"
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_workspaces_list_drops_the_workspaces_and_menu_entries(locale):
-    """R2/D2: the list carries Settings, Language and Help — but neither its own
-    ``ws:list`` nor ``nav:menu``."""
+def test_workspaces_list_carries_only_the_home_entry(locale):
+    """The list is outside the menu, so it offers home and nothing else from the
+    account block — neither its own ``ws:list`` nor Settings/Language/Help."""
     for name in ("ws_list", "ws_list_empty"):
         actions = {_callback(b) for row in _rows(_screens_both_locales()[(name, locale)]) for b in row}
         assert "ws:list" not in actions, f"{name}/{locale} still offers ws:list"
-        assert "nav:menu" not in actions, f"{name}/{locale} still offers the menu"
-        assert {"nav:settings", "nav:language", "nav:help"} <= actions
+        assert "nav:menu" in actions, f"{name}/{locale} lost the home entry"
+        assert not ({"nav:settings", "nav:language", "nav:help"} & actions), (
+            f"{name}/{locale} still repeats account destinations"
+        )
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])

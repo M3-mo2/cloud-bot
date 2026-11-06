@@ -114,7 +114,10 @@ async def test_first_start_shows_the_welcome_board_with_an_inline_start_button()
         last = bot.sent[-1]
         actions = _inline_actions(last["markup"])
         assert "ws:new" in actions, "the Start button was dropped"
-        assert "nav:help" in actions
+        # TASK nav-onehub: the welcome board is the menu's empty state, so it is a
+        # hub (new/workspaces/wallet/settings) and no longer repeats Help.
+        assert {"ws:list", "pay:wallet", "nav:settings"} <= actions
+        assert "nav:help" not in actions
         assert "cloud hosting" in last["html"].lower() or "استضافة سحابية" in last["html"]
     finally:
         await container.aclose()

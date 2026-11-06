@@ -38,7 +38,7 @@ retry` means a **🔄 Retry / 🔄 إعادة** primary button plus **⬅️ Bac
 | EN | "Something in the request was invalid." |
 | AR | "كان هناك خطأ في الطلب." |
 | Notes | Usually the bot's own bug. Log `details`; user gets a soft message. |
-| Buttons | Retry (primary), ☰ Menu (primary) |
+| Buttons | Retry (primary), 🏠 Home (primary) |
 
 Rendered (EN):
 
@@ -64,7 +64,7 @@ Rendered (AR, `is_rtl=True`):
 | EN | "The service is not configured correctly. The team has been notified." |
 | AR | "الخدمة غير مهيأة بشكل صحيح. تم إبلاغ الفريق." |
 | Notes | Operator config error. Log loudly; user sees a neutral message. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.3 403 — not yours
 
@@ -75,7 +75,7 @@ Rendered (AR, `is_rtl=True`):
 | EN | "That resource isn't available." |
 | AR | "هذا المورد غير متاح." |
 | Notes | Rendered **identically** to not-found (see §1.5) so ids cannot be probed. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.4 403 — subscription expired (locked)
 
@@ -85,7 +85,7 @@ Rendered (AR, `is_rtl=True`):
 | HTTP | 403 |
 | EN | "Your plan has expired. Renew to continue. Your files are safe." |
 | AR | "انتهت صلاحية خطتك. جدّد للمتابعة. ملفاتك آمنة." |
-| Buttons | 🔄 Renew (success, Phase 2), ☰ Menu (primary) |
+| Buttons | 🔄 Renew (success, Phase 2), 🏠 Home (primary) |
 
 Rendered (EN):
 
@@ -110,7 +110,7 @@ Rendered (AR):
 | AR | "هذا العنصر لم يعد موجودًا." |
 | Notes | Also the screen for the bot's own `NotOwned` / `WorkspaceMissing`. |
 | Advice | EN "Go back, or open the workspace list and pick it again." / AR "ارجع أو افتح قائمة المساحات واختر العنصر من جديد." |
-| Buttons | 📦 My workspaces (primary), ☰ Menu (primary) |
+| Buttons | 📦 My workspaces (primary), 🏠 Home (primary) |
 
 ### 1.6 404 — ports disabled
 
@@ -121,7 +121,7 @@ Rendered (AR):
 | EN | "Port browsing isn't available." |
 | AR | "استعراض المنافذ غير متاح." |
 | Notes | Phase 2 feature gate; normally the button is hidden and this never shows. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.7 409 — generic conflict
 
@@ -132,7 +132,7 @@ Rendered (AR):
 | EN | "That isn't possible right now." |
 | AR | "هذا غير ممكن الآن." |
 | Notes | e.g. purging run history while a run is live; see §5.4 of UI 04. |
-| Buttons | Retry (primary), ☰ Menu (primary) |
+| Buttons | Retry (primary), 🏠 Home (primary) |
 
 ### 1.8 409 — workspace suspended
 
@@ -144,7 +144,7 @@ Rendered (AR):
 | AR | "هذه المساحة متوقفة مؤقتًا." |
 | Hint | EN "Resume it to continue working." / AR "استأنفها للمتابعة." |
 | Advice | EN "Tap ▶️ Resume below to start it again." / AR "اضغط ▶️ استئناف في الأسفل لتشغيلها من جديد." |
-| Buttons | ▶️ Resume (success, `ws:resume:<workspace>`), ☰ Menu (primary). With no workspace id the Resume button is **not** drawn; 📦 My workspaces takes its place. |
+| Buttons | ▶️ Resume (success, `ws:resume:<workspace>`), 🏠 Home (primary). With no workspace id the Resume button is **not** drawn; 📦 My workspaces takes its place. |
 
 Rendered (EN):
 
@@ -172,7 +172,7 @@ Rendered (AR, `is_rtl=True`):
 | EN | "You have too many terminals open. Close one first." |
 | AR | "لديك عدد كبير من الطرفيات المفتوحة. أغلق واحدة أولًا." |
 | Notes | Phase 1.5. |
-| Buttons | 🖥 My terminals (primary), ☰ Menu (primary) |
+| Buttons | 🖥 My terminals (primary), 🏠 Home (primary) |
 
 ### 1.10 409 — session ended
 
@@ -183,7 +183,7 @@ Rendered (AR, `is_rtl=True`):
 | EN | "That terminal has closed." |
 | AR | "أُغلق هذا الطرفية." |
 | Notes | Phase 1.5. |
-| Buttons | ➕ New terminal (success), ☰ Menu (primary) |
+| Buttons | ➕ New terminal (success), 🏠 Home (primary) |
 
 ### 1.11 409 — archive entry exists
 
@@ -203,7 +203,7 @@ Rendered (AR, `is_rtl=True`):
 | HTTP | 413 |
 | EN | "That file is too large." |
 | AR | "هذا الملف كبير جدًا." |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.13 413 — archive too large / too many entries / ratio exceeded
 
@@ -214,7 +214,7 @@ Rendered (AR, `is_rtl=True`):
 | EN | "This archive is too large to extract." |
 | AR | "هذا الأرشيف كبير جدًا لاستخراجه." |
 | Notes | Three codes, one user meaning (expansion-bomb guards). |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.14 415 — unsupported archive
 
@@ -224,7 +224,7 @@ Rendered (AR, `is_rtl=True`):
 | HTTP | 415 |
 | EN | "That isn't a zip or rar file." |
 | AR | "هذا ليس ملف zip أو rar." |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.15 422 — unprocessable
 
@@ -236,7 +236,7 @@ Rendered (AR, `is_rtl=True`):
 | AR | "تعذّر قبول هذا الطلب." (مع سطر مخصص عند تحديد الحقل) |
 | Notes | Covers limits above maxima, bad ranges, unbounded runs not permitted, signals, etc. **The adapter re-reads `/v1/meta` on this code** because the cause is often a stale cap. |
 | Advice | EN "Adjust the request to what is allowed, then try again." / AR "عدّل الطلب بما يناسب المسموح ثم أعد المحاولة." |
-| Buttons | Retry (primary), ☰ Menu (primary) |
+| Buttons | Retry (primary), 🏠 Home (primary) |
 
 Sub-lines by known `details.field`:
 
@@ -269,7 +269,7 @@ Rendered (AR):
 | HTTP | 422 |
 | EN | "Please pick one of the offered runtimes." |
 | AR | "يرجى اختيار إحدى بيئات التشغيل المتاحة." |
-| Buttons | 🧰 Choose runtime (success), ☰ Menu (primary) |
+| Buttons | 🧰 Choose runtime (success), 🏠 Home (primary) |
 
 ### 1.17 422 — not a directory
 
@@ -280,7 +280,7 @@ Rendered (AR):
 | EN | "That path isn't a folder." |
 | AR | "هذا المسار ليس مجلدًا." |
 | Notes | Used when listing a file or writing over a directory. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.18 422 — session needs interpreter
 
@@ -291,7 +291,7 @@ Rendered (AR):
 | EN | "Terminals need the Python runtime. Change this workspace's runtime first." |
 | AR | "تتطلب الطرفيات بيئة Python. غيّر بيئة تشغيل المساحة أولًا." |
 | Notes | Phase 1.5. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.19 422 — subscription invalid / max duration / would shorten
 
@@ -302,7 +302,7 @@ Rendered (AR):
 | EN | "That plan duration isn't valid." |
 | AR | "مدة الخطة غير صالحة." |
 | Notes | Phase 2. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.20 422 — tunnels disabled / too many tunnels
 
@@ -315,7 +315,7 @@ Rendered (AR):
 | EN (too many) | "You've reached the limit for published links. Remove one first." |
 | AR (too many) | "وصلت إلى الحد الأقصى للروابط المنشورة. احذف رابطًا أولًا." |
 | Notes | Phase 2. |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 **`too_many_tunnels` is never a silent redraw (task 15, R1).** It renders a
 dedicated screen (`tunnel.limit_title`) whose sentence carries the **actual**
@@ -334,7 +334,7 @@ the reason on its own label**. The limit is reported, never hardcoded.
 | EN (unsafe) | "That archive contains unsafe entries." | AR | "يحتوي هذا الأرشيف على مدخلات غير آمنة." |
 | `code` | `archive_encrypted` / `archive_multivolume` / `archive_unsafe_entry` |
 | HTTP | 422 |
-| Buttons | ☰ Menu (primary) |
+| Buttons | 🏠 Home (primary) |
 
 ### 1.22 429 — write-rate exceeded
 
@@ -344,7 +344,7 @@ the reason on its own label**. The limit is reported, never hardcoded.
 | HTTP | 429 |
 | EN | "You're writing too fast. Please try again shortly." |
 | AR | "أنت تكتب بسرعة كبيرة. حاول مرة أخرى بعد قليل." |
-| Buttons | Retry (primary), ☰ Menu (primary) |
+| Buttons | Retry (primary), 🏠 Home (primary) |
 
 ### 1.23 500 — internal
 
@@ -354,7 +354,7 @@ the reason on its own label**. The limit is reported, never hardcoded.
 | HTTP | 500 |
 | EN | "Something went wrong. Please try again." |
 | AR | "حدث خطأ ما. يرجى المحاولة مرة أخرى." |
-| Buttons | Retry (primary), ☰ Menu (primary) |
+| Buttons | Retry (primary), 🏠 Home (primary) |
 
 ### 1.24 503 — unavailable (the sharpest edge)
 
@@ -365,7 +365,7 @@ the reason on its own label**. The limit is reported, never hardcoded.
 | EN | "The sandbox is temporarily unavailable. Please try again." |
 | AR | "البيئة المعزولة غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى." |
 | Notes | The engine's own `message` (e.g. "sandbox unavailable: nsjail could not set up...") names the **real** cause. It is logged and shown **only** in DEBUG+admin, collapsed. Users get the sentence above. |
-| Buttons | 🔄 Retry (primary), ☰ Menu (primary) |
+| Buttons | 🔄 Retry (primary), 🏠 Home (primary) |
 
 Rendered (EN, normal user):
 
@@ -398,7 +398,7 @@ Appended **only** in DEBUG, admin-only, collapsed:
 | EN | "Couldn't publish a link. Please try again." |
 | AR | "تعذّر نشر الرابط. يرجى المحاولة مرة أخرى." |
 | Notes | Phase 2; includes Cloudflare rate-limiting. |
-| Buttons | 🔄 Retry (primary), ☰ Menu (primary) |
+| Buttons | 🔄 Retry (primary), 🏠 Home (primary) |
 
 **The timeout explains itself (task 15, R4).** On the tunnel path this code
 renders a dedicated screen (`tunnel.timeout_title`) that adds what usually causes
@@ -414,7 +414,7 @@ it — cloudflared could not reach Cloudflare, so the workspace needs egress
 | HTTP | 507 |
 | EN | "This workspace is out of disk space." |
 | AR | "نفدت مساحة القرص في هذه المساحة." |
-| Buttons | 📁 Manage files (primary), ☰ Menu (primary) |
+| Buttons | 📁 Manage files (primary), 🏠 Home (primary) |
 
 ### 1.27 — `timeout` (defined, never emitted)
 
@@ -425,7 +425,7 @@ it — cloudflared could not reach Cloudflare, so the workspace needs egress
 | EN | "The request timed out. Please try again." |
 | AR | "انتهت مهلة الطلب. يرجى المحاولة مرة أخرى." |
 | Notes | Retained in the vocabulary; the adapter still parses it defensively. |
-| Buttons | Retry (primary), ☰ Menu (primary) |
+| Buttons | Retry (primary), 🏠 Home (primary) |
 
 ---
 

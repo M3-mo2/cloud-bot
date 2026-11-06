@@ -1,3 +1,1 @@
-📦 My workspaces [ws:list] enabled | 💳 Wallet [pay:wallet] enabled
-⚙️ Settings [nav:settings] enabled | 🌐 Language [nav:language] enabled
-☰ Menu [nav:menu] enabled
+🏠 Home [nav:menu] enabled

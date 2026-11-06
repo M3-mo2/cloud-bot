@@ -5,7 +5,7 @@ from __future__ import annotations
 MESSAGES: dict[str, str] = {
     # -- common --------------------------------------------------------------
     "common.back": "⬅️ Back",
-    "common.menu": "☰ Menu",
+    "common.menu": "🏠 Home",
     "common.cancel": "✖️ Cancel",
     "common.retry": "🔄 Retry",
     "common.confirm": "✅ Confirm",
@@ -164,8 +164,7 @@ MESSAGES: dict[str, str] = {
     # -- settings ------------------------------------------------------------
     "settings.title": "⚙️ Settings",
     "settings.language": "Language:",
-    "settings.plan": "Plan:",
-    "settings.choose": "Choose what to change.",
+    "settings.choose": "Help and language.",
 
     # -- workspaces: list ----------------------------------------------------
     "ws.list.title": "📦 My Workspaces",

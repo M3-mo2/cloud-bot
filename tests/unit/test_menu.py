@@ -83,14 +83,14 @@ def test_the_menu_body_is_not_a_wide_table():
 
 
 def test_empty_state_still_offers_the_primary_action():
+    """The welcome board is the menu's empty state, so it offers the menu's own
+    four: new, workspaces, wallet, settings. Help/Language live under Settings."""
     screen = menu_screens.main_menu([], Locale.EN, display_name="sara")
     assert [b.callback_data for b in _buttons(screen)] == [
         "ws:new",
         "ws:list",
         "pay:wallet",
         "nav:settings",
-        "nav:language",
-        "nav:help",
     ]
 
 

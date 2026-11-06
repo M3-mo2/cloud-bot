@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cloudbot.core.locale import LOCALE_LABELS, Locale
+from cloudbot.core.locale import Locale
 from cloudbot.domain.entities import Workspace
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_count
@@ -55,14 +55,15 @@ def main_menu(
     inside: Workspace | None = None,
     plan: str | None = None,
 ) -> Screen:
-    """The main board: what the user came for, then a principled button grid.
+    """The main board: the account's **only** hub.
 
     The body answers *which workspaces do I have, which is running, and how do I
     start a new one* — one compact line per workspace, never a four-column table.
     The keyboard reads top-to-bottom in the order attention moves: **the thing
-    they came to do** (``New Workspace``, full width), then **their own stuff**
-    (``My workspaces`` · the subscription), then **the account** (``Settings`` ·
-    ``Help``).
+    they came to do** (``New Workspace``, full width), then the account's own
+    destinations — ``My workspaces`` · ``Wallet`` · ``Settings``. Help and
+    Language are **not** on the menu ("the one-hub task"): they live under
+    Settings, so repeating them here would be the duplication he asked to end.
 
     Subscription seam: ``plan`` is the *derived* plan label (``active``, ``trial``,
     ``expiring`` …) for the wallet/subscription screens added by ``subs2``. Those
@@ -114,8 +115,9 @@ def help_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
     """What the product is, how a workspace and a terminal behave, and the two
     controls a new user needs (the in-session size tool, and the commands).
 
-    Kept to one screen: a help screen is a starting point, not a manual, and
-    every deep tool already has its own screen one tap away.
+    Help is a **page, not a hub**: its body and the home entry, nothing else. A
+    help screen is a starting point, not a manual, and every deep tool already
+    has its own screen one tap away.
     """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("help.title", locale))
@@ -140,14 +142,31 @@ def help_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
     return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "help", inside=inside)))
 
 
-def settings_screen(locale: Locale, *, plan: str = "free", inside: Workspace | None = None) -> Screen:
+def settings_screen(locale: Locale, *, inside: Workspace | None = None) -> Screen:
+    """The two-entry account settings hub: **Help** and **Language**, plus home.
+
+    Settings is where the account's reference destinations live now; the menu no
+    longer offers them directly. Nothing else belongs here — the wallet owns the
+    money, and the menu owns the account's destinations.
+    """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("settings.title", locale))
-    doc.p(_raw(f"<b>{catalog.t('settings.language', locale)}</b> {LOCALE_LABELS[locale]}"))
-    doc.p(_raw(f"<b>{catalog.t('settings.plan', locale)}</b> {catalog.t(f'plan.{plan}', locale)}"))
-    doc.div()
     doc.p(catalog.t("settings.choose", locale))
-    return Screen(doc=doc, markup=inline_markup(nav.nav_rows(locale, "settings", inside=inside)))
+    if inside is not None:
+        # Inside a workspace the block is the session's (one ``ws:home`` entry).
+        # Settings' own two destinations are account ones and stay out, exactly
+        # as on every other inside screen.
+        return Screen(
+            doc=doc, markup=inline_markup(nav.nav_rows(locale, "settings", inside=inside))
+        )
+    rows = [
+        [
+            inline(catalog.t("menu.help", locale), "nav:help", intent=Intent.PRIMARY),
+            inline(catalog.t("menu.language", locale), "nav:language", intent=Intent.PRIMARY),
+        ]
+    ]
+    rows += nav.nav_rows(locale, "settings")
+    return Screen(doc=doc, markup=inline_markup(rows))
 
 
 def _italic(text: str):

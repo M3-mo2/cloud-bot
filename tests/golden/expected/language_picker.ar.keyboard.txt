@@ -1,4 +1,2 @@
 ✓ العربية [lang:ar] disabled | English [lang:en] enabled
-📦 مساحاتي [ws:list] enabled | 💳 المحفظة [pay:wallet] enabled
-⚙️ الإعدادات [nav:settings] enabled | ❓ مساعدة [nav:help] enabled
-☰ القائمة [nav:menu] enabled
+🏠 الصفحة الرئيسية [nav:menu] enabled

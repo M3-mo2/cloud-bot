@@ -1,3 +1,1 @@
-📦 مساحاتي [ws:list] enabled | 💳 المحفظة [pay:wallet] enabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-☰ القائمة [nav:menu] enabled
+🏠 الصفحة الرئيسية [nav:menu] enabled

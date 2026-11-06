@@ -92,29 +92,19 @@ two-column grid and reads as a real destination. `Intent.MUTED` remains for
 buttons that legitimately exist elsewhere (e.g. `▶️ Run` while a run is active) —
 this rule is about the nav block only.
 
-**Not inside a workspace** — the block is the *account's*: Workspaces
-(`ws:list`), Settings (`nav:settings`), Language (`nav:language`), Help
-(`nav:help`), plus Menu (`nav:menu`) where the screen is not the menu. **At most
-two buttons per row, at most three rows**; a screen's primary action (e.g.
-`➕ New Workspace`) sits full width above it. The screen's own destination is
-omitted (R1).
-
-**R2 — the workspaces list also drops Menu** (`nav:menu`), because the menu's
-body is the same workspace table: for a user who owns workspaces it is a second
-route to the screen the list already is. The list block becomes the three account
-destinations that are not this screen:
+**Not inside a workspace the main menu is the only hub (TASK nav-onehub).**
+Only the menu offers the account's destinations — Workspaces (`ws:list`), Wallet
+(`pay:wallet`) and Settings (`nav:settings`); Help and Language live under
+Settings and are **not** on the menu. **Every other screen outside a workspace
+carries exactly one nav entry, the home destination `nav:menu`:**
 
 ```
-[ ⚙️ الإعدادات ] [ 🌐 اللغة ]
-[ ❓ مساعدة ]
+[ 🏠 الصفحة الرئيسية ] / [ 🏠 Home ]
 ```
 
-A screen such as Help therefore renders its destinations minus itself:
-
-```
-[ 📦 مساحاتي ] [ ⚙️ الإعدادات ]
-[ 🌐 اللغة ]     [ ☰ القائمة ]
-```
+**At most two buttons per row, at most three rows**; a screen's primary action
+(e.g. `➕ New Workspace`) sits full width above it. The screen's own destination
+is omitted (R1), which is why the menu itself has no `nav:menu` entry.
 
 **Inside a workspace** (task 13) — the block is the *session's*, **not the
 account's**: up to two entries, the workspace home (`ws:home`) and Workspaces
@@ -300,7 +290,9 @@ Action namespaces:
 
 | Screen element | Type | Intent | Flags |
 | --- | --- | --- | --- |
-| Nav destination (Workspaces/Settings/Language/Help/Menu) | inline | primary | current one **omitted** (R1); Menu also omitted on the list (R2); **not inside** only |
+| Menu body (Workspaces/Wallet/Settings) | inline | primary | **menu only**; the current one is omitted (R1) |
+| Home destination (🏠 Home) | inline | primary | `nav:menu`; **every screen outside the menu**; omitted on the menu (R1) |
+| Settings entries (Help/Language) | inline | primary | **Settings only** |
 | Session nav (🏠 home / 📦 My workspaces) | inline | primary | current one **omitted** (R1/R5); **inside** only, up to two entries |
 | Back (inner screens) | inline | primary | — |
 | Open workspace | inline | primary | — |

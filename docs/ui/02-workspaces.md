@@ -52,19 +52,14 @@ The list shows up to 10 per page, then a **Load more** button (primary), which
 requests the next page (the engine's offset pagination). When there are no more
 pages, the button is omitted.
 
-**The nav block depends on whether the user is inside a workspace.** Two task-14
-rules shape it here. **R1 — a nav entry never points at the screen you are already
-on: its own destination is omitted, not muted.** So the list does not carry
-`📦 My workspaces` (`ws:list`): that is this screen, and its label and icon are
-almost identical to the screen's own title `📦 مساحاتي` (the "two buttons named
-مساحة/مساحاتي" that was reported). **R2 — the list also drops `☰ Menu`**
-(`nav:menu`): the menu's body is the same workspace table, so for a user who owns
-workspaces it is a second route to the list itself. Outside a session the block
-is therefore exactly the three account destinations that are *not* this screen:
+**The nav block depends on whether the user is inside a workspace.** Outside a
+session, the **main menu is the only hub** (TASK nav-onehub): the list does not
+repeat the account's destinations. **R1 still holds — a nav entry never points at
+the screen you are already on — so the list is not offered its own `ws:list`.**
+The block is therefore exactly one entry, the home destination:
 
 ```
-[ ⚙️ الإعدادات ] [ 🌐 اللغة ]
-[ ❓ مساعدة ]
+[ 🏠 الصفحة الرئيسية ] / [ 🏠 Home ]   ← `nav:menu`
 ```
 
 When the list is shown *inside* a session the block is the session's (§2.5.2, and
@@ -88,7 +83,7 @@ Arabic (`is_rtl=True`):
 <p>مساحة العمل هي بيئتك الخاصة المعزولة التي تشغّل فيها الأكواد بأمان.</p>
 ```
 
-Keyboard: **➕ New Workspace** (inline, success), **☰ Menu** (inline, primary).
+Keyboard: **➕ New Workspace** (inline, success), **🏠 Home** (inline, primary).
 
 ---
 
@@ -199,7 +194,7 @@ following the shared bottom-placement rule (§0 of `01-language-and-menu.md`) an
 its ≤2-columns, ≤3-rows limit.
 
 > **Only the workspace home changes.** Every *inner* screen — a file browser, a
-> run history, a settings form, a confirm — keeps its own `⬅️ رجوع`/`☰ القائمة`;
+> run history, a settings form, a confirm — keeps its own `⬅️ رجوع`/`🏠 الصفحة الرئيسية`;
 > those are not duplicating anything and are deliberately untouched.
 
 A banner line is added when locked:
@@ -218,17 +213,16 @@ Your files are safe.</blockquote>
 **While the user is inside a workspace the nav block belongs to the session, not
 to the account.** On every screen reachable from a session — the workspace home,
 the workspace list, help, settings and the language picker — the shared block is
-**up to two entries**, subject to R1 (§1.3):
+**exactly one entry**, subject to R1 (§1.3):
 
 | Label (AR) | Label (EN) | Callback | Notes |
 | --- | --- | --- | --- |
-| 🏠 demo | 🏠 demo | `ws:home` | the workspace home; **omitted** on the home itself (R1/R5) |
-| 📦 مساحاتي | 📦 My workspaces | `ws:list` | browse / **switch** to another workspace; omitted on the list itself (R1) |
+| 🏠 demo | 🏠 demo | `ws:home` | the workspace home; **omitted** on the home itself (R1/R5), leaving the block empty |
 
-So on any inside screen that is *not* the workspace home or the list the block is
-the two entries `🏠 demo` + `📦 مساحاتي`; on the workspace home itself only
-`📦 مساحاتي` remains (you are already home); and on the inside list only `🏠 demo`
-remains (you are already on the list).
+`ws:list` is **not** offered inside a session at all: switching workspaces is an
+account action, taken after logging out, and carrying it inside made the block
+read as a hierarchy with two ways out on one screen. The single way out is the
+explicit log-out.
 
 The **account destinations — Settings, Language, Help and Menu — are removed
 from the block whenever the user is inside a workspace.** A place the user has
@@ -240,8 +234,8 @@ the docs must not rely on the inside block for the account menu; that is the
 point of the change.
 
 This took the inside block from six entries (home + four destinations + menu) to
-two, and the workspace home from **20 buttons to 16** (11 rows to 9 in the AR/EN
-keyboard grids), comfortably inside the ≤2-columns, ≤3-rows layout rule.
+one, comfortably inside the ≤2-columns, ≤3-rows layout rule. TASK nav-onehub left
+this inside rule untouched; the one-hub change is about the **outside** screens.
 
 ### 2.6 "Run" disabled while a run is active
 

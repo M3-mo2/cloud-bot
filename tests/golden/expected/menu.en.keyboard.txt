@@ -1,4 +1,3 @@
 ➕ New Workspace [ws:new] enabled
 📦 My workspaces [ws:list] enabled | 💳 Wallet [pay:wallet] enabled
-⚙️ Settings [nav:settings] enabled | 🌐 Language [nav:language] enabled
-❓ Help [nav:help] enabled
+⚙️ Settings [nav:settings] enabled

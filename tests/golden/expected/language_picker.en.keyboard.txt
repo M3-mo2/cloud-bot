@@ -1,4 +1,2 @@
 العربية [lang:ar] enabled | ✓ English [lang:en] disabled
-📦 My workspaces [ws:list] enabled | 💳 Wallet [pay:wallet] enabled
-⚙️ Settings [nav:settings] enabled | ❓ Help [nav:help] enabled
-☰ Menu [nav:menu] enabled
+🏠 Home [nav:menu] enabled

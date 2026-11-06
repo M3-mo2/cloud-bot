@@ -157,31 +157,33 @@ def test_home_entry_is_omitted_on_the_workspace_home_but_present_elsewhere(local
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_not_inside_block_minus_its_own_destination(locale):
-    """The guard against over-correcting: outside, the account block stays put —
-    minus the entry for the screen itself (R1)."""
+def test_not_inside_block_is_the_one_home_entry(locale):
+    """Outside the menu there is exactly one nav entry: home (TASK nav-onehub).
+
+    The old assertion pinned the account block (workspaces/wallet/settings/
+    language/menu minus its own). He asked for exactly the opposite outside the
+    menu, so the guard now pins the hub rule. The inside branch — this file's
+    subject — is unchanged; ``ws:home`` still never leaks outside.
+    """
     rows = nav.nav_rows(locale, "help")
     callbacks = {b.callback_data for row in rows for b in row}
-    assert callbacks == {"ws:list", "pay:wallet", "nav:settings", "nav:language", "nav:menu"}
-    assert "nav:help" not in callbacks
+    assert callbacks == {"nav:menu"}
     assert "ws:home" not in callbacks
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-@pytest.mark.parametrize(
-    "name,current_action",
-    [
-        ("menu", None),
-        ("help", "nav:help"),
-        ("settings", "nav:settings"),
-        ("workspaces", "ws:list"),
-        ("language", "nav:language"),
-    ],
-)
-def test_the_menu_board_still_offers_the_four_destinations(name, current_action, locale):
+def test_the_menu_board_still_offers_the_four_destinations(locale):
+    """TASK nav-onehub changed this guard: the menu used to be expected to carry
+    Help and Language too. They moved under Settings (the operator's own words),
+    so the menu's four are new / workspaces / wallet / settings — and Help and
+    Language must NOT be on it, or the duplication returns. The inside-a-session
+    rule this module protects is untouched.
+    """
     screen = menu_screens.main_menu([WS], locale, display_name="sara")
     callbacks = set(_callbacks(screen))
-    assert {"ws:list", "nav:settings", "nav:language", "nav:help"} <= callbacks
+    assert {"ws:new", "ws:list", "pay:wallet", "nav:settings"} <= callbacks
+    assert "nav:help" not in callbacks
+    assert "nav:language" not in callbacks
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])

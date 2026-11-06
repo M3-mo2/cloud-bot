@@ -12,40 +12,48 @@ Conventions used in this document:
 
 ---
 
-## 0. Navigation — one inline block on every top-level screen
+## 0. Navigation — the main menu is the only hub
 
-**There is no reply keyboard. Every button is an inline button.** Navigation lives
-in a single shared block at the **bottom** of every top-level screen — the main
-menu, the welcome board, `/help`, `/settings`, the workspaces list and the
-language picker. It is rendered by one helper (`presentation/screens/nav.py`) so
-every screen agrees.
+**There is no reply keyboard. Every button is an inline button.** The **main
+menu** is the only screen that offers the account's destinations. **Every other
+screen outside a workspace carries exactly one nav entry, the home destination
+`nav:menu`** — the workspaces list, the wallet, settings, help and the language
+picker included. It is rendered by one helper (`presentation/screens/nav.py`),
+so every screen agrees.
 
 **Layout rule (a future screen follows it).** The nav block has **at most two
 buttons per row and at most three rows**, and a screen's own primary action may
 sit **full width above** it. No screen anywhere uses more than two columns.
 
+The home destination wears **one** label everywhere:
+
+| Label (AR) | Label (EN) | Type | Style | Flags |
+| --- | --- | --- | --- | --- |
+| 🏠 الصفحة الرئيسية | 🏠 Home | inline | primary | `nav:menu` |
+
+The menu's own body (and nothing else) offers:
+
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
 | 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
+| 💳 المحفظة | 💳 Wallet | inline | primary | `pay:wallet` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
-| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
-| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
-| ☰ القائمة | ☰ Menu | inline | primary | `nav:menu` — only where the screen is not the menu |
 
 **A nav entry never points at the screen you are already on: the current
-destination is omitted, not muted (R1).** A disabled entry was the old answer; it
-is wrong because a disabled button is still a button-shaped thing that wastes a
-grid slot and reads as a destination. On the menu itself no Menu button appears;
-on the workspaces list `ws:list` and Menu are both dropped, because the list
-*is* `ws:list` and the menu's body duplicates the list (R2). The block is thus 2
-rows on the menu (its four destinations), 2 rows on Help/Settings/Language (their
-destinations + Menu, minus themselves), and 2 rows on the workspaces list (its
-three remaining destinations).
+destination is omitted, not muted (R1).** A disabled entry is still a
+button-shaped thing that wastes a grid slot and reads as a destination, so it is
+simply absent. On the menu itself no home entry appears (the menu *is* home).
 
 ```
 [ ➕ مساحة جديدة ]                         (success, full width — the screen's own action)
-[ 📦 مساحاتي ] [ ⚙️ الإعدادات ]
-[ 🌐 اللغة ]     [ ❓ مساعدة ]              ← the nav block, always last
+[ 📦 مساحاتي ] [ 💳 المحفظة ]
+[ ⚙️ الإعدادات ]                            ← the menu's body, always last
+```
+
+On any other outside screen the block is one row:
+
+```
+[ 🏠 الصفحة الرئيسية ] / [ 🏠 Home ]        ← `nav:menu`
 ```
 
 ---
@@ -132,27 +140,25 @@ a visible "and N more" line.
 
 ### 2.3 Menu keyboard
 
-Full-width primary action, then the shared inline nav block (§0). The layout is
-rebuilt from the old three-full-width-row version to spend the rows it saves on
-the distributed block.
+Full-width primary action, then the menu's own destinations (§0). Help and
+Language are no longer here — they moved under Settings.
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
 | ➕ مساحة جديدة | ➕ New Workspace | inline | success | `ws:new`, full width |
 | 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
+| 💳 المحفظة | 💳 Wallet | inline | primary | `pay:wallet` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
-| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
-| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 
 ```
 [ ➕ مساحة جديدة ]
-[ 📦 مساحاتي ] [ ⚙️ الإعدادات ]
-[ 🌐 اللغة ]   [ ❓ مساعدة ]
+[ 📦 مساحاتي ] [ 💳 المحفظة ]
+[ ⚙️ الإعدادات ]
 ```
 
-There is no persistent reply menu. "My workspaces" is reachable as the
-**📦 My workspaces** destination in the nav block, and it wears that one name on
-every screen.
+There is no persistent reply menu. **Help and Language are not on the menu** —
+they live under Settings (§4). "My workspaces" is reachable as the
+**📦 My workspaces** destination, and it wears that one name on the menu.
 
 With no workspaces, the menu is replaced by the **welcome board** (§2.5).
 
@@ -195,9 +201,8 @@ No laptop. No setup. No hassle.</p>
 | --- | --- | --- | --- | --- |
 | ➕ مساحة جديدة | ➕ New Workspace | inline | success | opens the create wizard (`ws:new`) |
 | 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
+| 💳 المحفظة | 💳 Wallet | inline | primary | `pay:wallet` |
 | ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
-| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
-| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
 
 The board deliberately avoids architecture jargon (no "isolated", "sandbox",
 "secure"): it speaks to what the user gets, not how the engine works. The inline
@@ -270,46 +275,37 @@ The command list stays in a collapsible block so the screen stays short.
 <p><i>ملفاتك خاصة بك وحدك. لا شيء مشترك بين المستخدمين.</i></p>
 ```
 
-Keyboard: the shared inline nav block (§0) with **Help omitted** (we are on it —
-R1), so the block is **Workspaces · Settings**, then **Language · Menu**. There is
-no Back/reply button.
+Keyboard: the single nav entry, **🏠 Home** (`nav:menu`). Help is a page, not a
+hub, so it repeats no account destination. There is no Back/reply button.
 
 ---
 
 ## 4. `/settings`
 
+Settings is a **two-entry hub**: Help and Language, and nothing else but the
+home entry.
+
 ### English
 
 ```html
 <h2>⚙️ Settings</h2>
-<p><b>Language:</b> English</p>
-<p><b>Plan:</b> Free</p>
-<hr>
-<p>Choose what to change.</p>
+<p>Help and language.</p>
 ```
 
 ### Arabic (`is_rtl=True`)
 
 ```html
 <h2>⚙️ الإعدادات</h2>
-<p><b>اللغة:</b> العربية</p>
-<p><b>الخطة:</b> مجانية</p>
-<hr>
-<p>اختر ما تريد تغييره.</p>
+<p>المساعدة واللغة.</p>
 ```
 
 ### Keyboard
 
-The shared inline nav block (§0) with **Settings omitted** (we are on it — R1).
-Changing the language is the **Language** destination (`nav:language`), and
-**Menu** returns home.
-
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
-| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
 | ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
-| ☰ القائمة | ☰ Menu | inline | primary | `nav:menu` |
+| 🌐 اللغة | 🌐 Language | inline | primary | `nav:language` |
+| 🏠 الصفحة الرئيسية | 🏠 Home | inline | primary | `nav:menu` |
 
 ---
 
@@ -317,8 +313,8 @@ Changing the language is the **Language** destination (`nav:language`), and
 
 Same card as onboarding, but reached mid-session. The **current** language is
 shown as a `disabled` label so the user sees their state (that disabled label is
-the language *choice*, not a nav destination), and the shared inline nav block
-(§0) with **Language omitted** (we are on it — R1) follows.
+the language *choice*, not a nav destination), and the single home entry (§0)
+follows.
 
 ### English (current = EN)
 
@@ -326,10 +322,7 @@ the language *choice*, not a nav destination), and the shared inline nav block
 | --- | --- | --- | --- | --- |
 | العربية | — | inline | primary | `lang:ar` |
 | — | ✓ English | inline | primary | `lang:en`, **disabled** |
-| 📦 مساحاتي | 📦 My workspaces | inline | primary | `ws:list` |
-| ⚙️ الإعدادات | ⚙️ Settings | inline | primary | `nav:settings` |
-| ❓ مساعدة | ❓ Help | inline | primary | `nav:help` |
-| ☰ القائمة | ☰ Menu | inline | primary | `nav:menu` |
+| 🏠 الصفحة الرئيسية | 🏠 Home | inline | primary | `nav:menu` |
 
 Switching language edits the current message into the menu in the new locale.
 

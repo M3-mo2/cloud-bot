@@ -404,18 +404,30 @@ the welcome board's "How it works" opens `/help`, and Start opens the wizard.
 ## CB-25 — Navigation is a shared inline row at the bottom of every top-level screen
 
 **Decision.** There is **no reply keyboard anywhere, ever** — every button is an
-inline button. Every top-level screen (main menu, welcome board, help, settings,
-workspaces list, language picker) ends with one shared **nav block**: the four
-destinations Workspaces (`ws:list`), Settings (`nav:settings`), Language
-(`nav:language`) and Help (`nav:help`) — plus Menu (`nav:menu`) where the screen
-is not the menu itself — laid out **two buttons per row, at most three rows**.
+inline button. Navigation is one shared block rendered by one helper
+(`presentation/screens/nav.py`), laid out **two buttons per row, at most three
+rows**.
+
+**Revised by TASK nav-onehub — the main menu is the only hub.** The old rule gave
+*every* top-level screen the account's four destinations plus Menu, which meant
+a logged-out user on «مساحاتي» saw Settings/Wallet/Help/Language again. His words:
+*«مش عايز كل الازرار اللي زي اعدادات ومحفظه ومساعده واللغه موجوده»*. So now:
+
+* **only the menu** offers the account's destinations — Workspaces (`ws:list`),
+  Wallet (`pay:wallet`), Settings (`nav:settings`) — plus its own full-width
+  `➕ New Workspace`;
+* **every other screen outside a workspace** carries exactly one nav entry, the
+  home destination `nav:menu`, labelled **🏠 Home / 🏠 الصفحة الرئيسية**;
+* **Settings** is a two-entry hub — Help (`nav:help`) and Language
+  (`nav:language`) — and the menu does not repeat them;
+* **Help** is a page (its body + home), and the **wallet** keeps only money;
+* **inside a workspace nothing changes**: the block is the session's, one
+  `ws:home` entry and never `ws:list`.
+
 **A nav entry never points at the screen you are already on: the current
 destination is omitted, not muted (task 14, R1).** A disabled entry was tried
 first (task 09); it is wrong because a button-shaped no-op still wastes a grid
-slot and reads as a destination. The workspaces list also drops Menu, whose body
-duplicates the list (R2). The main menu's own primary action (`➕ New Workspace`) sits full width
-*above* the block. One helper (`presentation/screens/nav.py`) renders it, so every
-screen agrees.
+slot and reads as a destination.
 
 **Why.** He asked for no reply keyboard and a *smart placement with good
 distribution*. The bottom of the message is where a thumb already expects
@@ -856,7 +868,9 @@ is the normal case, not the corner.
 5. **One destination, one label, everywhere.** `ws:list` was `📦 المساحات` on some screens and `📦 مساحاتي`
    on others; the error screens' `nav:menu` recovery button said `⬅️ Back` while the nav block said
    `🏠 Menu`. Both are fixed: `ws:list` is always **📦 My workspaces / 📦 مساحاتي**, and `nav:menu` is
-   always **☰ Menu / ☰ القائمة**. The emoji also stopped lying: `🏠` means the *workspace* home
+   always **🏠 Home / 🏠 الصفحة الرئيسية** (TASK nav-onehub changed the value of the same key, so the
+   one-destination-one-label guard still passes untouched). The emoji also stopped lying: `🏠` is the
+   home destination now (and `ws:home` for a workspace)
    (`ws:home`), never the menu, and `▶️` is no longer shared by Start and Run — the welcome board's primary
    action is the same **➕ New Workspace** as the menu's.
 

@@ -1,4 +1,3 @@
 ➕ مساحة جديدة [ws:new] enabled
 📦 مساحاتي [ws:list] enabled | 💳 المحفظة [pay:wallet] enabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-❓ مساعدة [nav:help] enabled
+⚙️ الإعدادات [nav:settings] enabled

@@ -1,31 +1,29 @@
 """The shared bottom navigation block for every top-level screen.
 
-One helper, one layout, one place. While the user is **not inside** a workspace,
-the block lists the top-level account destinations — Workspaces (``ws:list``),
-Settings (``nav:settings``), Language (``nav:language``) and Help (``nav:help``)
-— plus Menu (``nav:menu``) where the screen is not the menu itself.
+One helper, one layout, one place. **The main menu is the only hub.** While the
+user is **not inside** a workspace:
+
+* on the menu itself the block is the account's four destinations — New Workspace
+  (drawn by the screen itself), Workspaces (``ws:list``), Wallet (``pay:wallet``)
+  and Settings (``nav:settings``);
+* on **every other screen** the block is exactly one entry: the home destination
+  ``nav:menu``. A screen does not repeat the account's own destinations; Help and
+  Language live under Settings, and the wallet keeps only money.
 
 **A nav entry never points at the screen you are already on (R1): the current
-destination is omitted, not muted.** A disabled entry is still a button-shaped
-thing that wastes a slot in the two-column grid and reads as a real destination;
-the correct answer is that it is simply not there. This is keyed off ``current``
-and applies to every screen that uses the block. ``Intent.MUTED`` stays available
-for buttons that legitimately exist elsewhere (e.g. ``▶️ Run`` while a run is
-active) — this rule is about the nav block only.
-
-On the **workspaces list** Menu is dropped as well (R2): the menu's body is the
-same workspace table, so for a user who owns workspaces the menu is a second
-route to the screen the list already is.
+destination is omitted, not muted.** On the menu that means the home entry is
+absent because the menu *is* home. ``Intent.MUTED`` stays available for buttons
+that legitimately exist elsewhere (e.g. ``▶️ Run`` while a run is active) — this
+rule is about the nav block only.
 
 **While the user is inside a workspace (task 13) the block is the session's, not
-the account's.** It carries up to two entries: ``🏠 <workspace name>``
-(``ws:home``) and ``🏠 <workspace name>`` (``ws:home``) — and nothing else. There is no
-``ws:list`` while inside: reaching another workspace is an account action, taken
-after logging out, and offering it here made the session block look like a
-hierarchy. The account destinations — Settings, Language,
-Help and Menu — are dropped whenever ``inside`` is set; they remain reachable
-the same way as before, through the ``/settings`` and ``/help`` commands, and by
-leaving the workspace.
+the account's.** It carries one entry — ``🏠 <workspace name>`` (``ws:home``) —
+and nothing else. There is no ``ws:list`` while inside: reaching another
+workspace is an account action, taken after logging out, and offering it here
+made the session block look like a hierarchy. The account destinations are
+dropped whenever ``inside`` is set; they remain reachable through the
+``/settings`` and ``/help`` commands, and by leaving the workspace. This branch
+is deliberately untouched by the one-hub task.
 
 Layout rule (applies to every screen, forever): at most **two buttons per row**
 and at most **three rows** in the nav block; a screen's own primary action may
@@ -77,13 +75,13 @@ NAV_LABEL_EXCEPTIONS: frozenset[str] = frozenset(
     }
 )
 
-#: (current-key, catalog-label key, callback) in display order.
+#: (current-key, catalog-label key, callback) in display order. **The menu's own
+#: body** — the only place that offers these destinations (the one-hub rule).
+#: ``settings`` owns Help and Language now, so they are not listed here.
 DESTINATIONS: tuple[tuple[str, str, str], ...] = (
     ("workspaces", "menu.workspaces", "ws:list"),
     ("wallet", "menu.wallet", "pay:wallet"),
     ("settings", "menu.settings", "nav:settings"),
-    ("language", "menu.language", "nav:language"),
-    ("help", "menu.help", "nav:help"),
 )
 
 #: Every callback that belongs to the nav block (used by tests to count rows).
@@ -118,11 +116,13 @@ def nav_rows(locale: Locale, current: str, *, inside=None) -> list[list]:
 
     ``current`` is the surface the caller is rendering; its own destination is
     **omitted** (R1), never muted. ``inside`` is the workspace the user is
-    currently inside (a domain ``Workspace``) or ``None``. When set, the block is
-    the **session's block** (``ws:home`` + ``ws:list``, minus the current one);
-    when unset, the block is the account's (the four destinations, plus Menu
-    where the screen is not the menu and not the workspaces list). Inside, it is
-    one entry and never ``ws:list``.
+    currently inside (a domain ``Workspace``) or ``None``.
+
+    Outside a workspace the **menu is the only hub**: on the menu the block is
+    the four destinations from :data:`DESTINATIONS` (minus the menu itself, which
+    is not one of them); on every other screen it is exactly one entry — the home
+    destination ``nav:menu``. Inside, the block is the session's: one
+    ``ws:home`` entry and never ``ws:list``.
     """
     if inside is not None:
         # Inside a workspace the block is the session's, and it carries exactly one
@@ -141,14 +141,16 @@ def nav_rows(locale: Locale, current: str, *, inside=None) -> list[list]:
             return []
         return [[inline(home_label, "ws:home", intent=Intent.PRIMARY)]]
 
+    if current != "menu":
+        # The one-hub rule: a screen outside a workspace does not repeat the
+        # account's own destinations. It carries exactly one nav entry — home.
+        return [
+            [inline(catalog.t("common.menu", locale), "nav:menu", intent=Intent.PRIMARY)]
+        ]
+
     buttons = []
     for key, label_key, action in DESTINATIONS:
         if key == current:
             continue
         buttons.append(inline(catalog.t(label_key, locale), action, intent=Intent.PRIMARY))
-    # R2: on the workspaces list the menu duplicates the list itself; drop it.
-    if current not in ("menu", "workspaces"):
-        buttons.append(
-            inline(catalog.t("common.menu", locale), "nav:menu", intent=Intent.PRIMARY)
-        )
     return [buttons[index : index + 2] for index in range(0, len(buttons), 2)]

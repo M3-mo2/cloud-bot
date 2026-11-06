@@ -14,7 +14,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 126 |
 | Screens including the /dev tool | 129 |
-| Button edges | 453 |
+| Button edges | 417 |
 | Distinct destinations (actions) | 113 |
 | Entry commands | 9 |
 | Callback re-entry actions | 113 |
@@ -22,7 +22,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 0 |
 | Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 247 |
+| Contradictions: two-screen loops | 212 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -2915,9 +2915,173 @@ _No screen is rendered by this command._
 ### `/help`
 
 - **help** — ❓ Help
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+  - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+    - **menu** — 🤖 CloudBot
+      - ➕ New Workspace → `ws:new` → ws_create_name
+        - **ws_create_name** — ➕ New Workspace
+          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — 📦 My Workspaces
+          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_empty** — 📦 My Workspaces
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_inside** — 📦 My Workspaces
+          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
+      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+        - **wallet** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_expired** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - ↩ `wallet_expired` (already on this path)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_no_plan** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - ↩ `wallet_no_plan` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_two_plans** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_two_plans` (already on this path)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+      - ⚙️ Settings → `nav:settings` → settings, settings_inside
+        - **settings** — ⚙️ Settings
+          - ❓ Help → `nav:help` → help, help_inside
+            - ↩ `help` (already on this path)
+            - … `help_inside` at depth 6 (not expanded)
+          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
+            - … `language_picker` at depth 6 (not expanded)
+            - … `language_picker_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **settings_inside** — ⚙️ Settings
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+    - **menu_empty** — ☁️ CloudBot
+      - ➕ New Workspace → `ws:new` → ws_create_name
+        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `nav:settings` → settings, settings_inside
+        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
+        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
+    - **menu_inside** — 🤖 CloudBot
+      - ➕ New Workspace → `ws:new` → ws_create_name
+        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -2941,7 +3105,7 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
@@ -2954,7 +3118,7 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
@@ -3004,7 +3168,7 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
@@ -3026,335 +3190,12 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - ↩ `help` (already on this path)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - ↩ `wallet_expired` (already on this path)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - ↩ `help` (already on this path)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - ↩ `wallet_no_plan` (already on this path)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - ↩ `help` (already on this path)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - ↩ `help` (already on this path)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - ↩ `help` (already on this path)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - ↩ `help` (already on this path)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - ↩ `help` (already on this path)
-        - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-    - **ws_list_empty** — 📦 My Workspaces
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - ↩ `help` (already on this path)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - ↩ `ws_list_inside` (already on this path)
-  - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-    - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-    - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-    - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-    - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-  - ⚙️ Settings → `nav:settings` → settings, settings_inside
-    - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-    - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-  - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-    - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-    - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-  - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-    - **menu** — 🤖 CloudBot
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - ↩ `help` (already on this path)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-    - **menu_empty** — ☁️ CloudBot
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - ↩ `help` (already on this path)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-    - **menu_inside** — 🤖 CloudBot
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
 - **help_inside** — ❓ Help
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
@@ -3620,37 +3461,17 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - ↩ `help_inside` (already on this path)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_empty** — 📦 My Workspaces
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - ↩ `help_inside` (already on this path)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — 📦 My Workspaces
           - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -6460,20 +6281,7 @@ _No screen is rendered by this command._
             - ↩ `wallet_expired` (already on this path)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -6491,20 +6299,7 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - ↩ `wallet_no_plan` (already on this path)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -6522,196 +6317,11 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-        - **ws_list_empty** — 📦 My Workspaces
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-        - **ws_list_inside** — 📦 My Workspaces
-          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
         - **menu** — 🤖 CloudBot
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
@@ -6727,12 +6337,6 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
         - **menu_empty** — ☁️ CloudBot
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
@@ -6748,12 +6352,6 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
         - **menu_inside** — 🤖 CloudBot
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
@@ -6772,9 +6370,52 @@ _No screen is rendered by this command._
 ### `/settings`
 
 - **settings** — ⚙️ Settings
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+  - ❓ Help → `nav:help` → help, help_inside
+    - **help** — ❓ Help
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⚙️ Settings → `nav:settings` → settings, settings_inside
+            - ↩ `settings` (already on this path)
+            - … `settings_inside` at depth 6 (not expanded)
+        - **menu_empty** — ☁️ CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⚙️ Settings → `nav:settings` → settings, settings_inside
+            - ↩ `settings` (already on this path)
+            - … `settings_inside` at depth 6 (not expanded)
+        - **menu_inside** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+    - **help_inside** — ❓ Help
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -6798,7 +6439,7 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
@@ -6811,7 +6452,7 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
@@ -6861,7 +6502,7 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
@@ -6883,335 +6524,89 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
+        - **ws_list** — 📦 My Workspaces
+          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - ↩ `settings` (already on this path)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+        - **ws_list_empty** — 📦 My Workspaces
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - ↩ `wallet_expired` (already on this path)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - ↩ `settings` (already on this path)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - ↩ `wallet_no_plan` (already on this path)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - ↩ `settings` (already on this path)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - ↩ `settings` (already on this path)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - ↩ `settings` (already on this path)
-        - **settings_inside** — ⚙️ Settings
+        - **ws_list_inside** — 📦 My Workspaces
+          - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
+            - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - ↩ `settings` (already on this path)
-            - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - ↩ `settings` (already on this path)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-    - **ws_list_empty** — 📦 My Workspaces
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - ↩ `settings` (already on this path)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces
-      - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - ↩ `ws_list_inside` (already on this path)
-  - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-    - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-    - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-    - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-    - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+            - ↩ `ws_list_inside` (already on this path)
   - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-    - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-    - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-  - ❓ Help → `nav:help` → help, help_inside
-    - **help** — ❓ Help ↩ (already expanded at depth 4)
-    - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-  - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-    - **menu** — 🤖 CloudBot
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - ↩ `settings` (already on this path)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-    - **menu_empty** — ☁️ CloudBot
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - ↩ `settings` (already on this path)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
-    - **menu_inside** — 🤖 CloudBot
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
+    - **language_picker** — 🌐 Choose your language
+      - العربية → `lang:ar` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+      - ✓ English → `lang:en` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+    - **language_picker_inside** — 🌐 Choose your language
+      - العربية → `lang:ar` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+      - ✓ English → `lang:en` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
+  - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+    - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+    - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+    - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
 - **settings_inside** — ⚙️ Settings
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
@@ -7477,37 +6872,17 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - ↩ `settings_inside` (already on this path)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_empty** — 📦 My Workspaces
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - ↩ `settings_inside` (already on this path)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — 📦 My Workspaces
           - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -7561,37 +6936,17 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_empty** — 📦 My Workspaces
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — 📦 My Workspaces
           - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -7628,20 +6983,7 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -7659,20 +7001,7 @@ _No screen is rendered by this command._
             - ↩ `wallet_expired` (already on this path)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -7690,20 +7019,7 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - ↩ `wallet_no_plan` (already on this path)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -7721,121 +7037,23 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - ⚙️ Settings → `nav:settings` → settings, settings_inside
         - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
           - ❓ Help → `nav:help` → help, help_inside
             - … `help` at depth 6 (not expanded)
             - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
+            - … `language_picker` at depth 6 (not expanded)
+            - … `language_picker_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7859,12 +7077,6 @@ _No screen is rendered by this command._
       - ⚙️ Settings → `nav:settings` → settings, settings_inside
         - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
         - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
     - **menu_inside** — 🤖 CloudBot
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
@@ -8007,12 +7219,6 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
         - **menu_inside** — 🤖 CloudBot
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
@@ -8145,254 +7351,17 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - ↩ `wallet_expired` (already on this path)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - ↩ `wallet_no_plan` (already on this path)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - ↩ `menu` (already on this path)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - ↩ `menu` (already on this path)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - ↩ `menu` (already on this path)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -8415,19 +7384,189 @@ _No screen is rendered by this command._
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
   - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-    - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+    - **wallet** — 💳 Wallet & subscription
+      - ⭐ Buy Stars → `pay:packs` → wallet_packs
+        - **wallet_packs** — ⭐ Buy Stars
+          - ⭐ 50 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⭐ 150 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⭐ 500 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⭐ 1200 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📦 Plans → `pay:plans` → wallet_plans
+        - **wallet_plans** — 📦 Choose a plan
+          - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ✓ Monthly (your current plan) → `nav:noop` → (handler only — no screen)
+          - Buy Yearly — 1200 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+        - **wallet_history** — 📜 Wallet history
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_history_empty** — 📜 Wallet history
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_history_page_2** — 📜 Wallet history
+          - ⬅️ Previous → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - ↩ `wallet_history_page_2` (already on this path)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+        - ↩ `wallet` (already on this path)
+        - **wallet_expired** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - ↩ `wallet_expired` (already on this path)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_no_plan** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - ↩ `wallet_no_plan` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_two_plans** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_two_plans` (already on this path)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - ↩ `menu` (already on this path)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
   - ⚙️ Settings → `nav:settings` → settings, settings_inside
-    - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-    - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-  - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-    - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-    - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-  - ❓ Help → `nav:help` → help, help_inside
-    - **help** — ❓ Help ↩ (already expanded at depth 4)
-    - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+    - **settings** — ⚙️ Settings
+      - ❓ Help → `nav:help` → help, help_inside
+        - **help** — ❓ Help
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **help_inside** — ❓ Help
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
+        - **language_picker** — 🌐 Choose your language
+          - العربية → `lang:ar` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **language_picker_inside** — 🌐 Choose your language
+          - العربية → `lang:ar` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
+            - ↩ `menu` (already on this path)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - ↩ `menu` (already on this path)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+    - **settings_inside** — ⚙️ Settings
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **menu_empty** — ☁️ CloudBot
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
@@ -8447,12 +7586,6 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
         - ↩ `menu_empty` (already on this path)
         - **menu_inside** — 🤖 CloudBot
           - ➕ New Workspace → `ws:new` → ws_create_name
@@ -8586,254 +7719,17 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - ↩ `wallet_expired` (already on this path)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - ↩ `wallet_no_plan` (already on this path)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - ↩ `menu_empty` (already on this path)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - ↩ `menu_empty` (already on this path)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 2)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - ↩ `menu_empty` (already on this path)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -8856,19 +7752,189 @@ _No screen is rendered by this command._
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
   - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-    - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
+    - **wallet** — 💳 Wallet & subscription
+      - ⭐ Buy Stars → `pay:packs` → wallet_packs
+        - **wallet_packs** — ⭐ Buy Stars
+          - ⭐ 50 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⭐ 150 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⭐ 500 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⭐ 1200 Stars → `pay:pack` → wallet_packs
+            - ↩ `wallet_packs` (already on this path)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📦 Plans → `pay:plans` → wallet_plans
+        - **wallet_plans** — 📦 Choose a plan
+          - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ✓ Monthly (your current plan) → `nav:noop` → (handler only — no screen)
+          - Buy Yearly — 1200 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+        - **wallet_history** — 📜 Wallet history
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_history_empty** — 📜 Wallet history
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_history_page_2** — 📜 Wallet history
+          - ⬅️ Previous → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - ↩ `wallet_history_page_2` (already on this path)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+        - ↩ `wallet` (already on this path)
+        - **wallet_expired** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - ↩ `wallet_expired` (already on this path)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_no_plan** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - ↩ `wallet_no_plan` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **wallet_two_plans** — 💳 Wallet & subscription
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+            - … `wallet_packs` at depth 6 (not expanded)
+          - 📦 Plans → `pay:plans` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
+            - … `wallet_history` at depth 6 (not expanded)
+            - … `wallet_history_empty` at depth 6 (not expanded)
+            - … `wallet_history_page_2` at depth 6 (not expanded)
+          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - ↩ `wallet` (already on this path)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_two_plans` (already on this path)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - ↩ `menu_empty` (already on this path)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
   - ⚙️ Settings → `nav:settings` → settings, settings_inside
-    - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-    - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-  - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-    - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-    - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-  - ❓ Help → `nav:help` → help, help_inside
-    - **help** — ❓ Help ↩ (already expanded at depth 4)
-    - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+    - **settings** — ⚙️ Settings
+      - ❓ Help → `nav:help` → help, help_inside
+        - **help** — ❓ Help
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **help_inside** — ❓ Help
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
+        - **language_picker** — 🌐 Choose your language
+          - العربية → `lang:ar` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **language_picker_inside** — 🌐 Choose your language
+          - العربية → `lang:ar` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - ↩ `menu_empty` (already on this path)
+            - … `menu_inside` at depth 6 (not expanded)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - ↩ `menu_empty` (already on this path)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
+    - **settings_inside** — ⚙️ Settings
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
+        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **menu_inside** — 🤖 CloudBot
   - ➕ New Workspace → `ws:new` → ws_create_name
     - **ws_create_name** — ➕ New Workspace
@@ -8888,12 +7954,6 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
         - **menu_empty** — ☁️ CloudBot
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
@@ -8909,12 +7969,6 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
         - ↩ `menu_inside` (already on this path)
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
@@ -9180,37 +8234,17 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - ↩ `menu_inside` (already on this path)
         - **ws_list_empty** — 📦 My Workspaces
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - ↩ `menu_inside` (already on this path)
         - **ws_list_inside** — 📦 My Workspaces
           - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -9701,171 +8735,10 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - ↩ `wallet_expired` (already on this path)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - ↩ `wallet_no_plan` (already on this path)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9878,32 +8751,9 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
+        - **menu_empty** — ☁️ CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -9916,14 +8766,9 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
+        - **menu_inside** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -9935,20 +8780,10 @@ _No screen is rendered by this command._
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
@@ -9988,20 +8823,7 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -10019,20 +8841,7 @@ _No screen is rendered by this command._
             - ↩ `wallet_expired` (already on this path)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -10050,20 +8859,7 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - ↩ `wallet_no_plan` (already on this path)
             - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -10082,20 +8878,7 @@ _No screen is rendered by this command._
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
@@ -10357,51 +9140,10 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -10414,32 +9156,9 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
+        - **menu_empty** — ☁️ CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -10452,14 +9171,9 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
+        - **menu_inside** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
@@ -10471,20 +9185,10 @@ _No screen is rendered by this command._
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -11386,171 +10090,10 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - ↩ `wallet` (already on this path)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - ↩ `wallet_expired` (already on this path)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - ↩ `wallet_no_plan` (already on this path)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
-            - … `wallet_packs` at depth 6 (not expanded)
-          - 📦 Plans → `pay:plans` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
-            - … `wallet_history` at depth 6 (not expanded)
-            - … `wallet_history_empty` at depth 6 (not expanded)
-            - … `wallet_history_page_2` at depth 6 (not expanded)
-          - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - ↩ `wallet_two_plans` (already on this path)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -11563,32 +10106,9 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **language_picker_inside** — 🌐 Choose your language
-          - العربية → `lang:ar` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - ✓ English → `lang:en` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help
+        - **menu_empty** — ☁️ CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -11601,14 +10121,9 @@ _No screen is rendered by this command._
           - ⚙️ Settings → `nav:settings` → settings, settings_inside
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-        - **help_inside** — ❓ Help
+        - **menu_inside** — 🤖 CloudBot
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
           - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -11620,20 +10135,10 @@ _No screen is rendered by this command._
     - **ws_list_empty** — 📦 My Workspaces
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-        - **wallet** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-        - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-      - ⚙️ Settings → `nav:settings` → settings, settings_inside
-        - **settings** — ⚙️ Settings ↩ (already expanded at depth 4)
-        - **settings_inside** — ⚙️ Settings ↩ (already expanded at depth 4)
-      - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-        - **language_picker** — 🌐 Choose your language ↩ (already expanded at depth 4)
-        - **language_picker_inside** — 🌐 Choose your language ↩ (already expanded at depth 4)
-      - ❓ Help → `nav:help` → help, help_inside
-        - **help** — ❓ Help ↩ (already expanded at depth 4)
-        - **help_inside** — ❓ Help ↩ (already expanded at depth 4)
+      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+        - **menu** — 🤖 CloudBot ↩ (already expanded at depth 4)
+        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
+        - **menu_inside** — 🤖 CloudBot ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
@@ -11899,37 +10404,17 @@ _No screen is rendered by this command._
             - ↩ `ws_detail_suspended` (already on this path)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_empty** — 📦 My Workspaces
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-          - 🌐 Language → `nav:language` → language_picker, language_picker_inside
-            - … `language_picker` at depth 6 (not expanded)
-            - … `language_picker_inside` at depth 6 (not expanded)
-          - ❓ Help → `nav:help` → help, help_inside
-            - … `help` at depth 6 (not expanded)
-            - … `help_inside` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — 📦 My Workspaces
           - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -11999,7 +10484,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (247)
+### 3.5 Loops that are not obvious (212)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -12036,45 +10521,26 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser_empty** (**unobvious**)
-- **help** —“🌐 Language”→ **language_picker** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“☰ Menu”→ **menu** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“☰ Menu”→ **menu_empty** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“⚙️ Settings”→ **settings** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“💳 Wallet”→ **wallet** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“💳 Wallet”→ **wallet_expired** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“💳 Wallet”→ **wallet_no_plan** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“💳 Wallet”→ **wallet_two_plans** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“📦 My workspaces”→ **ws_list** —“❓ Help”→ **help** (**unobvious**)
-- **help** —“📦 My workspaces”→ **ws_list_empty** —“❓ Help”→ **help** (**unobvious**)
-- **help_inside** —“🏠 demo”→ **ws_list** —“❓ Help”→ **help_inside** (**unobvious**)
-- **help_inside** —“🏠 demo”→ **ws_list_empty** —“❓ Help”→ **help_inside** (**unobvious**)
-- **language_picker** —“العربية”→ **menu** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“العربية”→ **menu_empty** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“⚙️ Settings”→ **settings** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“💳 Wallet”→ **wallet** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“💳 Wallet”→ **wallet_expired** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“💳 Wallet”→ **wallet_no_plan** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“💳 Wallet”→ **wallet_two_plans** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“📦 My workspaces”→ **ws_list** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker** —“📦 My workspaces”→ **ws_list_empty** —“🌐 Language”→ **language_picker** (**unobvious**)
-- **language_picker_inside** —“العربية”→ **menu** —“🌐 Language”→ **language_picker_inside** (**unobvious**)
-- **language_picker_inside** —“العربية”→ **menu_empty** —“🌐 Language”→ **language_picker_inside** (**unobvious**)
-- **language_picker_inside** —“🏠 demo”→ **ws_list** —“🌐 Language”→ **language_picker_inside** (**unobvious**)
-- **language_picker_inside** —“🏠 demo”→ **ws_list_empty** —“🌐 Language”→ **language_picker_inside** (**unobvious**)
 - **live_logs_finished** —“🗑 Delete log”→ **run_history** —“📜 run_0…K4”→ **live_logs_finished** (**unobvious**)
-- **menu** —“⚙️ Settings”→ **settings** —“☰ Menu”→ **menu** (**unobvious**)
-- **menu** —“💳 Wallet”→ **wallet** —“☰ Menu”→ **menu** (**unobvious**)
-- **menu** —“💳 Wallet”→ **wallet_expired** —“☰ Menu”→ **menu** (**unobvious**)
-- **menu** —“💳 Wallet”→ **wallet_no_plan** —“☰ Menu”→ **menu** (**unobvious**)
-- **menu** —“💳 Wallet”→ **wallet_two_plans** —“☰ Menu”→ **menu** (**unobvious**)
+- **menu** —“⚙️ Settings”→ **settings** —“🏠 Home”→ **menu** (**unobvious**)
+- **menu** —“💳 Wallet”→ **wallet** —“🏠 Home”→ **menu** (**unobvious**)
+- **menu** —“💳 Wallet”→ **wallet_expired** —“🏠 Home”→ **menu** (**unobvious**)
+- **menu** —“💳 Wallet”→ **wallet_no_plan** —“🏠 Home”→ **menu** (**unobvious**)
+- **menu** —“💳 Wallet”→ **wallet_two_plans** —“🏠 Home”→ **menu** (**unobvious**)
 - **menu** —“➕ New Workspace”→ **ws_create_name** —“✖️ Cancel”→ **menu** (expected (back/affordance))
-- **menu_empty** —“⚙️ Settings”→ **settings** —“☰ Menu”→ **menu_empty** (**unobvious**)
-- **menu_empty** —“💳 Wallet”→ **wallet** —“☰ Menu”→ **menu_empty** (**unobvious**)
-- **menu_empty** —“💳 Wallet”→ **wallet_expired** —“☰ Menu”→ **menu_empty** (**unobvious**)
-- **menu_empty** —“💳 Wallet”→ **wallet_no_plan** —“☰ Menu”→ **menu_empty** (**unobvious**)
-- **menu_empty** —“💳 Wallet”→ **wallet_two_plans** —“☰ Menu”→ **menu_empty** (**unobvious**)
+- **menu** —“📦 My workspaces”→ **ws_list** —“🏠 Home”→ **menu** (**unobvious**)
+- **menu** —“📦 My workspaces”→ **ws_list_empty** —“🏠 Home”→ **menu** (**unobvious**)
+- **menu_empty** —“⚙️ Settings”→ **settings** —“🏠 Home”→ **menu_empty** (**unobvious**)
+- **menu_empty** —“💳 Wallet”→ **wallet** —“🏠 Home”→ **menu_empty** (**unobvious**)
+- **menu_empty** —“💳 Wallet”→ **wallet_expired** —“🏠 Home”→ **menu_empty** (**unobvious**)
+- **menu_empty** —“💳 Wallet”→ **wallet_no_plan** —“🏠 Home”→ **menu_empty** (**unobvious**)
+- **menu_empty** —“💳 Wallet”→ **wallet_two_plans** —“🏠 Home”→ **menu_empty** (**unobvious**)
 - **menu_empty** —“➕ New Workspace”→ **ws_create_name** —“✖️ Cancel”→ **menu_empty** (expected (back/affordance))
+- **menu_empty** —“📦 My workspaces”→ **ws_list** —“🏠 Home”→ **menu_empty** (**unobvious**)
+- **menu_empty** —“📦 My workspaces”→ **ws_list_empty** —“🏠 Home”→ **menu_empty** (**unobvious**)
 - **menu_inside** —“➕ New Workspace”→ **ws_create_name** —“✖️ Cancel”→ **menu_inside** (expected (back/affordance))
+- **menu_inside** —“🏠 demo”→ **ws_list** —“🏠 Home”→ **menu_inside** (**unobvious**)
+- **menu_inside** —“🏠 demo”→ **ws_list_empty** —“🏠 Home”→ **menu_inside** (**unobvious**)
 - **metrics** —“🔄 Refresh”→ **metrics_idle_incomplete** —“🔄 Refresh”→ **metrics** (**unobvious**)
 - **metrics** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics** (**unobvious**)
 - **metrics** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics** (**unobvious**)
@@ -12103,14 +10569,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **run_mode** —“✖️ Cancel”→ **ws_detail** —“▶️ Run”→ **run_mode** (expected (back/affordance))
 - **run_mode** —“✖️ Cancel”→ **ws_detail_more** —“▶️ Run”→ **run_mode** (expected (back/affordance))
 - **run_mode** —“✖️ Cancel”→ **ws_detail_suspended** —“▶️ Run”→ **run_mode** (expected (back/affordance))
-- **settings** —“💳 Wallet”→ **wallet** —“⚙️ Settings”→ **settings** (**unobvious**)
-- **settings** —“💳 Wallet”→ **wallet_expired** —“⚙️ Settings”→ **settings** (**unobvious**)
-- **settings** —“💳 Wallet”→ **wallet_no_plan** —“⚙️ Settings”→ **settings** (**unobvious**)
-- **settings** —“💳 Wallet”→ **wallet_two_plans** —“⚙️ Settings”→ **settings** (**unobvious**)
-- **settings** —“📦 My workspaces”→ **ws_list** —“⚙️ Settings”→ **settings** (**unobvious**)
-- **settings** —“📦 My workspaces”→ **ws_list_empty** —“⚙️ Settings”→ **settings** (**unobvious**)
-- **settings_inside** —“🏠 demo”→ **ws_list** —“⚙️ Settings”→ **settings_inside** (**unobvious**)
-- **settings_inside** —“🏠 demo”→ **ws_list_empty** —“⚙️ Settings”→ **settings_inside** (**unobvious**)
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_running** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
 - **terminal_list** —“➕ New terminal”→ **terminal_list_empty** —“➕ New terminal”→ **terminal_list** (**unobvious**)
@@ -12199,8 +10657,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **wallet** —“⭐ Buy Stars”→ **wallet_packs** —“⬅️ Back”→ **wallet** (expected (back/affordance))
 - **wallet** —“📦 Plans”→ **wallet_plans** —“Buy Weekly — 50 Stars”→ **wallet** (**unobvious**)
 - **wallet** —“🔄 Refresh”→ **wallet_two_plans** —“🔄 Refresh”→ **wallet** (**unobvious**)
-- **wallet** —“📦 My workspaces”→ **ws_list** —“💳 Wallet”→ **wallet** (**unobvious**)
-- **wallet** —“📦 My workspaces”→ **ws_list_empty** —“💳 Wallet”→ **wallet** (**unobvious**)
 - **wallet_expired** —“📜 History”→ **wallet_history** —“⬅️ Back”→ **wallet_expired** (expected (back/affordance))
 - **wallet_expired** —“📜 History”→ **wallet_history_empty** —“⬅️ Back”→ **wallet_expired** (expected (back/affordance))
 - **wallet_expired** —“📜 History”→ **wallet_history_page_2** —“⬅️ Back”→ **wallet_expired** (expected (back/affordance))
@@ -12208,8 +10664,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **wallet_expired** —“⭐ Buy Stars”→ **wallet_packs** —“⬅️ Back”→ **wallet_expired** (expected (back/affordance))
 - **wallet_expired** —“📦 Plans”→ **wallet_plans** —“Buy Weekly — 50 Stars”→ **wallet_expired** (**unobvious**)
 - **wallet_expired** —“🔄 Refresh”→ **wallet_two_plans** —“🔄 Refresh”→ **wallet_expired** (**unobvious**)
-- **wallet_expired** —“📦 My workspaces”→ **ws_list** —“💳 Wallet”→ **wallet_expired** (**unobvious**)
-- **wallet_expired** —“📦 My workspaces”→ **ws_list_empty** —“💳 Wallet”→ **wallet_expired** (**unobvious**)
 - **wallet_history** —“⬅️ Back”→ **wallet_no_plan** —“📜 History”→ **wallet_history** (expected (back/affordance))
 - **wallet_history** —“⬅️ Back”→ **wallet_two_plans** —“📜 History”→ **wallet_history** (expected (back/affordance))
 - **wallet_history_empty** —“⬅️ Back”→ **wallet_no_plan** —“📜 History”→ **wallet_history_empty** (expected (back/affordance))
@@ -12219,12 +10673,8 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **wallet_no_plan** —“⭐ Buy Stars”→ **wallet_packs** —“⬅️ Back”→ **wallet_no_plan** (expected (back/affordance))
 - **wallet_no_plan** —“📦 Plans”→ **wallet_plans** —“Buy Weekly — 50 Stars”→ **wallet_no_plan** (**unobvious**)
 - **wallet_no_plan** —“🔄 Refresh”→ **wallet_two_plans** —“🔄 Refresh”→ **wallet_no_plan** (**unobvious**)
-- **wallet_no_plan** —“📦 My workspaces”→ **ws_list** —“💳 Wallet”→ **wallet_no_plan** (**unobvious**)
-- **wallet_no_plan** —“📦 My workspaces”→ **ws_list_empty** —“💳 Wallet”→ **wallet_no_plan** (**unobvious**)
 - **wallet_packs** —“⬅️ Back”→ **wallet_two_plans** —“⭐ Buy Stars”→ **wallet_packs** (expected (back/affordance))
 - **wallet_plans** —“Buy Weekly — 50 Stars”→ **wallet_two_plans** —“📦 Plans”→ **wallet_plans** (**unobvious**)
-- **wallet_two_plans** —“📦 My workspaces”→ **ws_list** —“💳 Wallet”→ **wallet_two_plans** (**unobvious**)
-- **wallet_two_plans** —“📦 My workspaces”→ **ws_list_empty** —“💳 Wallet”→ **wallet_two_plans** (**unobvious**)
 - **ws_create_network** —“متابعة”→ **ws_create_plan** —“⬅️ Back”→ **ws_create_network** (expected (back/affordance))
 - **ws_create_network** —“متابعة”→ **ws_create_plan_short** —“⬅️ Back”→ **ws_create_network** (expected (back/affordance))
 - **ws_create_network** —“متابعة”→ **ws_create_plan_trial_used** —“⬅️ Back”→ **ws_create_network** (expected (back/affordance))
@@ -12528,28 +10978,28 @@ _Pick a section to list its screens and inspect their live buttons._
 _That item no longer exists._
 
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### err_unavailable — ⚙️ Service unavailable
 
 _The sandbox is temporarily unavailable. Please try again._
 
 - 🔄 Retry → `nav:refresh` → menu, menu_empty, menu_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### err_unprocessable — ⚠️ Couldn't do that
 
 _That request couldn't be accepted._
 
 - 🔄 Retry → `nav:refresh` → menu, menu_empty, menu_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### err_workspace_suspended — ⏸️ Workspace paused
 
 _This workspace is paused._
 
 - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### exec_prompt — ⚡ Quick command
 
@@ -12646,11 +11096,7 @@ _(no body text)_
 
 _CloudBot runs your code safely in an isolated sandbox — you never need to touch a server._
 
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### help_inside — ❓ Help
 
@@ -12687,11 +11133,7 @@ _اختر لغتك_
 
 - العربية → `lang:ar` → menu, menu_empty, menu_inside
 - ✓ English (disabled) → `lang:en` → menu, menu_empty, menu_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- ❓ Help → `nav:help` → help, help_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### language_picker_inside — 🌐 Choose your language
 
@@ -12726,8 +11168,6 @@ _Hello, sara 👋_
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
 - ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
 
 ### menu_empty — ☁️ CloudBot
 
@@ -12737,8 +11177,6 @@ _Development environments and cloud hosting — right from your phone._
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
 - ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
 
 ### menu_inside — 🤖 CloudBot
 
@@ -12905,17 +11343,15 @@ _How would you like to run code in demo?_
 
 ### settings — ⚙️ Settings
 
-_Language: English_
+_Help and language._
 
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
 - ❓ Help → `nav:help` → help, help_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🌐 Language → `nav:language` → language_picker, language_picker_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### settings_inside — ⚙️ Settings
 
-_Language: English_
+_Help and language._
 
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
@@ -13154,11 +11590,7 @@ _(no body text)_
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### wallet_expired — 💳 Wallet & subscription
 
@@ -13168,11 +11600,7 @@ _(no body text)_
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### wallet_history — 📜 Wallet history
 
@@ -13201,11 +11629,7 @@ _(no body text)_
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### wallet_packs — ⭐ Buy Stars
 
@@ -13247,11 +11671,7 @@ _(no body text)_
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
-- ☰ Menu → `nav:menu` → menu, menu_empty, menu_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### ws_create_name — ➕ New Workspace
 
@@ -13363,20 +11783,14 @@ _2 workspaces_
 - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - scraper → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - ➕ New Workspace → `ws:new` → ws_create_name
-- 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### ws_list_empty — 📦 My Workspaces
 
 _You don't have any workspaces yet._
 
 - ➕ New Workspace → `ws:new` → ws_create_name
-- 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-- ⚙️ Settings → `nav:settings` → settings, settings_inside
-- 🌐 Language → `nav:language` → language_picker, language_picker_inside
-- ❓ Help → `nav:help` → help, help_inside
+- 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### ws_list_inside — 📦 My Workspaces
 

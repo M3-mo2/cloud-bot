@@ -5,7 +5,7 @@ from __future__ import annotations
 MESSAGES: dict[str, str] = {
     # -- common --------------------------------------------------------------
     "common.back": "⬅️ رجوع",
-    "common.menu": "☰ القائمة",
+    "common.menu": "🏠 الصفحة الرئيسية",
     "common.cancel": "✖️ إلغاء",
     "common.retry": "🔄 إعادة",
     "common.confirm": "✅ تأكيد",
@@ -163,8 +163,7 @@ MESSAGES: dict[str, str] = {
     # -- settings ------------------------------------------------------------
     "settings.title": "⚙️ الإعدادات",
     "settings.language": "اللغة:",
-    "settings.plan": "الخطة:",
-    "settings.choose": "اختر ما تريد تغييره.",
+    "settings.choose": "المساعدة واللغة.",
 
     # -- workspaces: list ----------------------------------------------------
     "ws.list.title": "📦 مساحاتي",
