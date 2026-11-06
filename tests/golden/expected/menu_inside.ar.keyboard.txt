@@ -1,2 +1,2 @@
 ➕ مساحة جديدة [ws:new] enabled
-🏠 demo [ws:home] enabled | 📦 مساحاتي [ws:list] enabled
+🏠 demo [ws:home] enabled

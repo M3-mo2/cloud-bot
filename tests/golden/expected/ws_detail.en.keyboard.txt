@@ -4,4 +4,3 @@
 ⋯ More [ws:more:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 ⚙️ Settings [ws:settings:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🚪 Log out of workspace [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
-📦 My workspaces [ws:list] enabled

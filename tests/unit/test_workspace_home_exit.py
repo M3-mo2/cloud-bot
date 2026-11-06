@@ -86,22 +86,34 @@ def test_every_status_branch_still_has_a_way_out(name, status, locale):
     screen = _screen(status, locale)
     actions = _actions(screen)
     assert any(a.startswith("ws:logout") for a in actions), f"{name}/{locale}: cannot leave"
-    assert any(a.startswith("ws:list") for a in actions), f"{name}/{locale}: cannot switch"
+    # Switching workspaces is an *account* action: it belongs outside the session.
+    # The way out is the explicit log-out, and it is present on every branch — so
+    # nothing is stranded by ``ws:list`` being absent here. This assertion is the
+    # one that would catch the opposite mistake: a branch that removed the list
+    # *and* forgot a log-out.
+    assert not any(a.startswith("ws:list") for a in actions), (
+        f"{name}/{locale}: the session still offers the workspace list"
+    )
     assert not any(a == "ws:home" for a in actions), (
         f"{name}/{locale}: the home still offers ws:home (you are already there)"
     )
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_home_nav_block_still_offers_the_workspace_list(locale):
-    """Switching stays possible: ``ws:list`` is carried by the nav block, and the
-    home's own entry is gone (R1/R5)."""
+def test_home_nav_block_offers_nothing_but_the_exit_and_logout(locale):
+    """Inside a workspace the nav block is empty, and the exit is the log-out.
+
+    The block used to carry ``ws:list``; that made the session block read as a
+    hierarchy (this workspace *under* the list) and put two ways out of the
+    session on one screen. The single way out is the explicit log-out above.
+    """
     screen = _screen(WorkspaceStatus.ACTIVE, locale)
     nav_actions = {
         b.callback_data for row in _rows(screen) for b in row if b.callback_data in nav.NAV_ACTIONS
     }
-    assert "ws:list" in nav_actions, "the nav block no longer offers Workspaces"
+    assert "ws:list" not in nav_actions, "the session block still offers Workspaces"
     assert "ws:home" not in nav_actions, "the home still offers its own entry"
+    assert not nav_actions, f"the session block should be empty, got {nav_actions}"
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
@@ -112,7 +124,8 @@ def test_home_nav_block_respects_the_layout_rule(locale):
         for row in _rows(screen)
         if row and all(b.callback_data in nav.NAV_ACTIONS for b in row)
     ]
-    assert nav_rows, "the workspace home has no nav block"
+    # An empty block is legal now; the rule is about *size*, not presence. Keep
+    # asserting the shape so a future re-introduction lands inside the rule.
     assert len(nav_rows) <= 3, "the nav block exceeds the 3-row rule"
     for row in nav_rows:
         assert len(row) <= 2, "a nav row has more than two columns"

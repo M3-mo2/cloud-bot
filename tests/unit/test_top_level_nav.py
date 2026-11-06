@@ -246,10 +246,14 @@ def test_nav_without_a_session_is_unchanged():
 
 
 def test_home_entry_is_omitted_on_the_workspace_home_itself():
-    """R5: on the workspace home you are already home, so ``ws:home`` is gone,
-    leaving the session block at just ``ws:list``."""
+    """R5: on the workspace home you are already home, so the block is empty.
+
+    ``ws:list`` is not here either — switching workspaces is an account action
+    taken after logging out, and carrying it inside made the session block look
+    like a hierarchy. The way out of the session is the explicit log-out.
+    """
     rows = nav.nav_rows(Locale.EN, "workspace_home", inside=WS)
     entries = [b for row in rows for b in row if _callback(b) == "ws:home"]
     assert not entries
     callbacks = [_callback(b) for row in rows for b in row]
-    assert callbacks == ["ws:list"]
+    assert callbacks == []

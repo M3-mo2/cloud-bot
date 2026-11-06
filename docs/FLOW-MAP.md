@@ -14,7 +14,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 126 |
 | Screens including the /dev tool | 129 |
-| Button edges | 461 |
+| Button edges | 453 |
 | Distinct destinations (actions) | 113 |
 | Entry commands | 9 |
 | Callback re-entry actions | 113 |
@@ -368,10 +368,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -382,10 +378,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -439,10 +431,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -462,10 +450,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -1133,10 +1117,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -1147,10 +1127,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -1204,10 +1180,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -1227,10 +1199,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -1991,10 +1959,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -2005,10 +1969,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -2062,10 +2022,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -2085,10 +2041,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -2372,10 +2324,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -2386,10 +2334,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -2443,10 +2387,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -2466,10 +2406,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -3008,10 +2944,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -3022,10 +2954,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -3079,10 +3007,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -3102,10 +3026,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -3275,10 +3195,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -3325,10 +3241,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - ↩ `help` (already on this path)
         - **help_inside** — ❓ Help
@@ -3337,10 +3249,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -3444,10 +3352,6 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -3600,10 +3504,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -3654,10 +3554,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -3677,10 +3573,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -3780,17 +3672,9 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -4484,10 +4368,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -4498,10 +4378,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -4555,10 +4431,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -4578,10 +4450,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -5200,10 +5068,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -5214,10 +5078,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -5271,10 +5131,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -5294,10 +5150,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -5622,10 +5474,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -5636,10 +5484,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -5693,10 +5537,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -5716,10 +5556,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -6003,10 +5839,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -6017,10 +5849,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -6074,10 +5902,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -6097,10 +5921,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -6815,10 +6635,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -6865,10 +6681,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -6896,10 +6708,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -6957,10 +6765,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
     - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
     - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
@@ -6997,10 +6801,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -7011,10 +6811,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -7068,10 +6864,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -7091,10 +6883,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -7245,10 +7033,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -7295,10 +7079,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -7326,10 +7106,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -7433,10 +7209,6 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -7589,10 +7361,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -7643,10 +7411,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -7666,10 +7430,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -7769,17 +7529,9 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -8016,10 +7768,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -8066,10 +7814,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -8097,10 +7841,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -8155,10 +7895,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -8169,10 +7905,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -8226,10 +7958,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -8252,14 +7980,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -8304,10 +8024,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
@@ -8337,10 +8053,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -8351,10 +8063,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -8408,10 +8116,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -8431,10 +8135,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -8600,10 +8300,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -8650,10 +8346,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -8681,10 +8373,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -8777,10 +8465,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
   - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces
       - demo → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
@@ -8810,10 +8494,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -8824,10 +8504,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -8881,10 +8557,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -8904,10 +8576,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -9073,10 +8741,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -9123,10 +8787,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -9154,10 +8814,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -9408,10 +9064,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -9462,10 +9114,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -9485,10 +9133,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -9588,17 +9232,9 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -9685,10 +9321,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - ↩ `file_browser` (already on this path)
@@ -9739,10 +9371,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -9762,10 +9390,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -10232,10 +9856,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -10282,10 +9902,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -10313,10 +9929,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -10358,10 +9970,6 @@ _No screen is rendered by this command._
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **ws_detail_locked** — (no title)
   - 🔄 Renew → `ws:renew` → wallet_plans
     - **wallet_plans** — 📦 Choose a plan
@@ -10597,10 +10205,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - ↩ `ws_detail_locked` (already on this path)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -10652,10 +10256,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
           - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
@@ -10675,10 +10275,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -10796,10 +10392,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -10846,10 +10438,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -10877,10 +10465,6 @@ _No screen is rendered by this command._
             - ↩ `ws_detail_locked` (already on this path)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -10922,10 +10506,6 @@ _No screen is rendered by this command._
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **ws_detail_more** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
     - **file_browser** — 📁 Files
@@ -11021,10 +10601,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
@@ -11035,10 +10611,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -11062,10 +10634,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -11973,10 +11541,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - 🌐 Language → `nav:language` → language_picker, language_picker_inside
         - **language_picker** — 🌐 Choose your language
           - العربية → `lang:ar` → menu, menu_empty, menu_inside
@@ -12023,10 +11587,6 @@ _No screen is rendered by this command._
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
       - ❓ Help → `nav:help` → help, help_inside
         - **help** — ❓ Help
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -12054,10 +11614,6 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -12099,10 +11655,6 @@ _No screen is rendered by this command._
         - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 2)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 2)
 - **ws_detail_suspended** — (no title)
   - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
     - **ws_detail** — (no title)
@@ -12252,10 +11804,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
@@ -12303,10 +11851,6 @@ _No screen is rendered by this command._
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
           - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
@@ -12407,10 +11951,6 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-        - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-        - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - ↩ `ws_detail_suspended` (already on this path)
@@ -12427,10 +11967,6 @@ _No screen is rendered by this command._
     - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
-    - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
-  - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -12697,21 +12233,21 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **ws_create_plan_short** —“Monthly — 150 Stars ✓”→ **ws_create_plan_trial_used** —“Monthly — 150 Stars”→ **ws_create_plan_short** (**unobvious**)
 - **ws_detail** —“⋯ More”→ **ws_detail_more** —“⋯ Less”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⋯ More”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
-- **ws_detail** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail** (**unobvious**)
-- **ws_detail** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail** (**unobvious**)
+- **ws_detail** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail** (**unobvious**)
+- **ws_detail** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
-- **ws_detail_locked** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail_locked** (**unobvious**)
-- **ws_detail_locked** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail_locked** (**unobvious**)
+- **ws_detail_locked** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail_locked** (**unobvious**)
+- **ws_detail_locked** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_more** —“⋯ Less”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail_more** (**unobvious**)
+- **ws_detail_more** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail_more** (**unobvious**)
+- **ws_detail_more** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_more** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_more** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_suspended** —“📦 My workspaces”→ **ws_list** —“demo”→ **ws_detail_suspended** (**unobvious**)
-- **ws_detail_suspended** —“📦 My workspaces”→ **ws_list_inside** —“demo”→ **ws_detail_suspended** (**unobvious**)
+- **ws_detail_suspended** —“🚪 Log out of workspace”→ **ws_list** —“demo”→ **ws_detail_suspended** (**unobvious**)
+- **ws_detail_suspended** —“🚪 Log out of workspace”→ **ws_list_inside** —“demo”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_suspended** (**unobvious**)
 
@@ -13121,7 +12657,6 @@ _CloudBot runs your code safely in an isolated sandbox — you never need to tou
 _CloudBot runs your code safely in an isolated sandbox — you never need to touch a server._
 
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### job_prompt — 📜 Background job
 
@@ -13165,7 +12700,6 @@ _اختر لغتك_
 - العربية → `lang:ar` → menu, menu_empty, menu_inside
 - ✓ English (disabled) → `lang:en` → menu, menu_empty, menu_inside
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### live_logs_finished — ✅ Finished (exit 0)
 
@@ -13212,7 +12746,6 @@ _Hello, sara 👋_
 
 - ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### metrics — 📊 Resources
 
@@ -13385,7 +12918,6 @@ _Language: English_
 _Language: English_
 
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### terminal_command — ⌨️ Send a command
 
@@ -13785,7 +13317,6 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### ws_detail_locked — (no title)
 
@@ -13795,7 +13326,6 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 📁 Files → `file:ls` → file_browser, file_browser_empty
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### ws_detail_more — (no title)
 
@@ -13814,7 +13344,6 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### ws_detail_suspended — (no title)
 
@@ -13826,7 +13355,6 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 🖥 Terminals (disabled) → `term:list` → terminal_list, terminal_list_empty, terminal_stale
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-- 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
 ### ws_list — 📦 My Workspaces
 

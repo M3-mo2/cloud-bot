@@ -19,9 +19,10 @@ route to the screen the list already is.
 
 **While the user is inside a workspace (task 13) the block is the session's, not
 the account's.** It carries up to two entries: ``🏠 <workspace name>``
-(``ws:home``) and ``📦 Workspaces`` (``ws:list``) to switch — minus the one you
-are already on (R1/R5: on the workspace home itself ``ws:home`` is omitted,
-leaving just ``📦 Workspaces``). The account destinations — Settings, Language,
+(``ws:home``) and ``🏠 <workspace name>`` (``ws:home``) — and nothing else. There is no
+``ws:list`` while inside: reaching another workspace is an account action, taken
+after logging out, and offering it here made the session block look like a
+hierarchy. The account destinations — Settings, Language,
 Help and Menu — are dropped whenever ``inside`` is set; they remain reachable
 the same way as before, through the ``/settings`` and ``/help`` commands, and by
 leaving the workspace.
@@ -120,22 +121,25 @@ def nav_rows(locale: Locale, current: str, *, inside=None) -> list[list]:
     currently inside (a domain ``Workspace``) or ``None``. When set, the block is
     the **session's block** (``ws:home`` + ``ws:list``, minus the current one);
     when unset, the block is the account's (the four destinations, plus Menu
-    where the screen is not the menu and not the workspaces list).
+    where the screen is not the menu and not the workspaces list). Inside, it is
+    one entry and never ``ws:list``.
     """
     if inside is not None:
+        # Inside a workspace the block is the session's, and it carries exactly one
+        # entry: the workspace you are in. Listing the other workspaces is an
+        # account action — it is what you do *after* leaving — so ``ws:list`` is not
+        # here at all. Leaving is the explicit log-out button on the screens above;
+        # two ways out on one screen is one too many, and the pair read as a
+        # hierarchy that does not exist (this workspace is not "under" the list).
         name = getattr(inside, "name", "") or ""
         if name:
             home_label = catalog.t("nav.workspace_home_named", locale, name=name)
         else:
             home_label = catalog.t("nav.workspace_home", locale)
-        buttons = []
-        if current != "workspace_home":
-            buttons.append(inline(home_label, "ws:home", intent=Intent.PRIMARY))
-        if current != "workspaces":
-            buttons.append(
-                inline(catalog.t("menu.workspaces", locale), "ws:list", intent=Intent.PRIMARY)
-            )
-        return [buttons[index : index + 2] for index in range(0, len(buttons), 2)]
+        if current == "workspace_home":
+            # The home screen *is* the workspace; its own entry would point here.
+            return []
+        return [[inline(home_label, "ws:home", intent=Intent.PRIMARY)]]
 
     buttons = []
     for key, label_key, action in DESTINATIONS:

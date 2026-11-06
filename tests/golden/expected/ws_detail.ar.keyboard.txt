@@ -4,4 +4,3 @@
 ⋯ المزيد [ws:more:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 ⚙️ الإعدادات [ws:settings:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🚪 تسجيل الخروج من مساحة العمل [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
-📦 مساحاتي [ws:list] enabled

@@ -1,2 +1,2 @@
 ✓ العربية [lang:ar] disabled | English [lang:en] enabled
-🏠 demo [ws:home] enabled | 📦 مساحاتي [ws:list] enabled
+🏠 demo [ws:home] enabled

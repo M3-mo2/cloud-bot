@@ -2,4 +2,3 @@
 ▶️ Run [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK5] disabled | 🖥 Terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK5] disabled
 ⚙️ Settings [ws:settings:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled
 🚪 Log out of workspace [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled
-📦 My workspaces [ws:list] enabled
