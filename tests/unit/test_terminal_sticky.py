@@ -504,9 +504,8 @@ async def test_middleware_ignores_non_sticky_states_and_plain_text():
     state = _DictState(state=None)
     assert await _run_middleware("/help", state) is True
     assert state._state is None
-    state2 = _DictState(state=TerminalInput.awaiting_resize.state)
-    assert await _run_middleware("/help", state2) is True
-    assert state2._state is None  # a command leaves resize mode too
+    # term26 contract change: the resize input state is retired, so only command
+    # mode is sticky now.
     state3 = _DictState(state=TerminalInput.awaiting_command.state)
     assert await _run_middleware("ls -la", state3) is True
     assert state3._state == TerminalInput.awaiting_command.state

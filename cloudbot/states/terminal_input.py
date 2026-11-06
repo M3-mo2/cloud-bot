@@ -13,4 +13,3 @@ from aiogram.fsm.state import State, StatesGroup
 
 class TerminalInput(StatesGroup):
     awaiting_command = State()
-    awaiting_resize = State()

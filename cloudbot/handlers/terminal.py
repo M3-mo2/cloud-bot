@@ -107,7 +107,28 @@ async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sende
         return
     ws_id = _wid(parsed.ws_id)
     sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
-    await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await _show_list(cb, ctx, sender, sessions, ws_id, page=parsed.page)
+
+
+async def _show_list(cb, ctx, sender, sessions, ws_id, *, page: int = 0) -> None:
+    """Render one page of *my terminals* (same page contract as the ws list)."""
+    ordered = term_screens.order_sessions(sessions)
+    page_size = term_screens.PAGE_SIZE
+    total_pages = max(1, (len(ordered) + page_size - 1) // page_size)
+    # Clamp a stale/out-of-range page (e.g. a message drawn before a session was
+    # forgotten) so the screen never shows an empty page out of range.
+    page = max(0, min(page, total_pages - 1))
+    start = page * page_size
+    window = ordered[start : start + page_size]
+    screen = term_screens.my_terminals(
+        window,
+        ws_id,
+        ctx.locale,
+        page=page,
+        total_pages=total_pages,
+        has_more=(start + page_size) < len(ordered),
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
 # -- open --------------------------------------------------------------------
@@ -117,16 +138,30 @@ async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sende
     if parsed is None:
         return
     ws_id = _wid(parsed.ws_id)
+    size = _open_size(parsed)
     try:
-        session = await services.sessions.open(ctx.tg_id, ws_id)
+        session = await services.sessions.open(ctx.tg_id, ws_id, **size)
     except EngineRefused as exc:
         if exc.engine_code != "too_many_sessions":
             raise
         # The documented cap screen, never a raw error.
         sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
-        await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
+        await _show_list(cb, ctx, sender, sessions, ws_id)
         return
     await _show_view(cb, ctx, services, sender, ws_id, session.id, state=state)
+
+
+def _open_size(parsed) -> dict[str, int]:
+    """The optional explicit geometry carried by ``term:open``.
+
+    Absent (the default form every screen emits) → the service's own default is
+    used unchanged. Present → ``--cols/--rows`` from the documented power-user
+    route. Invalid values raise ``InvalidInput`` (a correctable screen).
+    """
+    if len(parsed.args) < 3:
+        return {}
+    cols, rows = _parse_size(f"{parsed.args[1]}x{parsed.args[2]}")
+    return {"cols": cols, "rows": rows}
 
 
 # -- view / refresh ----------------------------------------------------------
@@ -419,64 +454,35 @@ async def on_ctrl_d(
     await _show_view(cb, ctx, services, sender, ws_id, ses_id, state=state)
 
 
-# -- resize ------------------------------------------------------------------
+# -- retired resize controls (term26) ----------------------------------------
+# The size control is gone: the chat is the viewport and the app decides how many
+# columns it can draw. A real PTY already accepts its native tool (``stty cols N
+# rows M``), and the documented power-user route is ``--cols/--rows`` on
+# ``term:open``. Old messages still carry these buttons, so they must still be
+# answered — with the live view, never a dead button and never a swallowed text
+# message.
+@router.callback_query(F.data.startswith("term:rsz_custom"))
+@router.callback_query(F.data.startswith("term:rsz"))
 @router.callback_query(F.data.startswith("term:resize"))
-async def on_resize_menu(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    """Open the resize picker.
+async def on_retired_resize(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+) -> None:
+    """Answer a pre-term26 resize button by re-rendering the terminal view.
 
-    The terminal view emits ``term:resize`` for its **↔️ Resize** button, but no
-    handler matched it: the button was live and dead at once (a producer/consumer
-    mismatch of the same family as the ``IndexError``). The every-screen contract
-    test catches it.
+    The state is cleared **before** rendering: a user who was mid-resize when this
+    shipped must not have their next message swallowed as a size. Nothing is
+    resized (there is no size UI any more).
     """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
         return
-    ws_id = _wid(parsed.ws_id)
-    ses_id = parsed.ses_id
-    session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
-    await show_screen(cb, term_screens.resize_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.callback_query(F.data.startswith("term:rsz_custom"))
-async def on_resize_custom(
-    cb: CallbackQuery, ctx: UserContext, sender: RichSender, state: FSMContext
-) -> None:
-    parsed = await _parse_callback(cb, ctx, sender)
-    if parsed is None:
-        return
-    ws_id = parsed.ws_id
-    ses_id = parsed.ses_id
-    await state.set_state(TerminalInput.awaiting_resize)
-    await state.update_data(ws_id=ws_id, ses_id=ses_id)
-    await show_screen(cb, term_screens.resize_custom_prompt(_wid(ws_id), ses_id, ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.callback_query(F.data.startswith("term:rsz"))
-async def on_resize(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    parsed = await _parse_callback(cb, ctx, sender)
-    if parsed is None:
-        return
-    ws_id = _wid(parsed.ws_id)
-    ses_id = parsed.ses_id
-    spec = parsed.args[2]  # "COLSxROWS"
-    cols, rows = _parse_size(spec)
-    await services.sessions.resize(ctx.tg_id, ws_id, ses_id, cols=cols, rows=rows)
-    session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
-    await show_screen(cb, term_screens.resize_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
-
-
-@router.message(TerminalInput.awaiting_resize)
-async def on_resize_text(
-    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
-) -> None:
-    data = await state.get_data()
     await state.clear()
-    ws_id = _wid(data["ws_id"])
-    ses_id = data["ses_id"]
-    cols, rows = _parse_size(message.text or "")
-    await services.sessions.resize(ctx.tg_id, ws_id, ses_id, cols=cols, rows=rows)
-    await _show_view(message, ctx, services, sender, ws_id, ses_id)
+    ws_id = _wid(parsed.ws_id)
+    await _show_view(cb, ctx, services, sender, ws_id, parsed.ses_id, state=state)
 
 
 # -- close -------------------------------------------------------------------
@@ -516,10 +522,15 @@ async def on_forget(
     await state.clear()
     await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
     sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
-    await show_screen(cb, term_screens.my_terminals(sessions, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await _show_list(cb, ctx, sender, sessions, ws_id)
 
 
 def _parse_size(spec: str) -> tuple[int, int]:
+    """Parse ``COLSxROWS`` (kept for the documented ``--cols/--rows`` route).
+
+    The resize *screen* is retired (term26), but the same syntax remains the
+    power-user way to state a geometry when opening a session.
+    """
     text = (spec or "").strip().lower().replace("×", "x")
     for sep in ("x", ",", " "):
         if sep in text:

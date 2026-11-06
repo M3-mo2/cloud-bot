@@ -24,11 +24,12 @@ from cloudbot.states.terminal_input import TerminalInput
 
 log = structlog.get_logger("cloudbot.terminal_sticky")
 
-#: The terminal states a slash-command leaves behind. Both are explicit modes
-#: entered by a button; a command in either must return the user to the normal
-#: flow rather than being parsed as a command line or a PTY size.
+#: The terminal states a slash-command leaves behind. Entering command mode is an
+#: explicit button action; a command while in it must return the user to the normal
+#: flow rather than being parsed as a command line. (The resize state was retired
+#: with its screen in term26: no state ever awaits a size any more.)
 _STICKY_STATES: frozenset[str] = frozenset(
-    {TerminalInput.awaiting_command.state, TerminalInput.awaiting_resize.state}
+    {TerminalInput.awaiting_command.state}
 )
 
 #: Commands a router handles while a terminal state is active. A command here

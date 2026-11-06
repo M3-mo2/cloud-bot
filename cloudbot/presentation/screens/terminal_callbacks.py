@@ -49,29 +49,35 @@ CMD = "cmd"
 EXIT = "exit"
 SIGNAL = "signal"
 CTRL_D = "ctrl_d"
+#: Retired in term26: still *parsed* so old buttons resolve to a sensible screen,
+#: but no screen emits them any more (the chat is the viewport; ``stty`` is the
+#: in-session tool, and ``--cols/--rows`` on ``term:open`` is the power-user route).
 RESIZE = "resize"
 RSZ = "rsz"
 RSZ_CUSTOM = "rsz_custom"
 CLOSE = "close"
 FORGET = "forget"
 
-#: How many key parts each action must decode to. The parser validates the decoded
+#: How many key parts each action may decode to. The parser validates the decoded
 #: arity against this table, so a lost token (key ``()``) is caught, not indexed.
-#: An unknown action is rejected outright.
-_ARITY: dict[str, int] = {
-    LIST: 1,
-    OPEN: 1,
-    VIEW: 2,
-    REFRESH: 2,
-    CMD: 2,
-    EXIT: 2,
-    SIGNAL: 3,
-    CTRL_D: 2,
-    RESIZE: 2,
-    RSZ: 3,
-    RSZ_CUSTOM: 2,
-    CLOSE: 2,
-    FORGET: 2,
+#: An unknown action is rejected outright. Tuples allow the documented optional
+#: tail (page on ``list``; ``cols``/``rows`` on ``open``).
+_ARITIES: dict[str, tuple[int, ...]] = {
+    LIST: (1, 2),
+    OPEN: (1, 3),
+    VIEW: (2,),
+    REFRESH: (2,),
+    CMD: (2,),
+    EXIT: (2,),
+    SIGNAL: (3,),
+    CTRL_D: (2,),
+    # Legacy (term26): no screen emits these any more, but old messages still
+    # contain them, so the parser must resolve them to re-render the live view.
+    RESIZE: (2,),
+    RSZ: (3,),
+    RSZ_CUSTOM: (2,),
+    CLOSE: (2,),
+    FORGET: (2,),
 }
 
 
@@ -94,6 +100,16 @@ class TermCallback:
     def ses_id(self) -> str:
         return self.args[1] if len(self.args) > 1 else ""
 
+    @property
+    def page(self) -> int:
+        """The ``term:list`` page (0 when the callback carries none)."""
+        if len(self.args) < 2:
+            return 0
+        try:
+            return max(0, int(self.args[1]))
+        except (TypeError, ValueError):
+            return 0
+
 
 @dataclass(frozen=True)
 class InvalidTermCallback:
@@ -112,12 +128,26 @@ TermParseResult: TypeAlias = TermCallback | InvalidTermCallback
 
 
 # -- builders ----------------------------------------------------------------
-def list_(ws_id: object) -> str:
-    return _cb(f"{TERM_PREFIX}:{LIST}", ws_id)
+def list_(ws_id: object, page: int | None = None) -> str:
+    if page is None:
+        return _cb(f"{TERM_PREFIX}:{LIST}", ws_id)
+    return _cb(f"{TERM_PREFIX}:{LIST}", ws_id, int(page))
 
 
-def open_terminal(ws_id: object) -> str:
-    return _cb(f"{TERM_PREFIX}:{OPEN}", ws_id)
+def open_terminal(
+    ws_id: object, *, cols: int | None = None, rows: int | None = None
+) -> str:
+    """``term:open``, optionally carrying an explicit PTY geometry.
+
+    The plain form (no geometry) is the one every screen emits; the sized form is
+    the documented power-user route (``--cols``/``--rows``). Both decode through
+    this builder, so the handler sees either ``(ws,)`` or ``(ws, cols, rows)``.
+    """
+    if cols is None and rows is None:
+        return _cb(f"{TERM_PREFIX}:{OPEN}", ws_id)
+    if cols is None or rows is None:
+        raise ValueError("cols and rows must be given together")
+    return _cb(f"{TERM_PREFIX}:{OPEN}", ws_id, int(cols), int(rows))
 
 
 def view(ws_id: object, ses_id: object) -> str:
@@ -183,12 +213,12 @@ def parse(data: str) -> TermParseResult:
     if len(parts) < 2 or not parts[1]:
         return _invalid(data, "missing_action")
     action = parts[1]
-    expected = _ARITY.get(action)
+    expected = _ARITIES.get(action)
     if expected is None:
         return _invalid(data, "unknown_action", action)
     decoded = decode(data)
     key = decoded.key
-    if len(key) != expected:
+    if len(key) not in expected:
         # The token is unknown to this process (e.g. the button was drawn before a
         # restart): the full key parts are lost, so the button is out of date.
         return _invalid(data, "stale", action)

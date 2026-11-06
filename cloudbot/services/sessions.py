@@ -29,9 +29,17 @@ from cloudbot.services.ownership import OwnershipService
 #: PTY size bounds the engine enforces (``1..1000``; outside → 422).
 MIN_COLS_ROWS = 1
 MAX_COLS_ROWS = 1000
-#: Documented default PTY size (API.md §POST /sessions).
-DEFAULT_COLS = 80
-DEFAULT_ROWS = 24
+#: The geometry a session is opened with when the caller states none.
+#:
+#: Deliberately a real terminal baseline rather than whatever the engine would
+#: hand us: almost every TUI assumes at least 80×24, and 100×30 gives a little
+#: breathing room (long lines, a status line, a prompt) without wrapping so wide
+#: that output becomes unreadable in a chat. The chat is only the viewport — the
+#: program queries the PTY, so this is what it must see to be usable. A power user
+#: can still ask for an explicit size through ``term:open`` (``--cols/--rows``),
+#: and ``stty`` remains the in-session tool.
+DEFAULT_COLS = 100
+DEFAULT_ROWS = 30
 #: ``Ctrl-D`` (EOF) as a literal control byte: it is input, not a signal.
 CTRL_D = "\u0004"
 

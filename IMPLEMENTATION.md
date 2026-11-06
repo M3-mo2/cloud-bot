@@ -73,11 +73,16 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
     locales), offered on the ended screen and on the view of any terminal
     session. The engine record is untouched (the engine drops it with the
     workspace).
-  - Screens in `presentation/screens/terminal.py`: **my terminals**, the
-    **terminal view** (status heading, recent output in a `<pre>`, and the buttons
-    send-command / Ctrl-C / Ctrl-D / resize / close / my terminals), **resize**
-    (presets + a documented default `80×24`), the **ended** outcome, and the
-    **idle/lifetime notice** taken from the engine's session config.
+  - Screens in `presentation/screens/terminal.py`: **my terminals** (a compact,
+    paginated list — one `id · status · relative age` line per terminal, running
+    first then newest, same `PAGE_SIZE`/`page`/`total_pages`/`has_more` contract as
+    the workspace list; per-session buttons follow the page), the **terminal view**
+    (status heading, recent output in a `<pre>`, and the buttons send-command /
+    Ctrl-C / Ctrl-D / close / my terminals — **one exit**: *My terminals*), the
+    **ended** outcome, and the **idle/lifetime notice** taken from the engine's
+    session config. There is **no size UI** (task term26): the chat is the
+    viewport; sessions open at a deliberate `100×30`, `stty` is the in-session
+    tool, and `term:open` carries an optional `--cols/--rows` route.
   - Input flows through the FSM state group `states/terminal_input.py`; a plain
     message is sent with a newline appended, and a `/command` is never swallowed
     as terminal input.
@@ -107,8 +112,9 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
    (`0x04`) to the shell — chosen over a `TERM` signal because it is the
    interactive end-of-input that lets the shell exit **gracefully** on its own
    (running its exit traps) instead of being killed; the session then reads as
-   `exited`/`shell_exit`. **↔️ Resize** changes the PTY size (`stty size`
-   reflects it).
+   `exited`/`shell_exit`. There is no resize screen: use **`stty cols N rows M`**
+   in the shell (it is a real PTY; `stty size` reads it back), or pass
+   `--cols/--rows` when opening a session.
 4. **⏹ Close** ends the terminal; the session stays listed as ended, later input
    reads as the documented `session_ended`, and the screen offers a new terminal
    or **🗑 Remove from list** to drop the ended row from *my terminals*.

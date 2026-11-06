@@ -461,7 +461,6 @@ English:
 ```html
 <h2>🖥 Terminal</h2>
 <p><b>Status:</b> 🟢 Running</p>
-<p><b>Size:</b> 80×24</p>
 <pre><code class="language-text">$ </code></pre>
 <p><i>This terminal closes after 15m 00s idle, or 1h 00m 00s after it opens.</i></p>
 <p><i>This terminal is active. Send a command, or use the buttons below.</i></p>
@@ -472,7 +471,6 @@ Arabic (`is_rtl=True`):
 ```html
 <h2>🖥 الطرفية</h2>
 <p><b>الحالة:</b> 🟢 قيد التشغيل</p>
-<p><b>الحجم:</b> ٨٠×٢٤</p>
 <pre><code class="language-text">$ </code></pre>
 <p><i>تُغلق هذه الطرفية بعد ١٥ د ٠٠ ث من الخمول، أو ١ س ٠٠ د ٠٠ ث من فتحها.</i></p>
 <p><i>هذه الطرفية نشِطة. أرسل أمرًا، أو استخدم الأزرار بالأسفل.</i></p>
@@ -489,10 +487,8 @@ exit. A plain message in this state is the command (sent with Enter).
 | ⏹ إيقاف الكتابة | ⏹ Stop typing | inline | danger | **exits the mode** (R3) |
 | Ctrl-C | Ctrl-C | inline | primary | — |
 | Ctrl-D (نهاية الملف) | Ctrl-D (EOF) | inline | primary | — |
-| ↔️ تغيير الحجم | ↔️ Resize | inline | primary | — |
 | ⏹ إغلاق | ⏹ Close | inline | danger | — |
-| 🖥 طرفياتي | 🖥 My terminals | inline | primary | — |
-| ⬅️ رجوع | ⬅️ Back | inline | primary | — |
+| 🖥 طرفياتي | 🖥 My terminals | inline | primary | **the single exit** (task term26) |
 
 ### 7.3 Leaving the mode — three ways, none of them a dead end
 
@@ -529,7 +525,39 @@ The state survives because the FSM is per user/chat; a foreign user's message is
 refused by the ownership gate and clears the state, and can never reach the
 session (R5/R6).
 
-### 7.5 `command_prompt` is retired
+### 7.5 No size control (task term26)
+
+The view carries no size line and no **↔️ Resize** button: the user's viewport is
+the Telegram chat, and the app decides how many columns it can draw, so picking
+"120×40" promised a capability the medium does not have. The PTY is opened with a
+deliberate default (**100×30** — every TUI assumes at least 80×24, and this leaves
+room for a status line and a prompt without wrapping so wide that output becomes
+unreadable). A program that queries the PTY (any TUI) therefore gets a usable
+geometry with no setup.
+
+Power users keep two routes, neither of them a screen:
+
+- **In-session:** `stty cols N rows M` (and `stty size` to read it) — the
+  terminal-native, scriptable tool, since it is a real PTY.
+- **At open:** the documented `term:open` callback may carry `cols`/`rows`
+  (`--cols`/`--rows`); absent, the service default is used unchanged.
+
+Old `term:resize` / `term:rsz` / `term:rsz_custom` buttons still exist in chats
+drawn before this change. They are **answered** by re-rendering the live view and
+clearing any resize input state — never a dead button and never a swallowed text
+message.
+
+### 7.6 My terminals — compact and paginated (task term26)
+
+The list is one line per terminal (`id · status · relative age`), running first
+then newest, and paginated with the **workspace list's own contract**
+(`PAGE_SIZE = 10`, `page`/`total_pages`/`has_more`, `⬅️ Previous` / `Next ➡️`,
+`صفحة {page} من {total}`). Per-session buttons follow the page, so the keyboard
+cannot grow one-for-one with the session count; **Open terminal** and **Back**
+stay fixed at the bottom. The count is the page's count. The `too_many_sessions`
+cap path still renders this same list.
+
+### 7.7 `command_prompt` is retired
 
 The separate **⌨️ Send a command** prompt screen is no longer shown on this path:
 the sticky mode edits the terminal view in place instead. (The catalog keys

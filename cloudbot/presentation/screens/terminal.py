@@ -1,4 +1,4 @@
-"""Terminal screens (Phase 1.5): my terminals, the terminal view, resize, ended.
+"""Terminal screens (Phase 1.5): my terminals, the terminal view, ended.
 
 Screens are pure functions of domain state + locale; no I/O. Every string comes
 from a catalog key. The timeout notice is derived from the engine's session
@@ -15,8 +15,8 @@ from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.value_objects import SessionStatus, WorkspaceId
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import (
-    format_datetime,
     format_duration,
+    format_relative,
     localize_digits,
 )
 from cloudbot.presentation.keyboards.buttons import inline
@@ -33,13 +33,8 @@ from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens import terminal_callbacks as _term
 from cloudbot.presentation.screens.screen import Screen
 
-#: The engine's PTY-size bounds (API.md §POST /sessions).
-MAX_COLS_ROWS = 1000
-#: The documented default PTY size.
-DEFAULT_COLS = 80
-DEFAULT_ROWS = 24
-#: Preset sizes offered on the resize screen (the default is first).
-RESIZE_PRESETS: tuple[tuple[int, int], ...] = ((80, 24), (100, 30), (120, 40), (200, 50))
+#: The same page size as the workspace list (one pagination contract, not two).
+PAGE_SIZE = 10
 #: Keep the last ~12 KB of PTY output (rich text cap is 32768 chars).
 MAX_OUTPUT_BYTES = 12 * 1024
 
@@ -50,10 +45,6 @@ def _raw(text: str) -> Html:
 
 def _num(value: int, locale: Locale) -> str:
     return localize_digits(str(value), locale)
-
-
-def _size(cols: int, rows: int, locale: Locale) -> str:
-    return catalog.t("terminal.size", locale, cols=_num(cols, locale), rows=_num(rows, locale))
 
 
 def timeout_notice(meta: EngineMeta, locale: Locale) -> str:
@@ -79,14 +70,40 @@ def _short(ses_id: str) -> str:
     return ses_id[:12] + "…"
 
 
+def _created_at(session: TerminalSession) -> float:
+    return session.created_at.timestamp() if session.created_at else 0.0
+
+
+def order_sessions(sessions: list[TerminalSession]) -> list[TerminalSession]:
+    """Running first, then newest.
+
+    Opening *my terminals* is about the live session; a user must not have to
+    scan past finished ones (or an arbitrary fetch order) to find it. The sort
+    happens over the **whole** list before the page window is cut, so paging is
+    stable and the live terminal is on page 1.
+    """
+    return sorted(
+        sessions,
+        key=lambda session: (session.status is not SessionStatus.RUNNING, -_created_at(session)),
+    )
+
+
 # -- my terminals ------------------------------------------------------------
 def my_terminals(
     sessions: list[TerminalSession],
     ws_id: WorkspaceId,
     locale: Locale,
     *,
+    page: int = 0,
+    total_pages: int = 1,
+    has_more: bool = False,
     now: datetime | None = None,
 ) -> Screen:
+    """A compact, paginated list — one line per terminal of this page.
+
+    It deliberately has no size column: the chat is the viewport and the size
+    is not a user-facing notion (the shell's ``stty`` is the in-session tool).
+    """
     if now is None:
         now = datetime.now(timezone.utc)
     doc = RichDoc(locale)
@@ -96,35 +113,49 @@ def my_terminals(
         doc.p(italic(catalog.t("terminal.empty_hint", locale)))
     else:
         doc.p(catalog.t("terminal.count", locale, n=_num(len(sessions), locale)))
-        rows = []
         for session in sessions:
             emoji = SESSION_STATUS_EMOJI.get(session.status, "—")
             status = f"{emoji} {session_status_label(session.status, locale)}"
-            rows.append(
-                [
-                    _raw(f"<code>{esc(_short(session.id))}</code>"),
-                    status,
-                    _size(session.cols, session.rows, locale),
-                    format_datetime(session.created_at, locale),
-                ]
+            age = format_relative(session.created_at, now, locale)
+            doc.p(
+                _raw(
+                    f"<code>{esc(_short(session.id))}</code> · {esc(status)} · {esc(age)}"
+                )
             )
-        doc.table(
-            [
-                catalog.t("terminal.column.session", locale),
-                catalog.t("terminal.column.status", locale),
-                catalog.t("terminal.column.size", locale),
-                catalog.t("terminal.column.created", locale),
-            ],
-            rows,
-        )
-    return Screen(doc=doc, markup=my_terminals_markup(sessions, ws_id, locale))
+        doc.p(italic(catalog.t("terminal.page", locale, page=_num(page + 1, locale), total=_num(total_pages, locale))))
+    return Screen(
+        doc=doc,
+        markup=my_terminals_markup(
+            sessions, ws_id, locale, page=page, has_more=has_more
+        ),
+    )
 
 
-def my_terminals_markup(sessions: list[TerminalSession], ws_id: WorkspaceId, locale: Locale):
+def my_terminals_markup(
+    sessions: list[TerminalSession],
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    page: int = 0,
+    has_more: bool = False,
+):
     rows = []
-    for session in sessions:
-        label = f"🖥 {_short(session.id)}"
-        rows.append([inline(label, _term.view(ws_id, session.id), intent=Intent.PRIMARY)])
+    # Per-session buttons follow the page, not the whole list: the keyboard can
+    # never grow past one page regardless of how many terminals were opened.
+    session_buttons = [
+        inline(f"🖥 {_short(session.id)}", _term.view(ws_id, session.id), intent=Intent.PRIMARY)
+        for session in sessions
+    ]
+    for index in range(0, len(session_buttons), 2):
+        rows.append(session_buttons[index : index + 2])
+    nav = []
+    if page > 0:
+        nav.append(inline(catalog.t("terminal.prev", locale), _term.list_(ws_id, page - 1), intent=Intent.PRIMARY))
+    if has_more:
+        nav.append(inline(catalog.t("terminal.next", locale), _term.list_(ws_id, page + 1), intent=Intent.PRIMARY))
+    if nav:
+        rows.append(nav)
+    # The fixed actions stay at the bottom on every page.
     rows.append([inline(catalog.t("terminal.open", locale), _term.open_terminal(ws_id), intent=Intent.SUCCESS)])
     rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
     return inline_markup(rows)
@@ -153,11 +184,6 @@ def terminal_view(
     status = f"{emoji} {session_status_label(session.status, locale)}"
     doc.h(2, catalog.t("terminal.title", locale))
     doc.p(_raw(f"<b>{catalog.t('terminal.status_line', locale)}</b> {status}"))
-    doc.p(
-        _raw(
-            f"<b>{catalog.t('terminal.size_label', locale)}</b> {_size(session.cols, session.rows, locale)}"
-        )
-    )
 
     shown, trimmed = _tail(output or "")
     if shown:
@@ -189,17 +215,21 @@ def terminal_view(
 def terminal_view_markup(
     session: TerminalSession, ws_id: WorkspaceId, locale: Locale, *, typing: bool = False
 ):
+    # One exit, not two. The live terminal's exit is **🖥 My terminals** — the
+    # list is where a user manages sessions (open another, remove an ended one),
+    # and from it the workspace home is the very next tap (its own Back). A second
+    # bottom *Back* row duplicated that destination (same reasoning as the
+    # workspace home's redundant exit, task 11): it is one tap away, not gone.
     ses_id = session.id
     if session.status.is_terminal:
-        # A terminal session never accepts input/signal/resize; offer a new one
-        # and a way to drop the bot-side handle from *my terminals* instead.
+        # A terminal session never accepts input/signal; offer a new one and a way
+        # to drop the bot-side handle from *my terminals* instead.
         rows = [
             [
                 inline(catalog.t("terminal.new", locale), _term.open_terminal(ws_id), intent=Intent.SUCCESS),
                 inline(catalog.t("terminal.forget", locale), _term.forget(ws_id, ses_id), intent=Intent.PRIMARY),
             ],
             [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
-            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
         ]
         return inline_markup(rows)
     if typing:
@@ -215,12 +245,8 @@ def terminal_view_markup(
                 inline(catalog.t("terminal.ctrl_d", locale), _term.ctrl_d(ws_id, ses_id), intent=Intent.PRIMARY),
             ],
             [
-                inline(catalog.t("terminal.resize", locale), _term.resize(ws_id, ses_id), intent=Intent.PRIMARY),
                 inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER),
-            ],
-            [
                 inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
             ],
         ]
         return inline_markup(rows)
@@ -231,13 +257,9 @@ def terminal_view_markup(
         ],
         [
             inline(catalog.t("terminal.ctrl_d", locale), _term.ctrl_d(ws_id, ses_id), intent=Intent.PRIMARY),
-            inline(catalog.t("terminal.resize", locale), _term.resize(ws_id, ses_id), intent=Intent.PRIMARY),
-        ],
-        [
             inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER),
-            inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY),
         ],
-        [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
+        [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
     ]
     return inline_markup(rows)
 
@@ -250,46 +272,6 @@ def command_prompt(ws_id: WorkspaceId, ses_id: str, locale: Locale) -> Screen:
     doc.p(italic(catalog.t("terminal.command_hint", locale)))
     markup = inline_markup(
         [[inline(catalog.t("common.cancel", locale), _term.view(ws_id, ses_id), intent=Intent.PRIMARY)]],
-        force_reply=True,
-    )
-    return Screen(doc=doc, markup=markup, send_new=True)
-
-
-# -- resize ------------------------------------------------------------------
-def resize_screen(session: TerminalSession, ws_id: WorkspaceId, locale: Locale) -> Screen:
-    doc = RichDoc(locale)
-    doc.h(2, catalog.t("terminal.resize_title", locale))
-    doc.p(_raw(catalog.t("terminal.resize_body", locale)))
-    doc.p(_raw(f"<b>{catalog.t('terminal.size_label', locale)}</b> {_size(session.cols, session.rows, locale)}"))
-    return Screen(doc=doc, markup=resize_markup(session, ws_id, locale))
-
-
-def resize_markup(session: TerminalSession, ws_id: WorkspaceId, locale: Locale):
-    rows = []
-    for cols, rowsn in RESIZE_PRESETS:
-        label = catalog.t("terminal.size", locale, cols=_num(cols, locale), rows=_num(rowsn, locale))
-        current = session.cols == cols and session.rows == rowsn
-        rows.append(
-            [
-                inline(
-                    label,
-                    _term.rsz(ws_id, session.id, f"{cols}x{rowsn}"),
-                    intent=Intent.PRIMARY if not current else Intent.MUTED,
-                    disabled=current,
-                )
-            ]
-        )
-    rows.append([inline(catalog.t("terminal.resize_custom", locale), _term.rsz_custom(ws_id, session.id), intent=Intent.PRIMARY)])
-    rows.append([inline(catalog.t("common.back", locale), _term.view(ws_id, session.id), intent=Intent.PRIMARY)])
-    return inline_markup(rows)
-
-
-def resize_custom_prompt(ws_id: WorkspaceId, ses_id: str, locale: Locale) -> Screen:
-    doc = RichDoc(locale)
-    doc.h(2, catalog.t("terminal.resize_title", locale))
-    doc.p(_raw(catalog.t("terminal.resize_custom_prompt", locale)))
-    markup = inline_markup(
-        [[inline(catalog.t("common.cancel", locale), _term.resize(ws_id, ses_id), intent=Intent.PRIMARY)]],
         force_reply=True,
     )
     return Screen(doc=doc, markup=markup, send_new=True)
@@ -332,17 +314,12 @@ def ended_screen(session: TerminalSession, ws_id: WorkspaceId, locale: Locale) -
 
 
 __all__ = [
-    "DEFAULT_COLS",
-    "DEFAULT_ROWS",
-    "MAX_COLS_ROWS",
-    "RESIZE_PRESETS",
+    "PAGE_SIZE",
     "command_prompt",
     "ended_screen",
     "my_terminals",
     "my_terminals_markup",
-    "resize_custom_prompt",
-    "resize_markup",
-    "resize_screen",
+    "order_sessions",
     "stale_screen",
     "terminal_view",
     "terminal_view_markup",

@@ -31,7 +31,7 @@ show raw payloads, but only to admins and only collapsed.
 - **Workspaces** — create, inspect, and manage the lifecycle (suspend, resume, stop, delete).
 - **Files** — browse directories, view and edit files, upload and download, manage permissions, create and rename.
 - **Execution** — run a command synchronously (`exec`), or start a background run and follow its live logs and history.
-- **Terminal** — an interactive PTY session through the engine's native sessions API, with resize and signal support.
+- **Terminal** — an interactive PTY session through the engine's native sessions API, with signal support; the PTY defaults to 100×30 and `stty` adjusts it in-session.
 - **Packages** — list, install, and remove Python packages, with honest `exit_code` handling.
 - **Tunnels and ports** — publish ephemeral quick tunnels and discover listening ports.
 - **Metrics** — one-shot CPU/RAM/disk snapshots with explicit `*_complete` honesty.
