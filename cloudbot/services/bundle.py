@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from cloudbot.services.account import AccountService
 from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
+from cloudbot.services.billing import BillingService
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
@@ -25,6 +26,7 @@ from cloudbot.services.workspaces import WorkspacesService
 @dataclass(frozen=True)
 class Services:
     account: AccountService
+    billing: BillingService
     workspaces: WorkspacesService
     session: SessionService
     files: FilesService

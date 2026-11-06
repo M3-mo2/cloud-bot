@@ -11,3 +11,9 @@ from aiogram.fsm.state import State, StatesGroup
 
 class AdminInput(StatesGroup):
     awaiting_user_search = State()
+    #: A wallet mutation waiting for its number (Stars / days).
+    awaiting_wallet_amount = State()
+    #: A wallet mutation's optional reason (``/skip`` leaves it empty).
+    awaiting_wallet_reason = State()
+    #: The charge id to refund.
+    awaiting_wallet_charge = State()

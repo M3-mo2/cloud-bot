@@ -15,6 +15,7 @@ def _reset_global_routers():
     from cloudbot.handlers import (
         admin,
         admin_panel,
+        billing,
         common,
         dev,
         execution,
@@ -27,6 +28,7 @@ def _reset_global_routers():
 
     for module in (
         common,
+        billing,
         navigation,
         admin_panel,
         workspaces,
@@ -54,6 +56,7 @@ from cloudbot.core.runtime import BotRuntime
 from cloudbot.services.account import AccountService
 from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
+from cloudbot.services.billing import BillingService
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
@@ -115,6 +118,7 @@ async def services(engine, users, sessions, event_log, admin_state, subscription
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
+        billing=BillingService(subscriptions),
         workspaces=WorkspacesService(engine, users, ownership, subscriptions),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),

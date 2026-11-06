@@ -44,6 +44,10 @@ AUDIT_CAT = "audit_cat"
 AUDIT_ALL = "audit_all"
 AUDIT = "audit"
 AUDIT_USER = "audit_user"
+# -- wallet + subscription controls -----------------------------------------
+WALLET = "wallet"
+WALLET_OP = "wop"
+WALLET_PLAN = "wplan"
 
 #: The admin workspace actions declared in ``actions.py``. Each takes one subject.
 ACTION_KEYS: frozenset[str] = frozenset({"enter", "suspend", "resume", "delete"})
@@ -161,6 +165,17 @@ def audit(page: int = 0) -> str:
 def audit_user(tg_id: int, page: int = 0) -> str:
     return _action(AUDIT_USER, int(tg_id), int(page))
 
+def wallet(tg_id: int) -> str:
+    """Open a user's wallet + subscription controls."""
+    return _action(WALLET, int(tg_id))
+
+def wallet_op(op: str, tg_id: int, step: str = "ask", arg: str = "") -> str:
+    """A wallet mutation. ``step`` is ``ask`` (prompt) or ``go`` (perform with ``arg``)."""
+    return _action(WALLET_OP, op, int(tg_id), step, arg)
+
+def wallet_plan(op: str, tg_id: int, plan_code: str, step: str = "ask", arg: str = "") -> str:
+    return _action(WALLET_PLAN, op, int(tg_id), plan_code, step, arg)
+
 
 # -- parser ------------------------------------------------------------------
 def _invalid(data: str, reason: str, action: str = "") -> InvalidAdminCallback:
@@ -261,6 +276,33 @@ def parse(data: str) -> AdminParseResult:
         if isinstance(page, InvalidAdminCallback):
             return page
         return AdminCallback(action, (str(tg_id), str(page)))
+
+    if action == WALLET:
+        if len(rest) != 1:
+            return _invalid(data, "bad_arity", action)
+        tg_id = _require_int(data, rest[0], action)
+        if isinstance(tg_id, InvalidAdminCallback):
+            return tg_id
+        return AdminCallback(action, (str(tg_id),))
+
+    if action == WALLET_OP:
+        # op, tg_id, step, optional arg
+        if len(rest) not in (3, 4) or rest[2] not in ("ask", "go"):
+            return _invalid(data, "bad_arity", action)
+        tg_id = _require_int(data, rest[1], action)
+        if isinstance(tg_id, InvalidAdminCallback):
+            return tg_id
+        arg = rest[3] if len(rest) == 4 else ""
+        return AdminCallback(action, (rest[0], str(tg_id), rest[2], arg))
+
+    if action == WALLET_PLAN:
+        if len(rest) not in (4, 5) or rest[3] not in ("ask", "go"):
+            return _invalid(data, "bad_arity", action)
+        tg_id = _require_int(data, rest[1], action)
+        if isinstance(tg_id, InvalidAdminCallback):
+            return tg_id
+        arg = rest[4] if len(rest) == 5 else ""
+        return AdminCallback(action, (rest[0], str(tg_id), rest[2], rest[3], arg))
 
     if action == AUDIT_ALL:
         if len(rest) == 2 and rest[0] == "global":

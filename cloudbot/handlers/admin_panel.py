@@ -36,6 +36,7 @@ from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin import registry
 from cloudbot.presentation.screens.admin import user_page as user_page_mod
 from cloudbot.presentation.screens.admin import users as users_screen_mod
+from cloudbot.presentation.screens.admin import wallet as wallet_screen_mod
 from cloudbot.presentation.screens.admin.actions import (
     action,
     confirmation_screen,
@@ -378,6 +379,160 @@ async def _route_audit_user(cb, parsed: AdminCallback, ctx, services, sender, st
     await show_screen(cb, audit_screen_mod.audit_screen(view, page=page, tg_id=tg_id), ctx=ctx, sender=sender)
 
 
+# -- wallet + subscription controls -----------------------------------------
+async def _open_wallet(
+    cb, ctx: UserContext, services: Services, sender: RichSender, tg_id: int, *, banner=None
+) -> None:
+    wallet = await services.admin.wallet(tg_id)
+    subscription = await services.admin.subscription(tg_id)
+    payments = await services.admin.payments(tg_id)
+    view = await _view(ctx, services)
+    screen = wallet_screen_mod.wallet_screen(
+        view,
+        tg_id=tg_id,
+        wallet=wallet,
+        subscription=subscription,
+        payments=payments,
+    )
+    if banner:
+        from cloudbot.presentation.rich.tags import fragment
+
+        from cloudbot.presentation.rich.tags import blockquote
+
+        screen.doc.prepend_raw(str(blockquote(fragment(banner))))
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+async def _route_wallet(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    await _open_wallet(cb, ctx, services, sender, parsed.arg_int(0))
+
+async def _route_wallet_op(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    op, tg_id_raw, step, arg = parsed.args
+    tg_id = int(tg_id_raw)
+    if step == "go":
+        await _wallet_perform(cb, ctx, services, sender, state, op, tg_id, arg)
+        return
+    # ask: the prompt appropriate to the operation.
+    await _wallet_ask(cb, ctx, services, sender, state, op, tg_id)
+
+async def _route_wallet_plan(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    op, tg_id_raw, plan_code, step, arg = parsed.args
+    tg_id = int(tg_id_raw)
+    if step == "go":
+        await _wallet_perform(cb, ctx, services, sender, state, op, tg_id, plan_code)
+        return
+    # ask: the plan is chosen; now ask for the days.
+    await state.set_state(AdminInput.awaiting_wallet_amount)
+    await state.update_data(wop=op, wtg=tg_id, wplan=plan_code)
+    await show_screen(
+        cb,
+        _wallet_prompt(ctx.locale, wallet_screen_mod.OPS[op], tg_id),
+        ctx=ctx,
+        sender=sender,
+    )
+
+async def _wallet_ask(
+    cb, ctx: UserContext, services: Services, sender: RichSender, state, op: str, tg_id: int
+) -> None:
+    if op == "grant":
+        await show_screen(cb, wallet_screen_mod.plan_prompt(tg_id, op, ctx.locale), ctx=ctx, sender=sender)
+        return
+    if op == "revoke":
+        await state.set_state(AdminInput.awaiting_wallet_reason)
+        await state.update_data(wop=op, wtg=tg_id, wplan="", wamount=0)
+        await show_screen(cb, _wallet_prompt(ctx.locale, "admin.wallet.prompt_reason", tg_id), ctx=ctx, sender=sender)
+        return
+    if op == "refund":
+        await state.set_state(AdminInput.awaiting_wallet_charge)
+        await state.update_data(wop=op, wtg=tg_id)
+        await show_screen(cb, _wallet_prompt(ctx.locale, "admin.wallet.prompt_refund", tg_id), ctx=ctx, sender=sender)
+        return
+    current = await services.admin.subscription(tg_id)
+    plan_code = current.plan_code if current is not None else "month"
+    await state.set_state(AdminInput.awaiting_wallet_amount)
+    await state.update_data(wop=op, wtg=tg_id, wplan=plan_code)
+    await show_screen(cb, _wallet_prompt(ctx.locale, wallet_screen_mod.OPS[op], tg_id), ctx=ctx, sender=sender)
+
+def _wallet_prompt(locale, key: str, tg_id: int) -> Screen:
+    doc = RichDoc(locale)
+    doc.h(2, catalog.t("admin.wallet.title", locale))
+    doc.p(catalog.t(key, locale))
+    row = [
+        inline(
+            catalog.t("admin.wallet.cancel", locale),
+            admin_cb.wallet(tg_id),
+            intent=Intent.PRIMARY,
+        )
+    ]
+    return Screen(doc=doc, markup=inline_markup([row]))
+
+async def _wallet_perform(
+    cb, ctx: UserContext, services: Services, sender: RichSender, state, op: str, tg_id: int, arg: str
+) -> None:
+    data = await state.get_data()
+    await state.clear()
+    actor = ctx.actor_tg_id
+    reason = str(data.get("wreason") or arg or "")
+    amount = int(data.get("wamount") or 0)
+    plan_code = str(data.get("wplan") or "")
+    banner = ""
+    if op == "credit":
+        wallet = await services.admin.credit(tg_id, amount, reason, actor=actor)
+        banner = catalog.t("admin.wallet.done_credit", ctx.locale, stars=_d(amount, ctx.locale), balance=_d(wallet.balance_stars, ctx.locale))
+    elif op == "debit":
+        wallet = await services.admin.debit(tg_id, amount, reason, actor=actor)
+        banner = catalog.t("admin.wallet.done_debit", ctx.locale, stars=_d(amount, ctx.locale), balance=_d(wallet.balance_stars, ctx.locale))
+    elif op == "set":
+        wallet = await services.admin.set_balance(tg_id, amount, reason, actor=actor)
+        banner = catalog.t("admin.wallet.done_set", ctx.locale, stars=_d(wallet.balance_stars, ctx.locale))
+    elif op in ("grant", "extend", "shorten"):
+        days = amount if op != "shorten" else -amount
+        await services.admin.grant(tg_id, plan_code or "month", days, reason, actor=actor)
+        if op == "grant":
+            banner = catalog.t("admin.wallet.done_grant", ctx.locale, plan=catalog.t(f"plan.{plan_code}", ctx.locale), days=_d(amount, ctx.locale))
+        elif op == "extend":
+            banner = catalog.t("admin.wallet.done_extend", ctx.locale, days=_d(amount, ctx.locale))
+        else:
+            banner = catalog.t("admin.wallet.done_shorten", ctx.locale, days=_d(amount, ctx.locale))
+    elif op == "revoke":
+        await services.admin.revoke(tg_id, reason, actor=actor)
+        banner = catalog.t("admin.wallet.done_revoke", ctx.locale)
+    elif op == "refund":
+        charge_id = arg
+        existing = await services.billing.payment(charge_id)
+        if existing is None or existing.tg_id != tg_id:
+            banner = catalog.t("pay.nothing_to_refund", ctx.locale)
+        elif not existing.refundable:
+            banner = catalog.t("pay.refund_already", ctx.locale)
+        else:
+            # Telegram first (the money actually leaves), then the ledger
+            # reversal. If Telegram refuses, the books are left untouched so the
+            # ledger still equals what Telegram believes.
+            try:
+                await sender.refund_star_payment(tg_id, charge_id)
+            except Exception as exc:  # noqa: BLE001
+                log.warning("billing.refund_api_failed", error=type(exc).__name__)
+                banner = catalog.t("admin.wallet.refund_failed", ctx.locale)
+            else:
+                await services.billing.refund(
+                    tg_id=tg_id,
+                    charge_id=charge_id,
+                    actor=actor,
+                    reason=reason or f"admin refund {charge_id}",
+                )
+                banner = catalog.t("admin.wallet.done_refund", ctx.locale)
+    events.admin_action(
+        admin_id=actor,
+        action=f"wallet_{op}",
+        owner_tg_id=tg_id,
+        params={"amount": amount, "plan": plan_code, "reason": reason},
+    )
+    await _open_wallet(cb, ctx, services, sender, tg_id, banner=banner)
+
+def _d(value: int, locale) -> str:
+    from cloudbot.presentation.i18n.formatters import localize_digits
+
+    return localize_digits(str(value), locale)
+
 #: The one dispatch table: action key (from the codec) → route. Adding a section
 #: or an action is one codec builder + one entry here; a callback the parser does
 #: not know is answered with the stale screen, never a crash.
@@ -402,6 +557,9 @@ _ROUTES = {
     admin_cb.AUDIT_ALL: _route_audit_all,
     admin_cb.AUDIT: _route_audit,
     admin_cb.AUDIT_USER: _route_audit_user,
+    admin_cb.WALLET: _route_wallet,
+    admin_cb.WALLET_OP: _route_wallet_op,
+    admin_cb.WALLET_PLAN: _route_wallet_plan,
 }
 
 
@@ -416,6 +574,59 @@ async def on_users_search_text(
     view = await _view(ctx, services, users_page=page_obj)
     await show_screen(message, users_screen_mod.users_screen(view, page=0), ctx=ctx, sender=sender)
 
+
+@router.message(AdminInput.awaiting_wallet_amount)
+async def on_wallet_amount(
+    message: Message, ctx: UserContext, sender: RichSender, state: FSMContext
+) -> None:
+    data = await state.get_data()
+    op = str(data.get("wop") or "")
+    tg_id = int(data.get("wtg") or 0)
+    text = (message.text or "").strip().lstrip("+")
+    try:
+        amount = int(text)
+    except ValueError:
+        amount = 0
+    if amount <= 0:
+        await show_screen(
+            message,
+            _wallet_prompt(ctx.locale, wallet_screen_mod.OPS.get(op, "admin.wallet.prompt_credit"), tg_id),
+            ctx=ctx,
+            sender=sender,
+            force_send=True,
+        )
+        return
+    await state.update_data(wamount=amount)
+    await state.set_state(AdminInput.awaiting_wallet_reason)
+    doc = RichDoc(ctx.locale)
+    doc.h(2, catalog.t("admin.wallet.title", ctx.locale))
+    doc.p(catalog.t("admin.wallet.step_reason", ctx.locale))
+    doc.p(catalog.t("admin.wallet.prompt_reason", ctx.locale))
+    row = [inline(catalog.t("admin.wallet.cancel", ctx.locale), admin_cb.wallet(tg_id), intent=Intent.PRIMARY)]
+    await show_screen(message, Screen(doc=doc, markup=inline_markup([row])), ctx=ctx, sender=sender, force_send=True)
+
+@router.message(AdminInput.awaiting_wallet_reason)
+async def on_wallet_reason(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext, events: RequestEvents
+) -> None:
+    data = await state.get_data()
+    op = str(data.get("wop") or "")
+    tg_id = int(data.get("wtg") or 0)
+    text = (message.text or "").strip()
+    reason = "" if text in ("/skip", "") else text
+    await state.update_data(wreason=reason)
+    await _wallet_perform(
+        message, ctx, services, sender, state, op, tg_id, reason
+    )
+
+@router.message(AdminInput.awaiting_wallet_charge)
+async def on_wallet_charge(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext, events: RequestEvents
+) -> None:
+    data = await state.get_data()
+    tg_id = int(data.get("wtg") or 0)
+    charge_id = (message.text or "").strip()
+    await _wallet_perform(message, ctx, services, sender, state, "refund", tg_id, charge_id)
 
 def _not_found(ctx: UserContext) -> Screen:
     doc = RichDoc(ctx.locale)

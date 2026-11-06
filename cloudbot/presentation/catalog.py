@@ -95,7 +95,9 @@ from cloudbot.presentation.screens import run as run_screens
 from cloudbot.presentation.screens import run_logs as history_screens
 from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
+from cloudbot.presentation.screens import wallet as wallet_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
+from cloudbot.domain.billing import STAR_PACKS
 from cloudbot.presentation.screens.admin import audit as admin_audit
 from cloudbot.presentation.screens.admin import notifications as admin_notify
 from cloudbot.presentation.screens.admin import overview as admin_overview
@@ -624,6 +626,47 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
     )
 
 
+def _wallet_view(f, locale: Locale, *, none: bool = False, expired: bool = False):
+    from cloudbot.domain.subscription import (
+        Subscription,
+        SubscriptionSource,
+        SubscriptionState,
+        SubscriptionStatus,
+        derive_status,
+    )
+    from cloudbot.presentation.screens.wallet import WalletView
+
+    balance = 350
+    if none:
+        subscription = None
+        status = SubscriptionStatus(SubscriptionState.NONE, False, 0)
+    elif expired:
+        subscription = Subscription(
+            tg_id=6508129575,
+            plan_code="month",
+            started_at=NOW - timedelta(days=60),
+            expires_at=NOW - timedelta(days=30),
+            source=SubscriptionSource.STARS,
+        )
+        status = derive_status(subscription, NOW)
+    else:
+        subscription = Subscription(
+            tg_id=6508129575,
+            plan_code="month",
+            started_at=NOW - timedelta(days=2),
+            expires_at=NOW + timedelta(days=28),
+            source=SubscriptionSource.TRIAL,
+        )
+        status = derive_status(subscription, NOW)
+    return WalletView(
+        locale=locale,
+        tg_id=6508129575,
+        balance=balance,
+        subscription=subscription,
+        status=status,
+        now=NOW,
+    )
+
 def _admin_entered_view(locale: Locale) -> AdminView:
     return _admin_view(locale, entered=True)
 
@@ -631,6 +674,18 @@ def _admin_entered_view(locale: Locale) -> AdminView:
 #: name → builder. This is the registry's payload; ``SECTION_OF`` assigns each
 #: name to a section (a first-class grouping, not a prefix convention).
 SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
+    # -- wallet / subscription (subs2) ---------------------------------------
+    "wallet": lambda f, loc: wallet_screens.wallet_screen(_wallet_view(f, loc)),
+    "wallet_no_plan": lambda f, loc: wallet_screens.wallet_screen(_wallet_view(f, loc, none=True)),
+    "wallet_expired": lambda f, loc: wallet_screens.wallet_screen(_wallet_view(f, loc, expired=True)),
+    "wallet_plans": lambda f, loc: wallet_screens.plan_picker_screen(
+        _wallet_view(f, loc), needed_plan="year"
+    ),
+    "wallet_packs": lambda f, loc: wallet_screens.packs_screen(_wallet_view(f, loc)),
+    "wallet_receipt": lambda f, loc: wallet_screens.receipt_screen(
+        _wallet_view(f, loc), STAR_PACKS["stars_150"]
+    ),
+    "wallet_support": lambda f, loc: wallet_screens.support_screen(loc),
     "language_card": lambda f, loc: language_card(loc),
     "language_picker": lambda f, loc: language_picker(loc),
     "menu": lambda f, loc: menu_screens.main_menu([f["ws"], f["suspended"]], loc, display_name="sara"),
@@ -849,6 +904,7 @@ class Section:
 #: The sections, in navigation order. A screen is assigned to exactly one.
 SECTIONS: tuple[Section, ...] = (
     Section("menu", "dev.section.menu", 10),
+    Section("wallet", "dev.section.wallet", 15),
     Section("language", "dev.section.language", 20),
     Section("workspaces", "dev.section.workspaces", 30),
     Section("files", "dev.section.files", 40),
@@ -868,6 +924,8 @@ _SECTION_BY_KEY = {s.key: s for s in SECTIONS}
 
 
 def _section_of(name: str) -> str:
+    if name.startswith("wallet"):
+        return "wallet"
     if name.startswith("admin_"):
         return "admin"
     if name.startswith("err_"):

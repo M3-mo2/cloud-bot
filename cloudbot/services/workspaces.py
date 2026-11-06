@@ -6,15 +6,18 @@ Policy lives here: ownership checks, limit pre-validation against
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import structlog
 
 from cloudbot.core.errors import EngineRefused, InvalidInput, NotOwned
+from cloudbot.domain import plans
 from cloudbot.domain.entities import Workspace
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.domain.ports.subscriptions import Subscriptions
 from cloudbot.domain.ports.users import UserRepository
-from cloudbot.domain.subscription import derive_status
+from cloudbot.domain.subscription import SubscriptionState, derive_status
 from cloudbot.domain.value_objects import LifecycleResult, Limits, ResourceUsage, WorkspaceId, WorkspaceStatus
 from cloudbot.services.ownership import OwnershipService
 
@@ -66,6 +69,28 @@ class WorkspacesService:
                 raise InvalidInput(field, "above_max")
         return limits
 
+    async def plan_maxima(
+        self, tg_id: int, engine_maxima: Limits, *, now: datetime | None = None
+    ) -> Limits:
+        """The **ceiling** a workspace may ask for: the plan capped by the engine.
+
+        ``limits`` is what the engine enforces and ``max_limits`` is the most a
+        workspace may *request*. A plan therefore sets the ceiling a user may
+        request; the enforced values for a create that names nothing stay the
+        engine's ``limits_defaults`` (part 1's model). With no subscription the
+        engine's own maxima apply unchanged.
+        """
+        if self._subscriptions is None:
+            return engine_maxima
+        now = now or datetime.now(timezone.utc)
+        subscription = await self._subscriptions.get(tg_id)
+        if subscription is None or not derive_status(subscription, now).is_active:
+            return engine_maxima
+        plan = plans.PLANS.get(subscription.plan_code)
+        if plan is None:
+            return engine_maxima
+        return plan.to_limits(engine_maxima)
+
     async def list(self, tg_id: int) -> list[Workspace]:
         owned = set(await self._users.owned_workspaces(tg_id))
         if not owned:
@@ -90,8 +115,6 @@ class WorkspacesService:
         """
         if self._subscriptions is None:
             return workspaces
-        from datetime import datetime, timezone
-
         subscription = await self._subscriptions.get(tg_id)
         active = derive_status(subscription, datetime.now(timezone.utc)).is_active
         if active:
@@ -124,7 +147,10 @@ class WorkspacesService:
     ) -> Workspace:
         meta = await self._engine.meta()
         clean_name = self.validate_name(name)
-        self.validate_limits(limits, meta.limits_maxima)
+        # The plan sets the ceiling a user may request; that ceiling is itself
+        # capped by the engine's maxima. ``max_limits`` is then what is enforced.
+        ceiling = await self.plan_maxima(tg_id, meta.limits_maxima)
+        self.validate_limits(limits, ceiling)
         selected_profile = profile or meta.default_profile
         ws = await self._engine.create_workspace(
             name=clean_name, profile=selected_profile, limits=limits
@@ -176,7 +202,8 @@ class WorkspacesService:
             name = self.validate_name(name)
         if limits is not None:
             meta = await self._engine.meta()
-            self.validate_limits(limits, meta.limits_maxima)
+            ceiling = await self.plan_maxima(tg_id, meta.limits_maxima)
+            self.validate_limits(limits, ceiling)
         ws = await self._engine.patch_workspace(ws_id, name=name, limits=limits)
         return self._with_owner(ws, tg_id)
 

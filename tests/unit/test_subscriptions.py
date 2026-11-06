@@ -410,7 +410,7 @@ async def test_existing_database_upgrades_without_data_loss(tmp_path):
 
     database = Database(f"sqlite+aiosqlite:///{path}")
     await database.connect()
-    assert await database.migrate() == [5]
+    assert await database.migrate() == [5, 6]
 
     conn = await database.connect()
     async with conn.execute("SELECT tg_id, locale, display_name FROM users") as cur:

@@ -14,8 +14,8 @@ async def test_migrations_apply_and_are_idempotent():
     db = Database(":memory:")
     await db.connect()
     applied = await db.migrate()
-    # Updated when 0005_subscriptions was added: forward-only, every file applies once.
-    assert applied == [1, 2, 3, 4, 5]
+    # Updated when 0006_stars_payments was added: forward-only, every file applies once.
+    assert applied == [1, 2, 3, 4, 5, 6]
     again = await db.migrate()
     assert again == []  # forward-only, idempotent
     await db.close()

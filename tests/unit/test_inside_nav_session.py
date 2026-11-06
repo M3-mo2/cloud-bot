@@ -151,7 +151,7 @@ def test_not_inside_block_minus_its_own_destination(locale):
     minus the entry for the screen itself (R1)."""
     rows = nav.nav_rows(locale, "help")
     callbacks = {b.callback_data for row in rows for b in row}
-    assert callbacks == {"ws:list", "nav:settings", "nav:language", "nav:menu"}
+    assert callbacks == {"ws:list", "pay:wallet", "nav:settings", "nav:language", "nav:menu"}
     assert "nav:help" not in callbacks
     assert "ws:home" not in callbacks
 

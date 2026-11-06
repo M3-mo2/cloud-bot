@@ -11,7 +11,13 @@ from typing import Any
 
 import structlog
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import BufferedInputFile, InputRichMessage, Message, ReplyParameters
+from aiogram.types import (
+    BufferedInputFile,
+    InputRichMessage,
+    LabeledPrice,
+    Message,
+    ReplyParameters,
+)
 
 from cloudbot.presentation.rich.document import RichDoc
 
@@ -127,6 +133,45 @@ class RichSender:
             rich_message=doc.build(),
             can_stop=can_stop,
             keep_on_stop=keep_on_stop,
+        )
+
+    # -- Telegram Stars payments (the only payment calls in the product) ------
+    async def send_invoice(
+        self,
+        chat_id: int,
+        *,
+        title: str,
+        description: str,
+        payload: str,
+        prices: list[LabeledPrice],
+        currency: str,
+        provider_token: str = "",
+    ) -> Message:
+        """Send a Stars invoice. ``provider_token`` is empty for digital goods."""
+        return await self._bot.send_invoice(
+            chat_id=chat_id,
+            title=title,
+            description=description,
+            payload=payload,
+            currency=currency,
+            prices=prices,
+            provider_token=provider_token,
+        )
+
+    async def answer_pre_checkout(
+        self, pre_checkout_query_id: str, *, ok: bool, error_message: str | None = None
+    ) -> bool:
+        """Answer a pre-checkout query (the 10-second window)."""
+        return await self._bot.answer_pre_checkout_query(
+            pre_checkout_query_id=pre_checkout_query_id,
+            ok=ok,
+            error_message=error_message,
+        )
+
+    async def refund_star_payment(self, user_id: int, charge_id: str) -> bool:
+        """Refund a Stars payment by its Telegram charge id."""
+        return await self._bot.refund_star_payment(
+            user_id=user_id, telegram_payment_charge_id=charge_id
         )
 
     async def send_document(

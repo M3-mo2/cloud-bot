@@ -71,6 +71,7 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     from cloudbot.handlers import (
         admin,
         admin_panel,
+        billing,
         callbacks,
         common,
         execution,
@@ -81,6 +82,9 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     )
 
     dispatcher.include_router(common.router)
+    # Billing before the account routers: the Stars handshake (an invoice, a
+    # pre-checkout answer, a successful payment) is never user navigation.
+    dispatcher.include_router(billing.router)
     dispatcher.include_router(callbacks.navigation.router)
     # Admin panel before the workspace/file routers so a ``/admin`` command and its
     # ``adm:`` callbacks are never mistaken for user navigation.
@@ -108,5 +112,6 @@ async def set_commands(bot: Bot, settings: Settings) -> None:
         BotCommand(command="start", description="Open the menu"),
         BotCommand(command="settings", description="Language & preferences"),
         BotCommand(command="help", description="Help"),
+        BotCommand(command="paysupport", description="Payment support"),
     ]
     await bot.set_my_commands(commands)

@@ -79,6 +79,7 @@ NAV_LABEL_EXCEPTIONS: frozenset[str] = frozenset(
 #: (current-key, catalog-label key, callback) in display order.
 DESTINATIONS: tuple[tuple[str, str, str], ...] = (
     ("workspaces", "menu.workspaces", "ws:list"),
+    ("wallet", "menu.wallet", "pay:wallet"),
     ("settings", "menu.settings", "nav:settings"),
     ("language", "menu.language", "nav:language"),
     ("help", "menu.help", "nav:help"),
@@ -86,7 +87,15 @@ DESTINATIONS: tuple[tuple[str, str, str], ...] = (
 
 #: Every callback that belongs to the nav block (used by tests to count rows).
 NAV_ACTIONS: frozenset[str] = frozenset(
-    {"ws:list", "ws:home", "nav:settings", "nav:language", "nav:help", "nav:menu"}
+    {
+        "ws:list",
+        "ws:home",
+        "pay:wallet",
+        "nav:settings",
+        "nav:language",
+        "nav:help",
+        "nav:menu",
+    }
 )
 
 #: Each ``current`` key's own callback (R1). The helper omits the entry whose
@@ -94,6 +103,7 @@ NAV_ACTIONS: frozenset[str] = frozenset(
 #: once, data-driven, for every screen.
 CURRENT_ACTION: dict[str, str] = {
     "workspaces": "ws:list",
+    "wallet": "pay:wallet",
     "settings": "nav:settings",
     "language": "nav:language",
     "help": "nav:help",

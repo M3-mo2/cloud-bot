@@ -26,6 +26,7 @@ import aiosqlite
 from cloudbot.adapters.persistence.database import Database
 from cloudbot.adapters.persistence.models import parse_dt
 from cloudbot.domain import plans
+from cloudbot.domain.billing import StarsPayment
 from cloudbot.domain.subscription import (
     Movement,
     Subscription,
@@ -123,6 +124,27 @@ class SqliteSubscriptions:
             raise ValueError("refund amount must be positive")
         return await self._mutate(
             tg_id, kind="refund", amount=amount, reason=reason, actor=actor,
+            key=idempotency_key,
+        )
+
+    async def reverse(
+        self,
+        tg_id: int,
+        amount: int,
+        reason: str,
+        actor: int,
+        *,
+        idempotency_key: str = "",
+    ) -> Wallet:
+        """Append a negative reversal of a refunded credit.
+
+        A reversal is how a Telegram Stars refund is mirrored in the ledger: the
+        credit that the payment added is undone, never below zero.
+        """
+        if amount <= 0:
+            raise ValueError("reversal amount must be positive")
+        return await self._mutate(
+            tg_id, kind="reversal", amount=-amount, reason=reason, actor=actor,
             key=idempotency_key,
         )
 
@@ -328,6 +350,67 @@ class SqliteSubscriptions:
                 await self._rollback(conn)
                 raise
 
+    # -- Telegram Stars payments -------------------------------------------
+    async def record_payment(
+        self,
+        *,
+        tg_id: int,
+        pack_code: str,
+        stars: int,
+        charge_id: str,
+        provider_charge_id: str = "",
+        at: datetime,
+    ) -> bool:
+        """Record a delivered payment once. ``True`` when it was newly recorded.
+
+        ``charge_id`` is unique: a re-delivered ``successful_payment`` returns
+        ``False`` and changes nothing, so the receipt path can tell a first
+        delivery from a replay without trusting it.
+        """
+        if not charge_id:
+            raise ValueError("charge_id is required")
+        conn = await self._db.connect()
+        cursor = await conn.execute(
+            "INSERT OR IGNORE INTO stars_payments "
+            "(tg_id, pack_code, stars, charge_id, provider_charge_id, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                tg_id,
+                pack_code,
+                stars,
+                charge_id,
+                provider_charge_id,
+                at.isoformat().replace("+00:00", "Z"),
+            ),
+        )
+        return cursor.rowcount == 1
+
+    async def payment(self, charge_id: str) -> StarsPayment | None:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT * FROM stars_payments WHERE charge_id = ?", (charge_id,)
+        ) as cur:
+            row = await cur.fetchone()
+        return _row_to_payment(row) if row is not None else None
+
+    async def payments_for(self, tg_id: int) -> tuple[StarsPayment, ...]:
+        conn = await self._db.connect()
+        async with conn.execute(
+            "SELECT * FROM stars_payments WHERE tg_id = ? ORDER BY id", (tg_id,)
+        ) as cur:
+            rows = await cur.fetchall()
+        return tuple(_row_to_payment(r) for r in rows)
+
+    async def mark_refunded(self, charge_id: str, at: datetime) -> bool:
+        """Stamp ``refunded_at`` once. ``True`` when this call did the stamp."""
+        conn = await self._db.connect()
+        cursor = await conn.execute(
+            "UPDATE stars_payments SET refunded_at = ? "
+            "WHERE charge_id = ? AND refunded_at IS NULL",
+            (at.isoformat().replace("+00:00", "Z"), charge_id),
+        )
+        return cursor.rowcount == 1
+
     # -- internals -----------------------------------------------------------
     async def _mutate(
         self,
@@ -501,6 +584,20 @@ class SqliteSubscriptions:
             ),
         )
 
+
+def _row_to_payment(row: aiosqlite.Row) -> StarsPayment:
+    from cloudbot.adapters.persistence.models import parse_dt
+
+    refunded = row["refunded_at"]
+    return StarsPayment(
+        tg_id=int(row["tg_id"]),
+        pack_code=str(row["pack_code"]),
+        stars=int(row["stars"]),
+        charge_id=str(row["charge_id"]),
+        provider_charge_id=str(row["provider_charge_id"] or ""),
+        created_at=parse_dt(row["created_at"]),
+        refunded_at=parse_dt(refunded) if refunded else None,
+    )
 
 __all__ = [
     "InsufficientFunds",

@@ -92,6 +92,9 @@ def test_the_dispatch_table_covers_every_codec_action():
         admin_cb.AUDIT_ALL,
         admin_cb.AUDIT,
         admin_cb.AUDIT_USER,
+        admin_cb.WALLET,
+        admin_cb.WALLET_OP,
+        admin_cb.WALLET_PLAN,
     } | set(admin_cb.ACTION_KEYS)
     assert routes == expected, routes.symmetric_difference(expected)
 

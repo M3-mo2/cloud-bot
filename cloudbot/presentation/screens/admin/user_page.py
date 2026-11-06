@@ -116,7 +116,12 @@ def user_screen(view: AdminView) -> Screen:
                 catalog.t("admin.user.audit", locale),
                 admin_cb.audit_user(u.tg_id, 0),
                 intent=Intent.PRIMARY,
-            )
+            ),
+            inline(
+                catalog.t("admin.wallet.title", locale),
+                admin_cb.wallet(u.tg_id),
+                intent=Intent.SUCCESS,
+            ),
         ]
     )
     # The notification scope for this user, if the admin wants to watch only them.

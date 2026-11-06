@@ -1,2 +1,3 @@
-📦 My workspaces [ws:list] enabled | 🌐 Language [nav:language] enabled
-❓ Help [nav:help] enabled | ☰ Menu [nav:menu] enabled
+📦 My workspaces [ws:list] enabled | 💳 Wallet [pay:wallet] enabled
+🌐 Language [nav:language] enabled | ❓ Help [nav:help] enabled
+☰ Menu [nav:menu] enabled

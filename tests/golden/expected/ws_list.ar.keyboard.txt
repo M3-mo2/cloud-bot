@@ -1,5 +1,5 @@
 demo [ws:view:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 scraper [ws:view:ws_01M6HJASCWM9Z1PF755GT89NK5] enabled
 ➕ مساحة جديدة [ws:new] enabled
-⚙️ الإعدادات [nav:settings] enabled | 🌐 اللغة [nav:language] enabled
-❓ مساعدة [nav:help] enabled
+💳 المحفظة [pay:wallet] enabled | ⚙️ الإعدادات [nav:settings] enabled
+🌐 اللغة [nav:language] enabled | ❓ مساعدة [nav:help] enabled

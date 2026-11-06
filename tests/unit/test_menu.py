@@ -87,6 +87,7 @@ def test_empty_state_still_offers_the_primary_action():
     assert [b.callback_data for b in _buttons(screen)] == [
         "ws:new",
         "ws:list",
+        "pay:wallet",
         "nav:settings",
         "nav:language",
         "nav:help",
@@ -121,9 +122,12 @@ def test_the_primary_action_sits_alone_on_the_first_row(locale):
 
 
 @pytest.mark.parametrize("locale", LOCALES)
-def test_the_main_board_never_exceeds_three_rows_or_two_columns(locale):
+def test_the_main_board_never_exceeds_the_nav_row_rule_or_two_columns(locale):
+    """A payload row plus the nav block (at most three rows) — never more than
+    two columns. The nav block grew by one entry when the wallet became a
+    top-level destination, which still fits the three-row rule (four entries)."""
     screen = menu_screens.main_menu(_many_workspaces(2), locale, display_name="sara")
-    assert len(_rows(screen)) <= 3
+    assert len(_rows(screen)) <= 4
     for row in _rows(screen):
         assert len(row) <= 2
 
@@ -131,14 +135,24 @@ def test_the_main_board_never_exceeds_three_rows_or_two_columns(locale):
 # -- 3. the catalog-wide label guard ----------------------------------------
 @pytest.mark.parametrize("locale", LOCALES)
 def test_a_shared_destination_never_wears_two_labels(locale):
-    """Walk every screen: one destination callback, one label, in both locales."""
+    """Walk every screen: one destination callback, one label, in both locales.
+
+    The affordance labels declared in ``nav.NAV_LABEL_EXCEPTIONS`` are excluded:
+    ``common.back`` / ``common.refresh`` deliberately mean "step back" / "re-read
+    this" on several screens while reaching the same callback, exactly as the
+    static-label guard below already documents. Every other label on a destination
+    must be a single name.
+    """
+    from cloudbot.presentation.i18n.catalog import catalog
+
     CallbackCodec()
+    exceptions = {catalog.t(key, locale) for key in nav.NAV_LABEL_EXCEPTIONS}
     labels: dict[str, set[str]] = defaultdict(set)
     for name in sorted(screen_catalog.SCREEN_BUILDERS):
         screen = screen_catalog.build(name, locale)
         for button in _buttons(screen):
             action = getattr(button, "callback_data", None)
-            if action in SHARED_DESTINATIONS:
+            if action in SHARED_DESTINATIONS and button.text not in exceptions:
                 labels[action].add(button.text)
     offenders = {action: sorted(texts) for action, texts in labels.items() if len(texts) > 1}
     assert not offenders, f"shared destinations with several labels: {offenders}"

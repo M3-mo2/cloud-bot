@@ -280,6 +280,20 @@ class AdminService:
             tg_id, plan_code, days, actor, reason, idempotency_key=idempotency_key
         )
 
+    async def reverse(
+        self, tg_id: int, amount: int, reason: str, *, actor: int, idempotency_key: str = ""
+    ):
+        if self._subscriptions is None:
+            raise RuntimeError("subscription store is not configured")
+        return await self._subscriptions.reverse(
+            tg_id, amount, reason, actor, idempotency_key=idempotency_key
+        )
+
+    async def payments(self, tg_id: int):
+        if self._subscriptions is None:
+            return ()
+        return await self._subscriptions.payments_for(tg_id)
+
     async def revoke(
         self, tg_id: int, reason: str, *, actor: int, idempotency_key: str = ""
     ):

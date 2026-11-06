@@ -18,6 +18,7 @@ from . import user_page as _user_page  # noqa: E402,F401
 from . import workspace as _workspace  # noqa: E402,F401
 from . import notifications as _notifications  # noqa: E402,F401
 from . import audit as _audit  # noqa: E402,F401
+from . import wallet as _wallet  # noqa: E402,F401
 
 __all__ = [
     "AdminSection",

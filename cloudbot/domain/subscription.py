@@ -29,7 +29,7 @@ class SubscriptionSource(str, Enum):
     ADMIN = "admin"
 
 
-MovementKind = Literal["credit", "debit", "admin_set", "refund"]
+MovementKind = Literal["credit", "debit", "admin_set", "refund", "reversal"]
 
 
 @dataclass(frozen=True)

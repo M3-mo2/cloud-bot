@@ -78,6 +78,7 @@ def _handler_modules():
     from cloudbot.handlers import (
         admin,
         admin_panel,
+        billing,
         callbacks,
         common,
         execution,
@@ -89,6 +90,7 @@ def _handler_modules():
 
     return (
         common,
+        billing,
         callbacks.navigation,
         admin_panel,
         workspaces,
