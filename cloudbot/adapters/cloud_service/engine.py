@@ -9,6 +9,7 @@ by refreshing ``/v1/meta`` and retrying **once**, but only on idempotent calls
 from __future__ import annotations
 
 import base64
+from datetime import datetime, timezone
 from typing import Any, AsyncIterator
 
 import httpx
@@ -82,6 +83,13 @@ ARCHIVE_TIMEOUT_S = 120.0
 
 def _ws_path(ws_id: WorkspaceId, suffix: str = "") -> str:
     return f"/v1/workspaces/{ws_id}{suffix}"
+
+
+def _rfc3339(when: datetime) -> str:
+    """An absolute instant as the wire format the engine parses."""
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    return when.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 class EngineAdapter:
@@ -160,6 +168,20 @@ class EngineAdapter:
             # the refusal is still surfaced — never retried behind the user.
             await self._refresh_meta_if_stale(exc)
             raise
+        env = dto.WorkspaceEnvelope.model_validate(response.json())
+        return workspace_from_dto(env.workspace)
+
+    async def extend_subscription(
+        self, ws_id: WorkspaceId, *, expires_at: datetime
+    ) -> Workspace:
+        """POST the absolute expiry the bot computed (``subscription/extend``).
+
+        ``expires_at`` is an RFC3339 UTC instant in the future; the engine stores
+        it as the absolute term (INTEGRATION-GUIDE §8.3). This is the renewal path
+        for ``403 subscription_expired``.
+        """
+        body = {"expires_at": _rfc3339(expires_at)}
+        response = await self._client.post(_ws_path(ws_id, "/subscription/extend"), json=body)
         env = dto.WorkspaceEnvelope.model_validate(response.json())
         return workspace_from_dto(env.workspace)
 

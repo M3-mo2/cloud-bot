@@ -119,6 +119,13 @@ async def subscriptions(database):
     return SqliteSubscriptions(database)
 
 @pytest.fixture
+async def subscription_gate(subscriptions):
+    """The service-layer plan gate, wired exactly as production does (no admins)."""
+    from cloudbot.services.subscription import SubscriptionService
+
+    return SubscriptionService(subscriptions)
+
+@pytest.fixture
 def engine():
     return FakeEngine()
 
@@ -171,29 +178,36 @@ async def moderation(moderation_store):
 @pytest.fixture
 async def services(
     engine, database, users, sessions, event_log, admin_state, subscriptions,
-    fake_directory, moderation,
+    fake_directory, moderation, subscription_gate,
 ):
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
-        billing=BillingService(subscriptions),
+        billing=BillingService(subscriptions, engine=engine, subscription=subscription_gate),
         backup=BackupService(SqliteBackupStore(database)),
-        workspaces=WorkspacesService(engine, users, ownership, subscriptions, moderation),
+        workspaces=WorkspacesService(
+            engine, users, ownership, subscriptions, moderation, subscription_gate
+        ),
         session=SessionService(users, engine, ownership),
-        files=FilesService(engine, ownership),
-        execution=ExecutionService(engine, ownership, moderation),
-        sessions=SessionsService(engine, sessions, ownership, moderation),
+        files=FilesService(engine, ownership, subscription=subscription_gate),
+        execution=ExecutionService(
+            engine, ownership, moderation, subscription=subscription_gate
+        ),
+        sessions=SessionsService(
+            engine, sessions, ownership, moderation, subscription=subscription_gate
+        ),
         ownership=ownership,
-        packages=PackagesService(engine, ownership),
-        tunnels=TunnelsService(engine, ownership),
+        packages=PackagesService(engine, ownership, subscription=subscription_gate),
+        tunnels=TunnelsService(engine, ownership, subscription=subscription_gate),
         ports=PortsService(engine, ownership),
         metrics=MetricsService(engine, ownership),
-        processes=ProcessesService(engine, ownership),
-        archives=ArchivesService(engine, ownership),
+        processes=ProcessesService(engine, ownership, subscription=subscription_gate),
+        archives=ArchivesService(engine, ownership, subscription=subscription_gate),
         events=EventsService(event_log),
         admin=AdminService(
             users, engine, event_log, admin_state, ownership, BotRuntime(FROZEN_NOW),
             subscriptions=subscriptions, moderation=moderation,
+            subscription=subscription_gate,
         ),
         notifier=NotifierService(event_log, admin_state),
         broadcast=BroadcastService(SqliteBroadcastStore(database)),

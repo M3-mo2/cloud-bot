@@ -60,11 +60,23 @@ class SessionsService:
         store: SessionStore,
         ownership: OwnershipService,
         moderation: "object | None" = None,
+        *,
+        subscription: "object | None" = None,
     ) -> None:
         self._engine = engine
         self._store = store
         self._ownership = ownership
         self._moderation = moderation
+        self._subscription = subscription
+
+    async def _assert_usable(self, tg_id: int, ws_id: WorkspaceId) -> None:
+        """Refuse a lapsed plan at the service boundary (a ban outranks it).
+
+        Opening a shell and driving it both start work; a locked workspace must be
+        refused even when the caller never touched a screen.
+        """
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -83,6 +95,7 @@ class SessionsService:
         # the service boundary, so no path can start a shell around the ban.
         if self._moderation is not None:
             await self._moderation.assert_executable(ws_id)
+        await self._assert_usable(tg_id, ws_id)
         self._validate_size(cols, rows)
         await self._enforce_cap(tg_id, ws_id)
         session = await self._engine.open_session(ws_id, cols=cols, rows=rows)
@@ -181,6 +194,7 @@ class SessionsService:
     ) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_tracked(tg_id, ses_id)
+        await self._assert_usable(tg_id, ws_id)
         await self._engine.session_input(ws_id, ses_id, data)
 
     async def send_line(
@@ -197,6 +211,7 @@ class SessionsService:
     ) -> SessionOutput:
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_tracked(tg_id, ses_id)
+        await self._assert_usable(tg_id, ws_id)
         chunk: LogChunk = await self._engine.session_output(ws_id, ses_id, offset=offset)
         await self._store.set_offset(tg_id, SessionId(ses_id), chunk.next)
         return SessionOutput(
@@ -261,6 +276,7 @@ class SessionsService:
     ) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_tracked(tg_id, ses_id)
+        await self._assert_usable(tg_id, ws_id)
         normalized = (signal or "").upper()
         if normalized not in SESSION_SIGNALS:
             raise InvalidInput("signal", "unsupported")

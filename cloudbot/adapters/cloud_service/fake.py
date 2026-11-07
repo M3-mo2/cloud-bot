@@ -89,6 +89,8 @@ class FakeEngine:
         #: The engine's per-workspace tunnel cap. Tests override it to prove
         #: nothing hardcodes the number; the real value lives in ``/v1/meta``.
         self.max_tunnels = 2
+        #: Every ``extend_subscription`` the bot made, as ``(ws_id, expires_at)``.
+        self.subscription_extensions: list[tuple[str, datetime]] = []
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK4", "demo", WorkspaceStatus.ACTIVE, active=1)
         self._seed_workspace("ws_01M6HJASCWM9Z1PF755GT89NK5", "scraper", WorkspaceStatus.SUSPENDED)
 
@@ -180,6 +182,13 @@ class FakeEngine:
             )
             self._workspaces[str(ws.id)] = ws
         return ws
+
+    async def extend_subscription(
+        self, ws_id: WorkspaceId, *, expires_at: datetime
+    ) -> Workspace:
+        """Record the term the bot asked for; the fake never locks itself."""
+        self.subscription_extensions.append((str(ws_id), expires_at))
+        return await self.get_workspace(ws_id)
 
     async def list_workspaces(self) -> list[Workspace]:
         return list(self._workspaces.values())

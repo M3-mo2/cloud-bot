@@ -19,6 +19,7 @@ from cloudbot.core.errors import (
     InvalidInput,
     NotOwned,
     RateLimited,
+    SubscriptionExpired,
     UserBanned,
     WorkspaceBanned,
     WorkspaceMissing,
@@ -176,7 +177,10 @@ def _extra_actions_for(
         # The item is gone; the useful destination is the list it belonged to.
         return (("menu.workspaces", "ws:list", Intent.PRIMARY),)
     if code == "subscription_expired":
-        return (("err.renew", "ws:renew", Intent.SUCCESS),)
+        # Renew needs the workspace it belongs to (the handler decodes one key).
+        if ws_id:
+            return (("err.renew", f"ws:renew:{ws_id}", Intent.SUCCESS),)
+        return (("menu.wallet", "pay:wallet", Intent.SUCCESS),)
     if code == "unknown_profile":
         return (("err.choose_runtime", "nav:profiles", Intent.SUCCESS),)
     if code == "insufficient_storage":
@@ -225,6 +229,17 @@ def view_for_error(
             "err.unavailable.title",
             "err.domain.engine_unavailable",
             retryable=True,
+        )
+    if isinstance(err, SubscriptionExpired):
+        # The service gate refuses exactly as the engine's ``403`` does, so the
+        # user sees one screen whichever side refused. ``err.ws_id`` lets the
+        # screen offer Renew for that workspace.
+        return ErrorView(
+            "subscription_expired",
+            "err.subscription_expired.title",
+            "err.subscription_expired",
+            retryable=False,
+            extra_actions=_extra_actions_for("subscription_expired"),
         )
     if isinstance(err, (NotOwned, WorkspaceMissing)):
         return ErrorView(

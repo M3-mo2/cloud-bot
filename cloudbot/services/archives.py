@@ -27,9 +27,21 @@ from cloudbot.services.ownership import OwnershipService
 
 
 class ArchivesService:
-    def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
+    def __init__(
+        self,
+        engine: EnginePort,
+        ownership: OwnershipService,
+        *,
+        subscription: "object | None" = None,
+    ) -> None:
         self._engine = engine
         self._ownership = ownership
+        self._subscription = subscription
+
+    async def _assert_usable(self, tg_id: int, ws_id: WorkspaceId) -> None:
+        """Refuse extract/upload on a lapsed plan; export (a read) stays allowed."""
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -47,6 +59,7 @@ class ArchivesService:
         size_bytes: int | None = None,
     ) -> ArchiveResult:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_usable(tg_id, ws_id)
         meta = await self._engine.meta()
         self.check_upload_size(size_bytes if size_bytes is not None else len(data), meta)
         dest = normalize_path(path)
@@ -70,6 +83,7 @@ class ArchivesService:
         dry_run: bool = False,
     ) -> ArchiveResult:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_usable(tg_id, ws_id)
         source = resolve_source(path)
         destination = resolve_dest(dest)
         return await self._engine.extract_archive(

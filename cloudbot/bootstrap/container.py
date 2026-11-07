@@ -46,6 +46,7 @@ from cloudbot.services.ports import PortsService
 from cloudbot.services.processes import ProcessesService
 from cloudbot.services.session import SessionService
 from cloudbot.services.sessions import SessionsService
+from cloudbot.services.subscription import SubscriptionService
 from cloudbot.services.tunnels import TunnelsService
 from cloudbot.services.workspaces import WorkspacesService
 
@@ -114,27 +115,35 @@ def build(settings: Settings) -> Container:
     clock = SystemClock()
     ownership = OwnershipService(users)
     moderation = ModerationService(moderation_store, protected_ids=settings.admin_ids)
+    # The paid-plan gate: one seam every work service calls, and the actor's
+    # Telegram id is exempt when it is in the operator allowlist (anti-lockout).
+    subscription = SubscriptionService(subscriptions, admin_ids=settings.admin_ids)
 
     services = Services(
         account=AccountService(users),
-        billing=BillingService(subscriptions),
+        billing=BillingService(subscriptions, engine=engine, subscription=subscription),
         backup=BackupService(backup_store),
-        workspaces=WorkspacesService(engine, users, ownership, subscriptions, moderation),
+        workspaces=WorkspacesService(
+            engine, users, ownership, subscriptions, moderation, subscription
+        ),
         session=SessionService(users, engine, ownership),
-        files=FilesService(engine, ownership),
-        execution=ExecutionService(engine, ownership, moderation),
-        sessions=SessionsService(engine, sessions, ownership, moderation),
+        files=FilesService(engine, ownership, subscription=subscription),
+        execution=ExecutionService(engine, ownership, moderation, subscription=subscription),
+        sessions=SessionsService(
+            engine, sessions, ownership, moderation, subscription=subscription
+        ),
         ownership=ownership,
-        packages=PackagesService(engine, ownership),
-        tunnels=TunnelsService(engine, ownership),
+        packages=PackagesService(engine, ownership, subscription=subscription),
+        tunnels=TunnelsService(engine, ownership, subscription=subscription),
         ports=PortsService(engine, ownership),
         metrics=MetricsService(engine, ownership),
-        processes=ProcessesService(engine, ownership),
-        archives=ArchivesService(engine, ownership),
+        processes=ProcessesService(engine, ownership, subscription=subscription),
+        archives=ArchivesService(engine, ownership, subscription=subscription),
         events=EventsService(event_log),
         admin=AdminService(
             users, engine, event_log, admin_state, ownership, BotRuntime(),
             subscriptions=subscriptions, moderation=moderation,
+            subscription=subscription,
         ),
         notifier=NotifierService(event_log, admin_state),
         broadcast=BroadcastService(broadcast_store),

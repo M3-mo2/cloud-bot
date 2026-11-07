@@ -100,6 +100,24 @@ class PlanRequired(DomainError):
 
     code = "plan_required"
 
+
+class SubscriptionExpired(DomainError):
+    """Work was refused because the workspace's plan is not active.
+
+    Raised by the **service** layer (``SubscriptionService.assert_usable``), never
+    by a middleware: every caller — a handler, a scheduled job, a script, a future
+    entry point — funnels through the same gate. It renders the same
+    ``err.subscription_expired`` screen the engine's ``403`` does, so the user
+    cannot tell which side refused, and the workspace id lets the screen offer
+    Renew.
+    """
+
+    code = "subscription_expired"
+
+    def __init__(self, ws_id: str) -> None:
+        super().__init__(ws_id)
+        self.ws_id = ws_id
+
 class TrialUsed(DomainError):
     """The user already used their one free trial."""
 

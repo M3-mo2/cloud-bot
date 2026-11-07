@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from cloudbot.domain.billing import StarPack, StarsPayment, decode_payload
+from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.domain.ports.subscriptions import Subscriptions
 from cloudbot.domain.plans import Plan, plan as plan_for, paid_plans
 from cloudbot.domain.subscription import Subscription, SubscriptionStatus, derive_status
@@ -62,8 +63,19 @@ def quote_rejection(payload: str, amount: int) -> str:
     return "pay.checkout.amount"
 
 class BillingService:
-    def __init__(self, subscriptions: Subscriptions) -> None:
+    def __init__(
+        self,
+        subscriptions: Subscriptions,
+        *,
+        engine: "EnginePort | None" = None,
+        subscription: "object | None" = None,
+    ) -> None:
         self._subscriptions = subscriptions
+        #: The engine, only so a renewal can teach it the new expiry. Optional:
+        #: the money rules are pure and testable without one.
+        self._engine = engine
+        #: The service-layer plan gate; it owns the best-effort engine sync.
+        self._subscription = subscription
 
     async def wallet(self, tg_id: int):
         return await self._subscriptions.wallet(tg_id)
@@ -87,7 +99,17 @@ class BillingService:
 
         Raises ``InsufficientFunds`` untouched (no workspace, no money moved).
         """
-        return await self._subscriptions.purchase(tg_id, ws_id, plan_code)
+        purchased = await self._subscriptions.purchase(tg_id, ws_id, plan_code)
+        await self._sync_engine(ws_id, purchased)
+        return purchased
+
+    async def _sync_engine(self, ws_id: str, subscription: Subscription) -> None:
+        """Teach the engine the renewed expiry (best-effort; never raises)."""
+        if self._subscription is None or self._engine is None:
+            return
+        await self._subscription.sync_engine(
+            self._engine, ws_id, subscription.expires_at
+        )
 
     async def deliver_payment(
         self,

@@ -24,21 +24,24 @@ from cloudbot.services.processes import validate_process_id
 WS = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4")
 
 
-async def _own(users, tg_id: int, ws: WorkspaceId = WS):
+async def _own(users, subscriptions, tg_id: int, ws: WorkspaceId = WS):
+    """Owner + an **active** plan: these tests measure their own gate, not the
+    plan gate (which is proven separately in ``test_subscription_gate.py``)."""
     await users.get_or_create(tg_id, default_locale=Locale.EN)
     await users.add_workspace(tg_id, ws)
+    await subscriptions.grant(tg_id, str(ws), "week", 7, tg_id, "test fixture")
 
 
 # -- metrics -----------------------------------------------------------------
-async def test_metrics_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_metrics_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.metrics.snapshot(2, WS)
     assert exc.value.code == "not_owned"
 
 
-async def test_metrics_snapshot_returns_frame(services, users):
-    await _own(users, 1)
+async def test_metrics_snapshot_returns_frame(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     metrics = await services.metrics.snapshot(1, WS)
     assert metrics.workspace_id == str(WS)
     assert metrics.ram_complete is True
@@ -137,46 +140,46 @@ def test_metrics_idle_state_is_not_a_warning():
 
 
 # -- processes ---------------------------------------------------------------
-async def test_processes_list_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_processes_list_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.processes.list(2, WS)
     assert exc.value.code == "not_owned"
 
 
-async def test_processes_list_reports_detached(services, users):
-    await _own(users, 1)
+async def test_processes_list_reports_detached(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     pl = await services.processes.list(1, WS)
     assert pl.count == len(pl.processes)
     assert any(p.kind == "detached" for p in pl.processes)
 
 
-async def test_processes_stop_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_processes_stop_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.processes.stop(2, WS, "proc_0123456789abcdef")
     assert exc.value.code == "not_owned"
 
 
-async def test_processes_stop_returns_stopped(services, users):
-    await _own(users, 1)
+async def test_processes_stop_returns_stopped(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     result = await services.processes.stop(1, WS, "proc_0123456789abcdef")
     assert result.status == "stopped"
     assert result.stopped is True
     assert result.gone is False
 
 
-async def test_processes_stop_gone_path(services, users):
-    await _own(users, 1)
+async def test_processes_stop_gone_path(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     result = await services.processes.stop(1, WS, "proc_fedcba9876543210")
     assert result.status == "gone"
     assert result.stopped is False
     assert result.gone is True
 
 
-async def test_processes_repeat_stop_not_found_becomes_gone(services, users, engine):
+async def test_processes_repeat_stop_not_found_becomes_gone(services, users, engine, subscriptions):
     """A repeat stop is a 404 because the process left the inventory → "gone"."""
-    await _own(users, 1)
+    await _own(users, subscriptions, 1)
 
     async def _not_found(ws_id, process_id):
         raise EngineRefused("not_found")
@@ -233,15 +236,15 @@ def test_process_argv_is_escaped_and_truncated():
 
 
 # -- archives ----------------------------------------------------------------
-async def test_archives_extract_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_archives_extract_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.archives.extract(2, WS, path="/a.zip")
     assert exc.value.code == "not_owned"
 
 
-async def test_archives_extract_dry_run_reports_nothing_written(services, users):
-    await _own(users, 1)
+async def test_archives_extract_dry_run_reports_nothing_written(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     before = await services.files.list(1, WS, "/")
     result = await services.archives.extract(1, WS, path="/archive.zip", dry_run=True)
     assert result.dry_run is True
@@ -256,8 +259,8 @@ async def test_archives_extract_dry_run_reports_nothing_written(services, users)
     assert landed.entries, "the real extract must add files (positive control)"
 
 
-async def test_archives_extract_real_writes(services, users):
-    await _own(users, 1)
+async def test_archives_extract_real_writes(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     result = await services.archives.extract(1, WS, path="/archive.zip", dry_run=False)
     assert result.dry_run is False
     assert result.entries_extracted >= 1
@@ -273,14 +276,14 @@ async def test_archives_upload_size_precheck(services):
     services.archives.check_upload_size(1024, meta)  # no raise
 
 
-async def test_archives_extract_rejects_empty_source(services, users):
-    await _own(users, 1)
+async def test_archives_extract_rejects_empty_source(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(InvalidInput):
         await services.archives.extract(1, WS, path="  ")
 
 
-async def test_archives_export_always_zip(services, users):
-    await _own(users, 1)
+async def test_archives_export_always_zip(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     filename, blob = await services.archives.export(1, WS, "/project")
     assert filename.endswith(".zip")
     assert blob[:2] == b"PK"  # a ZIP signature

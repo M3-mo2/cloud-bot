@@ -41,20 +41,27 @@ class ExecutionService:
         engine: EnginePort,
         ownership: OwnershipService,
         moderation: "object | None" = None,
+        *,
+        subscription: "object | None" = None,
     ) -> None:
         self._engine = engine
         self._ownership = ownership
         self._moderation = moderation
+        self._subscription = subscription
 
-    async def _assert_executable(self, ws_id: WorkspaceId) -> None:
-        """Refuse a banned workspace at the service boundary (not only in the UI).
+    async def _assert_executable(self, tg_id: int, ws_id: WorkspaceId) -> None:
+        """Refuse a banned workspace, then a lapsed plan — at the service boundary.
 
         Every execution path — a run button, a terminal, the API, a scheduler —
-        funnels through one of the methods below, so a workspace ban can never be
-        bypassed by calling the service directly instead of pressing a button.
+        funnels through one of the methods below, so neither an admin ban nor an
+        expired subscription can be bypassed by calling the service directly
+        instead of pressing a button. A ban outranks a plan (the admin's reason is
+        the more actionable refusal).
         """
         if self._moderation is not None:
             await self._moderation.assert_executable(ws_id)
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -77,7 +84,7 @@ class ExecutionService:
         timeout_sec: int | None = None,
     ) -> ExecResult:
         await self._ownership.assert_owned(tg_id, ws_id)
-        await self._assert_executable(ws_id)
+        await self._assert_executable(tg_id, ws_id)
         clamped = self.clamp_exec_timeout(timeout_sec)
         return await self._engine.exec(ws_id, cmd, cwd=cwd, timeout_sec=clamped)
 
@@ -86,7 +93,7 @@ class ExecutionService:
         self, tg_id: int, ws_id: WorkspaceId, argv: list[str], *, cwd: str | None = None
     ) -> Run:
         await self._ownership.assert_owned(tg_id, ws_id)
-        await self._assert_executable(ws_id)
+        await self._assert_executable(tg_id, ws_id)
         if not argv:
             raise InvalidInput("argv", "empty")
         return await self._engine.create_run(ws_id, kind="command", argv=argv, cwd=cwd)
@@ -95,7 +102,7 @@ class ExecutionService:
         self, tg_id: int, ws_id: WorkspaceId, path: str, *, args: list[str] | None = None
     ) -> Run:
         await self._ownership.assert_owned(tg_id, ws_id)
-        await self._assert_executable(ws_id)
+        await self._assert_executable(tg_id, ws_id)
         if not path:
             raise InvalidInput("file", "empty")
         return await self._engine.create_run(ws_id, kind="file", file=path, args=args)

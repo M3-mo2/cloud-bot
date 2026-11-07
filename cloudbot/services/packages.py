@@ -41,9 +41,21 @@ class InstallOutcome:
 
 
 class PackagesService:
-    def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
+    def __init__(
+        self,
+        engine: EnginePort,
+        ownership: OwnershipService,
+        *,
+        subscription: "object | None" = None,
+    ) -> None:
         self._engine = engine
         self._ownership = ownership
+        self._subscription = subscription
+
+    async def _assert_usable(self, tg_id: int, ws_id: WorkspaceId) -> None:
+        """Refuse install/remove on a lapsed plan; listing stays allowed."""
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -56,6 +68,7 @@ class PackagesService:
         self, tg_id: int, ws_id: WorkspaceId, packages: list[str]
     ) -> InstallOutcome:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_usable(tg_id, ws_id)
         cleaned = [validate_package_name(name) for name in packages]
         # Fetch the workspace so a failed install can be explained honestly
         # ("this workspace has no internet") without a second round trip at
@@ -66,11 +79,13 @@ class PackagesService:
 
     async def remove(self, tg_id: int, ws_id: WorkspaceId, name: str) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_usable(tg_id, ws_id)
         cleaned = validate_package_name(name)
         await self._engine.remove_package(ws_id, cleaned)
 
     async def remove_all(self, tg_id: int, ws_id: WorkspaceId) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_usable(tg_id, ws_id)
         await self._engine.remove_all_packages(ws_id)
 
 

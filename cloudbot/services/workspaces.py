@@ -49,12 +49,17 @@ class WorkspacesService:
         ownership: OwnershipService,
         subscriptions: Subscriptions | None = None,
         moderation: "object | None" = None,
+        subscription: "object | None" = None,
     ) -> None:
         self._engine = engine
         self._users = users
         self._ownership = ownership
         self._subscriptions = subscriptions
         self._moderation = moderation
+        #: The service-layer plan gate + best-effort engine sync (see
+        #: ``services/subscription.py``). Optional so the pure-unit fixtures stay
+        #: constructible; production always wires it.
+        self._subscription = subscription
 
     async def meta(self, refresh: bool = False) -> EngineMeta:
         return await self._engine.meta(refresh=refresh)
@@ -252,7 +257,9 @@ class WorkspacesService:
                 if subscription is None or subscription.plan_code != "trial":
                     raise TrialUsed()
             else:
-                await self._subscriptions.purchase(tg_id, str(ws.id), plan.code)
+                subscription = await self._subscriptions.purchase(
+                    tg_id, str(ws.id), plan.code
+                )
         except Exception:
             # The plan could not be attached (trial already used, or a concurrent
             # spend took the balance): do not leave a planless workspace behind.
@@ -262,6 +269,13 @@ class WorkspacesService:
             except Exception:  # noqa: BLE001
                 log.error("workspace.plan_compensation_failed", ws_id=str(ws.id))
             raise
+        # Tell the engine the term so its own ``403 subscription_expired`` can
+        # fire. Best-effort: the bot's store is the source of truth and the
+        # service gate still refuses work if the sync fails.
+        if self._subscription is not None and subscription is not None:
+            await self._subscription.sync_engine(
+                self._engine, ws.id, subscription.expires_at
+            )
         return self._with_owner(ws, tg_id)
 
     async def get(self, tg_id: int, ws_id: WorkspaceId) -> Workspace:

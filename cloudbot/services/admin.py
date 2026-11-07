@@ -54,6 +54,7 @@ class AdminService:
         runtime: BotRuntime | None = None,
         subscriptions: Subscriptions | None = None,
         moderation: "object | None" = None,
+        subscription: "object | None" = None,
     ) -> None:
         self._users = users
         self._engine = engine
@@ -63,6 +64,8 @@ class AdminService:
         self._runtime = runtime or BotRuntime()
         self._subscriptions = subscriptions
         self._moderation = moderation
+        #: The plan gate; a forward grant teaches the engine the new expiry.
+        self._subscription = subscription
 
     # -- overview ------------------------------------------------------------
     async def overview(self, *, now: datetime | None = None) -> AdminOverview:
@@ -315,10 +318,18 @@ class AdminService:
         target = ws_id or await self._first_workspace(tg_id)
         if target is None:
             raise RuntimeError("user has no workspace to attach the plan to")
-        return await self._subscriptions.grant(
+        granted = await self._subscriptions.grant(
             tg_id, target, plan_code, days, actor, reason,
             idempotency_key=idempotency_key,
         )
+        # A forward grant (days > 0) is pushed to the engine; a shorten is not
+        # (the engine cannot accept an earlier term — the service gate still
+        # refuses work at the bot's expiry).
+        if self._subscription is not None and days > 0 and granted is not None:
+            await self._subscription.sync_engine(
+                self._engine, target, granted.expires_at
+            )
+        return granted
 
     async def revoke(
         self,

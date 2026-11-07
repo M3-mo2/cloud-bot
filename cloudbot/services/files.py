@@ -20,9 +20,28 @@ MAX_PREVIEW_BYTES = 12 * 1024
 
 
 class FilesService:
-    def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
+    def __init__(
+        self,
+        engine: EnginePort,
+        ownership: OwnershipService,
+        *,
+        subscription: "object | None" = None,
+    ) -> None:
         self._engine = engine
         self._ownership = ownership
+        self._subscription = subscription
+
+    async def _assert_writable(self, tg_id: int, ws_id: WorkspaceId) -> None:
+        """Refuse a mutation on a workspace whose plan is not active.
+
+        Reads stay allowed (the engine allows them while locked and a user's files
+        must remain viewable); only writes/deletes/moves/upload are refused here.
+        The engine also refuses mutating file operations on a locked workspace
+        (``403 subscription_expired``); this is the client-side half, so a path with
+        no UI cannot bypass it.
+        """
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -49,22 +68,26 @@ class FilesService:
         self, tg_id: int, ws_id: WorkspaceId, path: str, content: str, *, encoding: str = "text"
     ) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_writable(tg_id, ws_id)
         await self._engine.write_file(ws_id, path, content, encoding=encoding)
 
     async def mkdir(self, tg_id: int, ws_id: WorkspaceId, path: str) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_writable(tg_id, ws_id)
         if not path or path == "/":
             raise InvalidInput("path", "empty")
         await self._engine.mkdir(ws_id, path)
 
     async def rename(self, tg_id: int, ws_id: WorkspaceId, src: str, dst: str) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_writable(tg_id, ws_id)
         if not dst or dst == "/":
             raise InvalidInput("path", "empty")
         await self._engine.rename(ws_id, src, dst)
 
     async def delete(self, tg_id: int, ws_id: WorkspaceId, path: str) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_writable(tg_id, ws_id)
         await self._engine.delete_file(ws_id, path)
 
     def check_upload_size(self, size_bytes: int, meta: EngineMeta) -> None:
@@ -83,6 +106,7 @@ class FilesService:
         size_bytes: int | None = None,
     ) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_writable(tg_id, ws_id)
         if size_bytes is not None:
             meta = await self._engine.meta()
             self.check_upload_size(size_bytes, meta)

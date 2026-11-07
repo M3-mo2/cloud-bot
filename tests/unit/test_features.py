@@ -19,21 +19,24 @@ from cloudbot.services.tunnels import parse_port, validate_port
 WS = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK4")
 
 
-async def _own(users, tg_id: int, ws: WorkspaceId = WS):
+async def _own(users, subscriptions, tg_id: int, ws: WorkspaceId = WS):
+    """Owner + an **active** plan: these tests measure their own gate, not the
+    plan gate (which is proven separately in ``test_subscription_gate.py``)."""
     await users.get_or_create(tg_id, default_locale=Locale.EN)
     await users.add_workspace(tg_id, ws)
+    await subscriptions.grant(tg_id, str(ws), "week", 7, tg_id, "test fixture")
 
 
 # -- packages ----------------------------------------------------------------
-async def test_packages_install_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_packages_install_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.packages.install(2, WS, ["six"])
     assert exc.value.code == "not_owned"
 
 
-async def test_packages_install_ok_when_net(services, users):
-    await _own(users, 1)
+async def test_packages_install_ok_when_net(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     # demo is seeded with default limits (allow_net False); enable it.
     await services.workspaces.patch(1, WS, limits=Limits(allow_net=True))
     outcome = await services.packages.install(1, WS, ["six"])
@@ -41,8 +44,8 @@ async def test_packages_install_ok_when_net(services, users):
     assert outcome.allow_net is True
 
 
-async def test_packages_install_failure_is_honest_without_net(services, users):
-    await _own(users, 1)
+async def test_packages_install_failure_is_honest_without_net(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     # The default workspace has allow_net False; the fake returns exit_code 1.
     outcome = await services.packages.install(1, WS, ["six"])
     assert outcome.result.exit_code == 1
@@ -128,16 +131,16 @@ def test_parse_package_input_splits_on_space_and_comma():
 
 
 # -- tunnels -----------------------------------------------------------------
-async def test_tunnels_publish_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_tunnels_publish_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.tunnels.publish(2, WS, 8080)
     assert exc.value.code == "not_owned"
 
 
-async def test_tunnels_publish_gate_allow_tunnels(services, users):
+async def test_tunnels_publish_gate_allow_tunnels(services, users, subscriptions):
     """allow_net on, allow_tunnels off ⇒ the allow_tunnels gate."""
-    await _own(users, 1)
+    await _own(users, subscriptions, 1)
     await services.workspaces.patch(1, WS, limits=Limits(allow_net=True, allow_tunnels=False))
     with pytest.raises(EngineRefused) as exc:
         await services.tunnels.publish(1, WS, 8080)
@@ -145,9 +148,9 @@ async def test_tunnels_publish_gate_allow_tunnels(services, users):
     assert exc.value.details.get("field") == "allow_tunnels"
 
 
-async def test_tunnels_publish_gate_allow_net(services, users):
+async def test_tunnels_publish_gate_allow_net(services, users, subscriptions):
     """allow_net off ⇒ the allow_net gate, even with allow_tunnels on."""
-    await _own(users, 1)
+    await _own(users, subscriptions, 1)
     await services.workspaces.patch(1, WS, limits=Limits(allow_net=False, allow_tunnels=True))
     with pytest.raises(EngineRefused) as exc:
         await services.tunnels.publish(1, WS, 8080)
@@ -155,8 +158,8 @@ async def test_tunnels_publish_gate_allow_net(services, users):
     assert exc.value.details.get("field") == "allow_net"
 
 
-async def test_tunnels_publish_ok_when_both_on(services, users):
-    await _own(users, 1)
+async def test_tunnels_publish_ok_when_both_on(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     await services.workspaces.patch(1, WS, limits=Limits(allow_net=True, allow_tunnels=True))
     tunnel = await services.tunnels.publish(1, WS, 8080)
     assert tunnel.url.startswith("https://")
@@ -219,15 +222,15 @@ def test_three_gate_messages_are_distinct():
 
 
 # -- ports -------------------------------------------------------------------
-async def test_ports_list_refused_for_foreign_user(services, users):
-    await _own(users, 1)
+async def test_ports_list_refused_for_foreign_user(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     with pytest.raises(Exception) as exc:
         await services.ports.list(2, WS)
     assert exc.value.code == "not_owned"
 
 
-async def test_ports_list_returns_report_with_reachability(services, users):
-    await _own(users, 1)
+async def test_ports_list_returns_report_with_reachability(services, users, subscriptions):
+    await _own(users, subscriptions, 1)
     report = await services.ports.list(1, WS)
     assert report.reachability
     assert report.count == len(report.ports)

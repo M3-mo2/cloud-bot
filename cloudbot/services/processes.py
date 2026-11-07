@@ -33,9 +33,16 @@ _SAFE_PROCESS_ID = re.compile(r"^proc_[0-9a-f]+$")
 
 
 class ProcessesService:
-    def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
+    def __init__(
+        self,
+        engine: EnginePort,
+        ownership: OwnershipService,
+        *,
+        subscription: "object | None" = None,
+    ) -> None:
         self._engine = engine
         self._ownership = ownership
+        self._subscription = subscription
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -48,6 +55,8 @@ class ProcessesService:
         self, tg_id: int, ws_id: WorkspaceId, process_id: str
     ) -> ProcessStopResult:
         await self._ownership.assert_owned(tg_id, ws_id)
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
         clean = validate_process_id(process_id)
         try:
             return await self._engine.stop_process(ws_id, clean)

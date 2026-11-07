@@ -40,9 +40,16 @@ class TunnelAlreadyPublished(Exception):
 
 
 class TunnelsService:
-    def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
+    def __init__(
+        self,
+        engine: EnginePort,
+        ownership: OwnershipService,
+        *,
+        subscription: "object | None" = None,
+    ) -> None:
         self._engine = engine
         self._ownership = ownership
+        self._subscription = subscription
         #: ``/v1/meta`` is the same for every workspace and changes rarely; cache
         #: it so rendering the ceiling (``tunnels.max_per_workspace``) is not a new
         #: engine call on every screen. The adapter's own meta cache backs this up.
@@ -76,6 +83,8 @@ class TunnelsService:
         create releases the lock, so a retry works.
         """
         await self._ownership.assert_owned(tg_id, ws_id)
+        if self._subscription is not None:
+            await self._subscription.assert_usable(tg_id, ws_id)
         validate_port(port)
         key = (tg_id, str(ws_id), port)
         async with self._locks[key]:

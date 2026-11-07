@@ -7,6 +7,7 @@ on the HTTP adapter.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, AsyncIterator, Protocol
 
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession, Workspace
@@ -49,6 +50,17 @@ class EnginePort(Protocol):
         limits: Limits | None,
         subscription: dict[str, Any] | None = None,
     ) -> Workspace: ...
+    async def extend_subscription(
+        self, ws_id: WorkspaceId, *, expires_at: "datetime"
+    ) -> Workspace:
+        """Extend a workspace's term to an absolute instant (INTEGRATION-GUIDE §8.3).
+
+        The engine *adds* a duration while the term is live and refuses an earlier
+        ``expires_at`` (``422 subscription_would_shorten``); it accepts this
+        absolute form for a client that owns its own calendar. A lapsed term
+        starts from now and unlocks.
+        """
+        ...
     async def list_workspaces(self) -> list[Workspace]: ...
     async def get_workspace(self, ws_id: WorkspaceId) -> Workspace: ...
     async def patch_workspace(
