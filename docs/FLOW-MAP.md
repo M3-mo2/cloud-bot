@@ -14,10 +14,10 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 153 |
 | Screens including the /dev tool | 156 |
-| Button edges | 508 |
-| Distinct destinations (actions) | 144 |
+| Button edges | 507 |
+| Distinct destinations (actions) | 143 |
 | Entry commands | 9 |
-| Callback re-entry actions | 144 |
+| Callback re-entry actions | 143 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 144 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 143 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -85,7 +85,6 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:notify_pause` | (handler only — no screen) |
 | `adm:notify_scope` | admin_user |
 | `adm:notify_toggle` | (handler only — no screen) |
-| `adm:resume` | admin_user |
 | `adm:sec` | admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `adm:suspend` | admin_user |
 | `adm:user` | admin_user |
@@ -598,8 +597,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -1022,8 +1019,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -1601,8 +1596,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -2087,8 +2080,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -2562,8 +2553,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -2666,8 +2655,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - ↩ `admin_confirm_delete` (already on this path)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
@@ -3136,8 +3123,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
         - ↩ `admin_confirm_suspend` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - ↩ `admin_confirm_suspend` (already on this path)
@@ -4290,8 +4275,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -4704,8 +4687,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -4888,8 +4869,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
@@ -5588,8 +5567,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -6002,8 +5979,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -6546,8 +6521,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -7200,8 +7173,6 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_user` (already on this path)
-  - ▶️ Resume → `adm:resume` → admin_user
-    - ↩ `admin_user` (already on this path)
   - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
     - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 2)
     - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 2)
@@ -7462,8 +7433,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
@@ -8166,8 +8135,6 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -9165,8 +9132,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -9579,8 +9544,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -10158,8 +10121,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -10644,8 +10605,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -11119,8 +11078,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -11223,8 +11180,6 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - ↩ `admin_confirm_delete` (already on this path)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
@@ -11693,8 +11648,6 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
         - ↩ `admin_confirm_suspend` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - ↩ `admin_confirm_suspend` (already on this path)
@@ -12847,8 +12800,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -13261,8 +13212,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -13445,8 +13394,6 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
@@ -14145,8 +14092,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -14689,8 +14634,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -15240,8 +15183,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -15894,8 +15835,6 @@ _No screen is rendered by this command._
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_user` (already on this path)
-  - ▶️ Resume → `adm:resume` → admin_user
-    - ↩ `admin_user` (already on this path)
   - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
     - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 2)
     - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 2)
@@ -16156,8 +16095,6 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
@@ -16860,8 +16797,6 @@ _No screen is rendered by this command._
           - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - ▶️ Resume → `adm:resume` → admin_user
-            - ↩ `admin_user` (already on this path)
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
@@ -21675,11 +21610,10 @@ _The live fleet counts are unknown while the engine is unreachable._
 
 ### admin_user — 👤 User
 
-_Workspaces_
+_✦ Workspaces ⟸ 1_
 
 - 🚪 Enter → `adm:enter` → admin_entered
 - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-- ▶️ Resume → `adm:resume` → admin_user
 - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
 - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
 - 🧾 Audit log → `adm:audit_user` → admin_audit

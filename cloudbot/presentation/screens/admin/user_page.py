@@ -16,13 +16,18 @@ from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.mapping.statuses import display_state
 from cloudbot.presentation.rich.document import RichDoc
-from cloudbot.presentation.rich.tags import code, fragment, italic
+from cloudbot.presentation.rich.tags import Html, bold, code, fragment, italic
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin._helpers import num
 from cloudbot.presentation.screens.admin.actions import action, action_button
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
+
+
+def _raw(text: str) -> Html:
+    """Trusted HTML fragment built here (the status/usage line)."""
+    return Html(text)
 
 
 def user_screen(view: AdminView) -> Screen:
@@ -64,13 +69,25 @@ def user_screen(view: AdminView) -> Screen:
         )
 
     doc.div()
-    doc.p(catalog.t("admin.user.workspaces", locale))
+
+    # -- his workspaces: one block each, no table -----------------------------
+    # This was a four-column table (name, id, status, usage). In a right-to-left
+    # message the numbers drifted away from their headers, and the 26-character
+    # workspace id took a whole column to say nothing the name had not. A block per
+    # workspace — bold name, then one compact line of facts — reads straight down.
+    doc.p(
+        fragment(
+            [
+                bold(f"✦ {catalog.t('admin.user.workspaces', locale)} ⟸ "),
+                bold(num(len(page.workspaces), locale)),
+            ]
+        )
+    )
     kb: list[list] = []
     enter = action("enter")
     if not page.workspaces:
         doc.p(italic(catalog.t("admin.user.no_workspaces", locale)))
     else:
-        rows = []
         for wu in page.workspaces:
             ws = wu.workspace
             label_key, emoji = display_state(ws.status, ws.summary.state)
@@ -87,57 +104,48 @@ def user_screen(view: AdminView) -> Screen:
             ban_reason = view.workspace_bans.get(str(ws.id))
             if ban_reason is not None:
                 status = catalog.t("admin.user.ws_banned", locale, reason=ban_reason or "—")
-            rows.append(
-                [ws.name, code(str(ws.id)), status, usage]
-            )
-        doc.table(
-            [
-                catalog.t("admin.user.col.name", locale),
-                catalog.t("admin.user.col.id", locale),
-                catalog.t("admin.user.col.status", locale),
-                catalog.t("admin.user.col.usage", locale),
-            ],
-            rows,
-        )
-        for wu in page.workspaces:
-            ws = wu.workspace
+
+            doc.p(bold(ws.name))
+            doc.p(_raw(f"{status} · {usage}"))
+
             subject = str(ws.id)
-            kb.append(
-                [
-                    action_button(enter, subject, locale)
-                    if enter
-                    else inline(catalog.t("admin.action.enter", locale), "nav:noop")
-                ]
-            )
-            # quick destructive actions are only offered on the workspace row's
-            # own line, and each goes through its declaration's confirmation.
-            row = []
-            for key in ("suspend", "resume", "delete"):
+            # Two rows per workspace at most: the way in, then the state change.
+            # Delete and ban sit one deliberate step further, on their own row —
+            # never mixed into the row a hand taps by habit.
+            first = [
+                action_button(enter, subject, locale)
+                if enter
+                else inline(catalog.t("admin.action.enter", locale), "nav:noop")
+            ]
+            for key in ("suspend", "resume"):
                 act = action(key)
                 if act is not None:
-                    row.append(action_button(act, subject, locale))
-            kb.append(row)
-            # A workspace ban is reversible from here: lift, or (if not banned) ban.
-            if str(ws.id) in view.workspace_bans:
-                kb.append(
-                    [
-                        inline(
-                            catalog.t("admin.user.ws_unban", locale),
-                            admin_cb.ws_unban(subject),
-                            intent=Intent.SUCCESS,
-                        )
-                    ]
+                    first.append(action_button(act, subject, locale))
+                    break
+            kb.append(first)
+
+            danger = []
+            act = action("delete")
+            if act is not None:
+                danger.append(action_button(act, subject, locale))
+            if ban_reason is not None:
+                danger.append(
+                    inline(
+                        catalog.t("admin.user.ws_unban", locale),
+                        admin_cb.ws_unban(subject),
+                        intent=Intent.SUCCESS,
+                    )
                 )
             else:
-                kb.append(
-                    [
-                        inline(
-                            catalog.t("admin.user.ws_ban", locale),
-                            admin_cb.ws_ban(subject),
-                            intent=Intent.DANGER,
-                        )
-                    ]
+                danger.append(
+                    inline(
+                        catalog.t("admin.user.ws_ban", locale),
+                        admin_cb.ws_ban(subject),
+                        intent=Intent.DANGER,
+                    )
                 )
+            if danger:
+                kb.append(danger)
 
     _recent_activity(doc, view, locale)
     kb.append(
@@ -202,27 +210,33 @@ def user_screen(view: AdminView) -> Screen:
 
 def _recent_activity(doc: RichDoc, view: AdminView, locale) -> None:
     doc.div()
-    doc.p(catalog.t("admin.user.recent", locale))
+    doc.p(
+        fragment(
+            [
+                bold(f"✦ {catalog.t('admin.user.recent', locale)} ⟸ "),
+                bold(num(len(view.recent_events), locale)),
+            ]
+        )
+    )
     events: list[EventRecord] = view.recent_events
     if not events:
         doc.p(italic(catalog.t("admin.user.no_activity", locale)))
         return
-    rows = []
-    for e in events:
-        rows.append(
-            [
-                format_datetime(e.ts, locale),
-                catalog.t(e.category.label_key, locale),
-                catalog.t(e.summary_key, locale, **e.params),
-            ]
-        )
-    doc.table(
+    # One line per event: a bullet, the *what* in bold, then the *when* in
+    # parentheses. A three-column table put the timestamp in its own column, which
+    # in a right-to-left message is the first thing a reader's eye lands on — and
+    # the least useful. The sentence reads in the order a person asks it.
+    doc.ul(
         [
-            catalog.t("admin.audit.col.time", locale),
-            catalog.t("admin.audit.col.category", locale),
-            catalog.t("admin.audit.col.summary", locale),
-        ],
-        rows,
+            fragment(
+                [
+                    bold(catalog.t(e.summary_key, locale, **e.params)),
+                    f" — {catalog.t(e.category.label_key, locale)}",
+                    f" ({format_datetime(e.ts, locale)})",
+                ]
+            )
+            for e in events
+        ]
     )
 
 
