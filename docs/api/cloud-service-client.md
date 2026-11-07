@@ -318,7 +318,7 @@ Mapping (from INTEGRATION-GUIDE §9.3 / SPEC §2.8):
 | `write_rate_exceeded` | 429 | `RateLimited(retry_after)` | "Slow down; retry shortly." |
 | `internal` | 500 | `EngineUnavailable(retryable=True)` | "Something went wrong; try again." |
 | `unavailable` | 503 | `EngineUnavailable(retryable=True, cause=message)` | **Preserve the engine message for the operator log**, show generic retry text. |
-| `tunnel_url_unavailable` | 504 | `EngineRefused("tunnel_url_unavailable")` | "Could not publish; try again." |
+| `tunnel_url_unavailable` | 504 | `EngineRefused("tunnel_url_unavailable", retryable=True)` | "Could not publish; try again." — a transient cloudflared/Cloudflare failure (INTEGRATION-GUIDE §9.3 marks it retryable); a bare gateway `504` with no envelope synthesizes this same code |
 | `insufficient_storage` | 507 | `EngineRefused("insufficient_storage")` | "The workspace is out of disk." |
 
 The engine's `message` is attached to the error object as `cause` for **logging**,

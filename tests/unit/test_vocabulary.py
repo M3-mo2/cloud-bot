@@ -114,6 +114,47 @@ def test_domain_errors_render_localized():
             assert "{" not in screen.doc.html
 
 
+def test_retryable_refusal_keeps_its_screen_and_offers_retry():
+    """A ``504 tunnel_url_unavailable`` is retryable *and* keeps its own sentence.
+
+    INTEGRATION-GUIDE.md:696 marks it "Retry? Yes". The presentation view must
+    carry that honesty: same tunnel sentence, the retry hint, and a Retry button
+    — never a dead-end "permanent" screen. Removing the ``err.retryable`` OR in
+    the mapping makes this fail.
+    """
+    from cloudbot.presentation.i18n.catalog import catalog
+
+    retryable = EngineRefused("tunnel_url_unavailable", retryable=True)
+    screen = error_mapping.error_screen(retryable, Locale.EN)
+    html = screen.doc.html
+    # Its own sentence, not a generic "unavailable". The rich renderer escapes
+    # the apostrophe, so compare against the escaped form.
+    from cloudbot.presentation.rich.tags import esc
+
+    assert esc(catalog.t("err.tunnel_url_unavailable", Locale.EN)) in html
+    assert catalog.t("err.hint", Locale.EN) in html
+    labels = [b.text for row in (screen.markup.inline_keyboard or []) for b in row]
+    assert catalog.t("common.retry", Locale.EN) in labels
+
+    # The adapter's retry flag is what makes the view retryable. Prove it with a
+    # code that the screen vocabulary alone would treat as permanent: flagged
+    # retryable it offers Retry, unflagged it does not. This bites if the
+    # ``or err.retryable`` in the mapping is removed.
+    flagged = error_mapping.error_screen(
+        EngineRefused("not_found", retryable=True), Locale.EN
+    )
+    flagged_labels = [b.text for row in (flagged.markup.inline_keyboard or []) for b in row]
+    assert catalog.t("common.retry", Locale.EN) in flagged_labels
+
+    unflagged = error_mapping.error_screen(
+        EngineRefused("not_found", retryable=False), Locale.EN
+    )
+    unflagged_labels = [
+        b.text for row in (unflagged.markup.inline_keyboard or []) for b in row
+    ]
+    assert catalog.t("common.retry", Locale.EN) not in unflagged_labels
+
+
 def test_raw_payload_only_in_debug_admin():
     err = EngineRefused("unavailable", message='{"error":{"code":"unavailable"}}', details={})
     prod = error_mapping.error_screen(err, Locale.EN, mode=RunMode.PRODUCTION, is_admin=True)

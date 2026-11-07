@@ -86,6 +86,11 @@ class FileEntryDTO(_DTO):
     target: str | None = None
     target_inside: bool | None = None
     runnable: str | None = None
+    #: Carried by ``files/stat`` for a regular file (API.md L1316-1328). A
+    #: listing omits them and they fall back to the empty/false defaults.
+    sha256: str = ""
+    content_type: str = ""
+    binary: bool = False
 
 
 class FileListEnvelope(_DTO):

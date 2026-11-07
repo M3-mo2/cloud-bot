@@ -1,8 +1,9 @@
 """``EnginePort`` implementation over the HTTP client.
 
 This is the only module that knows the Cloud Service wire format. It maps domain
-calls to HTTP and responses to domain entities, and refreshes ``/v1/meta`` on a
-``422 unprocessable`` refusal (usually a stale cached cap), retrying once.
+calls to HTTP and responses to domain entities. Stale cached numbers are handled
+by refreshing ``/v1/meta`` and retrying **once**, but only on idempotent calls
+(``PATCH``); a creation ``POST`` is never auto-retried.
 """
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ from cloudbot.adapters.cloud_service.mapping import (
     exec_result_from_dto,
     file_content_from_dto,
     file_page_from_dto,
-    file_entry_from_dto,
+    file_entry_from_stat_dto,
     install_result_from_dto,
     lifecycle_from_dto,
     log_chunk_from_dto,
@@ -150,7 +151,15 @@ class EngineAdapter:
             body["limits"] = limits.to_request()
         if subscription:
             body["subscription"] = subscription
-        response = await self._client.post("/v1/workspaces", json=body)
+        try:
+            response = await self._client.post("/v1/workspaces", json=body)
+        except EngineRefused as exc:
+            # A ``422``/``409`` above a cached maximum means the cached numbers
+            # were stale; re-read ``/v1/meta`` so the next attempt's pickers are
+            # right (INTEGRATION-GUIDE.md:29-32). Creation is not idempotent, so
+            # the refusal is still surfaced — never retried behind the user.
+            await self._refresh_meta_if_stale(exc)
+            raise
         env = dto.WorkspaceEnvelope.model_validate(response.json())
         return workspace_from_dto(env.workspace)
 
@@ -176,9 +185,17 @@ class EngineAdapter:
             body["name"] = name
         if limits is not None:
             body["limits"] = limits.to_request()
-        response = await self._client.patch(_ws_path(ws_id), json=body)
-        env = dto.WorkspaceEnvelope.model_validate(response.json())
-        return workspace_from_dto(env.workspace)
+
+        async def _call() -> Workspace:
+            response = await self._client.patch(_ws_path(ws_id), json=body)
+            env = dto.WorkspaceEnvelope.model_validate(response.json())
+            return workspace_from_dto(env.workspace)
+
+        # A ``422`` on a limits PATCH is the documented stale-cache case: the
+        # cached ``limits_maxima`` no longer matches the engine's. Refresh meta
+        # and retry the (idempotent) PATCH once; the refusal is surfaced if it
+        # persists. Creation POSTs deliberately do not take this path.
+        return await self._with_meta_refresh(_call)
 
     async def suspend_workspace(self, ws_id: WorkspaceId) -> LifecycleResult:
         response = await self._client.post(_ws_path(ws_id, "/suspend"))
@@ -214,17 +231,13 @@ class EngineAdapter:
         response = await self._client.get(
             _ws_path(ws_id, "/files/stat"), params={"path": path}
         )
-        return file_entry_from_dto(
-            dto.FileEntryDTO(
-                name=_basename(path),
-                path=path,
-                type=response.json().get("type", "file"),
-                size=response.json().get("size"),
-                mode=response.json().get("mode"),
-                mod_time=response.json().get("mod_time"),
-                runnable=response.json().get("runnable"),
-            )
-        )
+        # Map the whole stat response through its DTO: it carries ``sha256``,
+        # ``content_type`` and ``binary`` for a regular file, and dropping them
+        # made a file's integrity/type unverifiable without a byte read.
+        payload = dict(response.json())
+        payload.setdefault("name", _basename(path))
+        payload.setdefault("path", path)
+        return file_entry_from_stat_dto(dto.FileStatDTO.model_validate(payload))
 
     async def read_file(
         self,
@@ -346,14 +359,34 @@ class EngineAdapter:
         return run_from_dto(env_dto.run)
 
     async def _with_meta_refresh(self, coro_factory: Any) -> Any:
-        """Run a call; on ``unprocessable`` refresh meta and retry once."""
+        """Run an idempotent call; on a stale-number refusal refresh meta, retry once.
+
+        INTEGRATION-GUIDE.md:29-32: re-read ``/v1/meta`` "whenever a request is
+        refused with `422`/`409` because your cached numbers were stale", then
+        retry. Only idempotent calls are wired through here: a non-idempotent
+        create is never retried (surfacing its refusal so the user retries).
+        """
         try:
             return await coro_factory()
         except EngineRefused as exc:
-            if exc.engine_code == "unprocessable":
+            if exc.engine_code in ("unprocessable", "conflict"):
                 await self._meta.refresh()
                 return await coro_factory()
             raise
+
+    async def _refresh_meta_if_stale(self, exc: EngineRefused) -> None:
+        """Refresh ``/v1/meta`` after a stale-number refusal, without retrying.
+
+        Used on non-idempotent calls: a ``422 unprocessable`` is exactly the
+        stale-cached-maximum refusal the guide names. Re-reading meta corrects
+        the bot's pickers/caps for the next attempt; the creation itself is
+        still surfaced, since retrying it could create twice.
+        """
+        if exc.engine_code in ("unprocessable", "conflict"):
+            try:
+                await self._meta.refresh()
+            except Exception:  # noqa: BLE001 - a failed refresh must not hide the refusal
+                pass
 
     async def list_runs(
         self,

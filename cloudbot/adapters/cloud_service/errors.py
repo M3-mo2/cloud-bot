@@ -49,6 +49,11 @@ KNOWN_CODES: frozenset[str] = frozenset(
         "unavailable",
         "tunnel_url_unavailable",
         "insufficient_storage",
+        # The engine retains ``timeout`` in its vocabulary/OpenAPI enum but never
+        # emits it (SPEC §2.8, API.md). It is parsed defensively, never used as
+        # the classification of a bare ``504`` (that is ``tunnel_url_unavailable``
+        # above). A *client-side* socket timeout is a different event entirely and
+        # is ``EngineUnavailable`` from the transport, not this code.
         "timeout",
     }
 )
@@ -58,6 +63,13 @@ _UNAVAILABLE_CODES = {"internal"}
 
 #: Codes that map to the bot's own ``RateLimited``.
 _RATE_LIMITED_CODES = {"write_rate_exceeded"}
+
+#: Refusal codes that the contract marks retryable (INTEGRATION-GUIDE §9.3).
+#: ``504 tunnel_url_unavailable`` says "Retry? Yes" — a cloudflared/Cloudflare
+#: hiccup, not a permanent refusal — so it keeps its own tunnel screen *and*
+#: carries ``retryable=True``. A ``503 unavailable`` is transient too, but it is
+#: an ``EngineUnavailable`` with a message, handled in ``translate`` below.
+_RETRYABLE_REFUSAL_CODES = {"tunnel_url_unavailable", "timeout"}
 
 
 def _parse_envelope(body: bytes) -> tuple[str, str, dict[str, Any]]:
@@ -95,7 +107,11 @@ def _synthetic_code(status: int) -> str:
         500: "internal",
         502: "unavailable",
         503: "unavailable",
-        504: "timeout",
+        # The contract's only ``504`` is ``tunnel_url_unavailable`` (a transient
+        # cloudflared/Cloudflare failure), so a bare gateway 504 is classified
+        # as that retryable refusal — never as a locally invented ``timeout``
+        # code, which would report a transient hiccup as a permanent failure.
+        504: "tunnel_url_unavailable",
         507: "insufficient_storage",
     }.get(status, "unknown")
 
@@ -123,5 +139,14 @@ def translate(
             return EngineUnavailable(retryable=True, cause=message)
         return EngineRefused(code, message=message, details=details)
     if code in _UNAVAILABLE_CODES or code == "unavailable":
+        # A 503 `unavailable`: transient, and ``cause`` keeps the engine's exact
+        # message that names the real reason (INTEGRATION-GUIDE §9.1/§9.3).
         return EngineUnavailable(retryable=True, cause=message)
-    return EngineRefused(code, message=message, details=details)
+    return EngineRefused(
+        code,
+        message=message,
+        details=details,
+        # ``504 tunnel_url_unavailable`` is retryable per the contract, while a
+        # permanent refusal (409/422/403/404/...) stays retryable=False.
+        retryable=code in _RETRYABLE_REFUSAL_CODES,
+    )

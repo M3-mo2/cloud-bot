@@ -204,7 +204,12 @@ def view_for_error(
             code=code,
             title_key=title_key,
             message_key=message_key,
-            retryable=code in _RETRY_CODES,
+            # The adapter's own classification (the contract's retry column) is
+            # additive to the screen vocabulary: a retryable refusal such as
+            # ``504 tunnel_url_unavailable`` keeps its dedicated screen *and*
+            # offers Retry, so the user is never told a transient failure is
+            # permanent.
+            retryable=code in _RETRY_CODES or err.retryable,
             extra_actions=_extra_actions_for(code, ws_id),
         )
     if isinstance(err, EngineUnavailable):

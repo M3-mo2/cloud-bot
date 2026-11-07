@@ -66,6 +66,12 @@ class FileEntry:
     mod_time: datetime | None
     runnable: str | None
     target: str | None = None
+    #: Integrity/type fields the engine's ``files/stat`` response carries for a
+    #: regular file. They live on the entry (not just on a read) so a caller can
+    #: verify a file without reading its bytes; empty/false for a directory.
+    sha256: str = ""
+    content_type: str = ""
+    binary: bool = False
 
 
 @dataclass(frozen=True)

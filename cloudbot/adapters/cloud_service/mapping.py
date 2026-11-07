@@ -128,6 +128,26 @@ def file_entry_from_dto(e: dto.FileEntryDTO) -> FileEntry:
         mod_time=_dt(e.mod_time),
         runnable=e.runnable,
         target=e.target,
+        sha256=e.sha256,
+        content_type=e.content_type,
+        binary=e.binary,
+    )
+
+
+def file_entry_from_stat_dto(s: dto.FileStatDTO) -> FileEntry:
+    """Map a ``files/stat`` response, including ``sha256``/``content_type``/``binary``."""
+    ftype = s.type if s.type in ("file", "dir", "symlink") else "file"
+    return FileEntry(
+        path=s.path,
+        name=s.name,
+        type=ftype,  # type: ignore[arg-type]
+        size=s.size,
+        mode=s.mode,
+        mod_time=_dt(s.mod_time),
+        runnable=s.runnable,
+        sha256=s.sha256,
+        content_type=s.content_type,
+        binary=s.binary,
     )
 
 

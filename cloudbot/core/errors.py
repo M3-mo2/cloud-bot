@@ -29,7 +29,14 @@ class EngineUnavailable(DomainError):
 
 
 class EngineRefused(DomainError):
-    """A valid request the engine refused (422/409/403/404/413/415/507)."""
+    """A valid request the engine refused (422/409/403/404/413/415/507).
+
+    ``retryable`` carries the contract's retry column for the few 5xx codes that
+    are refusals with their own screen but are still transient. A modelled
+    ``504 tunnel_url_unavailable`` is the case: it keeps its dedicated tunnel
+    screen *and* is honestly marked retryable (INTEGRATION-GUIDE §9.3), rather
+    than being flattened into a generic "engine unavailable".
+    """
 
     code = "engine_refused"
 
@@ -38,11 +45,14 @@ class EngineRefused(DomainError):
         code: str,
         message: str = "",
         details: dict[str, Any] | None = None,
+        *,
+        retryable: bool = False,
     ) -> None:
         super().__init__(code)
         self.engine_code = code
         self.message = message
         self.details: dict[str, Any] = dict(details or {})
+        self.retryable = retryable
 
 
 class NotOwned(DomainError):

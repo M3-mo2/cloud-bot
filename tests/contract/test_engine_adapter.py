@@ -184,6 +184,13 @@ async def test_error_translation_404_not_found_distinct_from_403():
 
 
 async def test_error_translation_503_unavailable_preserves_message():
+    """The contract's sharpest edge: a 503 must carry the engine's own cause.
+
+    INTEGRATION-GUIDE.md:699 — "503 unavailable ... **`message` names the cause.**
+    ... Show the engine's `message`." The adapter must not substitute its own
+    generic "unavailable" text; the exact message is preserved on ``cause`` for
+    the operator log (the user-facing sentence is chosen by presentation).
+    """
     adapter = make_adapter(
         {
             ("GET", "/v1/meta"): httpx.Response(
@@ -201,7 +208,8 @@ async def test_error_translation_503_unavailable_preserves_message():
     with pytest.raises(EngineUnavailable) as exc:
         await adapter.meta(refresh=True)
     assert exc.value.retryable is True
-    assert "nsjail" in exc.value.cause
+    # Not merely "contains nsjail": the whole engine message survives untouched.
+    assert exc.value.cause == "sandbox unavailable: nsjail could not set up"
     await adapter.aclose()
 
 
@@ -209,6 +217,91 @@ async def test_error_translation_429_rate_limited():
     body = json.dumps({"error": {"code": "write_rate_exceeded", "message": "", "details": {}}}).encode()
     translated = engine_errors.translate(429, body)
     assert isinstance(translated, RateLimited)
+
+
+def test_bare_504_is_tunnel_url_unavailable_and_retryable():
+    """A 504 without an envelope must not be reported as a permanent failure.
+
+    INTEGRATION-GUIDE.md:696 — "| 504 | `tunnel_url_unavailable` | ... | Yes |".
+    A gateway/proxy can answer a 504 with an HTML body (no JSON envelope), so the
+    status-only path must yield the contract's only 504 code, classified
+    retryable — not the locally invented ``timeout`` code the adapter used to
+    map 504 to (which read as a permanent failure to any correct client).
+    """
+    translated = engine_errors.translate(504, b"<html>504 Gateway Time-out</html>")
+    assert isinstance(translated, EngineRefused)
+    assert translated.engine_code == "tunnel_url_unavailable"
+    assert translated.retryable is True
+
+
+def test_504_with_modelled_envelope_is_retryable_refusal():
+    body = json.dumps(
+        {
+            "error": {
+                "code": "tunnel_url_unavailable",
+                "message": "cloudflared produced no URL",
+                "details": {"reason": "cloudflare 429"},
+            }
+        }
+    ).encode()
+    translated = engine_errors.translate(504, body)
+    assert isinstance(translated, EngineRefused)
+    assert translated.engine_code == "tunnel_url_unavailable"
+    assert translated.retryable is True
+    # The contract still says the client shows "Could not publish; try again."
+    # for this code, but retryability is a separate, honest property.
+    assert translated.details.get("reason") == "cloudflare 429"
+
+
+def test_modelled_timeout_504_is_parsed_defensively_and_retryable():
+    """The engine's retained ``timeout`` code is parsed, never conflated with 504.
+
+    SPEC §2.8 / API.md: ``timeout`` is "defined but never emitted". If an older
+    engine does emit it, the adapter still recognises it and marks it retryable;
+    a bare ``504`` (no envelope) is ``tunnel_url_unavailable`` instead (above).
+    """
+    body = json.dumps(
+        {"error": {"code": "timeout", "message": "deadline", "details": {}}}
+    ).encode()
+    translated = engine_errors.translate(504, body)
+    assert isinstance(translated, EngineRefused)
+    assert translated.engine_code == "timeout"
+    assert translated.retryable is True
+    # And it is a *known* code, so presentation has a sentence for it.
+    assert "timeout" in engine_errors.KNOWN_CODES
+
+
+def test_permanent_refusal_is_not_marked_retryable():
+    """Retryability is the contract's column, not a blanket True on 5xx."""
+    body = json.dumps(
+        {"error": {"code": "tunnels_disabled", "message": "", "details": {}}}
+    ).encode()
+    translated = engine_errors.translate(422, body)
+    assert isinstance(translated, EngineRefused)
+    assert translated.retryable is False
+
+
+async def test_client_side_socket_timeout_is_not_the_server_504():
+    """A client socket timeout is a different event from the server's 504.
+
+    INTEGRATION-GUIDE.md:696 models ``504 tunnel_url_unavailable``; a transport
+    timeout (``httpx.TimeoutException``) is not an HTTP response at all and must
+    stay ``EngineUnavailable`` — never be conflated with the server 504.
+    """
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("client socket timed out", request=request)
+
+    adapter = EngineAdapter.create(
+        "http://engine.test", "k", transport=httpx.MockTransport(handler), max_retries=0
+    )
+    try:
+        with pytest.raises(EngineUnavailable) as exc:
+            await adapter.meta(refresh=True)
+        assert exc.value.retryable is True
+        # It is a transport failure, not a 504 refusal.
+        assert "tunnel_url_unavailable" not in str(exc.value.cause)
+    finally:
+        await adapter.aclose()
 
 
 async def test_401_becomes_config_error():
@@ -237,11 +330,82 @@ async def test_meta_refresh_on_unprocessable():
     transport = httpx.MockTransport(handler)
     adapter = EngineAdapter.create("http://engine.test", "k", transport=transport)
     await adapter.meta(refresh=True)  # prime
+    calls["meta"] = 0
     calls["create"] = 0
-    # The adapter's _with_meta_refresh is exercised through a retrying call.
+    # A creation POST is not idempotent, so a stale-number 422 is surfaced (it
+    # could create twice if retried) — but the adapter still re-reads ``/v1/meta``
+    # so the next attempt's caps are right (INTEGRATION-GUIDE.md:29-32).
     with pytest.raises(EngineRefused):
         await adapter.create_workspace(name="x", profile=None, limits=Limits())
     assert calls["create"] == 1  # creations are never auto-retried
+    assert calls["meta"] == 1  # but meta was refreshed, not left stale
+    await adapter.aclose()
+
+
+async def test_patch_workspace_refreshes_meta_and_retries_once_on_422():
+    """The meta-refresh requirement is wired, and this fails without the wiring.
+
+    INTEGRATION-GUIDE.md:29-32 requires re-reading ``/v1/meta`` after a ``422``
+    that names a stale cached number, then retrying. ``PATCH`` is idempotent, so
+    the adapter does exactly that: refresh meta, retry once, and return the
+    successful result. Removing ``_with_meta_refresh`` from ``patch_workspace``
+    makes the first ``422`` surface, so this test goes red.
+    """
+    calls = {"meta": 0, "patch": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/v1/meta":
+            calls["meta"] += 1
+            return httpx.Response(200, json=META)
+        if request.url.path == f"/v1/workspaces/{WS}" and request.method == "PATCH":
+            calls["patch"] += 1
+            if calls["patch"] == 1:
+                return httpx.Response(
+                    422,
+                    json={
+                        "error": {
+                            "code": "unprocessable",
+                            "message": "disk_mb above maximum",
+                            "details": {"field": "disk_mb"},
+                        }
+                    },
+                )
+            return httpx.Response(200, json=WORKSPACE)
+        return httpx.Response(404, json={"error": {"code": "not_found"}})
+
+    adapter = EngineAdapter.create(
+        "http://engine.test", "k", transport=httpx.MockTransport(handler)
+    )
+    await adapter.meta(refresh=True)  # prime the cache: one meta call
+    calls["meta"] = 0
+    ws = await adapter.patch_workspace(WorkspaceId(WS), limits=Limits(disk_mb=2048))
+    assert str(ws.id) == WS
+    # The stale refusal was resolved by refreshing meta exactly once and retrying.
+    assert calls["meta"] == 1
+    assert calls["patch"] == 2
+    await adapter.aclose()
+
+
+async def test_patch_workspace_surfaces_a_persistent_422_after_one_retry():
+    """One retry only: a genuinely bad request is still a visible refusal."""
+    calls = {"patch": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/v1/meta":
+            return httpx.Response(200, json=META)
+        calls["patch"] += 1
+        return httpx.Response(
+            422,
+            json={"error": {"code": "unprocessable", "message": "still bad", "details": {"field": "disk_mb"}}},
+        )
+
+    adapter = EngineAdapter.create(
+        "http://engine.test", "k", transport=httpx.MockTransport(handler)
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.patch_workspace(WorkspaceId(WS), limits=Limits(disk_mb=2048))
+    assert exc.value.engine_code == "unprocessable"
+    assert calls["patch"] == 2  # original + exactly one retry
     await adapter.aclose()
 
 
@@ -260,6 +424,78 @@ async def test_unknown_field_body_does_not_crash():
     )
     meta = await adapter.meta(refresh=True)
     assert meta.version == "0.0.20"
+    await adapter.aclose()
+
+
+# -- files: stat carries the integrity/type fields ---------------------------
+STAT_FILE = {
+    "name": "main.py",
+    "path": "/main.py",
+    "type": "file",
+    "size": 12,
+    "mode": "0644",
+    "mod_time": "2026-01-02T15:05:05Z",
+    "content_type": "text/x-python; charset=utf-8",
+    "sha256": "0ca9" + "a" * 60,
+    "binary": False,
+    "runnable": "python3",
+}
+
+
+async def test_stat_file_surfaces_sha256_content_type_and_binary():
+    """A file's integrity must be verifiable from ``stat``, not only a read.
+
+    API.md L1316-1328: ``files/stat`` returns ``content_type``, ``sha256`` and
+    ``binary`` for a regular file. The adapter used to rebuild a five-field DTO
+    and throw all three away, so nothing could confirm a file's hash without
+    reading its bytes. They must reach the domain entry.
+    """
+    adapter = make_adapter(
+        {("GET", f"/v1/workspaces/{WS}/files/stat"): httpx.Response(200, json=STAT_FILE)}
+    )
+    entry = await adapter.stat_file(WorkspaceId(WS), "/main.py")
+    assert entry.path == "/main.py"
+    assert entry.name == "main.py"
+    assert entry.type == "file"
+    assert entry.size == 12
+    assert entry.sha256 == STAT_FILE["sha256"]
+    assert entry.content_type == "text/x-python; charset=utf-8"
+    assert entry.binary is False
+    await adapter.aclose()
+
+
+async def test_stat_file_binary_flag_is_not_dropped():
+    binary = {**STAT_FILE, "name": "logo.png", "path": "/logo.png",
+              "content_type": "image/png", "binary": True}
+    adapter = make_adapter(
+        {("GET", f"/v1/workspaces/{WS}/files/stat"): httpx.Response(200, json=binary)}
+    )
+    entry = await adapter.stat_file(WorkspaceId(WS), "/logo.png")
+    assert entry.binary is True
+    assert entry.content_type == "image/png"
+    await adapter.aclose()
+
+
+async def test_file_listing_dto_defaults_stay_empty():
+    """A listing omits the stat-only fields; they must not fabricate values."""
+    listing = {
+        "path": "/",
+        "entries": [
+            {"name": "main.py", "path": "/main.py", "type": "file", "size": 12,
+             "mode": "0644", "mod_time": "2026-01-02T15:05:05Z", "runnable": "python3"}
+        ],
+        "count": 1,
+        "total": 1,
+        "truncated": False,
+    }
+    adapter = make_adapter(
+        {("GET", f"/v1/workspaces/{WS}/files"): httpx.Response(200, json=listing)}
+    )
+    page = await adapter.list_files(WorkspaceId(WS), "/")
+    entry = page.entries[0]
+    assert entry.sha256 == ""
+    assert entry.content_type == ""
+    assert entry.binary is False
     await adapter.aclose()
 
 
@@ -601,7 +837,10 @@ async def test_tunnel_url_unavailable_504_is_refusal_not_retry():
     """A 504 with a modelled code is a ``top-level`` refusal, never a blind retry.
 
     The adapter retries idempotent verbs on 504, but a creation POST is never
-    retried, so the caller sees the documented ``tunnel_url_unavailable``.
+    retried, so the caller sees the documented ``tunnel_url_unavailable``. The
+    refusal is still classified **retryable** per INTEGRATION-GUIDE.md:696 ("Retry?
+    Yes"): the client must not call it permanent, and the tunnel screen offers
+    Retry on the same port.
     """
     adapter = make_adapter(
         {
@@ -621,6 +860,29 @@ async def test_tunnel_url_unavailable_504_is_refusal_not_retry():
         await adapter.create_tunnel(WS, 8080)
     assert exc.value.engine_code == "tunnel_url_unavailable"
     assert exc.value.details.get("reason") == "cloudflare 429"
+    assert exc.value.retryable is True
+    await adapter.aclose()
+
+
+async def test_create_tunnel_bare_gateway_504_is_retryable_tunnel_code():
+    """A proxy 504 with an HTML body reaches the tunnel screen, not a dead end.
+
+    The real regression path: ``POST /tunnels`` gets a bare ``504`` (no JSON
+    envelope), the adapter must still name the contract's ``tunnel_url_unavailable``
+    so the tunnel handler renders its dedicated retry-on-the-same-port screen.
+    Classifying it as a locally invented ``timeout`` code bypassed that path.
+    """
+    adapter = make_adapter(
+        {
+            ("POST", f"/v1/workspaces/{WS}/tunnels"): httpx.Response(
+                504, content=b"<html>504 Gateway Time-out</html>"
+            )
+        }
+    )
+    with pytest.raises(EngineRefused) as exc:
+        await adapter.create_tunnel(WS, 8080)
+    assert exc.value.engine_code == "tunnel_url_unavailable"
+    assert exc.value.retryable is True
     await adapter.aclose()
 
 
