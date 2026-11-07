@@ -73,12 +73,18 @@ async def test_delete_removes_registration(services, users):
     assert not await users.owns(5, ws.id)
 
 
-async def test_suspended_workspace_refuses_exec(services, users):
+async def test_suspended_workspace_refuses_exec(services, users, subscriptions):
     # scraper is seeded suspended.
     import cloudbot.domain.value_objects as vo
 
     scrapper = WorkspaceId("ws_01M6HJASCWM9Z1PF755GT89NK5")
     await users.add_workspace(9, scrapper)
+    # The subject here is the *suspension* refusal. Without a plan the
+    # service-layer gate answers "plan expired" first — a truthful refusal of a
+    # different question, and the more misleading one for a user whose workspace
+    # is merely suspended. Give the actor a live plan so the refusal under test is
+    # the one that reaches him.
+    await subscriptions.grant(9, str(scrapper), "month", 30, 9, "test fixture")
     with pytest.raises(EngineRefused) as exc:
         await services.execution.exec(9, scrapper, "echo hi")
     assert exc.value.engine_code == "workspace_suspended"

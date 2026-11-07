@@ -70,6 +70,11 @@ async def _container_with_workspace(*, allow_tunnels=True, allow_net=True, max_t
         engine_api_key="k",
         database_url="sqlite+aiosqlite:///:memory:",
         mock_engine=True,
+        # The owner under test also holds the admin bit, exactly as in production.
+        # ``Settings`` defaults ``admin_ids`` to empty, so without it the
+        # service-layer plan gate refuses every workspace-scoped call and the test
+        # fails on "Plan expired" instead of reaching the guard it is about.
+        admin_ids={WS_OWNER},
         _env_file=None,
     )
     container = build(settings)

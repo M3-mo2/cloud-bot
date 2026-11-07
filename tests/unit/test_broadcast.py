@@ -202,8 +202,18 @@ async def _seed(database, tg_id: int, *, name: str = "u") -> None:
     await repo.set_display_name(tg_id, name)
 
 async def _grant(database, tg_id: int, ws_id: str, *, days: int, now: datetime = NOW) -> None:
+    """Grant on the fixture's clock, not the wall clock.
+
+    ``now`` used to be accepted and then dropped: ``SqliteSubscriptions.grant``
+    read the real clock, so "a one-day plan" was measured from today instead of
+    from ``NOW`` and the "expired five days later" assertion reversed itself once
+    the calendar moved past the fixture date. The parameter is now load-bearing.
+    """
     subs = SqliteSubscriptions(database)
-    await subs.grant(tg_id, ws_id, "month", days, ADMIN, "test", idempotency_key=f"t:{tg_id}:{days}")
+    await subs.grant(
+        tg_id, ws_id, "month", days, ADMIN, "test",
+        idempotency_key=f"t:{tg_id}:{days}", now=now,
+    )
 
 async def test_audience_presets_return_real_disjoint_sets(db):
     # 1: has an active plan. 2: has an expired plan. 3: has a workspace, no plan.

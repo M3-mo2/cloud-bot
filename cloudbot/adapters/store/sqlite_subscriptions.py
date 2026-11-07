@@ -222,7 +222,15 @@ class SqliteSubscriptions:
         reason: str,
         *,
         idempotency_key: str = "",
+        now: datetime | None = None,
     ) -> Subscription | None:
+        """Extend (or, with negative ``days``, shorten) a workspace's plan.
+
+        ``now`` exists because the clock is an input, not an ambient fact: a caller
+        that fixes ``NOW`` and reasons "this expires in a day" was silently measured
+        against the real wall clock, so a one-day grant looked expired once the real
+        date moved past the fixture. Production leaves it ``None``.
+        """
         if days == 0:
             raise ValueError("grant days must be non-zero")
         try:
@@ -239,7 +247,7 @@ class SqliteSubscriptions:
                     await conn.execute("ROLLBACK")
                     return current
 
-                now = datetime.now(timezone.utc)
+                moment = now or datetime.now(timezone.utc)
                 current = await self._get(conn, ws_id)
                 if current is None and days < 0:
                     await conn.execute("ROLLBACK")
@@ -257,12 +265,12 @@ class SqliteSubscriptions:
                 else:
                     new = extend(
                         current, tg_id=tg_id, ws_id=ws_id, plan_code=plan_code,
-                        days=days, source=SubscriptionSource.ADMIN, now=now,
+                        days=days, source=SubscriptionSource.ADMIN, now=moment,
                     )
-                await self._put(conn, new, now)
+                await self._put(conn, new, moment)
                 await self._append_event(
                     conn, tg_id, ws_id, "grant" if days > 0 else "shorten",
-                    plan_code, days, actor, reason, now, idempotency_key,
+                    plan_code, days, actor, reason, moment, idempotency_key,
                 )
                 await conn.execute("COMMIT")
                 return new

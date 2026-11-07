@@ -124,6 +124,12 @@ async def _harness(*, allow_tunnels: bool = True, allow_net: bool = True, max_tu
         engine_api_key="k",
         database_url="sqlite+aiosqlite:///:memory:",
         mock_engine=True,
+        # The owner under test also holds the admin bit, exactly as in production:
+        # ``Settings`` defaults ``admin_ids`` to empty, so without this the
+        # service-layer plan gate refuses every workspace-scoped call and each
+        # test below fails on "Plan expired" instead of reaching the guard it is
+        # about. The gate is not the subject here.
+        admin_ids={WS_OWNER},
         _env_file=None,
     )
     container = build(settings)
@@ -377,6 +383,12 @@ async def test_f03_two_users_do_not_interfere():
     await container.users.get_or_create(OTHER2, default_locale=Locale.EN)
     ws2 = engine.add_workspace("other")
     await container.users.add_workspace(OTHER2, ws2.id)
+    # This test checks that one user's publish does not disturb the other's, so
+    # both need a live plan: the gate is enforced per (user, workspace) and would
+    # otherwise refuse the second publish for a reason this test is not about.
+    await container.subscriptions.grant(
+        OTHER2, str(ws2.id), "month", 30, OTHER2, "test fixture"
+    )
     await engine.patch_workspace(
         ws2.id, limits=Limits(allow_net=True, allow_tunnels=True)
     )

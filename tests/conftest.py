@@ -118,12 +118,20 @@ async def admin_state(database):
 async def subscriptions(database):
     return SqliteSubscriptions(database)
 
+#: The admin the fixtures act as. Production passes ``settings.admin_ids`` here;
+#: a fixture that left it empty made **every** admin action raise
+#: ``SubscriptionExpired``, because ``assert_usable`` exempts only ids it was
+#: told about. Tests that drove the panel as the operator then failed on a gate
+#: that was working correctly.
+ADMIN_TG_ID = 6508129575
+
+
 @pytest.fixture
 async def subscription_gate(subscriptions):
-    """The service-layer plan gate, wired exactly as production does (no admins)."""
+    """The service-layer plan gate, wired exactly as production does."""
     from cloudbot.services.subscription import SubscriptionService
 
-    return SubscriptionService(subscriptions)
+    return SubscriptionService(subscriptions, admin_ids=[ADMIN_TG_ID])
 
 @pytest.fixture
 def engine():
