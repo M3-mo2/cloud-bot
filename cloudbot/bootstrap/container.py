@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from cloudbot.adapters.cloud_service.engine import EngineAdapter
 from cloudbot.adapters.cloud_service.fake import FakeEngine
 from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
+from cloudbot.adapters.persistence.broadcast_store import SqliteBroadcastStore
 from cloudbot.adapters.persistence.database import Database
 from cloudbot.adapters.persistence.sqlite_events import (
     SqliteAdminStateStore,
@@ -30,6 +31,7 @@ from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
 from cloudbot.services.backup import BackupService
 from cloudbot.services.billing import BillingService
+from cloudbot.services.broadcast import BroadcastService
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
@@ -79,6 +81,7 @@ class Container:
     forcejoin_store: SqliteForceJoinStore
     backup_store: SqliteBackupStore
     moderation_store: SqliteModerationStore
+    broadcast_store: SqliteBroadcastStore
     services: Services
 
     async def aclose(self) -> None:
@@ -107,6 +110,7 @@ def build(settings: Settings) -> Container:
     forcejoin_store = SqliteForceJoinStore(database)
     backup_store = SqliteBackupStore(database)
     moderation_store = SqliteModerationStore(database)
+    broadcast_store = SqliteBroadcastStore(database)
     clock = SystemClock()
     ownership = OwnershipService(users)
     moderation = ModerationService(moderation_store, protected_ids=settings.admin_ids)
@@ -133,6 +137,7 @@ def build(settings: Settings) -> Container:
             subscriptions=subscriptions, moderation=moderation,
         ),
         notifier=NotifierService(event_log, admin_state),
+        broadcast=BroadcastService(broadcast_store),
         # The directory is wired with the real Bot in ``build_dispatcher``; this
         # placeholder keeps the service constructible (and keeps the gate's
         # "unknown ⇒ allow" path the safe default) until then.
@@ -151,5 +156,6 @@ def build(settings: Settings) -> Container:
         forcejoin_store=forcejoin_store,
         backup_store=backup_store,
         moderation_store=moderation_store,
+        broadcast_store=broadcast_store,
         services=services,
     )

@@ -200,6 +200,28 @@ class RichSender:
         buffer = await self._bot.download(document)
         return buffer.read()
 
+    async def copy_message(
+        self,
+        chat_id: int,
+        from_chat_id: int,
+        message_id: int,
+    ) -> Message:
+        """Replay one message byte-identically through Telegram's own copy.
+
+        This is the **broadcast** seam (and only that): a broadcast is stored as
+        the ``(from_chat_id, message_id)`` reference to the admin's own composed
+        message and delivered with ``Bot.copy_message``, so entities, links, photo,
+        caption and line breaks cannot drift through a re-render. Telegram answers
+        with a ``MessageId``; a caller that needs the message id reads
+        ``.message_id``. Exceptions are propagated: the broadcast loop is the one
+        place that interprets them and never aborts the run for one user.
+        """
+        return await self._bot.copy_message(
+            chat_id=chat_id,
+            from_chat_id=from_chat_id,
+            message_id=message_id,
+        )
+
     async def answer_callback(
         self, cb: Any, *, text: str | None = None, alert: bool = False
     ) -> None:

@@ -54,6 +54,7 @@ from cloudbot.adapters.persistence.sqlite_moderation import SqliteModerationStor
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
+from cloudbot.adapters.persistence.broadcast_store import SqliteBroadcastStore
 from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
 from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.locale import Locale
@@ -63,6 +64,7 @@ from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
 from cloudbot.services.backup import BackupService
 from cloudbot.services.billing import BillingService
+from cloudbot.services.broadcast import BroadcastService
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
@@ -194,6 +196,7 @@ async def services(
             subscriptions=subscriptions, moderation=moderation,
         ),
         notifier=NotifierService(event_log, admin_state),
+        broadcast=BroadcastService(SqliteBroadcastStore(database)),
         forcejoin=ForceJoinService(
             SqliteForceJoinStore(database), fake_directory, bot_id=42
         ),

@@ -52,6 +52,14 @@ from cloudbot.domain.backup import (
     BackupFile,
     BackupView,
 )
+from cloudbot.domain.broadcast import (
+    AudienceOption,
+    BroadcastResult,
+    BroadcastRun,
+    BroadcastSource,
+    BroadcastView,
+    FailureGroup,
+)
 from cloudbot.domain.events import (
     EventCategory,
     EventRecord,
@@ -114,6 +122,7 @@ from cloudbot.presentation.screens.admin import overview as admin_overview
 from cloudbot.presentation.screens.admin import user_page as admin_user
 from cloudbot.presentation.screens.admin import users as admin_users
 from cloudbot.presentation.screens.admin import moderation as admin_moderation
+from cloudbot.presentation.screens.admin import broadcast as admin_broadcast
 from cloudbot.presentation.screens.admin import workspace as admin_workspace
 from cloudbot.presentation.screens.admin.actions import action, confirmation_screen
 from cloudbot.presentation.screens.admin.notification_message import (
@@ -652,6 +661,7 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
             directory="/var/www/data/backups",
         ),
         overview=overview,
+        broadcast=_broadcast_view(),
         users_page=UserListPage(users=[user], total=1, offset=0, limit=10),
         user_page=page,
         audit_page=AuditPage(events=[event], total=1, offset=0, limit=20),
@@ -720,6 +730,59 @@ def _moderation_view(locale: Locale) -> AdminView:
             )
         ],
     )
+
+def _broadcast_run(run_id: int = 3, *, status: str = "done", sent: int = 40, failed: int = 4) -> BroadcastRun:
+    return BroadcastRun(
+        id=run_id,
+        created_at=NOW - timedelta(hours=2),
+        created_by=6508129575,
+        source=BroadcastSource(chat_id=6508129575, message_id=77, kind="photo"),
+        audience="all",
+        total=sent + failed,
+        sent=sent,
+        failed=failed,
+        status=status,
+        started_at=NOW - timedelta(hours=2),
+        finished_at=NOW - timedelta(hours=1),
+        stop_reason="",
+    )
+
+
+def _broadcast_view() -> BroadcastView:
+    return BroadcastView(
+        options=(
+            AudienceOption(key="all", count=1200),
+            AudienceOption(key="active", count=342),
+            AudienceOption(key="expired", count=118),
+            AudienceOption(key="no_plan", count=57),
+        ),
+        history=(
+            _broadcast_run(3),
+            _broadcast_run(2, status="stopped", sent=10, failed=5),
+            _broadcast_run(1, status="done", sent=0, failed=0),
+        ),
+        open_run=None,
+        max_recipients=5000,
+        failure_threshold=5,
+    )
+
+
+def _broadcast_open_view() -> BroadcastView:
+    from dataclasses import replace as _replace
+
+    view = _broadcast_view()
+    return _replace(view, open_run=_broadcast_run(4, status="sending", sent=12, failed=0))
+
+
+def _broadcast_result() -> BroadcastResult:
+    return BroadcastResult(
+        run=_broadcast_run(3),
+        groups=(
+            FailureGroup(kind="blocked", count=3),
+            FailureGroup(kind="other", count=1),
+        ),
+    )
+
 
 def plans_plan(code: str):
     from cloudbot.domain.plans import plan as _plan
@@ -1218,6 +1281,31 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "admin_backup_restore_done": lambda f, loc: admin_backup.restore_result_screen(
         _admin_view(loc), ok=True, scope="full",
         safety="/var/www/data/cloudbot-pre-restore-20261103T204339Z.db",
+    ),
+    "admin_broadcast": lambda f, loc: admin_broadcast.broadcast_screen(_admin_view(loc)),
+    "admin_broadcast_open": lambda f, loc: admin_broadcast.broadcast_screen(
+        AdminView(locale=loc, now=NOW, broadcast=_broadcast_open_view())
+    ),
+    "admin_broadcast_compose": lambda f, loc: admin_broadcast.compose_prompt(_admin_view(loc)),
+    "admin_broadcast_audience": lambda f, loc: admin_broadcast.audience_screen(
+        _admin_view(loc), _broadcast_view(), source=_broadcast_run().source
+    ),
+    "admin_broadcast_preview": lambda f, loc: admin_broadcast.preview_screen(
+        _admin_view(loc), source=_broadcast_run().source, family="all",
+        count=1200, ceiling=5000, over_ceiling=False,
+    ),
+    "admin_broadcast_preview_over_ceiling": lambda f, loc: admin_broadcast.preview_screen(
+        _admin_view(loc), source=_broadcast_run().source, family="all",
+        count=9000, ceiling=5000, over_ceiling=True,
+    ),
+    "admin_broadcast_progress": lambda f, loc: admin_broadcast.progress_screen(
+        _admin_view(loc), _broadcast_run(4, status="sending", sent=12, failed=0)
+    ),
+    "admin_broadcast_result": lambda f, loc: admin_broadcast.result_screen(
+        _admin_view(loc), _broadcast_result()
+    ),
+    "admin_broadcast_history": lambda f, loc: admin_broadcast.history_screen(
+        _admin_view(loc), _broadcast_view().history
     ),
 }
 

@@ -22,6 +22,7 @@ from . import backup as _backup  # noqa: E402,F401
 from . import audit as _audit  # noqa: E402,F401
 from . import wallet as _wallet  # noqa: E402,F401
 from . import moderation as _moderation  # noqa: E402,F401
+from . import broadcast as _broadcast  # noqa: E402,F401
 
 __all__ = [
     "AdminSection",

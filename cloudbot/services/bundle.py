@@ -9,6 +9,7 @@ from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
 from cloudbot.services.backup import BackupService
 from cloudbot.services.billing import BillingService
+from cloudbot.services.broadcast import BroadcastService
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
@@ -46,5 +47,6 @@ class Services:
     events: EventsService
     admin: AdminService
     notifier: NotifierService
+    broadcast: BroadcastService
     forcejoin: ForceJoinService
     moderation: ModerationService

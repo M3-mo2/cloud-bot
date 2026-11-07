@@ -137,3 +137,25 @@ class CannotBanAdmin(DomainError):
 
     def __init__(self) -> None:
         super().__init__(self.code)
+
+class BroadcastInFlight(DomainError):
+    """One broadcast at a time: a second run is refused while one is sending."""
+
+    code = "broadcast_in_flight"
+
+    def __init__(self) -> None:
+        super().__init__(self.code)
+
+class BroadcastOverCeiling(DomainError):
+    """The audience is larger than the per-run ceiling and was not confirmed.
+
+    ``count`` and ``ceiling`` are carried so the preview can say both numbers in
+    the admin's own words.
+    """
+
+    code = "broadcast_over_ceiling"
+
+    def __init__(self, count: int, ceiling: int) -> None:
+        super().__init__(self.code)
+        self.count = count
+        self.ceiling = ceiling

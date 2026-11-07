@@ -118,6 +118,14 @@ def test_the_dispatch_table_covers_every_codec_action():
         admin_cb.BAN_GO,
         admin_cb.WS_BAN,
         admin_cb.WS_UNBAN,
+        admin_cb.BC_COMPOSE,
+        admin_cb.BC_AUDIENCE,
+        admin_cb.BC_CONFIRM,
+        admin_cb.BC_RESULT,
+        admin_cb.BC_RETRY,
+        admin_cb.BC_HISTORY,
+        admin_cb.BC_RESEND,
+        admin_cb.BC_CANCEL,
     } | set(admin_cb.ACTION_KEYS)
     assert routes == expected, routes.symmetric_difference(expected)
 

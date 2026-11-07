@@ -22,6 +22,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from cloudbot.domain.admin import AdminView
+from cloudbot.domain.broadcast import AUDIENCES, BroadcastSource, AudienceKey
 from cloudbot.domain.events import EventCategory
 from cloudbot.domain.value_objects import WorkspaceId
 from cloudbot.handlers.render import show_screen
@@ -34,6 +35,7 @@ from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens.admin import audit as audit_screen_mod
 from cloudbot.presentation.screens.admin import backup as backup_screen_mod
+from cloudbot.presentation.screens.admin import broadcast as broadcast_screen_mod
 from cloudbot.presentation.screens.admin import forcejoin as forcejoin_screen_mod
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin import registry
@@ -82,6 +84,7 @@ async def _view(
     overview=None,
     banned_users=None,
     banned_workspaces=None,
+    broadcast=None,
 ) -> AdminView:
     entered = await services.admin.entered(ctx.actor_tg_id)
     subs = await services.admin.subscriptions(ctx.actor_tg_id)
@@ -125,6 +128,7 @@ async def _view(
         banned_users=banned_users or [],
         banned_workspaces=banned_workspaces or [],
         workspace_bans=workspace_bans,
+        broadcast=broadcast if broadcast is not None else await services.broadcast.view(),
     )
 
 async def _backup_view(services: Services):
@@ -952,6 +956,344 @@ async def _route_bk_cancel(cb, parsed: AdminCallback, ctx, services, sender, sta
     await services.backup.discard_staged(parsed.args[0])
     await _show_backup(cb, ctx, services, sender, key="admin.bk.saved")
 
+# -- broadcast ---------------------------------------------------------------
+def _broadcast_source(message) -> tuple[str, str]:
+    """Classify the admin's single composed message → ``(kind, refusal_reason)``.
+
+    The rule is the task's: one message, text / photo+caption / document / video.
+    An album (``media_group_id``) is refused **explicitly** — copying it would send
+    only the first part, which is worse than saying no.
+    """
+    if getattr(message, "media_group_id", None):
+        return "", "album"
+    if getattr(message, "photo", None):
+        return "photo", ""
+    if getattr(message, "video", None):
+        return "video", ""
+    if getattr(message, "document", None):
+        return "document", ""
+    if (message.text or "").strip():
+        return "text", ""
+    return "", "empty"
+
+
+async def _show_broadcast(cb, ctx, services, sender, *, banner_key: str = "") -> None:
+    view = await _view(ctx, services, broadcast=await services.broadcast.view())
+    screen = broadcast_screen_mod.broadcast_screen(view)
+    if banner_key:
+        from cloudbot.presentation.rich.tags import blockquote, fragment
+
+        screen.doc.prepend_raw(str(blockquote(fragment(catalog.t(banner_key, ctx.locale)))))
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+
+async def _route_bc_compose(cb, parsed, ctx, services, sender, state, events) -> None:
+    await state.set_state(AdminInput.awaiting_broadcast_message)
+    await show_screen(cb, broadcast_screen_mod.compose_prompt(await _view(ctx, services)), ctx=ctx, sender=sender)
+
+
+async def _route_bc_cancel(cb, parsed, ctx, services, sender, state, events) -> None:
+    await state.clear()
+    await _show_broadcast(cb, ctx, services, sender, banner_key="admin.bc.cancelled")
+
+
+async def _route_bc_audience(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    """A preset tap → freeze that audience into the draft and show the preview."""
+    audience = parsed.args[0]
+    run = await _broadcast_draft(ctx, services, state)
+    if run is None:
+        await _show_broadcast(cb, ctx, services, sender, banner_key="admin.bc.none")
+        return
+    from cloudbot.core.errors import BroadcastOverCeiling
+
+    try:
+        plan = await services.broadcast.plan(run.id, audience=audience)  # type: ignore[arg-type]
+    except BroadcastOverCeiling:
+        # Over the ceiling is not an error: it is the preview's decision, taken
+        # with the explicit bigger-number consent button.
+        section = await services.broadcast.view()
+        count = next((o.count for o in section.options if o.key == audience), 0)
+        await _show_preview(
+            cb, ctx, services, sender, run=run, audience=audience, count=count, over_ceiling=True
+        )
+        return
+    await _show_preview(
+        cb, ctx, services, sender, run=plan, audience=audience,
+        count=plan.total, over_ceiling=False,
+    )
+
+
+async def _broadcast_draft(ctx: UserContext, services, state):
+    """The composing draft for this admin: from FSM, else the newest stored draft.
+
+    The draft is persisted precisely so a restart does not lose the composed
+    message; the FSM is only a fast path.
+    """
+    data = await state.get_data()
+    run_id = int(data.get("bc_run_id") or 0)
+    run = await services.broadcast.run(run_id) if run_id else None
+    if run is not None and run.status == "composing":
+        return run
+    fallback = await services.broadcast.latest_draft(created_by=ctx.actor_tg_id)
+    if fallback is not None:
+        await state.update_data(bc_run_id=fallback.id)
+    return fallback
+
+
+async def _show_preview(cb, ctx, services, sender, *, run, audience, count, over_ceiling) -> None:
+    screen = broadcast_screen_mod.preview_screen(
+        await _view(ctx, services),
+        source=run.source,
+        family=audience,  # type: ignore[arg-type]
+        count=count,
+        ceiling=services.broadcast.max_recipients,
+        over_ceiling=over_ceiling,
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+
+async def _route_bc_go(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    """Confirm → freeze the plan (with consent if needed) → drive the run in place."""
+    audience, consent = parsed.args[0], parsed.args[1] == "1"
+    run = await _broadcast_draft(ctx, services, state)
+    if run is None:
+        await _show_broadcast(cb, ctx, services, sender, banner_key="admin.bc.none")
+        return
+    run_id = run.id
+    if run.in_flight:
+        await _show_broadcast(cb, ctx, services, sender, banner_key="admin.bc.send_in_flight")
+        return
+    from cloudbot.core.errors import BroadcastOverCeiling
+
+    # Re-freeze with the live count; consent is the bigger-number acknowledgement.
+    live = await services.broadcast.options()
+    count = next((o.count for o in live if o.key == audience), 0)
+    try:
+        run = await services.broadcast.plan(
+            run_id,
+            audience=audience,  # type: ignore[arg-type]
+            confirmed_count=count if consent else None,
+        )
+    except BroadcastOverCeiling:
+        await _show_preview(
+            cb, ctx, services, sender, run=run, audience=audience, count=count, over_ceiling=True
+        )
+        return
+
+    from cloudbot.presentation.mapping.broadcast import (
+        classify_copy_error,
+        retry_after_seconds,
+    )
+
+    progress_message = cb.message
+    chat_id = progress_message.chat.id if progress_message is not None else ctx.actor_tg_id
+    progress_id = progress_message.message_id if progress_message is not None else 0
+
+    first = True
+    last_rendered = {"key": None}
+
+    async def _progress(fresh) -> None:
+        nonlocal first
+        key = (fresh.sent, fresh.failed)
+        if key == last_rendered["key"]:
+            return
+        last_rendered["key"] = key
+        screen = broadcast_screen_mod.progress_screen(await _view(ctx, services), fresh)
+        if first:
+            first = False
+            if progress_id:
+                # The preview message becomes the progress message: an in-place
+                # update, not a new message per tick.
+                await sender.edit(chat_id, progress_id, screen.doc, markup=screen.markup)
+                return
+        await sender.edit(chat_id, progress_id, screen.doc, markup=screen.markup)
+
+    try:
+        result = await services.broadcast.send(
+            run_id,
+            copy=lambda chat, frm, mid: sender.copy_message(chat, frm, mid),
+            classify=classify_copy_error,
+            retry_after=_retry_after_or_none,
+            progress=_progress,
+        )
+    except Exception as exc:  # noqa: BLE001
+        from cloudbot.core.errors import BroadcastInFlight
+
+        if isinstance(exc, BroadcastInFlight):
+            await _show_broadcast(cb, ctx, services, sender, banner_key="admin.bc.send_in_flight")
+            return
+        raise
+    events.admin_action(
+        admin_id=ctx.actor_tg_id,
+        action="broadcast",
+        params={
+            "run": result.run.id,
+            "audience": result.run.audience,
+            "sent": result.run.sent,
+            "failed": result.run.failed,
+            "status": result.run.status,
+        },
+    )
+    await show_screen(
+        cb,
+        broadcast_screen_mod.result_screen(await _view(ctx, services), result),
+        ctx=ctx,
+        sender=sender,
+        force_send=True,
+    )
+
+
+def _retry_after_or_none(exc: BaseException) -> int | None:
+    from cloudbot.presentation.mapping.broadcast import (
+        is_retry_after,
+        retry_after_seconds,
+    )
+
+    return retry_after_seconds(exc) if is_retry_after(exc) else None
+
+
+async def _route_bc_result(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    run_id = parsed.arg_int(0)
+    result = await services.broadcast.result(run_id)
+    if result is None:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    await show_screen(
+        cb,
+        broadcast_screen_mod.result_screen(await _view(ctx, services), result),
+        ctx=ctx,
+        sender=sender,
+    )
+
+
+async def _route_bc_retry(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    """Re-attempt only the failed targets of a finished run, same stored message."""
+    run_id = parsed.arg_int(0)
+    run = await services.broadcast.run(run_id)
+    if run is None or run.in_flight:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    await state.update_data(bc_run_id=run_id)
+    await _resend_run(cb, ctx, services, sender, run, retry_failed=True, events=events)
+
+
+async def _route_bc_resend(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    """A history resend: the same stored reference to the same audience again."""
+    run_id = parsed.arg_int(0)
+    run = await services.broadcast.run(run_id)
+    if run is None or run.in_flight:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    # A resend is a new run over a fresh copy of the same audience, using the
+    # stored source reference — never a re-render of his text.
+    fresh = await services.broadcast.create_draft(
+        source=run.source, created_by=ctx.actor_tg_id
+    )
+    await services.broadcast.plan(fresh.id, audience=run.audience, confirmed_count=None)
+    await state.update_data(bc_run_id=fresh.id)
+    fresh = await services.broadcast.run(fresh.id)
+    assert fresh is not None
+    await _resend_run(cb, ctx, services, sender, fresh, retry_failed=False, events=events)
+
+
+async def _resend_run(cb, ctx, services, sender, run, *, retry_failed: bool, events) -> None:
+    from cloudbot.presentation.mapping.broadcast import classify_copy_error
+
+    progress_message = cb.message
+    chat_id = progress_message.chat.id if progress_message is not None else ctx.actor_tg_id
+    progress_id = progress_message.message_id if progress_message is not None else 0
+    last_rendered = {"key": None}
+
+    async def _progress(fresh) -> None:
+        key = (fresh.sent, fresh.failed)
+        if key == last_rendered["key"]:
+            return
+        last_rendered["key"] = key
+        if not progress_id:
+            return
+        screen = broadcast_screen_mod.progress_screen(await _view(ctx, services), fresh)
+        await sender.edit(chat_id, progress_id, screen.doc, markup=screen.markup)
+
+    try:
+        result = await services.broadcast.send(
+            run.id,
+            copy=lambda chat, frm, mid: sender.copy_message(chat, frm, mid),
+            classify=classify_copy_error,
+            retry_after=_retry_after_or_none,
+            progress=_progress,
+            retry_failed=retry_failed,
+        )
+    except Exception as exc:  # noqa: BLE001
+        from cloudbot.core.errors import BroadcastInFlight
+
+        if isinstance(exc, BroadcastInFlight):
+            await _show_broadcast(cb, ctx, services, sender, banner_key="admin.bc.send_in_flight")
+            return
+        raise
+    events.admin_action(
+        admin_id=ctx.actor_tg_id,
+        action="broadcast",
+        params={
+            "run": result.run.id,
+            "audience": result.run.audience,
+            "sent": result.run.sent,
+            "failed": result.run.failed,
+            "status": result.run.status,
+        },
+    )
+    await show_screen(
+        cb,
+        broadcast_screen_mod.result_screen(await _view(ctx, services), result),
+        ctx=ctx,
+        sender=sender,
+        force_send=True,
+    )
+
+
+async def _route_bc_history(cb, parsed, ctx, services, sender, state, events) -> None:
+    runs = tuple(await services.broadcast.history())
+    await show_screen(
+        cb,
+        broadcast_screen_mod.history_screen(await _view(ctx, services), runs),
+        ctx=ctx,
+        sender=sender,
+    )
+
+
+# -- broadcast: the admin's composed message (one update) --------------------
+@router.message(AdminInput.awaiting_broadcast_message)
+async def on_broadcast_message(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender,
+    state: FSMContext, events: RequestEvents,
+) -> None:
+    """Persist the ``(chat, message_id)`` reference — never the text — then ask the audience."""
+    kind, reason = _broadcast_source(message)
+    if reason:
+        await show_screen(
+            message,
+            broadcast_screen_mod.compose_refused(await _view(ctx, services), reason=reason),
+            ctx=ctx, sender=sender, force_send=True,
+        )
+        return
+    await state.clear()
+    source = BroadcastSource(chat_id=message.chat.id, message_id=message.message_id, kind=kind)
+    run = await services.broadcast.create_draft(source=source, created_by=ctx.actor_tg_id)
+    await state.update_data(bc_run_id=run.id)
+    section = await services.broadcast.view()
+    events.admin_action(
+        admin_id=ctx.actor_tg_id,
+        action="broadcast_compose",
+        params={"run": run.id, "kind": kind},
+    )
+    await show_screen(
+        message,
+        broadcast_screen_mod.audience_screen(
+            await _view(ctx, services, broadcast=section), section, source=source
+        ),
+        ctx=ctx, sender=sender, force_send=True,
+    )
+
+
 def _token_for(parsed: AdminCallback) -> str:
     """A deterministic, filesystem-safe token for the staged upload."""
     import hashlib
@@ -1009,6 +1351,14 @@ _ROUTES = {
     admin_cb.BK_DISK: _route_bk_disk,
     admin_cb.BK_GO: _route_bk_go,
     admin_cb.BK_CANCEL: _route_bk_cancel,
+    admin_cb.BC_COMPOSE: _route_bc_compose,
+    admin_cb.BC_AUDIENCE: _route_bc_audience,
+    admin_cb.BC_CONFIRM: _route_bc_go,
+    admin_cb.BC_RESULT: _route_bc_result,
+    admin_cb.BC_RETRY: _route_bc_retry,
+    admin_cb.BC_HISTORY: _route_bc_history,
+    admin_cb.BC_RESEND: _route_bc_resend,
+    admin_cb.BC_CANCEL: _route_bc_cancel,
 }
 
 

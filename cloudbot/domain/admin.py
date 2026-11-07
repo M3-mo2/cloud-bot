@@ -14,6 +14,7 @@ from cloudbot.domain.events import EventRecord
 from cloudbot.domain.forcejoin import ForceJoinChat
 from cloudbot.domain.moderation import UserBan, WorkspaceBan
 from cloudbot.domain.backup import BackupView
+from cloudbot.domain.broadcast import BroadcastView
 from cloudbot.domain.subscription import Subscription
 from cloudbot.domain.value_objects import ResourceUsage
 
@@ -143,6 +144,8 @@ class AdminView:
     #: ``ws_id -> admin reason`` for the workspaces on a user's page, so each row
     #: can render its ban state and the lift button.
     workspace_bans: dict[str, str] = field(default_factory=dict)
+    #: The broadcast section's read model (audience counts, history, open run).
+    broadcast: "BroadcastView | None" = None
 
 
 def summarize_user(user: User, workspace_count: int, *, plan: str = "free") -> UserSummary:

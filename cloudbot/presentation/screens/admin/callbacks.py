@@ -74,6 +74,15 @@ BK_RESTORE = "bk_restore"
 BK_DISK = "bk_disk"
 BK_GO = "bk_go"
 BK_CANCEL = "bk_cancel"
+# -- broadcast ---------------------------------------------------------------
+BC_COMPOSE = "bc_compose"
+BC_AUDIENCE = "bc_aud"
+BC_CONFIRM = "bc_go"
+BC_RESULT = "bc_result"
+BC_RETRY = "bc_retry"
+BC_HISTORY = "bc_hist"
+BC_RESEND = "bc_resend"
+BC_CANCEL = "bc_cancel"
 
 #: The admin workspace actions declared in ``actions.py``. Each takes one subject.
 ACTION_KEYS: frozenset[str] = frozenset({"enter", "suspend", "resume", "delete"})
@@ -280,6 +289,32 @@ def backup_go(token: str, scope: str) -> str:
 def backup_cancel(token: str) -> str:
     return _action(BK_CANCEL, token)
 
+# -- broadcast ---------------------------------------------------------------
+def broadcast_compose() -> str:
+    return _action(BC_COMPOSE)
+
+def broadcast_audience(audience: str) -> str:
+    return _action(BC_AUDIENCE, audience)
+
+def broadcast_confirm(audience: str, over_ceiling: bool = False) -> str:
+    """Confirm the send. ``over_ceiling`` is the explicit bigger-number consent."""
+    return _action(BC_CONFIRM, audience, "1" if over_ceiling else "0")
+
+def broadcast_result(run_id: int) -> str:
+    return _action(BC_RESULT, int(run_id))
+
+def broadcast_retry(run_id: int) -> str:
+    return _action(BC_RETRY, int(run_id))
+
+def broadcast_history() -> str:
+    return _action(BC_HISTORY)
+
+def broadcast_resend(run_id: int) -> str:
+    return _action(BC_RESEND, int(run_id))
+
+def broadcast_cancel() -> str:
+    return _action(BC_CANCEL)
+
 # -- parser ------------------------------------------------------------------
 def _invalid(data: str, reason: str, action: str = "") -> InvalidAdminCallback:
     return InvalidAdminCallback(raw=data, reason=reason, action=action)
@@ -484,6 +519,33 @@ def parse(data: str) -> AdminParseResult:
         if len(rest) != 1 or not rest[0]:
             return _invalid(data, "bad_arity", action)
         return AdminCallback(action, (rest[0],))
+
+    if action == BC_COMPOSE or action == BC_HISTORY or action == BC_CANCEL:
+        if rest:
+            return _invalid(data, "too_many_args", action)
+        return AdminCallback(action)
+
+    if action == BC_AUDIENCE:
+        if len(rest) != 1 or rest[0] not in ("all", "active", "expired", "no_plan"):
+            return _invalid(data, "bad_scope", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action == BC_CONFIRM:
+        if len(rest) != 2 or rest[0] not in ("all", "active", "expired", "no_plan"):
+            return _invalid(data, "bad_arity", action)
+        if rest[1] not in ("0", "1"):
+            return _invalid(data, "bad_switch", action)
+        return AdminCallback(action, (rest[0], rest[1]))
+
+    if action in (BC_RESULT, BC_RETRY, BC_RESEND):
+        if len(rest) != 1:
+            return _invalid(data, "bad_arity", action)
+        run_id = _require_int(data, rest[0], action)
+        if isinstance(run_id, InvalidAdminCallback):
+            return run_id
+        if run_id < 0:
+            return _invalid(data, "bad_arity", action)
+        return AdminCallback(action, (str(run_id),))
 
     if action == WALLET_PLAN:
         if len(rest) not in (4, 5) or rest[3] not in ("ask", "go"):

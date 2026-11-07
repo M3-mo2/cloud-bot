@@ -25,3 +25,5 @@ class AdminInput(StatesGroup):
     awaiting_ban_reason = State()
     #: The text of a message the admin is sending to a specific user.
     awaiting_message = State()
+    #: The message the admin composed in his own chat, to be broadcast verbatim.
+    awaiting_broadcast_message = State()
