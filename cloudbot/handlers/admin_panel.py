@@ -33,6 +33,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens.admin import audit as audit_screen_mod
+from cloudbot.presentation.screens.admin import backup as backup_screen_mod
 from cloudbot.presentation.screens.admin import forcejoin as forcejoin_screen_mod
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin import registry
@@ -85,6 +86,7 @@ async def _view(
     scope = await services.admin.notify_scope(ctx.actor_tg_id)
     fj_chats = await services.forcejoin.chats()
     fj_enabled = await services.forcejoin.enabled()
+    backup = await _backup_view(services)
     return AdminView(
         locale=ctx.locale,
         now=now or _now(),
@@ -100,6 +102,34 @@ async def _view(
         entered=entered,
         forcejoin_chats=fj_chats,
         forcejoin_enabled=fj_enabled,
+        backup=backup,
+        admin_id=ctx.actor_tg_id,
+    )
+
+async def _backup_view(services: Services):
+    """One read model for the backup section: the schedule, owned files, versions."""
+    from cloudbot.domain.backup import BackupView
+
+    backup = services.backup
+    config = await backup.config()
+    files = await backup.files()
+    schema_version = 0
+    code_version = 0
+    try:
+        schema_version = await backup.schema_version()
+        code_version = schema_version
+    except Exception:  # noqa: BLE001 - the panel still renders the schedule
+        pass
+    try:
+        directory = backup.directory()
+    except Exception:  # noqa: BLE001
+        directory = ""
+    return BackupView(
+        config=config,
+        files=tuple(files),
+        schema_version=schema_version,
+        code_schema_version=code_version,
+        directory=directory,
     )
 
 
@@ -598,6 +628,229 @@ def _d(value: int, locale) -> str:
 
     return localize_digits(str(value), locale)
 
+# -- backup ------------------------------------------------------------------
+async def _show_backup(cb, ctx, services, sender, *, key: str = "", **args) -> None:
+    view = await _view(ctx, services)
+    if key:
+        screen = backup_screen_mod.notice_screen(view, key=key, **args)
+    else:
+        screen = backup_screen_mod.backup_screen(view)
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+async def _route_bk_instant(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    scope = parsed.args[0]
+    try:
+        artifact = await services.backup.make_backup(scope, persist=True)
+    except Exception as exc:  # noqa: BLE001 - mapped to one line, never raw
+        log.error("backup.instant_failed", error=type(exc).__name__)
+        await _show_backup(cb, ctx, services, sender, key="admin.bk.instant_failed")
+        return
+    # The same chat the admin is pressing the button in (his requirement: the
+    # backup arrives as a document right here).
+    await sender.send_document(
+        cb.message.chat.id if cb.message else ctx.actor_tg_id,
+        artifact.filename,
+        artifact.data,
+    )
+    from cloudbot.presentation.i18n.formatters import format_bytes
+
+    await _show_backup(
+        cb,
+        ctx,
+        services,
+        sender,
+        key="admin.bk.settings_done" if scope == "settings" else "admin.bk.instant_done",
+        size=format_bytes(artifact.size_bytes, ctx.locale),
+    )
+
+async def _route_bk_switch(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    enabled = parsed.args[0] == "on"
+    await services.backup.set_enabled(enabled, actor=ctx.actor_tg_id)
+    events.admin_action(
+        admin_id=ctx.actor_tg_id, action="backup_schedule", params={"enabled": enabled}
+    )
+    await _show_backup(cb, ctx, services, sender, key="admin.bk.saved")
+
+async def _route_bk_schedule(cb, parsed, ctx, services, sender, state, events) -> None:
+    view = await _view(ctx, services)
+    await show_screen(cb, backup_screen_mod.schedule_screen(view), ctx=ctx, sender=sender)
+
+async def _route_bk_hours(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    hours = parsed.arg_int(0)
+    current = await services.backup.config()
+    await services.backup.update_schedule(
+        actor=ctx.actor_tg_id,
+        period_kind="hours",
+        period_hours=hours,
+        daily_time=current.daily_time,
+        retention_keep=current.retention_keep,
+        destination_chat_id=current.destination_chat_id,
+        tz_name=current.tz_name,
+    )
+    events.admin_action(
+        admin_id=ctx.actor_tg_id, action="backup_schedule", params={"period_hours": hours}
+    )
+    await _show_backup(
+        cb, ctx, services, sender,
+        key="admin.bk.period_changed", hours=_d(hours, ctx.locale),
+    )
+
+async def _route_bk_daily(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    time = parsed.args[0]
+    current = await services.backup.config()
+    await services.backup.update_schedule(
+        actor=ctx.actor_tg_id,
+        period_kind="daily",
+        period_hours=current.period_hours,
+        daily_time=time,
+        retention_keep=current.retention_keep,
+        destination_chat_id=current.destination_chat_id,
+        tz_name=current.tz_name,
+    )
+    events.admin_action(
+        admin_id=ctx.actor_tg_id, action="backup_schedule", params={"daily_time": time}
+    )
+    await _show_backup(
+        cb, ctx, services, sender,
+        key="admin.bk.daily_changed", time=time, tz=current.tz_name,
+    )
+
+async def _route_bk_retention(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    keep = parsed.arg_int(0)
+    current = await services.backup.config()
+    await services.backup.update_schedule(
+        actor=ctx.actor_tg_id,
+        period_kind=current.period_kind,
+        period_hours=current.period_hours,
+        daily_time=current.daily_time,
+        retention_keep=keep,
+        destination_chat_id=current.destination_chat_id,
+        tz_name=current.tz_name,
+    )
+    await _show_backup(
+        cb, ctx, services, sender,
+        key="admin.bk.retention_changed", n=_d(keep, ctx.locale),
+    )
+
+async def _route_bk_dest(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    chat_id = parsed.arg_int(0) or ctx.actor_tg_id
+    current = await services.backup.config()
+    await services.backup.update_schedule(
+        actor=ctx.actor_tg_id,
+        period_kind=current.period_kind,
+        period_hours=current.period_hours,
+        daily_time=current.daily_time,
+        retention_keep=current.retention_keep,
+        destination_chat_id=chat_id,
+        tz_name=current.tz_name,
+    )
+    await _show_backup(
+        cb, ctx, services, sender,
+        key="admin.bk.dest_changed", chat=_d(chat_id, ctx.locale),
+    )
+
+async def _route_bk_prune(cb, parsed, ctx, services, sender, state, events) -> None:
+    deleted = await services.backup.prune()
+    if not deleted:
+        await _show_backup(cb, ctx, services, sender, key="admin.bk.pruned_none")
+        return
+    await _show_backup(
+        cb, ctx, services, sender,
+        key="admin.bk.pruned", count=_d(len(deleted), ctx.locale), files=", ".join(deleted),
+    )
+
+async def _route_bk_restore(cb, parsed, ctx, services, sender, state, events) -> None:
+    await state.set_state(AdminInput.awaiting_backup_document)
+    view = await _view(ctx, services)
+    await show_screen(cb, backup_screen_mod.restore_prompt_screen(view), ctx=ctx, sender=sender)
+
+async def _route_bk_disk(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    name = parsed.args[0]
+    data = await services.backup.read_owned(name)
+    if data is None:
+        await _show_backup(cb, ctx, services, sender, key="admin.bk.file_missing")
+        return
+    validation = await services.backup.validate(data)
+    if not validation.ok:
+        await show_screen(
+            cb,
+            backup_screen_mod.restore_result_screen(
+                await _view(ctx, services), ok=False, reason=validation.reason
+            ),
+            ctx=ctx,
+            sender=sender,
+        )
+        return
+    token = _token_for(parsed)
+    await services.backup.write_pending(token, validation.scope, data)
+    await show_screen(
+        cb,
+        backup_screen_mod.restore_confirm_screen(
+            await _view(ctx, services), token=token, scope=validation.scope, label=name
+        ),
+        ctx=ctx,
+        sender=sender,
+    )
+
+async def _route_bk_go(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    token, scope = parsed.args
+    data = await services.backup.staged(token)
+    if data is None:
+        await _show_backup(cb, ctx, services, sender, key="admin.bk.file_missing")
+        return
+    validation = await services.backup.validate(data)
+    if not validation.ok:
+        await show_screen(
+            cb,
+            backup_screen_mod.restore_result_screen(
+                await _view(ctx, services), ok=False, reason=validation.reason
+            ),
+            ctx=ctx,
+            sender=sender,
+        )
+        return
+    try:
+        safety = await services.backup.restore(validation)
+    except Exception as exc:  # noqa: BLE001
+        reason = getattr(exc, "reason", "restore_failed_recovered")
+        await show_screen(
+            cb,
+            backup_screen_mod.restore_result_screen(
+                await _view(ctx, services), ok=False, reason=reason
+            ),
+            ctx=ctx,
+            sender=sender,
+        )
+        return
+    await services.backup.discard_staged(token)
+    events.admin_action(
+        admin_id=ctx.actor_tg_id,
+        action="backup_restore",
+        params={"scope": validation.scope},
+    )
+    await show_screen(
+        cb,
+        backup_screen_mod.restore_result_screen(
+            await _view(ctx, services),
+            ok=True,
+            scope=validation.scope,
+            safety=safety,
+        ),
+        ctx=ctx,
+        sender=sender,
+    )
+
+async def _route_bk_cancel(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    await services.backup.discard_staged(parsed.args[0])
+    await _show_backup(cb, ctx, services, sender, key="admin.bk.saved")
+
+def _token_for(parsed: AdminCallback) -> str:
+    """A deterministic, filesystem-safe token for the staged upload."""
+    import hashlib
+
+    raw = ":".join(parsed.args) or "file"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
+
 #: The one dispatch table: action key (from the codec) → route. Adding a section
 #: or an action is one codec builder + one entry here; a callback the parser does
 #: not know is answered with the stale screen, never a crash.
@@ -630,6 +883,18 @@ _ROUTES = {
     admin_cb.FJ_REMOVE: _route_fj_remove,
     admin_cb.FJ_SWITCH: _route_fj_switch,
     admin_cb.FJ_CHECK: _route_fj_check,
+    admin_cb.BK_SCHEDULE: _route_bk_schedule,
+    admin_cb.BK_INSTANT: _route_bk_instant,
+    admin_cb.BK_SWITCH: _route_bk_switch,
+    admin_cb.BK_HOURS: _route_bk_hours,
+    admin_cb.BK_DAILY: _route_bk_daily,
+    admin_cb.BK_RETENTION: _route_bk_retention,
+    admin_cb.BK_DEST: _route_bk_dest,
+    admin_cb.BK_PRUNE: _route_bk_prune,
+    admin_cb.BK_RESTORE: _route_bk_restore,
+    admin_cb.BK_DISK: _route_bk_disk,
+    admin_cb.BK_GO: _route_bk_go,
+    admin_cb.BK_CANCEL: _route_bk_cancel,
 }
 
 
@@ -749,3 +1014,43 @@ def _stale(ctx: UserContext) -> Screen:
             [[inline(catalog.t("admin.stale.reopen", ctx.locale), admin_cb.menu(), intent=Intent.PRIMARY)]]
         ),
     )
+
+
+# -- backup: the uploaded file (one message) ---------------------------------
+@router.message(AdminInput.awaiting_backup_document, F.document)
+async def on_backup_document(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    """Keep the uploaded bytes, classify them, and offer an explicit confirm."""
+    await state.clear()
+    document = message.document
+    data = await sender.download_document(document)
+    token = _token_for(
+        AdminCallback(admin_cb.BK_GO, (str(document.file_unique_id), "full"))
+    )
+    scope = await services.backup.stage_upload(token, data)
+    validation = await services.backup.validate(data)
+    view = await _view(ctx, services)
+    if not validation.ok:
+        await services.backup.discard_staged(token)
+        screen = backup_screen_mod.restore_result_screen(
+            view, ok=False, reason=validation.reason
+        )
+        await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)
+        return
+    from cloudbot.presentation.i18n.formatters import format_bytes
+
+    basis = document.file_name or "backup"
+    screen = backup_screen_mod.restore_confirm_screen(
+        view, token=token, scope=validation.scope, label=basis
+    )
+    screen.doc.prepend_raw(
+        str(
+            backup_screen_mod.received_notice(
+                ctx.locale,
+                size=format_bytes(len(data), ctx.locale),
+                scope=validation.scope,
+            )
+        )
+    )
+    await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)

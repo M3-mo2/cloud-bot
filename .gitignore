@@ -18,3 +18,5 @@ data/
 build/
 dist/
 *.egg-info/
+backups/
+backup-pending/

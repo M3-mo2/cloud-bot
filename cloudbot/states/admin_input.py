@@ -19,3 +19,5 @@ class AdminInput(StatesGroup):
     awaiting_wallet_charge = State()
     #: The force-join gate: the chat to add (``@name`` / id / t.me link).
     awaiting_forcejoin_chat = State()
+    #: A backup file to restore (sent as a document; checked before it is used).
+    awaiting_backup_document = State()

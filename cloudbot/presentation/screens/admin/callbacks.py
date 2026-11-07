@@ -54,6 +54,19 @@ FJ_TOGGLE = "fj_toggle"
 FJ_REMOVE = "fj_remove"
 FJ_SWITCH = "fj_switch"
 FJ_CHECK = "fj_check"
+# -- backup --------------------------------------------------------------
+BK_SCHEDULE = "bk_sched"
+BK_INSTANT = "bk_now"
+BK_SWITCH = "bk_switch"
+BK_HOURS = "bk_hours"
+BK_DAILY = "bk_daily"
+BK_RETENTION = "bk_keep"
+BK_DEST = "bk_dest"
+BK_PRUNE = "bk_prune"
+BK_RESTORE = "bk_restore"
+BK_DISK = "bk_disk"
+BK_GO = "bk_go"
+BK_CANCEL = "bk_cancel"
 
 #: The admin workspace actions declared in ``actions.py``. Each takes one subject.
 ACTION_KEYS: frozenset[str] = frozenset({"enter", "suspend", "resume", "delete"})
@@ -199,6 +212,44 @@ def forcejoin_check() -> str:
     return _action(FJ_CHECK)
 
 
+# -- backup ------------------------------------------------------------------
+def backup_schedule() -> str:
+    return _action(BK_SCHEDULE)
+
+def backup_instant(scope: str = "full") -> str:
+    return _action(BK_INSTANT, "settings" if scope == "settings" else "full")
+
+def backup_switch(enabled: bool) -> str:
+    return _action(BK_SWITCH, "on" if enabled else "off")
+
+def backup_hours(hours: int) -> str:
+    return _action(BK_HOURS, int(hours))
+
+def backup_daily(time: str) -> str:
+    """``time`` is ``HH:MM``; it is sent without the colon (the wire is colon-split)."""
+    return _action(BK_DAILY, str(time).replace(":", ""))
+
+def backup_retention(keep: int) -> str:
+    return _action(BK_RETENTION, int(keep))
+
+def backup_destination(tg_id: int) -> str:
+    return _action(BK_DEST, int(tg_id))
+
+def backup_prune() -> str:
+    return _action(BK_PRUNE)
+
+def backup_restore() -> str:
+    return _action(BK_RESTORE)
+
+def backup_disk(name: str) -> str:
+    return _action(BK_DISK, name)
+
+def backup_go(token: str, scope: str) -> str:
+    return _action(BK_GO, token, "settings" if scope == "settings" else "full")
+
+def backup_cancel(token: str) -> str:
+    return _action(BK_CANCEL, token)
+
 # -- parser ------------------------------------------------------------------
 def _invalid(data: str, reason: str, action: str = "") -> InvalidAdminCallback:
     return InvalidAdminCallback(raw=data, reason=reason, action=action)
@@ -333,6 +384,52 @@ def parse(data: str) -> AdminParseResult:
     if action == FJ_SWITCH:
         if len(rest) != 1 or rest[0] not in ("on", "off"):
             return _invalid(data, "bad_switch", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action == BK_SCHEDULE or action == BK_PRUNE or action == BK_RESTORE:
+        if rest:
+            return _invalid(data, "too_many_args", action)
+        return AdminCallback(action)
+
+    if action == BK_INSTANT:
+        if len(rest) != 1 or rest[0] not in ("full", "settings"):
+            return _invalid(data, "bad_switch", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action == BK_SWITCH:
+        if len(rest) != 1 or rest[0] not in ("on", "off"):
+            return _invalid(data, "bad_switch", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action in (BK_HOURS, BK_RETENTION, BK_DEST):
+        if len(rest) != 1:
+            return _invalid(data, "bad_arity", action)
+        number = _require_int(data, rest[0], action)
+        if isinstance(number, InvalidAdminCallback):
+            return number
+        return AdminCallback(action, (str(number),))
+
+    if action == BK_DAILY:
+        if len(rest) != 1 or not rest[0].isdigit() or len(rest[0]) != 4:
+            return _invalid(data, "bad_arity", action)
+        raw = rest[0]
+        return AdminCallback(action, (f"{raw[:2]}:{raw[2:]}",))
+
+    if action == BK_DISK:
+        # A filename never contains a colon; the codec refuses one anyway so a
+        # crafted callback cannot smuggle a path separator through this segment.
+        if len(rest) != 1 or not rest[0] or ":" in rest[0]:
+            return _invalid(data, "bad_arity", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action == BK_GO:
+        if len(rest) != 2 or not rest[0] or rest[1] not in ("full", "settings"):
+            return _invalid(data, "bad_arity", action)
+        return AdminCallback(action, (rest[0], rest[1]))
+
+    if action == BK_CANCEL:
+        if len(rest) != 1 or not rest[0]:
+            return _invalid(data, "bad_arity", action)
         return AdminCallback(action, (rest[0],))
 
     if action == WALLET_PLAN:

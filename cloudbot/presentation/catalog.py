@@ -46,6 +46,11 @@ from cloudbot.domain.admin import (
 )
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession, Workspace
 from cloudbot.domain.forcejoin import ForceJoinChat, GateStatus
+from cloudbot.domain.backup import (
+    BackupConfig,
+    BackupFile,
+    BackupView,
+)
 from cloudbot.domain.events import (
     EventCategory,
     EventRecord,
@@ -101,6 +106,7 @@ from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.presentation.screens.forcejoin import gate_screen
 from cloudbot.domain.billing import STAR_PACKS
 from cloudbot.presentation.screens.admin import audit as admin_audit
+from cloudbot.presentation.screens.admin import backup as admin_backup
 from cloudbot.presentation.screens.admin import forcejoin as admin_forcejoin
 from cloudbot.presentation.screens.admin import notifications as admin_notify
 from cloudbot.presentation.screens.admin import overview as admin_overview
@@ -613,6 +619,36 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
     return AdminView(
         locale=locale,
         now=NOW,
+        admin_id=6508129575,
+        backup=BackupView(
+            config=BackupConfig(
+                enabled=True,
+                period_kind="daily",
+                period_hours=24,
+                daily_time="03:00",
+                tz_name="Africa/Cairo",
+                retention_keep=7,
+                next_run_at=NOW + timedelta(hours=6),
+                last_run_at=NOW - timedelta(hours=18),
+            ),
+            files=(
+                BackupFile(
+                    name="cloudbot-backup-20261103T024139Z.zip",
+                    size_bytes=184_320,
+                    created_at=NOW - timedelta(hours=18),
+                    scope="full",
+                ),
+                BackupFile(
+                    name="cloudbot-settings-20261102T024139Z.json",
+                    size_bytes=4_096,
+                    created_at=NOW - timedelta(days=1, hours=2),
+                    scope="settings",
+                ),
+            ),
+            schema_version=9,
+            code_schema_version=9,
+            directory="/var/www/data/backups",
+        ),
         overview=overview,
         users_page=UserListPage(users=[user], total=1, offset=0, limit=10),
         user_page=page,
@@ -1108,6 +1144,22 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     )),
     "admin_notify_gap": lambda f, loc: Screen(doc=gap_message(250, loc)),
     "admin_notify_capped": lambda f, loc: Screen(doc=suppression_message(27, loc)),
+    "admin_backup": lambda f, loc: admin_backup.backup_screen(_admin_view(loc)),
+    "admin_backup_schedule": lambda f, loc: admin_backup.schedule_screen(_admin_view(loc)),
+    "admin_backup_restore_prompt": lambda f, loc: admin_backup.restore_prompt_screen(_admin_view(loc)),
+    "admin_backup_restore_confirm_full": lambda f, loc: admin_backup.restore_confirm_screen(
+        _admin_view(loc), token="abc123", scope="full", label="cloudbot-backup-20261103T024139Z.zip"
+    ),
+    "admin_backup_restore_confirm_settings": lambda f, loc: admin_backup.restore_confirm_screen(
+        _admin_view(loc), token="abc123", scope="settings", label="cloudbot-settings-20261102T024139Z.json"
+    ),
+    "admin_backup_restore_refused": lambda f, loc: admin_backup.restore_result_screen(
+        _admin_view(loc), ok=False, reason="newer_schema"
+    ),
+    "admin_backup_restore_done": lambda f, loc: admin_backup.restore_result_screen(
+        _admin_view(loc), ok=True, scope="full",
+        safety="/var/www/data/cloudbot-pre-restore-20261103T204339Z.db",
+    ),
 }
 
 

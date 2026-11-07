@@ -38,6 +38,7 @@ async def _run() -> int:
     from cloudbot.bootstrap import app as app_module
     from cloudbot.bootstrap import lifecycle
     from cloudbot.bootstrap.container import build
+    from cloudbot.bootstrap.backup_scheduler import BackupScheduler
     from cloudbot.bootstrap.notify import NotificationDispatcher, NotificationPoller
     from cloudbot.core.locale import Locale
     from cloudbot.presentation.rich.sender import RichSender
@@ -71,11 +72,22 @@ async def _run() -> int:
     )
     poller = NotificationPoller(notify)
 
+    async def _send_backup(chat_id: int, filename: str, data: bytes) -> None:
+        await sender.send_document(chat_id, filename, data)
+
+    backup_scheduler = BackupScheduler(
+        container.services.backup,
+        admin_ids=lambda: sorted(settings.admin_ids),
+        send=_send_backup,
+    )
+
     try:
         await app_module.set_commands(bot, settings)
         poller.start()
+        backup_scheduler.start()
         await dispatcher.start_polling(bot)
     finally:
+        await backup_scheduler.stop()
         await poller.stop()
         await lifecycle.shutdown(container)
     return 0

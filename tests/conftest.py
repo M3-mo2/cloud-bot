@@ -52,6 +52,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
 )
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
+from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
 from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
 from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.locale import Locale
@@ -59,6 +60,7 @@ from cloudbot.core.runtime import BotRuntime
 from cloudbot.services.account import AccountService
 from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
+from cloudbot.services.backup import BackupService
 from cloudbot.services.billing import BillingService
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
@@ -155,11 +157,12 @@ async def forcejoin_store(database):
     return SqliteForceJoinStore(database)
 
 @pytest.fixture
-async def services(engine, users, sessions, event_log, admin_state, subscriptions, fake_directory):
+async def services(engine, database, users, sessions, event_log, admin_state, subscriptions, fake_directory):
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
         billing=BillingService(subscriptions),
+        backup=BackupService(SqliteBackupStore(database)),
         workspaces=WorkspacesService(engine, users, ownership, subscriptions),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),

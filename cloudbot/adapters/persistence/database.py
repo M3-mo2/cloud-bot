@@ -75,6 +75,17 @@ class Database:
             await self._conn.close()
             self._conn = None
 
+    async def reload(self) -> aiosqlite.Connection:
+        """Close and re-open the connection so the process serves the current file.
+
+        This is what makes a restore work **without a restart**: every store here
+        caches nothing but this one connection handle, so re-opening it is enough.
+        A caller that swapped the file underneath (a restore) calls this instead
+        of restarting the bot.
+        """
+        await self.close()
+        return await self.connect()
+
     async def _applied_versions(self, conn: aiosqlite.Connection) -> set[int]:
         async with conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='schema_migrations'"

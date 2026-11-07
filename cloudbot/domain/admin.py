@@ -12,6 +12,7 @@ from cloudbot.core.locale import Locale
 from cloudbot.domain.entities import User, Workspace
 from cloudbot.domain.events import EventRecord
 from cloudbot.domain.forcejoin import ForceJoinChat
+from cloudbot.domain.backup import BackupView
 from cloudbot.domain.subscription import Subscription
 from cloudbot.domain.value_objects import ResourceUsage
 
@@ -126,6 +127,11 @@ class AdminView:
     #: The force-join gate's chats and its one global switch (admin section).
     forcejoin_chats: list[ForceJoinChat] = field(default_factory=list)
     forcejoin_enabled: bool = True
+    #: The backup section's schedule, owned files and schema readings.
+    backup: "BackupView | None" = None
+    #: The admin's own Telegram id, so a section can default a destination to
+    #: "this chat". Read from the identity gate's context, never from input.
+    admin_id: int = 0
 
 
 def summarize_user(user: User, workspace_count: int, *, plan: str = "free") -> UserSummary:

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from cloudbot.adapters.cloud_service.engine import EngineAdapter
 from cloudbot.adapters.cloud_service.fake import FakeEngine
+from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
 from cloudbot.adapters.persistence.database import Database
 from cloudbot.adapters.persistence.sqlite_events import (
     SqliteAdminStateStore,
@@ -26,6 +27,7 @@ from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.services.account import AccountService
 from cloudbot.services.admin import AdminService
 from cloudbot.services.archives import ArchivesService
+from cloudbot.services.backup import BackupService
 from cloudbot.services.billing import BillingService
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
@@ -73,6 +75,7 @@ class Container:
     admin_state: SqliteAdminStateStore
     subscriptions: SqliteSubscriptions
     forcejoin_store: SqliteForceJoinStore
+    backup_store: SqliteBackupStore
     services: Services
 
     async def aclose(self) -> None:
@@ -99,12 +102,14 @@ def build(settings: Settings) -> Container:
     admin_state = SqliteAdminStateStore(database)
     subscriptions = SqliteSubscriptions(database)
     forcejoin_store = SqliteForceJoinStore(database)
+    backup_store = SqliteBackupStore(database)
     clock = SystemClock()
     ownership = OwnershipService(users)
 
     services = Services(
         account=AccountService(users),
         billing=BillingService(subscriptions),
+        backup=BackupService(backup_store),
         workspaces=WorkspacesService(engine, users, ownership, subscriptions),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),
@@ -138,5 +143,6 @@ def build(settings: Settings) -> Container:
         admin_state=admin_state,
         subscriptions=subscriptions,
         forcejoin_store=forcejoin_store,
+        backup_store=backup_store,
         services=services,
     )

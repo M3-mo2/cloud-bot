@@ -100,6 +100,18 @@ def test_the_dispatch_table_covers_every_codec_action():
         admin_cb.FJ_REMOVE,
         admin_cb.FJ_SWITCH,
         admin_cb.FJ_CHECK,
+        admin_cb.BK_SCHEDULE,
+        admin_cb.BK_INSTANT,
+        admin_cb.BK_SWITCH,
+        admin_cb.BK_HOURS,
+        admin_cb.BK_DAILY,
+        admin_cb.BK_RETENTION,
+        admin_cb.BK_DEST,
+        admin_cb.BK_PRUNE,
+        admin_cb.BK_RESTORE,
+        admin_cb.BK_DISK,
+        admin_cb.BK_GO,
+        admin_cb.BK_CANCEL,
     } | set(admin_cb.ACTION_KEYS)
     assert routes == expected, routes.symmetric_difference(expected)
 
