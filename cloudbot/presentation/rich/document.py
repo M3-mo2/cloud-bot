@@ -171,27 +171,37 @@ class RichDoc:
 
     def raw_buttons(
         self,
-        row: Sequence[Mapping[str, object]],
+        rows: Sequence[dict | Sequence[dict]],
         *,
         align: str | None = None,
     ) -> "RichDoc":
-        """A row of in-body buttons from raw ``RichMessageButton`` keyword dicts.
+        """A row of buttons given as ready-made dicts.
 
-        ``buttons`` above is the common (label, callback, style) shape; this seam
-        exists for the force-join gate's one-button-per-chat rows, where a chat
-        with a public username is a ``url`` button and one without is a
-        ``callback_data`` button. Telegram refuses a mixed row in the html form,
-        so the caller still builds entirely in blocks (see ``buttons``).
+        The sibling of :meth:`buttons` for callers that build their own entries —
+        a button whose ``url`` comes from a chat, or whose label is composed
+        elsewhere. Each dict needs at least ``text`` and one action
+        (``callback_data`` / ``url``); ``style`` is optional.
         """
         from aiogram.types import InputRichBlockButtons, RichMessageButton
 
-        built = []
-        for item in row:
-            data = item.get("callback_data")
-            if data is not None and len(str(data).encode("utf-8")) > 64:
-                raise ValueError(f"callback_data over 64 bytes: {data!r}")
-            built.append(RichMessageButton(**item))
-        self._blocks.append(InputRichBlockButtons(buttons=built, align=align))
+        entries = list(rows)
+        if entries and isinstance(entries[0], dict):
+            entries = [entries]
+        for row in entries:
+            built = []
+            for e in row:
+                action = e.get("callback_data")
+                if action is not None and len(str(action).encode("utf-8")) > 64:
+                    raise ValueError(f"callback_data over 64 bytes: {action!r}")
+                built.append(
+                    RichMessageButton(
+                        text=e.get("text", ""),
+                        callback_data=action,
+                        url=e.get("url"),
+                        style=e.get("style"),
+                    )
+                )
+            self._blocks.append(InputRichBlockButtons(buttons=built, align=align))
         return self
 
     def alert(self, kind: str, title: Element, body: Element) -> "RichDoc":
@@ -204,7 +214,18 @@ class RichDoc:
         return "".join(self._parts)
 
     def build(self) -> InputRichMessage:
-        """``InputRichMessage`` allows *either* html or blocks, never both."""
+        """``InputRichMessage`` allows *either* html or blocks, never both.
+
+        A document that wrote to **both** is a programming error, and a silent one:
+        returning the blocks would drop every html part (an identity table, a
+        divider) from the message with no exception anywhere. It is raised instead,
+        because the alternative is a screen that quietly loses content.
+        """
+        if self._blocks and self._parts:
+            raise ValueError(
+                "a RichDoc cannot mix html parts and blocks: Telegram allows one form. "
+                f"{len(self._parts)} html part(s) would be silently dropped."
+            )
         if self._blocks:
             return InputRichMessage(blocks=self._blocks, is_rtl=is_rtl(self._locale))
         return InputRichMessage(html=self.html, is_rtl=is_rtl(self._locale))
