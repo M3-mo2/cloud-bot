@@ -1,4 +1,11 @@
-"""Admin section: the users list (paged, searchable, honest empty state)."""
+"""Admin section: the users list (paged, searchable, honest empty state).
+
+The list is **blocks**, not a three-column table: in a right-to-left message a
+row of ``name · id | plan | last seen`` drifts away from its headers. Each user is
+a bold heading, one compact fact line, and that user's own *Open* button straight
+under it. The two-column identity tables the panel does keep are the ones that
+hold a label and its value only.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +18,11 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import code, fragment
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
-from cloudbot.presentation.screens.admin._helpers import num
+from cloudbot.presentation.screens.admin._helpers import (
+    add_block_header,
+    num,
+    subject,
+)
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
@@ -22,25 +33,28 @@ PAGE_SIZE = 10
 def users_screen(view: AdminView, *, page: int = 0) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.users.title", locale))
 
     page_obj: UserListPage | None = view.users_page
     if page_obj is None:
-        doc.p(catalog.t("admin.overview.unavailable", locale))
+        add_block_header(doc, subject(locale, "admin.users.title"), "—", locale)
+        doc.paragraph(catalog.t("admin.overview.unavailable", locale))
         return Screen(doc=doc, markup=_nav(locale, 0, 1))
 
+    # The header's number is a real measurement: the filtered total when
+    # searchable, otherwise the same count line the list prints.
+    add_block_header(
+        doc,
+        subject(locale, "admin.users.title"),
+        catalog.t("admin.users.count", locale, n=num(page_obj.total, locale)),
+        locale,
+    )
+
     if page_obj.query:
-        doc.p(catalog.t("admin.users.searching", locale, query=page_obj.query))
+        doc.paragraph(catalog.t("admin.users.searching", locale, query=page_obj.query))
 
     if not page_obj.users:
-        doc.p(catalog.t("admin.users.empty", locale))
+        doc.paragraph(catalog.t("admin.users.empty", locale))
     else:
-        doc.p(
-            catalog.t(
-                "admin.users.count", locale, n=num(page_obj.total, locale)
-            )
-        )
-        rows = []
         for u in page_obj.users:
             last_seen = (
                 format_relative(u.last_seen_at, view.now, locale)
@@ -49,33 +63,21 @@ def users_screen(view: AdminView, *, page: int = 0) -> Screen:
                 if u.last_seen_at
                 else "—"
             )
-            # Three columns: who, plan, when. Language, workspace count and the
-            # numeric id are on the user's own page (one tap away); a phone can
-            # scan identity + plan + recency, not six columns.
-            who = fragment([u.display_name or "—", " · ", code(str(u.tg_id))])
-            rows.append(
+            doc.heading(u.display_name or f"#{num(u.tg_id, locale)}", size=3)
+            doc.paragraph(
+                f"{catalog.t(f'plan.{u.plan}', locale)} · {last_seen} · #{num(u.tg_id, locale)}"
+            )
+            doc.buttons(
                 [
-                    who,
-                    catalog.t(f"plan.{u.plan}", locale),
-                    last_seen,
+                    (
+                        catalog.t("admin.users.open", locale, name=u.display_name or f"#{num(u.tg_id, locale)}"),
+                        admin_cb.user(u.tg_id),
+                        "primary",
+                    )
                 ]
             )
-        doc.table(
-            [
-                catalog.t("admin.users.col.user", locale),
-                catalog.t("admin.users.col.plan", locale),
-                catalog.t("admin.users.col.last_seen", locale),
-            ],
-            rows,
-        )
 
-    kb = []
-    for u in page_obj.users:
-        label = catalog.t(
-            "admin.users.open", locale, name=u.display_name or f"#{num(u.tg_id, locale)}"
-        )
-        kb.append([inline(label, admin_cb.user(u.tg_id), intent=Intent.PRIMARY)])
-    kb.append(
+    kb = [
         [
             inline(
                 catalog.t("admin.users.search", locale),
@@ -83,7 +85,7 @@ def users_screen(view: AdminView, *, page: int = 0) -> Screen:
                 intent=Intent.PRIMARY,
             )
         ]
-    )
+    ]
     kb.extend(_paging(locale, page, page_obj.total, page_obj.limit, page_obj.query))
     kb.append([inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)])
     return Screen(doc=doc, markup=inline_markup(kb))

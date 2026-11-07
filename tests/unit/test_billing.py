@@ -35,6 +35,32 @@ ADMIN = 777
 USER = 6508129575
 RICH = {"text": "x"}
 
+def _rich_text(rich_message) -> str:
+    """Everything a rich message shows, in whichever form it was built.
+
+    ``InputRichMessage`` allows *either* ``html`` or ``blocks``; a screen with
+    in-body buttons (Bot API 10.3) is blocks-only, so ``.html`` is ``None`` for it.
+    Reading only ``.html`` would make such a screen look empty to a harness.
+    """
+    html = getattr(rich_message, "html", None)
+    if html is not None:
+        return html
+    parts: list[str] = []
+
+    def walk(block) -> None:
+        text = getattr(block, "text", None)
+        if text:
+            parts.append(str(text))
+        for nested in getattr(block, "blocks", None) or []:
+            walk(nested)
+        for button in getattr(block, "buttons", None) or []:
+            parts.append(str(getattr(button, "text", "")))
+
+    for block in getattr(rich_message, "blocks", None) or []:
+        walk(block)
+    return " ".join(parts)
+
+
 class RecordingBot:
     id = 42
 
@@ -48,12 +74,12 @@ class RecordingBot:
         self.refund_raises: Exception | None = None
 
     async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
-        self.sent.append(rich_message.html)
+        self.sent.append(_rich_text(rich_message))
         self.markups.append(reply_markup)
         return Message.model_construct(chat={"id": chat_id}, message_id=1)
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
-        self.sent.append(getattr(rich_message, "html", ""))
+        self.sent.append(_rich_text(rich_message))
         self.markups.append(reply_markup)
         return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
 

@@ -5,6 +5,10 @@ One section «الإدارة والعقوبات» listing both ban kinds with a 
 a second search UI: the screen that already finds a user offers the message and
 the ban there.
 
+The section home is **blocks**: each ban is a bold heading, one fact line, and its
+own *Open* / *Unban* buttons straight under it — not a three-column table with a
+flat run of pairs at the bottom that nothing ties to a row.
+
 Screens are pure: they render the ``AdminView`` they are given, never call the
 store.
 """
@@ -19,90 +23,94 @@ from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
-from cloudbot.presentation.rich.tags import code, fragment, italic
+from cloudbot.presentation.rich.tags import fragment, italic
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
-from cloudbot.presentation.screens.admin._helpers import num
+from cloudbot.presentation.screens.admin._helpers import (
+    add_block_header,
+    num,
+    subject,
+)
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
+
 
 def moderation_screen(view: AdminView) -> Screen:
     """The section home: every ban currently in force, split by kind."""
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.mod.title", locale))
 
     users = view.banned_users
     workspaces = view.banned_workspaces
+    total = len(users) + len(workspaces)
     back = [inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)]
 
+    add_block_header(
+        doc,
+        subject(locale, "admin.mod.title"),
+        catalog.t("admin.mod.count", locale, n=num(total, locale)),
+        locale,
+    )
+
     if not users and not workspaces:
-        doc.p(catalog.t("admin.mod.empty", locale))
+        doc.paragraph(catalog.t("admin.mod.empty", locale))
         return Screen(doc=doc, markup=inline_markup([back]))
 
-    kb: list[list] = []
     if users:
-        doc.p(catalog.t("admin.mod.users_title", locale))
-        rows = [
-            [code(str(ban.tg_id)), ban.reason or "—", _until(ban, locale)]
-            for ban in users
-        ]
-        doc.table(
-            [
-                catalog.t("admin.mod.col.user", locale),
-                catalog.t("admin.mod.col.reason", locale),
-                catalog.t("admin.mod.col.until", locale),
-            ],
-            rows,
+        doc.heading(
+            f"✦ {catalog.t('admin.mod.users_title', locale)} ⟸ {num(len(users), locale)}",
+            size=2,
         )
         for ban in users:
-            kb.append(
+            doc.heading(f"👤 #{num(ban.tg_id, locale)}", size=3)
+            doc.paragraph(
+                f"{catalog.t('admin.mod.col_reason_inline', locale)}: {ban.reason or '—'} · "
+                f"{catalog.t('admin.mod.col_until_inline', locale)}: {_until(ban, locale)}"
+            )
+            doc.buttons(
                 [
-                    inline(
+                    (
                         catalog.t("admin.mod.open_user", locale, id=num(ban.tg_id, locale)),
                         admin_cb.user(ban.tg_id),
-                        intent=Intent.PRIMARY,
+                        "primary",
                     ),
-                    inline(
+                    (
                         catalog.t("admin.mod.unban_user", locale),
                         admin_cb.user_unban(ban.tg_id),
-                        intent=Intent.SUCCESS,
+                        "success",
                     ),
                 ]
             )
 
     if workspaces:
-        doc.p(catalog.t("admin.mod.ws_title", locale))
-        rows = [
-            [code(ban.ws_id), ban.reason or "—", format_datetime(ban.banned_at, locale)]
-            for ban in workspaces
-        ]
-        doc.table(
-            [
-                catalog.t("admin.mod.col.ws", locale),
-                catalog.t("admin.mod.col.reason", locale),
-                catalog.t("admin.mod.col.when", locale),
-            ],
-            rows,
+        doc.heading(
+            f"✦ {catalog.t('admin.mod.ws_title', locale)} ⟸ {num(len(workspaces), locale)}",
+            size=2,
         )
         for ban in workspaces:
-            kb.append(
+            doc.heading(f"🗂 {ban.ws_id}", size=3)
+            doc.paragraph(
+                f"{catalog.t('admin.mod.col_reason_inline', locale)}: {ban.reason or '—'} · "
+                f"{catalog.t('admin.mod.col_when_inline', locale)}: {format_datetime(ban.banned_at, locale)}"
+            )
+            doc.buttons(
                 [
-                    inline(
+                    (
                         catalog.t("admin.mod.unban_ws", locale),
                         admin_cb.ws_unban(ban.ws_id),
-                        intent=Intent.SUCCESS,
+                        "success",
                     )
                 ]
             )
 
-    kb.append(back)
-    return Screen(doc=doc, markup=inline_markup(kb))
+    return Screen(doc=doc, markup=inline_markup([back]))
+
 
 def _until(ban: UserBan, locale) -> str:
     if ban.expires_at is None:
         return catalog.t("admin.mod.until_permanent", locale)
     return format_datetime(ban.expires_at, locale)
+
 
 def ban_prompt(kind: str, subject: str, label: str, locale, *, reason: str = "") -> Screen:
     """The ban-reason prompt. Every button carries a subject, so there is a way out.
@@ -161,6 +169,7 @@ def ban_prompt(kind: str, subject: str, label: str, locale, *, reason: str = "")
         ]
     return Screen(doc=doc, markup=inline_markup(rows))
 
+
 def _cancel_cb(kind: str, subject: str) -> str:
     if kind == "ws":
         return admin_cb.section("moderation")
@@ -168,6 +177,7 @@ def _cancel_cb(kind: str, subject: str) -> str:
         return admin_cb.user(int(subject))
     except (TypeError, ValueError):
         return admin_cb.menu()
+
 
 def message_prompt(tg_id: int, label: str, locale) -> Screen:
     """The message prompt: the next text the admin sends is the message."""
@@ -179,6 +189,7 @@ def message_prompt(tg_id: int, label: str, locale) -> Screen:
         [inline(catalog.t("common.cancel", locale), admin_cb.user(tg_id), intent=Intent.PRIMARY)]
     ]
     return Screen(doc=doc, markup=inline_markup(rows))
+
 
 def message_result(
     tg_id: int,
@@ -208,6 +219,7 @@ def message_result(
         ]
     ]
     return Screen(doc=doc, markup=inline_markup(rows))
+
 
 register(
     AdminSection(

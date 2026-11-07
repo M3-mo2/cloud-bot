@@ -8,6 +8,7 @@ from cloudbot.domain.events import EventRecord
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import (
     format_bytes_pair,
+    format_count,
     format_datetime,
     format_percent,
     format_relative,
@@ -19,7 +20,7 @@ from cloudbot.presentation.mapping.statuses import display_state
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, bold, code, fragment, italic
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
-from cloudbot.presentation.screens.admin._helpers import num
+from cloudbot.presentation.screens.admin._helpers import add_block_header, num
 from cloudbot.presentation.screens.admin.actions import action, action_button
 from cloudbot.presentation.screens.screen import Screen
 
@@ -89,7 +90,12 @@ def user_screen(view: AdminView) -> Screen:
     # workspace's own buttons in its body, and ``InputRichMessage`` allows either
     # html or blocks, never both. Mixing them used to drop the html half in silence
     # — the user's identity simply vanished from the message.
-    doc.heading(catalog.t("admin.user.title", locale), size=2)
+    add_block_header(
+        doc,
+        f"👤 {u.display_name or '#' + num(u.tg_id, locale)}",
+        format_count("count.workspaces", len(page.workspaces), locale),
+        locale,
+    )
     for k, v in (
         (catalog.t("admin.user.id", locale), str(u.tg_id)),
         (catalog.t("admin.user.name", locale), u.display_name or "—"),
@@ -161,7 +167,7 @@ def user_screen(view: AdminView) -> Screen:
                 intent=Intent.PRIMARY,
             ),
             inline(
-                catalog.t("admin.wallet.title", locale),
+                catalog.t("admin.user.wallet", locale),
                 admin_cb.wallet(u.tg_id),
                 intent=Intent.SUCCESS,
             ),

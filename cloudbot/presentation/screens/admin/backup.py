@@ -2,12 +2,17 @@
 
 Pure screens (no I/O): they render ``AdminView.backup``. Every action is a codec
 builder, so the contract test proves each button is parseable and routable.
+
+The files list is **blocks** — a bold name per backup, one fact line, and that
+file's own *Restore* button straight under it — not a four-column table. The
+schedule/data identity blocks stay two-column ``label | value`` tables, which is
+the only shape a table may hold here.
 """
 
 from __future__ import annotations
 
 from cloudbot.domain.admin import AdminView
-from cloudbot.domain.backup import BackupConfig, BackupFile, BackupView
+from cloudbot.domain.backup import DEFAULT_TZ, BackupConfig, BackupFile, BackupView
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_bytes, format_datetime
 from cloudbot.presentation.keyboards.buttons import inline
@@ -16,16 +21,23 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import code, fragment, italic
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
-from cloudbot.presentation.screens.admin._helpers import num
+from cloudbot.presentation.screens.admin._helpers import (
+    add_block_header,
+    add_html_header,
+    num,
+    subject,
+)
 from cloudbot.presentation.screens.screen import Screen
-from cloudbot.domain.backup import DEFAULT_TZ
 
 from .section import AdminSection, register
+
 
 def _when(value, locale) -> str:
     return format_datetime(value, locale) if value is not None else "—"
 
+
 _PATH_SLOT = "\x00"
+
 
 def _hint_parts(locale) -> tuple[str, str]:
     """The directory hint split around its path, so the path can be inline code
@@ -34,11 +46,14 @@ def _hint_parts(locale) -> tuple[str, str]:
     before, _, after = text.partition(_PATH_SLOT)
     return before, after
 
+
 def _before_hint(locale) -> str:
     return _hint_parts(locale)[0]
 
+
 def _after_hint(locale) -> str:
     return _hint_parts(locale)[1]
+
 
 def _period(config: BackupConfig, locale) -> str:
     if config.period_kind == "daily":
@@ -47,13 +62,23 @@ def _period(config: BackupConfig, locale) -> str:
         )
     return catalog.t("admin.bk.period_hours", locale, hours=num(config.period_hours, locale))
 
+
+def _schedule_fact(config: BackupConfig, locale) -> str:
+    if not config.enabled:
+        return catalog.t("admin.bk.off_short", locale)
+    if config.next_run_at is not None:
+        return catalog.t("admin.bk.next_short", locale, when=_when(config.next_run_at, locale))
+    return catalog.t("admin.bk.next_none_short", locale)
+
+
 def backup_screen(view: AdminView) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.bk.title", locale))
     backup = view.backup
+
     if backup is None:
-        doc.p(catalog.t("admin.overview.unavailable", locale))
+        add_block_header(doc, subject(locale, "admin.bk.title"), "—", locale)
+        doc.paragraph(catalog.t("admin.overview.unavailable", locale))
         return Screen(
             doc=doc,
             markup=inline_markup(
@@ -61,26 +86,27 @@ def backup_screen(view: AdminView) -> Screen:
             ),
         )
     config = backup.config
+    files = backup.files
 
-    doc.blockquote(
-        fragment(catalog.t("admin.bk.on" if config.enabled else "admin.bk.off", locale))
+    # The header's second line is the one fact that matters on this screen: the
+    # schedule's next run (or that it is off). A screen whose subject is *when the
+    # next backup happens* does not need an invented count.
+    add_block_header(
+        doc,
+        subject(locale, "admin.bk.title"),
+        _schedule_fact(config, locale),
+        locale,
     )
+
+    doc.quote(catalog.t("admin.bk.on" if config.enabled else "admin.bk.off", locale))
     if config.enabled:
-        doc.p(
-            catalog.t(
-                "admin.bk.next",
-                locale,
-                when=_when(config.next_run_at, locale),
-            )
-        )
-    else:
-        doc.p(catalog.t("admin.bk.next_none", locale))
+        doc.paragraph(catalog.t("admin.bk.next", locale, when=_when(config.next_run_at, locale)))
     if config.last_run_at is not None:
-        doc.p(catalog.t("admin.bk.last", locale, when=_when(config.last_run_at, locale)))
+        doc.paragraph(catalog.t("admin.bk.last", locale, when=_when(config.last_run_at, locale)))
     else:
-        doc.p(catalog.t("admin.bk.last_none", locale))
+        doc.paragraph(catalog.t("admin.bk.last_none", locale))
     if config.last_error:
-        doc.p(
+        doc.paragraph(
             catalog.t(
                 "admin.bk.last_error",
                 locale,
@@ -90,7 +116,7 @@ def backup_screen(view: AdminView) -> Screen:
             )
         )
 
-    doc.kv_table(
+    doc.kv_block(
         [
             (catalog.t("admin.bk.col_schedule", locale), _period(config, locale)),
             (
@@ -109,7 +135,7 @@ def backup_screen(view: AdminView) -> Screen:
             ),
         ]
     )
-    doc.p(
+    doc.paragraph(
         catalog.t(
             "admin.bk.schema",
             locale,
@@ -118,106 +144,104 @@ def backup_screen(view: AdminView) -> Screen:
         )
     )
 
-    files = backup.files
+    doc.heading(
+        f"✦ {catalog.t('admin.bk.files_title', locale)} ⟸ {num(len(files), locale)}",
+        size=2,
+    )
     if files:
-        rows = []
-        for item in files[:8]:
-            rows.append(
-                [
-                    code(item.name),
-                    catalog.t(f"admin.bk.scope.{item.scope}", locale),
-                    format_bytes(item.size_bytes, locale),
-                    _when(item.created_at, locale),
-                ]
-            )
-        doc.table(
-            [
-                catalog.t("admin.bk.col_file", locale),
-                catalog.t("admin.bk.col_scope", locale),
-                catalog.t("admin.bk.col_size", locale),
-                catalog.t("admin.bk.col_created", locale),
-            ],
-            rows,
-        )
+        for index, item in enumerate(files[:8]):
+            _file_block(doc, item, locale)
     else:
-        doc.p(catalog.t("admin.bk.files_empty", locale))
-    doc.p(
-        fragment(
+        doc.paragraph(catalog.t("admin.bk.files_empty", locale))
+    doc.paragraph(f"{_before_hint(locale)}{backup.directory or 'data/backups'}{_after_hint(locale)}")
+
+    kb = []
+    kb.extend(
+        [
             [
-                italic(
-                    fragment([_before_hint(locale), code(backup.directory or "data/backups"), _after_hint(locale)])
-                )
+                inline(
+                    catalog.t("admin.bk.instant", locale),
+                    admin_cb.backup_instant("full"),
+                    intent=Intent.SUCCESS,
+                ),
+                inline(
+                    catalog.t("admin.bk.instant_settings", locale),
+                    admin_cb.backup_instant("settings"),
+                    intent=Intent.PRIMARY,
+                ),
+            ],
+            [
+                inline(
+                    catalog.t("admin.bk.schedule", locale),
+                    admin_cb.backup_schedule(),
+                    intent=Intent.PRIMARY,
+                ),
+                inline(
+                    catalog.t("admin.bk.switch_off" if config.enabled else "admin.bk.switch_on", locale),
+                    admin_cb.backup_switch(not config.enabled),
+                    intent=Intent.DANGER if config.enabled else Intent.SUCCESS,
+                ),
+            ],
+            [
+                inline(
+                    catalog.t("admin.bk.restore_action", locale),
+                    admin_cb.backup_restore(),
+                    intent=Intent.DANGER,
+                ),
+                inline(
+                    catalog.t("admin.bk.retention_action", locale),
+                    admin_cb.backup_prune(),
+                    intent=Intent.PRIMARY,
+                ),
+            ],
+        ]
+    )
+    kb.append([inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)])
+    return Screen(doc=doc, markup=inline_markup(kb))
+
+
+def _file_block(doc: RichDoc, item: BackupFile, locale) -> None:
+    """One backup file: name (bold), its scope/size/time, and its own restore button."""
+    doc.heading(item.name, size=3)
+    doc.paragraph(
+        " · ".join(
+            [
+                catalog.t(f"admin.bk.scope.{item.scope}", locale),
+                format_bytes(item.size_bytes, locale),
+                _when(item.created_at, locale),
             ]
         )
     )
-
-    kb = []
-    # One "restore this file" per on-disk backup: an existing copy is one tap away.
-    for item in files[:6]:
-        action = admin_cb.backup_disk(item.name)
-        # A filename long enough to overflow Telegram's 64-byte callback cap simply
-        # gets no per-file button; the upload/restore path still reaches it.
-        if len(action.encode("utf-8")) > 64:
-            continue
-        kb.append(
+    action = admin_cb.backup_disk(item.name)
+    # A filename long enough to overflow Telegram's 64-byte callback cap simply
+    # gets no per-file button; the upload/restore path still reaches it.
+    if len(action.encode("utf-8")) <= 64:
+        doc.buttons(
             [
-                inline(
+                (
                     catalog.t("admin.bk.restore_file", locale, file=_short(item.name)),
                     action,
-                    intent=Intent.PRIMARY,
+                    "primary",
                 )
             ]
         )
-    kb.extend([
-        [
-            inline(
-                catalog.t("admin.bk.instant", locale),
-                admin_cb.backup_instant("full"),
-                intent=Intent.SUCCESS,
-            ),
-            inline(
-                catalog.t("admin.bk.instant_settings", locale),
-                admin_cb.backup_instant("settings"),
-                intent=Intent.PRIMARY,
-            ),
-        ],
-        [
-            inline(
-                catalog.t("admin.bk.schedule", locale),
-                admin_cb.backup_schedule(),
-                intent=Intent.PRIMARY,
-            ),
-            inline(
-                catalog.t("admin.bk.switch_off" if config.enabled else "admin.bk.switch_on", locale),
-                admin_cb.backup_switch(not config.enabled),
-                intent=Intent.DANGER if config.enabled else Intent.SUCCESS,
-            ),
-        ],
-        [
-            inline(
-                catalog.t("admin.bk.restore_action", locale),
-                admin_cb.backup_restore(),
-                intent=Intent.DANGER,
-            ),
-            inline(
-                catalog.t("admin.bk.retention_action", locale),
-                admin_cb.backup_prune(),
-                intent=Intent.PRIMARY,
-            ),
-        ],
-    ])
-    kb.append([inline(catalog.t("admin.back", locale), admin_cb.menu(), intent=Intent.PRIMARY)])
-    return Screen(doc=doc, markup=inline_markup(kb))
+
 
 def _short(name: str, limit: int = 30) -> str:
     return name if len(name) <= limit else f"…{name[-limit:]}"
 
+
 def schedule_screen(view: AdminView) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.bk.schedule_title", locale))
     backup = view.backup
     config = backup.config if backup else BackupConfig()
+    add_html_header(
+        doc,
+        subject(locale, "admin.bk.schedule_title"),
+        _period(config, locale),
+        locale,
+    )
     doc.p(catalog.t("admin.bk.schedule_hint", locale))
     doc.kv_table(
         [
@@ -278,10 +302,11 @@ def schedule_screen(view: AdminView) -> Screen:
     ]
     return Screen(doc=doc, markup=inline_markup(kb))
 
+
 def restore_prompt_screen(view: AdminView) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.bk.restore_prompt_title", locale))
+    add_html_header(doc, subject(locale, "admin.bk.restore_prompt_title"), "—", locale)
     doc.p(catalog.t("admin.bk.restore_prompt", locale))
     return Screen(
         doc=doc,
@@ -298,6 +323,7 @@ def restore_prompt_screen(view: AdminView) -> Screen:
         ),
     )
 
+
 def restore_confirm_screen(
     view: AdminView,
     *,
@@ -307,7 +333,12 @@ def restore_confirm_screen(
 ) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.bk.restore_confirm_title", locale))
+    add_html_header(
+        doc,
+        subject(locale, "admin.bk.restore_confirm_title"),
+        catalog.t("admin.bk.scope_fact", locale, scope=catalog.t(f"admin.bk.scope.{scope}", locale)),
+        locale,
+    )
     doc.blockquote(
         fragment(
             catalog.t(
@@ -343,6 +374,7 @@ def restore_confirm_screen(
     ]
     return Screen(doc=doc, markup=inline_markup(kb))
 
+
 def restore_result_screen(
     view: AdminView,
     *,
@@ -353,7 +385,12 @@ def restore_result_screen(
 ) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.bk.restore_title", locale))
+    add_html_header(
+        doc,
+        subject(locale, "admin.bk.restore_title"),
+        catalog.t("admin.bk.restore_ok_short" if ok else "admin.bk.restore_refused_short", locale),
+        locale,
+    )
     if ok:
         doc.blockquote(
             fragment(
@@ -401,6 +438,7 @@ def restore_result_screen(
     ]
     return Screen(doc=doc, markup=inline_markup(kb))
 
+
 def received_notice(locale, *, size: str, scope: str):
     """The upload's one-line banner (shared by the handler, not duplicated)."""
     return fragment(
@@ -412,14 +450,14 @@ def received_notice(locale, *, size: str, scope: str):
         )
     )
 
+
 def notice_screen(view: AdminView, *, key: str, **args) -> Screen:
     """A one-line result above the section (backup made, pruned, refused)."""
     locale = view.locale
     screen = backup_screen(view)
-    screen.doc.prepend_raw(
-        str(fragment(catalog.t(key, locale, **args)))
-    )
+    screen.doc.prepend_text(catalog.t(key, locale, **args))
     return screen
+
 
 register(
     AdminSection(

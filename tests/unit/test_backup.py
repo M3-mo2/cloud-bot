@@ -319,8 +319,12 @@ async def test_backup_screens_are_pure_and_use_one_label_per_destination(locale)
         screen_mod.restore_result_screen(view, ok=False, reason="newer_schema"),
         screen_mod.restore_result_screen(view, ok=True, scope="settings"),
     ):
-        html = screen.doc.html
-        assert "<h2>" in html
+        # ``backup_screen`` builds in **blocks** (its files carry in-body buttons);
+        # ``InputRichMessage`` allows either blocks or html, never both, so the
+        # body check reads whichever form the screen chose.
+        built = screen.doc.build()
+        body = built.html if built.html is not None else built.model_dump_json(exclude_none=True)
+        assert "<h2>" in body or '"type":"heading"' in body
         buttons = [b for row in screen.markup.inline_keyboard for b in row]
         assert buttons
         # One label per destination: two buttons never share a callback destination
@@ -338,6 +342,9 @@ async def test_the_backup_screen_digits_localize(world):
     from cloudbot.presentation.catalog import _admin_view
     from cloudbot.presentation.screens.admin import backup as screen_mod
 
-    arabic = screen_mod.backup_screen(_admin_view(Locale.AR)).doc.html
+    # The screen builds in blocks; the JSON form still contains every rendered
+    # string, so the digit and Arabic checks read the same content.
+    built = screen_mod.backup_screen(_admin_view(Locale.AR)).doc.build()
+    arabic = built.html if built.html is not None else built.model_dump_json(exclude_none=True)
     assert not any("\u0660" <= ch <= "\u0669" for ch in arabic)
     assert any("\u0600" <= ch <= "\u06ff" for ch in arabic)

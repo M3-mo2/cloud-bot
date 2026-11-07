@@ -45,9 +45,11 @@ def _audience_label(key: AudienceKey, locale) -> str:
 def _kind_label(kind: str, locale) -> str:
     return catalog.t(f"admin.bc.received_{kind}", locale)
 
-def _header(doc: RichDoc, locale) -> None:
+def _header(doc: RichDoc, locale, fact: str) -> None:
+    from cloudbot.presentation.screens.admin._helpers import subject
+
     doc.p(_rule(locale))
-    doc.h(2, catalog.t("admin.bc.title", locale))
+    doc.h(2, f"✦ {subject(locale, 'admin.bc.title')} ⟸ {fact}")
     doc.p(_rule(locale))
 
 def _back_row(locale):
@@ -59,7 +61,11 @@ def broadcast_screen(view: AdminView) -> Screen:
     section = view.broadcast
     locale = view.locale
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(
+        doc,
+        locale,
+        catalog.t("admin.bc.history_count", locale, n=_num(len(section.history) if section else 0, locale)),
+    )
     doc.p(catalog.t("admin.bc.intro", locale))
 
     if section is None or (not section.history and section.open_run is None):
@@ -117,7 +123,7 @@ def broadcast_screen(view: AdminView) -> Screen:
 def compose_prompt(view: AdminView) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(doc, locale, catalog.t("admin.bc.compose_waiting", locale))
     doc.p(catalog.t("admin.bc.compose_hint", locale))
     doc.blockquote(fragment(catalog.t("admin.bc.compose_waiting", locale)))
     kb = [
@@ -151,7 +157,7 @@ def audience_screen(
     """Every preset with its **live** count; one tap freezes it into a preview."""
     locale = view.locale
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(doc, locale, catalog.t("admin.bc.audience_options", locale, n=_num(len(section.options), locale)))
     doc.p(catalog.t("admin.bc.received", locale, kind=_kind_label(source.kind, locale)))
     doc.p(catalog.t("admin.bc.audience_hint", locale))
     doc.kv_table(
@@ -212,7 +218,7 @@ def preview_screen(
     """
     locale = view.locale
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(doc, locale, catalog.t("admin.bc.preview_recipients", locale, n=_num(count, locale)))
     doc.h(3, catalog.t("admin.bc.preview_title", locale))
     doc.p(catalog.t("admin.bc.preview_of", locale))
     doc.blockquote(
@@ -274,7 +280,7 @@ def progress_screen(view: AdminView, run: BroadcastRun) -> Screen:
     """The in-place progress: sent / failed / remaining, updated on the same message."""
     locale = view.locale
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(doc, locale, catalog.t("admin.bc.progress_total", locale, n=_num(run.total, locale)))
     doc.h(3, catalog.t("admin.bc.sending", locale))
     doc.blockquote(
         fragment(
@@ -305,7 +311,7 @@ def result_screen(view: AdminView, result: BroadcastResult) -> Screen:
     locale = view.locale
     run = result.run
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(doc, locale, catalog.t("admin.bc.progress_total", locale, n=_num(run.total, locale)))
     if run.status == "stopped":
         doc.h(3, catalog.t("admin.bc.result_stopped_title", locale))
     elif run.status == "interrupted":
@@ -376,7 +382,7 @@ def result_screen(view: AdminView, result: BroadcastResult) -> Screen:
 def history_screen(view: AdminView, runs: tuple[BroadcastRun, ...]) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    _header(doc, locale)
+    _header(doc, locale, catalog.t("admin.bc.history_count", locale, n=_num(len(runs), locale)))
     doc.h(3, catalog.t("admin.bc.history_title", locale))
     if not runs:
         doc.p(catalog.t("admin.bc.history_empty", locale))
@@ -384,23 +390,20 @@ def history_screen(view: AdminView, runs: tuple[BroadcastRun, ...]) -> Screen:
             doc=doc,
             markup=inline_markup([_back_row(locale)]),
         )
-    doc.table(
-        [
-            catalog.t("admin.bc.history_col_when", locale),
-            catalog.t("admin.bc.history_col_audience", locale),
-            catalog.t("admin.bc.history_col_counts", locale),
-            catalog.t("admin.bc.history_col_state", locale),
-        ],
-        [
-            [
-                format_datetime(run.created_at, locale),
-                _audience_label(run.audience, locale),
-                f"{_num(run.sent, locale)} / {_num(run.failed, locale)}",
-                catalog.t(f"admin.bc.history_state.{run.status}", locale),
-            ]
-            for run in runs
-        ],
-    )
+    # One block per run: the state in the heading, then the audience and the real
+    # counts on one fact line — never a four-column table.
+    for run in runs:
+        doc.h(3, catalog.t(f"admin.bc.history_state.{run.status}", locale))
+        doc.p(
+            f"{_audience_label(run.audience, locale)} · "
+            + catalog.t(
+                "admin.bc.history_counts_inline",
+                locale,
+                sent=_num(run.sent, locale),
+                failed=_num(run.failed, locale),
+            )
+            + f" · {format_datetime(run.created_at, locale)}"
+        )
     doc.p(fragment(italic(catalog.t("admin.bc.history_resend_note", locale))))
     kb: list[list] = []
     for run in runs:

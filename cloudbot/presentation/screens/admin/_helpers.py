@@ -48,15 +48,13 @@ def prepend_banner(screen: Screen, ctx) -> None:
     presentation→middleware import. Called by ``handlers/render.show_screen`` for
     every screen an admin reaches while entered.
     """
-    from cloudbot.presentation.rich.tags import esc
-
     text = catalog.t(
         "admin.entered.banner",
         ctx.locale,
         ws_id=ctx.entered_ws_id,
         owner=ctx.entered_owner_tg_id,
     )
-    screen.doc.prepend_raw(f"<blockquote>⚠️ {esc(text)}</blockquote>")
+    screen.doc.prepend_text(f"⚠️ {text}")
     leave = inline(
         catalog.t("admin.entered.leave", ctx.locale), admin_cb.leave(), intent=Intent.PRIMARY
     )
@@ -77,6 +75,49 @@ def user_display(summary_display: str, tg_id: int, locale: Locale) -> str:
     return f"#{num(tg_id, locale)}"
 
 
+def rule(locale: Locale) -> str:
+    """The one section rule every admin screen opens with."""
+    return catalog.t("admin.rule", locale)
+
+
+def subject(locale: Locale, title_key: str) -> str:
+    """A section's subject without its leading emoji (the header adds ``✦``)."""
+    text = catalog.t(title_key, locale)
+    head, sep, rest = text.partition(" ")
+    if sep and not any(ch.isalnum() for ch in head):
+        return rest
+    return text
+
+
+def header_line(title: str, fact: str) -> str:
+    """``✦ subject ⟸ the number that matters`` — the one glance that orients."""
+    return f"✦ {title} ⟸ {fact}"
+
+
+def add_html_header(doc: RichDoc, title: str, fact: str, locale: Locale) -> None:
+    """rule / ✦ title ⟸ fact / rule, in the html form (no in-body buttons)."""
+    doc.p(rule(locale))
+    doc.h(2, header_line(title, fact))
+    doc.p(rule(locale))
+
+
+def add_block_header(doc: RichDoc, title: str, fact: str, locale: Locale) -> None:
+    """rule / ✦ title ⟸ fact / rule, in the blocks form (in-body buttons)."""
+    doc.paragraph(rule(locale))
+    doc.heading(header_line(title, fact), size=2)
+    doc.paragraph(rule(locale))
+
+
+def prepend_notice(doc: RichDoc, text: str) -> None:
+    """Put a plain notice at the top of either an html or a blocks document.
+
+    A block screen cannot take an html fragment (Telegram allows one form), so the
+    notice becomes a paragraph block there. One seam for every banner/notice the
+    admin panel prepends.
+    """
+    doc.prepend_text(text)
+
+
 __all__ = [
     "num",
     "esc_id",
@@ -84,6 +125,12 @@ __all__ = [
     "add_entered_banner",
     "leave_entered_row",
     "user_display",
+    "rule",
+    "subject",
+    "header_line",
+    "add_html_header",
+    "add_block_header",
+    "prepend_notice",
     "format_datetime",
     "format_relative",
     "catalog",

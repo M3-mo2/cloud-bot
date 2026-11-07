@@ -23,7 +23,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import code, italic
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
-from cloudbot.presentation.screens.admin._helpers import num
+from cloudbot.presentation.screens.admin._helpers import add_block_header, num, subject
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
@@ -51,8 +51,14 @@ def wallet_screen(
 ) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.wallet.title", locale))
-    doc.p(_raw(f"{catalog.t('admin.user.id', locale)}: {code(tg_id)}"))
+    balance = wallet.balance_stars if wallet is not None else 0
+    add_block_header(
+        doc,
+        subject(locale, "admin.wallet.title"),
+        catalog.t("wallet.stars", locale, n=_num(balance, locale)),
+        locale,
+    )
+    doc.paragraph(f"{catalog.t('admin.user.id', locale)}: {tg_id}")
 
     if subscription is None:
         plan_line = catalog.t("admin.wallet.none", locale)
@@ -74,8 +80,7 @@ def wallet_screen(
                 plan=plan,
                 days=_num(status.days_left, locale),
             )
-    balance = wallet.balance_stars if wallet is not None else 0
-    doc.kv_table(
+    doc.kv_block(
         [
             (catalog.t("admin.wallet.plan", locale), plan_line),
             (
@@ -85,59 +90,43 @@ def wallet_screen(
         ]
     )
 
-    # The ledger: what happened, attributed, with the reason.
-    doc.p(catalog.t("admin.wallet.ledger_title", locale))
-    if wallet is None or not wallet.ledger:
-        doc.p(italic(catalog.t("admin.wallet.ledger_empty", locale)))
+    # The ledger: what happened, attributed, with the reason. One heading per
+    # movement (kind + signed amount) and one fact line (time and reason) — never
+    # a four-column table a right-to-left message drifts apart.
+    ledger = () if wallet is None else wallet.ledger
+    doc.heading(
+        f"✦ {catalog.t('admin.wallet.ledger_title', locale)} ⟸ {num(len(ledger), locale)}",
+        size=2,
+    )
+    if not ledger:
+        doc.paragraph(catalog.t("admin.wallet.ledger_empty", locale))
     else:
-        rows = []
-        for movement in reversed(wallet.ledger[-10:]):
+        for movement in reversed(ledger[-10:]):
             kind = catalog.t(f"admin.wallet.kind.{movement.kind}", locale)
             amount = ("+" if movement.amount > 0 else "") + str(movement.amount)
-            rows.append(
-                [
-                    format_datetime(movement.at, locale),
-                    kind,
-                    _raw(f"<code>{localize_digits(amount, locale)}</code>"),
-                    movement.reason,
-                ]
+            doc.heading(f"{kind} · {localize_digits(amount, locale)}", size=3)
+            doc.paragraph(
+                f"{format_datetime(movement.at, locale)} · {movement.reason or '—'}"
             )
-        doc.table(
-            [
-                catalog.t("admin.wallet.col.time", locale),
-                catalog.t("admin.wallet.col.kind", locale),
-                catalog.t("admin.wallet.col.amount", locale),
-                catalog.t("admin.wallet.col.reason", locale),
-            ],
-            rows,
-        )
 
     if payments:
-        doc.p(catalog.t("admin.wallet.payments_title", locale) if catalog.has("admin.wallet.payments_title", locale) else "Stars payments")
-        docs = []
+        doc.heading(
+            f"✦ {catalog.t('admin.wallet.payments_title', locale)} ⟸ {num(len(payments), locale)}",
+            size=2,
+        )
         for payment in reversed(payments[-10:]):
             state = (
                 catalog.t("admin.wallet.refunded_mark", locale)
                 if not payment.refundable
                 else catalog.t("admin.wallet.refundable_mark", locale)
             )
-            docs.append(
-                [
-                    format_datetime(payment.created_at, locale),
-                    _raw(code(payment.charge_id)),
-                    catalog.t("wallet.stars", locale, n=_num(payment.stars, locale)),
-                    state,
-                ]
+            doc.heading(
+                catalog.t("wallet.stars", locale, n=_num(payment.stars, locale)),
+                size=3,
             )
-        doc.table(
-            [
-                catalog.t("admin.wallet.col.time", locale),
-                catalog.t("admin.wallet.col.charge", locale),
-                catalog.t("admin.wallet.col.amount", locale),
-                catalog.t("admin.wallet.col.state", locale),
-            ],
-            docs,
-        )
+            doc.paragraph(
+                f"{payment.charge_id} · {state} · {format_datetime(payment.created_at, locale)}"
+            )
 
     kb: list[list] = []
     kb.append(

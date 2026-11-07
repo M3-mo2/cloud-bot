@@ -98,6 +98,31 @@ async def test_non_admin_ordinary_message_passes_through():
     assert calls["handler"] == 1
 
 
+def _rich_text(rich_message) -> str:
+    """Everything a rich message shows, in whichever form it was built.
+
+    ``InputRichMessage`` allows *either* ``html`` or ``blocks``; a screen with
+    in-body buttons (Bot API 10.3) is blocks-only, so ``.html`` is ``None`` for it.
+    Reading only ``.html`` would make such a screen look empty to a harness.
+    """
+    html = getattr(rich_message, "html", None)
+    if html is not None:
+        return html
+    parts: list[str] = []
+
+    def walk(block) -> None:
+        text = getattr(block, "text", None)
+        if text:
+            parts.append(str(text))
+        for nested in getattr(block, "blocks", None) or []:
+            walk(nested)
+        for button in getattr(block, "buttons", None) or []:
+            parts.append(str(getattr(button, "text", "")))
+
+    for block in getattr(rich_message, "blocks", None) or []:
+        walk(block)
+    return " ".join(parts)
+
 async def test_allowlisted_admin_health_works_in_production_end_to_end():
     """``/health`` is ``admin_commands=False`` in PRODUCTION; the gate overrides it
     for an allowlisted admin so the panel's health reading is real.
@@ -138,7 +163,7 @@ async def test_allowlisted_admin_health_works_in_production_end_to_end():
             return True
 
         async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
-            self.sent.append(rich_message.html)
+            self.sent.append(_rich_text(rich_message))
             return Message.model_construct(chat={"id": chat_id}, message_id=1)
 
         async def edit_message_text(self, **kw):

@@ -11,18 +11,35 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import fragment, italic
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
-from cloudbot.presentation.screens.admin._helpers import num
+from cloudbot.presentation.screens.admin._helpers import (
+    add_html_header,
+    num,
+    subject,
+)
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
 
 
+def _enabled_count(view: AdminView) -> int:
+    return sum(
+        1 for category in EventCategory if view.notification_subscriptions.get(category.value, True)
+    )
+
+
 def notifications_screen(view: AdminView) -> Screen:
     locale = view.locale
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("admin.notify.title", locale))
 
     paused = view.notify_paused
+    subscribed = _enabled_count(view)
+    add_html_header(
+        doc,
+        subject(locale, "admin.notify.title"),
+        catalog.t("admin.notify.enabled_count", locale, n=num(subscribed, locale)),
+        locale,
+    )
+
     doc.blockquote(
         fragment(
             catalog.t(
@@ -37,22 +54,20 @@ def notifications_screen(view: AdminView) -> Screen:
         doc.p(catalog.t("admin.notify.scope", locale, tg_id=num(view.notify_scope, locale)))
     doc.p(italic(catalog.t("admin.notify.hint", locale)))
 
-    rows = []
+    # One line per category (label, then its state), never a two-column table that
+    # a right-to-left message misaligns. The two-column table is reserved for a
+    # label and its value; a list of subjects is a list.
     for category in EventCategory:
         enabled = view.notification_subscriptions.get(category.value, True)
-        rows.append(
-            [
-                catalog.t(category.label_key, locale),
-                catalog.t("admin.notify.on" if enabled else "admin.notify.off", locale),
-            ]
+        doc.p(
+            fragment(
+                [
+                    catalog.t(category.label_key, locale),
+                    " — ",
+                    catalog.t("admin.notify.on" if enabled else "admin.notify.off", locale),
+                ]
+            )
         )
-    doc.table(
-        [
-            catalog.t("admin.notify.col.category", locale),
-            catalog.t("admin.notify.col.state", locale),
-        ],
-        rows,
-    )
 
     all_on = all(view.notification_subscriptions.get(c.value, True) for c in EventCategory)
     kb = []

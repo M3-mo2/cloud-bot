@@ -534,9 +534,7 @@ async def _show_forcejoin(cb, ctx: UserContext, services: Services, sender: Rich
     view = await _view(ctx, services)
     screen = forcejoin_screen_mod.forcejoin_screen(view)
     if banner:
-        from cloudbot.presentation.rich.tags import blockquote, fragment
-
-        screen.doc.prepend_raw(str(blockquote(fragment(banner))))
+        screen.doc.prepend_text(banner)
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 async def _route_fj_add(cb, parsed, ctx, services, sender, state, events) -> None:
@@ -601,11 +599,7 @@ async def _open_wallet(
         payments=payments,
     )
     if banner:
-        from cloudbot.presentation.rich.tags import fragment
-
-        from cloudbot.presentation.rich.tags import blockquote
-
-        screen.doc.prepend_raw(str(blockquote(fragment(banner))))
+        screen.doc.prepend_text(banner)
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 async def _route_wallet(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
@@ -981,9 +975,7 @@ async def _show_broadcast(cb, ctx, services, sender, *, banner_key: str = "") ->
     view = await _view(ctx, services, broadcast=await services.broadcast.view())
     screen = broadcast_screen_mod.broadcast_screen(view)
     if banner_key:
-        from cloudbot.presentation.rich.tags import blockquote, fragment
-
-        screen.doc.prepend_raw(str(blockquote(fragment(catalog.t(banner_key, ctx.locale)))))
+        screen.doc.prepend_text(catalog.t(banner_key, ctx.locale))
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
@@ -1382,9 +1374,7 @@ async def on_forcejoin_chat(
         )
     view = await _view(ctx, services)
     screen = forcejoin_screen_mod.forcejoin_screen(view)
-    from cloudbot.presentation.rich.tags import blockquote, fragment
-
-    screen.doc.prepend_raw(str(blockquote(fragment(banner))))
+    screen.doc.prepend_text(banner)
     await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)
 
 # -- users search (text step) ------------------------------------------------
@@ -1508,13 +1498,12 @@ async def on_backup_document(
     screen = backup_screen_mod.restore_confirm_screen(
         view, token=token, scope=validation.scope, label=basis
     )
-    screen.doc.prepend_raw(
-        str(
-            backup_screen_mod.received_notice(
-                ctx.locale,
-                size=format_bytes(len(data), ctx.locale),
-                scope=validation.scope,
-            )
+    screen.doc.prepend_text(
+        catalog.t(
+            "admin.bk.upload_received",
+            ctx.locale,
+            size=format_bytes(len(data), ctx.locale),
+            scope=catalog.t(f"admin.bk.scope.{validation.scope}", ctx.locale),
         )
     )
     await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)

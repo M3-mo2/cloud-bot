@@ -65,11 +65,52 @@ class RichDoc:
         self._parts.insert(0, html)
         return self
 
+    def prepend_text(self, text: str) -> "RichDoc":
+        """Insert a **quoted** notice at the very top, in the form this doc uses.
+
+        An html document gets a ``<blockquote>``; a blocks document gets a
+        paragraph block. The admin panel prefixes a banner or a one-line result to
+        screens that may build in either form, and mixing the two would drop the
+        html half (see :meth:`build`).
+        """
+        if self._blocks:
+            from aiogram.types import InputRichBlockBlockQuotation
+
+            self._blocks.insert(0, InputRichBlockBlockQuotation(blocks=[
+                self._paragraph_block(text)
+            ]))
+        else:
+            self._parts.insert(0, f"<blockquote>{tags.safe(text)}</blockquote>")
+        return self
+
+    @staticmethod
+    def _paragraph_block(text: str):
+        from aiogram.types import InputRichBlockParagraph
+
+        return InputRichBlockParagraph(text=text)
+
     def div(self) -> "RichDoc":
         return self._add("<hr>")
 
     def blockquote(self, text: Element) -> "RichDoc":
         return self._add(f"<blockquote>{self._value(text)}</blockquote>")
+
+    def quote(self, text: str) -> "RichDoc":
+        """A quoted notice in whichever form this document already uses.
+
+        An html document gets ``<blockquote>``; a blocks document gets a
+        block-quotation block. Screens that build in blocks cannot add html (see
+        :meth:`build`), and a warning must not be the thing that silently drops
+        the rest of the message.
+        """
+        if self._blocks:
+            from aiogram.types import InputRichBlockBlockQuotation
+
+            self._blocks.append(
+                InputRichBlockBlockQuotation(blocks=[self._paragraph_block(text)])
+            )
+            return self
+        return self._add(f"<blockquote>{tags.safe(text)}</blockquote>")
 
     def ul(self, items: Sequence[Element]) -> "RichDoc":
         body = "".join(f"<li>{self._value(item)}</li>" for item in items)
@@ -146,6 +187,25 @@ class RichDoc:
         from aiogram.types import InputRichBlockFooter
 
         self._blocks.append(InputRichBlockFooter(text=text))
+        return self
+
+    def kv_block(self, pairs: Sequence[tuple[str, str]]) -> "RichDoc":
+        """A two-column ``label`` / ``value`` table in the **blocks** form.
+
+        A table is allowed only for a label and its value (identity blocks), never
+        for a list of subjects. This is the block-document sibling of
+        :meth:`kv_table`, for screens that build in blocks.
+        """
+        from aiogram.types import InputRichBlockTable, RichBlockTableCell
+
+        cells = [
+            [
+                RichBlockTableCell(align="left", valign="middle", text=label, is_header=True),
+                RichBlockTableCell(align="left", valign="middle", text=value),
+            ]
+            for label, value in pairs
+        ]
+        self._blocks.append(InputRichBlockTable(cells=cells, is_bordered=True))
         return self
 
     def buttons(
