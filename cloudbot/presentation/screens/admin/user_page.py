@@ -103,7 +103,7 @@ def user_screen(view: AdminView) -> Screen:
             else "—",
         ),
     ):
-        doc.paragraph(f"**{k}**: {v}")
+        doc.paragraph(f"{k}: {v}")
 
     # The ban is a state, shown here and reversible in one tap.
     if view.user_ban is not None:
@@ -226,8 +226,10 @@ def _recent_activity(doc: RichDoc, view: AdminView, locale) -> None:
     # in a right-to-left message is the first thing the eye lands on and the least
     # useful. The sentence reads in the order a person asks it.
     for e in events:
+        # The block form takes plain RichText: a `**` here printed literally. The
+        # emphasis comes from the line's shape — event, category, time — not marks.
         doc.paragraph(
-            f"**{catalog.t(e.summary_key, locale, **e.params)}** — "
+            f"{catalog.t(e.summary_key, locale, **e.params)} — "
             f"{catalog.t(e.category.label_key, locale)} "
             f"({format_datetime(e.ts, locale)})"
         )
