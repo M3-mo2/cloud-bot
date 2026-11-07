@@ -4,6 +4,12 @@ This repository is **cloud-bot**: the operator-owned Telegram frontend for the h
 engine **Cloud Service** (`sandboxd`). Read `docs/README.md` first, then the document it tells you to
 read for the area you are touching.
 
+## Read this first
+
+**`MOHAMED.md`** in this repo describes how the owner works: the language of a reply, the shape of
+one, what "done" means, and the UI taste this product is held to. It is not optional context — read
+it alongside this file.
+
 ## Hard rules
 
 1. **This repository is documentation-first.** Implement what the docs specify. Where a doc is
