@@ -51,7 +51,9 @@ async def test_0001_then_0002_preserves_existing_rows(tmp_path):
     applied = await db.migrate()
     # The exact tail grows as migrations are added (0006 = stars payments);
     # this asserts "nothing before 0002 was re-applied and nothing was skipped".
-    assert applied == [2, 3, 4, 5, 6, 7]
+    # The tail grows as migrations are added (0008 = forcejoin); the point is that
+    # nothing before 0002 was re-applied and nothing was skipped.
+    assert applied == [2, 3, 4, 5, 6, 7, 8]
 
     conn = await db.connect()
     async with conn.execute("SELECT tg_id FROM users") as cur:

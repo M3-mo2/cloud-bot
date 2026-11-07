@@ -16,6 +16,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
 )
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
+from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
 from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.clock import SystemClock
 from cloudbot.core.config import Settings
@@ -30,6 +31,7 @@ from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
+from cloudbot.services.forcejoin import ForceJoinService
 from cloudbot.services.metrics import MetricsService
 from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
@@ -42,6 +44,24 @@ from cloudbot.services.tunnels import TunnelsService
 from cloudbot.services.workspaces import WorkspacesService
 
 
+class _NoDirectory:
+    """The pre-bot placeholder: every read is "unknown" (the gate allows through)."""
+
+    async def resolve_chat(self, reference: str) -> dict:  # pragma: no cover - never used
+        from cloudbot.domain.forcejoin import ChatResolutionError
+
+        raise ChatResolutionError("api_unavailable", "bot not wired")
+
+    async def is_admin_in(self, chat_id: int, bot_id: int) -> bool:  # pragma: no cover
+        return False
+
+    async def membership(self, chat_id: int, user_id: int):  # pragma: no cover
+        from cloudbot.domain.forcejoin import MembershipResult
+
+        return MembershipResult.unknown_for(chat_id, "bot_not_wired")
+
+_NO_DIRECTORY = _NoDirectory()
+
 @dataclass
 class Container:
     settings: Settings
@@ -52,6 +72,7 @@ class Container:
     event_log: SqliteEventLog
     admin_state: SqliteAdminStateStore
     subscriptions: SqliteSubscriptions
+    forcejoin_store: SqliteForceJoinStore
     services: Services
 
     async def aclose(self) -> None:
@@ -77,6 +98,7 @@ def build(settings: Settings) -> Container:
     event_log = SqliteEventLog(database)
     admin_state = SqliteAdminStateStore(database)
     subscriptions = SqliteSubscriptions(database)
+    forcejoin_store = SqliteForceJoinStore(database)
     clock = SystemClock()
     ownership = OwnershipService(users)
 
@@ -101,6 +123,10 @@ def build(settings: Settings) -> Container:
             subscriptions=subscriptions,
         ),
         notifier=NotifierService(event_log, admin_state),
+        # The directory is wired with the real Bot in ``build_dispatcher``; this
+        # placeholder keeps the service constructible (and keeps the gate's
+        # "unknown ⇒ allow" path the safe default) until then.
+        forcejoin=ForceJoinService(forcejoin_store, _NO_DIRECTORY),
     )
     return Container(
         settings=settings,
@@ -111,5 +137,6 @@ def build(settings: Settings) -> Container:
         event_log=event_log,
         admin_state=admin_state,
         subscriptions=subscriptions,
+        forcejoin_store=forcejoin_store,
         services=services,
     )

@@ -33,6 +33,7 @@ from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens.admin import audit as audit_screen_mod
+from cloudbot.presentation.screens.admin import forcejoin as forcejoin_screen_mod
 from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin import registry
 from cloudbot.presentation.screens.admin import user_page as user_page_mod
@@ -82,6 +83,8 @@ async def _view(
     subs = await services.admin.subscriptions(ctx.actor_tg_id)
     cursor, paused = await services.admin.notify_state(ctx.actor_tg_id)
     scope = await services.admin.notify_scope(ctx.actor_tg_id)
+    fj_chats = await services.forcejoin.chats()
+    fj_enabled = await services.forcejoin.enabled()
     return AdminView(
         locale=ctx.locale,
         now=now or _now(),
@@ -95,6 +98,8 @@ async def _view(
         notify_scope=scope,
         notification_cursor=cursor,
         entered=entered,
+        forcejoin_chats=fj_chats,
+        forcejoin_enabled=fj_enabled,
     )
 
 
@@ -382,6 +387,62 @@ async def _route_audit_user(cb, parsed: AdminCallback, ctx, services, sender, st
     await show_screen(cb, audit_screen_mod.audit_screen(view, page=page, tg_id=tg_id), ctx=ctx, sender=sender)
 
 
+# -- force-join gate ---------------------------------------------------------
+async def _show_forcejoin(cb, ctx: UserContext, services: Services, sender: RichSender, *, banner: str = "") -> None:
+    view = await _view(ctx, services)
+    screen = forcejoin_screen_mod.forcejoin_screen(view)
+    if banner:
+        from cloudbot.presentation.rich.tags import blockquote, fragment
+
+        screen.doc.prepend_raw(str(blockquote(fragment(banner))))
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
+
+async def _route_fj_add(cb, parsed, ctx, services, sender, state, events) -> None:
+    """One message, no wizard: the next text message is the chat reference."""
+    await state.set_state(AdminInput.awaiting_forcejoin_chat)
+    view = await _view(ctx, services)
+    await show_screen(cb, forcejoin_screen_mod.add_prompt(view), ctx=ctx, sender=sender)
+
+async def _route_fj_toggle(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    chat_id = parsed.arg_int(0)
+    chat = await services.forcejoin.recheck(chat_id)
+    if chat is None:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    await services.forcejoin.set_chat_enabled(chat_id, not chat.enabled)
+    refreshed = await services.forcejoin.recheck(chat_id)
+    banner = ""
+    if refreshed is not None and not refreshed.bot_is_admin:
+        banner = catalog.t("admin.fj.banner_not_admin", ctx.locale, chat=refreshed.label)
+    await _show_forcejoin(cb, ctx, services, sender, banner=banner)
+
+async def _route_fj_remove(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    chat_id = parsed.arg_int(0)
+    chat = await services.forcejoin.recheck(chat_id)
+    if chat is None:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    await services.forcejoin.remove_chat(chat_id)
+    await _show_forcejoin(cb, ctx, services, sender)
+
+async def _route_fj_switch(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    enabled = parsed.args[0] == "on"
+    await services.forcejoin.set_enabled(enabled)
+    await _show_forcejoin(cb, ctx, services, sender)
+
+async def _route_fj_check(cb, parsed, ctx, services, sender, state, events) -> None:
+    """The admin's end-to-end proof: this admin's own membership, measured live."""
+    results = await services.forcejoin.probe(ctx.actor_tg_id)
+    rows = [(chat.label, result.subscribed, result.unknown) for chat, result in results]
+    ok = bool(rows) and all(subscribed or unknown for _, subscribed, unknown in rows)
+    view = await _view(ctx, services)
+    await show_screen(
+        cb,
+        forcejoin_screen_mod.check_result_screen(view, rows=rows, ok=ok),
+        ctx=ctx,
+        sender=sender,
+    )
+
 # -- wallet + subscription controls -----------------------------------------
 async def _open_wallet(
     cb, ctx: UserContext, services: Services, sender: RichSender, tg_id: int, *, banner=None
@@ -564,8 +625,38 @@ _ROUTES = {
     admin_cb.WALLET: _route_wallet,
     admin_cb.WALLET_OP: _route_wallet_op,
     admin_cb.WALLET_PLAN: _route_wallet_plan,
+    admin_cb.FJ_ADD: _route_fj_add,
+    admin_cb.FJ_TOGGLE: _route_fj_toggle,
+    admin_cb.FJ_REMOVE: _route_fj_remove,
+    admin_cb.FJ_SWITCH: _route_fj_switch,
+    admin_cb.FJ_CHECK: _route_fj_check,
 }
 
+
+# -- force-join add (the one-message step) -----------------------------------
+@router.message(AdminInput.awaiting_forcejoin_chat)
+async def on_forcejoin_chat(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    """Resolve, verify the bot is an admin, store — or refuse with the exact reason."""
+    await state.clear()
+    reference = (message.text or "").strip()
+    banner = ""
+    try:
+        chat = await services.forcejoin.add_chat(reference, added_by=ctx.actor_tg_id)
+    except Exception as exc:  # noqa: BLE001 - mapped to one refusal line below
+        reason = getattr(exc, "reason", "not_found")
+        banner = catalog.t(f"admin.fj.refuse.{reason}", ctx.locale)
+    else:
+        banner = catalog.t(
+            "admin.fj.added", ctx.locale, chat=chat.label, kind=catalog.t(f"admin.fj.kind.{chat.kind}", ctx.locale)
+        )
+    view = await _view(ctx, services)
+    screen = forcejoin_screen_mod.forcejoin_screen(view)
+    from cloudbot.presentation.rich.tags import blockquote, fragment
+
+    screen.doc.prepend_raw(str(blockquote(fragment(banner))))
+    await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)
 
 # -- users search (text step) ------------------------------------------------
 @router.message(AdminInput.awaiting_user_search)

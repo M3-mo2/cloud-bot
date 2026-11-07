@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 126 |
-| Screens including the /dev tool | 129 |
-| Button edges | 411 |
-| Distinct destinations (actions) | 113 |
+| Catalog screens | 128 |
+| Screens including the /dev tool | 131 |
+| Button edges | 421 |
+| Distinct destinations (actions) | 118 |
 | Entry commands | 9 |
-| Callback re-entry actions | 113 |
+| Callback re-entry actions | 118 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
-| Contradictions: dead ends | 0 |
-| Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 208 |
+| Contradictions: dead ends | 1 |
+| Contradictions: orphans | 2 |
+| Contradictions: two-screen loops | 210 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -32,17 +32,17 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 
 | Command | Screens it can render |
 | --- | --- |
-| `/admin` | admin_overview, admin_audit, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_notifications, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
+| `/admin` | admin_overview, admin_audit, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_notifications, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `/dev` | dev_sections |
 | `/diag` | (handler only — no screen) |
 | `/health` | (handler only — no screen) |
 | `/help` | help, help_inside |
-| `/notifications` | admin_notifications, admin_audit, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
+| `/notifications` | admin_notifications, admin_audit, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `/paysupport` | wallet_support |
 | `/settings` | settings, settings_inside |
 | `/start` | language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 113 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 118 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -53,6 +53,11 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:cancel` | admin_overview, admin_overview_unreachable, admin_user |
 | `adm:delete` | admin_user |
 | `adm:enter` | admin_entered |
+| `adm:fj_add` | (handler only — no screen) |
+| `adm:fj_check` | (handler only — no screen) |
+| `adm:fj_remove` | admin_forcejoin |
+| `adm:fj_switch` | admin_forcejoin |
+| `adm:fj_toggle` | admin_forcejoin |
 | `adm:leave` | admin_overview, admin_overview_unreachable |
 | `adm:menu` | admin_overview, admin_overview_unreachable |
 | `adm:notify_all` | (handler only — no screen) |
@@ -60,7 +65,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:notify_scope` | admin_user |
 | `adm:notify_toggle` | (handler only — no screen) |
 | `adm:resume` | admin_user |
-| `adm:sec` | admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
+| `adm:sec` | admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `adm:suspend` | admin_user |
 | `adm:user` | admin_user |
 | `adm:users_search` | (handler only — no screen) |
@@ -167,7 +172,7 @@ One tree per command. The same screen reached twice is shown both times (that is
 ### `/admin`
 
 - **admin_overview** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -182,27 +187,40 @@ One tree per command. The same screen reached twice is shown both times (that is
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -486,6 +504,22 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions
+      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -533,9 +567,10 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -554,18 +589,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_user** — 👤 User ↩ (already expanded at depth 2)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - ↩ `admin_overview` (already on this path)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -585,7 +632,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - ↩ `admin_audit` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -612,6 +659,22 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -631,27 +694,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -674,9 +750,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -695,18 +772,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - ↩ `admin_audit` (already on this path)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -775,9 +864,25 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -796,27 +901,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -824,27 +942,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -929,9 +1060,25 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -950,27 +1097,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -978,27 +1138,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -1494,7 +1667,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -1510,6 +1683,22 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -1529,27 +1718,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -1572,9 +1774,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1593,18 +1796,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -1612,23 +1827,22 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-- **admin_notifications** — 🔔 Notifications
-  - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
-  - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
-  - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+- **admin_forcejoin** — 🔗 Mandatory subscriptions
+  - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+  - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+  - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -1668,30 +1882,244 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+- **admin_notifications** — 🔔 Notifications
+  - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+  - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+  - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+  - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+    - **admin_overview** — 🛠 Admin panel
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_notifications` (already on this path)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -1714,9 +2142,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1735,18 +2164,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - ↩ `admin_notifications` (already on this path)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -1758,7 +2199,7 @@ One tree per command. The same screen reached twice is shown both times (that is
 - **admin_notify_gap** — ⚠️ Events were missed
 - **admin_notify_message** — ℹ️ Event
 - **admin_overview_unreachable** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -1772,27 +2213,40 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_audit` (already on this path)
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2077,6 +2531,22 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions
+      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2124,9 +2594,10 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
@@ -2145,18 +2616,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_user** — 👤 User ↩ (already expanded at depth 2)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
@@ -2441,27 +2924,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2469,27 +2965,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2534,9 +3043,25 @@ One tree per command. The same screen reached twice is shown both times (that is
   - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
   - 🔔 Watch only this user → `adm:notify_scope` → admin_user
     - ↩ `admin_user` (already on this path)
-  - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions
+      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2636,9 +3161,25 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2657,27 +3198,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2685,27 +3239,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2727,7 +3294,7 @@ One tree per command. The same screen reached twice is shown both times (that is
   - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -2767,6 +3334,22 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2786,27 +3369,40 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - ↩ `admin_users_empty` (already on this path)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2829,9 +3425,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2846,18 +3443,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_users_empty` (already on this path)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - ↩ `admin_users_empty` (already on this path)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -3470,7 +4079,7 @@ _No screen is rendered by this command._
   - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -3510,30 +4119,59 @@ _No screen is rendered by this command._
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_notifications` (already on this path)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3556,9 +4194,10 @@ _No screen is rendered by this command._
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -3577,18 +4216,30 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - ↩ `admin_notifications` (already on this path)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -3609,7 +4260,7 @@ _No screen is rendered by this command._
     - ↩ `admin_audit` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_entered** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty
@@ -3636,6 +4287,22 @@ _No screen is rendered by this command._
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -3655,27 +4322,40 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3698,9 +4378,10 @@ _No screen is rendered by this command._
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -3719,18 +4400,30 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - ↩ `admin_audit` (already on this path)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -3799,9 +4492,25 @@ _No screen is rendered by this command._
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -3820,27 +4529,40 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -3848,27 +4570,40 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3953,9 +4688,25 @@ _No screen is rendered by this command._
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -3974,27 +4725,40 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4002,27 +4766,40 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -4518,7 +5295,7 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -4534,6 +5311,22 @@ _No screen is rendered by this command._
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -4553,27 +5346,40 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -4596,9 +5402,10 @@ _No screen is rendered by this command._
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4617,18 +5424,214 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+- **admin_forcejoin** — 🔗 Mandatory subscriptions
+  - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+  - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+  - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+    - ↩ `admin_forcejoin` (already on this path)
+  - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+    - **admin_overview** — 🛠 Admin panel
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -4640,7 +5643,7 @@ _No screen is rendered by this command._
 - **admin_notify_gap** — ⚠️ Events were missed
 - **admin_notify_message** — ℹ️ Event
 - **admin_overview** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -4655,27 +5658,40 @@ _No screen is rendered by this command._
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -4959,6 +5975,22 @@ _No screen is rendered by this command._
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions
+      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -5006,9 +6038,10 @@ _No screen is rendered by this command._
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5027,18 +6060,30 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_user** — 👤 User ↩ (already expanded at depth 2)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - ↩ `admin_overview` (already on this path)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5046,7 +6091,7 @@ _No screen is rendered by this command._
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_overview_unreachable** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -5060,27 +6105,40 @@ _No screen is rendered by this command._
         - ↩ `admin_audit` (already on this path)
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -5365,6 +6423,22 @@ _No screen is rendered by this command._
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions
+      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -5412,9 +6486,10 @@ _No screen is rendered by this command._
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
@@ -5433,18 +6508,30 @@ _No screen is rendered by this command._
             - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_user** — 👤 User ↩ (already expanded at depth 2)
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
@@ -5729,27 +6816,40 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5757,27 +6857,40 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -5822,9 +6935,25 @@ _No screen is rendered by this command._
   - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
   - 🔔 Watch only this user → `adm:notify_scope` → admin_user
     - ↩ `admin_user` (already on this path)
-  - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions
+      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+        - ↩ `admin_forcejoin` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -5924,9 +7053,25 @@ _No screen is rendered by this command._
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -5945,27 +7090,40 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5973,27 +7131,40 @@ _No screen is rendered by this command._
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -6015,7 +7186,7 @@ _No screen is rendered by this command._
   - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -6055,6 +7226,22 @@ _No screen is rendered by this command._
           - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -6074,27 +7261,40 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - ↩ `admin_users_empty` (already on this path)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -6117,9 +7317,10 @@ _No screen is rendered by this command._
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -6134,18 +7335,30 @@ _No screen is rendered by this command._
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_users_empty` (already on this path)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - ↩ `admin_users_empty` (already on this path)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -10180,23 +11393,24 @@ _None: every destination wears a single static label._
 
 _None: no screen repeats a callback._
 
-### 3.3 Dead ends (0)
+### 3.3 Dead ends (1)
 
 A dead end is a screen from which no button path reaches a home screen (menu, workspaces list, help, settings or language). Transient cards that are *sent*, never navigated, are measured separately below.
 
-_None: every navigable screen can reach a home screen._
+- **fj_gate** — (no title)
 
 Transient cards (no buttons by design — sent to the user, not navigated): `admin_notify_capped`, `admin_notify_gap`, `admin_notify_message`, `tunnel_publishing`
 
-### 3.4 Orphans (1)
+### 3.4 Orphans (2)
 
 A screen not reachable from any command entry through the button graph. Error screens are excluded: the error guard reaches them, not a button.
 
+- **fj_gate** — (no title)
 - **terminal_command** — ⌨️ Send a command
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (208)
+### 3.5 Loops that are not obvious (210)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -10206,6 +11420,8 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **admin_confirm_suspend** —“✅ Proceed”→ **admin_user** —“⏸️ Suspend”→ **admin_confirm_suspend** (**unobvious**)
 - **admin_entered** —“🚪 Leave workspace”→ **admin_overview** —“👥 Users”→ **admin_entered** (**unobvious**)
 - **admin_entered** —“🚪 Leave workspace”→ **admin_overview_unreachable** —“👥 Users”→ **admin_entered** (**unobvious**)
+- **admin_forcejoin** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_forcejoin** (expected (back/affordance))
+- **admin_forcejoin** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_forcejoin** (expected (back/affordance))
 - **admin_notifications** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_notifications** (expected (back/affordance))
 - **admin_notifications** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_notifications** (expected (back/affordance))
 - **admin_overview** —“👥 Users”→ **admin_overview_unreachable** —“👥 Users”→ **admin_overview** (**unobvious**)
@@ -10433,12 +11649,14 @@ _None._
 
 ### Catalog entries that no command reaches
 
+- **fj_gate** — (no title)
 - **terminal_command** — ⌨️ Send a command
 
 ### Reached after a text / document / payment step (not a button)
 
 A prompt asks the user to type (or upload, or pay); the reply is handled by a message handler whose filter is not a `Command`. These screens are real user flows even though no button leads to them.
 
+- `AdminInput.awaiting_forcejoin_chat` → admin_forcejoin
 - `AdminInput.awaiting_user_search` → admin_users, admin_users_empty
 - `AdminInput.awaiting_wallet_amount` → (handler only — no screen)
 - `AdminInput.awaiting_wallet_charge` → (handler only — no screen)
@@ -10462,11 +11680,11 @@ A prompt asks the user to type (or upload, or pay); the reply is handled by a me
 ### Inline screens built in handlers (not catalog screens)
 
 - `cloudbot/handlers/admin.py:53 (on_diag)`
-- `cloudbot/handlers/admin_panel.py:173 (_route_users_search)`
-- `cloudbot/handlers/admin_panel.py:469 (_wallet_prompt)`
-- `cloudbot/handlers/admin_panel.py:610 (on_wallet_amount)`
-- `cloudbot/handlers/admin_panel.py:639 (_not_found)`
-- `cloudbot/handlers/admin_panel.py:655 (_stale)`
+- `cloudbot/handlers/admin_panel.py:178 (_route_users_search)`
+- `cloudbot/handlers/admin_panel.py:530 (_wallet_prompt)`
+- `cloudbot/handlers/admin_panel.py:701 (on_wallet_amount)`
+- `cloudbot/handlers/admin_panel.py:730 (_not_found)`
+- `cloudbot/handlers/admin_panel.py:746 (_stale)`
 - `cloudbot/handlers/callbacks/navigation.py:31 (on_clear)`
 - `cloudbot/handlers/files.py:217 (_screen)`
 
@@ -10512,6 +11730,19 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
 
+### admin_forcejoin — 🔗 Mandatory subscriptions
+
+_Press Add and send the @username, numeric id or t.me link. The bot must be an administrator in…_
+
+- ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+- 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+- ⏸️ Disable: Cloud World (disabled) → `adm:fj_toggle` → admin_forcejoin
+- 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+- ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+- 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+- 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+- ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+
 ### admin_notifications — 🔔 Notifications
 
 _Delivered up to event #42_
@@ -10553,17 +11784,19 @@ _Workspace created_
 
 _Engine 0.0.20 · api v1 · health ok · ready ready_
 
-- 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_overview_unreachable — 🛠 Admin panel
 
 _The live fleet counts are unknown while the engine is unreachable._
 
-- 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 👥 Users → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔔 Notifications → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🧾 Audit log → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_user — 👤 User
 
@@ -10576,7 +11809,7 @@ _Workspaces_
 - 🧾 Audit log → `adm:audit_user` → admin_audit
 - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
 - 🔔 Watch only this user → `adm:notify_scope` → admin_user
-- ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- ⬅️ Back → `adm:sec` → admin_audit, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_users — 👥 Users
 
@@ -10799,6 +12032,12 @@ _(no body text)_
 - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
 - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+
+### fj_gate — (no title)
+
+_(no body text)_
+
+- (no buttons)
 
 ### help — ❓ Help
 

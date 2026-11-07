@@ -111,6 +111,12 @@ _ADMIN_CHECK_ALLOWED = {
     "middleware/context_mw.py",
     "middleware/context.py",
     "middleware/mode_gate.py",
+    # The force-join gate exempts the owner for the anti-lockout rule; like every
+    # other gate it reads the identity resolved once by the context middleware.
+    "middleware/forcejoin.py",
+    # ``/start`` is gate-exempt so its handler renders the gate itself; it reads
+    # the identity the context middleware already resolved to skip the owner.
+    "handlers/common.py",
     "middleware/error_guard.py",
     "core/config.py",
     "presentation/rich/components.py",

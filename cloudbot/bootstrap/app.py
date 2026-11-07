@@ -20,6 +20,7 @@ from cloudbot.middleware.admin_gate import AdminGateMiddleware
 from cloudbot.middleware.context_mw import ContextMiddleware
 from cloudbot.middleware.error_guard import ErrorGuardMiddleware
 from cloudbot.middleware.events_source import EventSourceMiddleware
+from cloudbot.middleware.forcejoin import ForceJoinMiddleware
 from cloudbot.middleware.inject import InjectMiddleware
 from cloudbot.middleware.mode_gate import ModeGateMiddleware
 from cloudbot.middleware.observability import ObservabilityMiddleware
@@ -45,6 +46,13 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     dispatcher = Dispatcher(storage=storage)
 
     sender = RichSender(bot)
+    # The force-join gate needs the real Bot (``getChatMember``). It is bound here,
+    # once the bot exists, and runs first in the chain so a gated user can never
+    # reach any handler — a new handler cannot forget it.
+    from cloudbot.adapters.telegram.directory import TelegramDirectory
+
+    directory = TelegramDirectory(bot)
+    container.services.forcejoin.bind(directory, getattr(bot, "id", 0))
     dispatcher.update.outer_middleware(ObservabilityMiddleware())
     dispatcher.update.outer_middleware(
         ContextMiddleware(
@@ -64,6 +72,12 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     # so ``/admin`` and ``adm:`` callbacks reveal nothing.
     dispatcher.message.outer_middleware(AdminGateMiddleware())
     dispatcher.callback_query.outer_middleware(AdminGateMiddleware())
+    # The mandatory-subscription gate. Registered on the message/callback
+    # observers (an update-level middleware only sees the ``Update`` wrapper), and
+    # **after** the admin gate so a non-admin's ``/admin`` is still swallowed
+    # silently. It exempts ``/start`` and its own ``fj:`` re-check callbacks.
+    dispatcher.message.outer_middleware(ForceJoinMiddleware())
+    dispatcher.callback_query.outer_middleware(ForceJoinMiddleware())
     # A known slash-command must leave the sticky terminal state (R4). Registered
     # after the admin gate so the gate still decides identity first.
     dispatcher.message.outer_middleware(TerminalStickyMiddleware())
@@ -77,11 +91,15 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
         execution,
         features,
         files,
+        forcejoin,
         terminal,
         workspaces,
     )
 
     dispatcher.include_router(common.router)
+    # The gate's own re-check buttons: registered near the front so the two
+    # ``fj:`` calls always reach their handler (they are gate-exempt too).
+    dispatcher.include_router(forcejoin.router)
     # Billing before the account routers: the Stars handshake (an invoice, a
     # pre-checkout answer, a successful payment) is never user navigation.
     dispatcher.include_router(billing.router)

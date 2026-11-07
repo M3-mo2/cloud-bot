@@ -11,6 +11,7 @@ from datetime import datetime
 from cloudbot.core.locale import Locale
 from cloudbot.domain.entities import User, Workspace
 from cloudbot.domain.events import EventRecord
+from cloudbot.domain.forcejoin import ForceJoinChat
 from cloudbot.domain.subscription import Subscription
 from cloudbot.domain.value_objects import ResourceUsage
 
@@ -122,6 +123,9 @@ class AdminView:
     notify_scope: int | None = None
     notification_cursor: int = 0
     entered: EnteredWorkspace | None = None
+    #: The force-join gate's chats and its one global switch (admin section).
+    forcejoin_chats: list[ForceJoinChat] = field(default_factory=list)
+    forcejoin_enabled: bool = True
 
 
 def summarize_user(user: User, workspace_count: int, *, plan: str = "free") -> UserSummary:

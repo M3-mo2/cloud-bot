@@ -45,6 +45,7 @@ from cloudbot.domain.admin import (
     WorkspaceWithUsage,
 )
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession, Workspace
+from cloudbot.domain.forcejoin import ForceJoinChat, GateStatus
 from cloudbot.domain.events import (
     EventCategory,
     EventRecord,
@@ -97,8 +98,10 @@ from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.presentation.screens import wallet as wallet_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
+from cloudbot.presentation.screens.forcejoin import gate_screen
 from cloudbot.domain.billing import STAR_PACKS
 from cloudbot.presentation.screens.admin import audit as admin_audit
+from cloudbot.presentation.screens.admin import forcejoin as admin_forcejoin
 from cloudbot.presentation.screens.admin import notifications as admin_notify
 from cloudbot.presentation.screens.admin import overview as admin_overview
 from cloudbot.presentation.screens.admin import user_page as admin_user
@@ -623,6 +626,31 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
         )
         if entered
         else None,
+        forcejoin_chats=[
+            ForceJoinChat(
+                id=1,
+                chat_id=-1001234567890,
+                username="cloud_world",
+                title="Cloud World",
+                kind="channel",
+                bot_is_admin=True,
+                enabled=True,
+                added_at=NOW,
+                added_by=999,
+            ),
+            ForceJoinChat(
+                id=2,
+                chat_id=-1009876543210,
+                username="cloud_chat",
+                title="Cloud Chat",
+                kind="group",
+                bot_is_admin=False,
+                enabled=False,
+                added_at=NOW,
+                added_by=999,
+            ),
+        ],
+        forcejoin_enabled=True,
     )
 
 
@@ -1044,6 +1072,15 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     ),
     "admin_user": lambda f, loc: admin_user.user_screen(_admin_view(loc)),
     "admin_notifications": lambda f, loc: admin_notify.notifications_screen(_admin_view(loc)),
+    "admin_forcejoin": lambda f, loc: admin_forcejoin.forcejoin_screen(_admin_view(loc)),
+    "fj_gate": lambda f, loc: gate_screen(
+        GateStatus(
+            enabled=True,
+            required=tuple(_admin_view(loc).forcejoin_chats[:1]),
+            missing=tuple(_admin_view(loc).forcejoin_chats[:1]),
+        ),
+        loc,
+    ),
     "admin_audit": lambda f, loc: admin_audit.audit_screen(_admin_view(loc)),
     "admin_entered": lambda f, loc: admin_workspace.entered_workspace_screen(
         _admin_entered_view(loc)
@@ -1112,6 +1149,8 @@ def _section_of(name: str) -> str:
         return "wallet"
     if name.startswith("admin_"):
         return "admin"
+    if name.startswith("fj_"):
+        return "menu"
     if name.startswith("err_"):
         return "errors"
     if name.startswith("language"):

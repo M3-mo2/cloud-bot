@@ -11,6 +11,7 @@ from cloudbot.services.billing import BillingService
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
+from cloudbot.services.forcejoin import ForceJoinService
 from cloudbot.services.metrics import MetricsService
 from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
@@ -42,3 +43,4 @@ class Services:
     events: EventsService
     admin: AdminService
     notifier: NotifierService
+    forcejoin: ForceJoinService

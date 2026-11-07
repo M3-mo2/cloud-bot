@@ -116,6 +116,15 @@ async def on_start(
     user, is_new = await services.account.onboard(
         ctx.tg_id, default_locale=ctx.locale
     )
+    # The gate exempts ``/start`` so this path can render the gate itself: a new
+    # or returning user who has not joined every required chat is shown the gate
+    # instead of the menu (the middleware cannot do it — it is exempt here).
+    status = await services.forcejoin.status(ctx.tg_id)
+    if status.must_join and not ctx.is_admin:
+        from cloudbot.presentation.screens.forcejoin import gate_screen
+
+        await show_screen(message, gate_screen(status, user.locale), ctx=ctx, sender=sender)
+        return
     if is_new:
         events.user_new(tg_id=ctx.tg_id, name=ctx.display_name)
         await show_screen(message, language_card(ctx.locale), ctx=ctx, sender=sender)

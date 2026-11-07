@@ -293,7 +293,7 @@ async def test_legacy_user_subscriptions_move_to_the_first_workspace(tmp_path):
     )
     await conn.commit()
 
-    assert await db.migrate() == [7]
+    assert await db.migrate() == [7, 8]
     conn = await db.connect()
 
     async with conn.execute("SELECT * FROM subscriptions") as cur:

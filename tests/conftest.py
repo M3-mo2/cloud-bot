@@ -21,6 +21,7 @@ def _reset_global_routers():
         execution,
         features,
         files,
+        forcejoin,
         terminal,
         workspaces,
     )
@@ -35,6 +36,7 @@ def _reset_global_routers():
         files,
         execution,
         features,
+        forcejoin,
         admin,
         dev,
         terminal,
@@ -50,6 +52,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
 )
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
+from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
 from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.locale import Locale
 from cloudbot.core.runtime import BotRuntime
@@ -61,6 +64,7 @@ from cloudbot.services.bundle import Services
 from cloudbot.services.events import EventsService
 from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
+from cloudbot.services.forcejoin import ForceJoinService
 from cloudbot.services.metrics import MetricsService
 from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
@@ -113,8 +117,45 @@ def engine():
     return FakeEngine()
 
 
+class FakeDirectory:
+    """A configurable Telegram directory for tests: memberships by chat, admin by chat."""
+
+    def __init__(self) -> None:
+        self.memberships: dict[int, object] = {}
+        self.admins: dict[int, bool] = {}
+        self.chats: dict[str, dict] = {}
+
+    async def resolve_chat(self, reference: str) -> dict:
+        from cloudbot.domain.forcejoin import ChatResolutionError
+
+        info = self.chats.get(reference)
+        if info is None:
+            raise ChatResolutionError("not_found", reference)
+        return info
+
+    async def is_admin_in(self, chat_id: int, bot_id: int) -> bool:
+        return self.admins.get(chat_id, False)
+
+    async def membership(self, chat_id: int, user_id: int):
+        from cloudbot.domain.forcejoin import MembershipResult
+
+        result = self.memberships.get(chat_id)
+        if result is None:
+            return MembershipResult.unknown_for(chat_id, "no_fixture")
+        if callable(result):
+            return result(chat_id, user_id)
+        return result
+
 @pytest.fixture
-async def services(engine, users, sessions, event_log, admin_state, subscriptions):
+def fake_directory():
+    return FakeDirectory()
+
+@pytest.fixture
+async def forcejoin_store(database):
+    return SqliteForceJoinStore(database)
+
+@pytest.fixture
+async def services(engine, users, sessions, event_log, admin_state, subscriptions, fake_directory):
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
@@ -137,6 +178,9 @@ async def services(engine, users, sessions, event_log, admin_state, subscription
             subscriptions=subscriptions,
         ),
         notifier=NotifierService(event_log, admin_state),
+        forcejoin=ForceJoinService(
+            SqliteForceJoinStore(database), fake_directory, bot_id=42
+        ),
     )
 
 

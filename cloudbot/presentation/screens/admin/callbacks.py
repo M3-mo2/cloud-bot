@@ -48,6 +48,12 @@ AUDIT_USER = "audit_user"
 WALLET = "wallet"
 WALLET_OP = "wop"
 WALLET_PLAN = "wplan"
+# -- force-join gate ---------------------------------------------------------
+FJ_ADD = "fj_add"
+FJ_TOGGLE = "fj_toggle"
+FJ_REMOVE = "fj_remove"
+FJ_SWITCH = "fj_switch"
+FJ_CHECK = "fj_check"
 
 #: The admin workspace actions declared in ``actions.py``. Each takes one subject.
 ACTION_KEYS: frozenset[str] = frozenset({"enter", "suspend", "resume", "delete"})
@@ -176,6 +182,22 @@ def wallet_op(op: str, tg_id: int, step: str = "ask", arg: str = "") -> str:
 def wallet_plan(op: str, tg_id: int, plan_code: str, step: str = "ask", arg: str = "") -> str:
     return _action(WALLET_PLAN, op, int(tg_id), plan_code, step, arg)
 
+# -- force-join gate ---------------------------------------------------------
+def forcejoin_add() -> str:
+    return _action(FJ_ADD)
+
+def forcejoin_toggle(chat_id: int) -> str:
+    return _action(FJ_TOGGLE, int(chat_id))
+
+def forcejoin_remove(chat_id: int) -> str:
+    return _action(FJ_REMOVE, int(chat_id))
+
+def forcejoin_switch(enabled: bool) -> str:
+    return _action(FJ_SWITCH, "on" if enabled else "off")
+
+def forcejoin_check() -> str:
+    return _action(FJ_CHECK)
+
 
 # -- parser ------------------------------------------------------------------
 def _invalid(data: str, reason: str, action: str = "") -> InvalidAdminCallback:
@@ -294,6 +316,24 @@ def parse(data: str) -> AdminParseResult:
             return tg_id
         arg = rest[3] if len(rest) == 4 else ""
         return AdminCallback(action, (rest[0], str(tg_id), rest[2], arg))
+
+    if action in (FJ_ADD, FJ_CHECK):
+        if rest:
+            return _invalid(data, "too_many_args", action)
+        return AdminCallback(action)
+
+    if action in (FJ_TOGGLE, FJ_REMOVE):
+        if len(rest) != 1:
+            return _invalid(data, "bad_arity", action)
+        chat_id = _require_int(data, rest[0], action)
+        if isinstance(chat_id, InvalidAdminCallback):
+            return chat_id
+        return AdminCallback(action, (str(chat_id),))
+
+    if action == FJ_SWITCH:
+        if len(rest) != 1 or rest[0] not in ("on", "off"):
+            return _invalid(data, "bad_switch", action)
+        return AdminCallback(action, (rest[0],))
 
     if action == WALLET_PLAN:
         if len(rest) not in (4, 5) or rest[3] not in ("ask", "go"):

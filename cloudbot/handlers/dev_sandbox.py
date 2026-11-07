@@ -84,6 +84,7 @@ def _handler_modules():
         execution,
         features,
         files,
+        forcejoin,
         terminal,
         workspaces,
     )
@@ -92,6 +93,7 @@ def _handler_modules():
         common,
         billing,
         callbacks.navigation,
+        forcejoin,
         admin_panel,
         workspaces,
         files,

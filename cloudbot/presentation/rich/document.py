@@ -169,6 +169,31 @@ class RichDoc:
         self._blocks.append(InputRichBlockButtons(buttons=built, align=align))
         return self
 
+    def raw_buttons(
+        self,
+        row: Sequence[Mapping[str, object]],
+        *,
+        align: str | None = None,
+    ) -> "RichDoc":
+        """A row of in-body buttons from raw ``RichMessageButton`` keyword dicts.
+
+        ``buttons`` above is the common (label, callback, style) shape; this seam
+        exists for the force-join gate's one-button-per-chat rows, where a chat
+        with a public username is a ``url`` button and one without is a
+        ``callback_data`` button. Telegram refuses a mixed row in the html form,
+        so the caller still builds entirely in blocks (see ``buttons``).
+        """
+        from aiogram.types import InputRichBlockButtons, RichMessageButton
+
+        built = []
+        for item in row:
+            data = item.get("callback_data")
+            if data is not None and len(str(data).encode("utf-8")) > 64:
+                raise ValueError(f"callback_data over 64 bytes: {data!r}")
+            built.append(RichMessageButton(**item))
+        self._blocks.append(InputRichBlockButtons(buttons=built, align=align))
+        return self
+
     def alert(self, kind: str, title: Element, body: Element) -> "RichDoc":
         icon = {"warning": "⚠️", "error": "❌", "success": "✅", "info": "ℹ️"}.get(kind, "⚠️")
         return self.h(2, tags.fragment([icon, " ", tags.bold(title)])).p(body)
