@@ -15,6 +15,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
     SqliteAdminStateStore,
     SqliteEventLog,
 )
+from cloudbot.adapters.persistence.sqlite_moderation import SqliteModerationStore
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
@@ -35,6 +36,7 @@ from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.forcejoin import ForceJoinService
 from cloudbot.services.metrics import MetricsService
+from cloudbot.services.moderation import ModerationService
 from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
@@ -76,6 +78,7 @@ class Container:
     subscriptions: SqliteSubscriptions
     forcejoin_store: SqliteForceJoinStore
     backup_store: SqliteBackupStore
+    moderation_store: SqliteModerationStore
     services: Services
 
     async def aclose(self) -> None:
@@ -103,18 +106,20 @@ def build(settings: Settings) -> Container:
     subscriptions = SqliteSubscriptions(database)
     forcejoin_store = SqliteForceJoinStore(database)
     backup_store = SqliteBackupStore(database)
+    moderation_store = SqliteModerationStore(database)
     clock = SystemClock()
     ownership = OwnershipService(users)
+    moderation = ModerationService(moderation_store, protected_ids=settings.admin_ids)
 
     services = Services(
         account=AccountService(users),
         billing=BillingService(subscriptions),
         backup=BackupService(backup_store),
-        workspaces=WorkspacesService(engine, users, ownership, subscriptions),
+        workspaces=WorkspacesService(engine, users, ownership, subscriptions, moderation),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),
-        execution=ExecutionService(engine, ownership),
-        sessions=SessionsService(engine, sessions, ownership),
+        execution=ExecutionService(engine, ownership, moderation),
+        sessions=SessionsService(engine, sessions, ownership, moderation),
         ownership=ownership,
         packages=PackagesService(engine, ownership),
         tunnels=TunnelsService(engine, ownership),
@@ -125,13 +130,14 @@ def build(settings: Settings) -> Container:
         events=EventsService(event_log),
         admin=AdminService(
             users, engine, event_log, admin_state, ownership, BotRuntime(),
-            subscriptions=subscriptions,
+            subscriptions=subscriptions, moderation=moderation,
         ),
         notifier=NotifierService(event_log, admin_state),
         # The directory is wired with the real Bot in ``build_dispatcher``; this
         # placeholder keeps the service constructible (and keeps the gate's
         # "unknown ⇒ allow" path the safe default) until then.
         forcejoin=ForceJoinService(forcejoin_store, _NO_DIRECTORY),
+        moderation=moderation,
     )
     return Container(
         settings=settings,
@@ -144,5 +150,6 @@ def build(settings: Settings) -> Container:
         subscriptions=subscriptions,
         forcejoin_store=forcejoin_store,
         backup_store=backup_store,
+        moderation_store=moderation_store,
         services=services,
     )

@@ -12,6 +12,7 @@ from cloudbot.core.locale import Locale
 from cloudbot.domain.entities import User, Workspace
 from cloudbot.domain.events import EventRecord
 from cloudbot.domain.forcejoin import ForceJoinChat
+from cloudbot.domain.moderation import UserBan, WorkspaceBan
 from cloudbot.domain.backup import BackupView
 from cloudbot.domain.subscription import Subscription
 from cloudbot.domain.value_objects import ResourceUsage
@@ -132,6 +133,16 @@ class AdminView:
     #: The admin's own Telegram id, so a section can default a destination to
     #: "this chat". Read from the identity gate's context, never from input.
     admin_id: int = 0
+    #: The subject user's ban, when the screen is about a specific user.
+    user_ban: UserBan | None = None
+    #: The subject workspace's ban, when the screen is about a specific workspace.
+    workspace_ban: WorkspaceBan | None = None
+    #: The moderation section: every ban currently in force (users + workspaces).
+    banned_users: list[UserBan] = field(default_factory=list)
+    banned_workspaces: list[WorkspaceBan] = field(default_factory=list)
+    #: ``ws_id -> admin reason`` for the workspaces on a user's page, so each row
+    #: can render its ban state and the lift button.
+    workspace_bans: dict[str, str] = field(default_factory=dict)
 
 
 def summarize_user(user: User, workspace_count: int, *, plan: str = "free") -> UserSummary:

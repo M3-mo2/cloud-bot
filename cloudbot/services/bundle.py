@@ -14,6 +14,7 @@ from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.forcejoin import ForceJoinService
 from cloudbot.services.metrics import MetricsService
+from cloudbot.services.moderation import ModerationService
 from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
@@ -46,3 +47,4 @@ class Services:
     admin: AdminService
     notifier: NotifierService
     forcejoin: ForceJoinService
+    moderation: ModerationService

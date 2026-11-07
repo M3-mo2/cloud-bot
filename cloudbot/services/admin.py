@@ -30,6 +30,7 @@ from cloudbot.domain.admin import (
     summarize_user,
 )
 from cloudbot.domain.entities import Workspace
+from cloudbot.domain.moderation import DeliveryResult
 from cloudbot.domain.events import EventCategory
 from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.domain.ports.events import AdminStateStore, EventLog
@@ -52,6 +53,7 @@ class AdminService:
         ownership: OwnershipService,
         runtime: BotRuntime | None = None,
         subscriptions: Subscriptions | None = None,
+        moderation: "object | None" = None,
     ) -> None:
         self._users = users
         self._engine = engine
@@ -60,6 +62,7 @@ class AdminService:
         self._ownership = ownership
         self._runtime = runtime or BotRuntime()
         self._subscriptions = subscriptions
+        self._moderation = moderation
 
     # -- overview ------------------------------------------------------------
     async def overview(self, *, now: datetime | None = None) -> AdminOverview:
@@ -327,6 +330,59 @@ class AdminService:
         if self._subscriptions is None:
             return ()
         return await self._subscriptions.payments_for(tg_id)
+
+    # -- moderation ----------------------------------------------------------
+    async def ban_user(
+        self,
+        tg_id: int,
+        *,
+        reason: str,
+        days: int | None = None,
+        actor: int,
+        now: datetime | None = None,
+    ):
+        if self._moderation is None:
+            raise RuntimeError("moderation is not configured")
+        return await self._moderation.ban_user(
+            tg_id, reason=reason, banned_by=actor, days=days, now=now
+        )
+
+    async def unban_user(self, tg_id: int) -> bool:
+        if self._moderation is None:
+            raise RuntimeError("moderation is not configured")
+        return await self._moderation.unban_user(tg_id)
+
+    async def user_ban(self, tg_id: int):
+        if self._moderation is None:
+            return None
+        return await self._moderation.user_ban(tg_id)
+
+    async def banned_users(self) -> list:
+        if self._moderation is None:
+            return []
+        return await self._moderation.banned_users()
+
+    async def ban_workspace(self, ws_id: WorkspaceId, *, reason: str, actor: int):
+        if self._moderation is None:
+            raise RuntimeError("moderation is not configured")
+        await self._ownership.assert_admin_override(0, ws_id)
+        return await self._moderation.ban_workspace(ws_id, reason=reason, banned_by=actor)
+
+    async def unban_workspace(self, ws_id: WorkspaceId) -> bool:
+        if self._moderation is None:
+            raise RuntimeError("moderation is not configured")
+        await self._ownership.assert_admin_override(0, ws_id)
+        return await self._moderation.unban_workspace(ws_id)
+
+    async def workspace_ban(self, ws_id: WorkspaceId):
+        if self._moderation is None:
+            return None
+        return await self._moderation.workspace_ban(ws_id)
+
+    async def banned_workspaces(self) -> list:
+        if self._moderation is None:
+            return []
+        return await self._moderation.banned_workspaces()
 
     # -- notifications -------------------------------------------------------
     async def subscriptions(self, admin_id: int) -> dict[str, bool]:

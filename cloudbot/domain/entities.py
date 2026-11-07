@@ -51,6 +51,9 @@ class Workspace:
     summary: WorkspaceSummary
     created_at: datetime
     last_activity_at: datetime
+    #: Set only when an admin banned this workspace: the admin's own reason. The
+    #: workspace is presented as locked and every execution is refused.
+    ban_reason: str = ""
 
 
 @dataclass(frozen=True)

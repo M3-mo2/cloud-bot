@@ -57,6 +57,12 @@ def user_screen(view: AdminView) -> Screen:
         ]
     )
 
+    # The ban is a state, shown here and reversible in one tap.
+    if view.user_ban is not None:
+        doc.blockquote(
+            fragment(catalog.t("admin.user.banned", locale, reason=view.user_ban.reason or "—"))
+        )
+
     doc.div()
     doc.p(catalog.t("admin.user.workspaces", locale))
     kb: list[list] = []
@@ -78,6 +84,9 @@ def user_screen(view: AdminView) -> Screen:
                 )
             else:
                 usage = catalog.t("admin.user.usage_unknown", locale)
+            ban_reason = view.workspace_bans.get(str(ws.id))
+            if ban_reason is not None:
+                status = catalog.t("admin.user.ws_banned", locale, reason=ban_reason or "—")
             rows.append(
                 [ws.name, code(str(ws.id)), status, usage]
             )
@@ -108,6 +117,27 @@ def user_screen(view: AdminView) -> Screen:
                 if act is not None:
                     row.append(action_button(act, subject, locale))
             kb.append(row)
+            # A workspace ban is reversible from here: lift, or (if not banned) ban.
+            if str(ws.id) in view.workspace_bans:
+                kb.append(
+                    [
+                        inline(
+                            catalog.t("admin.user.ws_unban", locale),
+                            admin_cb.ws_unban(subject),
+                            intent=Intent.SUCCESS,
+                        )
+                    ]
+                )
+            else:
+                kb.append(
+                    [
+                        inline(
+                            catalog.t("admin.user.ws_ban", locale),
+                            admin_cb.ws_ban(subject),
+                            intent=Intent.DANGER,
+                        )
+                    ]
+                )
 
     _recent_activity(doc, view, locale)
     kb.append(
@@ -124,6 +154,42 @@ def user_screen(view: AdminView) -> Screen:
             ),
         ]
     )
+    # Moderation: unban (one tap) or ban, and message this user right here.
+    if view.user_ban is not None:
+        kb.append(
+            [
+                inline(
+                    catalog.t("admin.user.unban", locale),
+                    admin_cb.user_unban(u.tg_id),
+                    intent=Intent.SUCCESS,
+                )
+            ]
+        )
+    else:
+        kb.append(
+            [
+                inline(
+                    catalog.t("admin.user.ban", locale),
+                    admin_cb.user_ban(u.tg_id),
+                    intent=Intent.DANGER,
+                ),
+                inline(
+                    catalog.t("admin.user.message", locale),
+                    admin_cb.user_msg(u.tg_id),
+                    intent=Intent.PRIMARY,
+                ),
+            ]
+        )
+    if view.user_ban is not None:
+        kb.append(
+            [
+                inline(
+                    catalog.t("admin.user.message", locale),
+                    admin_cb.user_msg(u.tg_id),
+                    intent=Intent.PRIMARY,
+                )
+            ]
+        )
     # The notification scope for this user, if the admin wants to watch only them.
     if view.notify_scope == u.tg_id:
         scope_label = catalog.t("admin.user.scope_clear", locale)

@@ -21,3 +21,7 @@ class AdminInput(StatesGroup):
     awaiting_forcejoin_chat = State()
     #: A backup file to restore (sent as a document; checked before it is used).
     awaiting_backup_document = State()
+    #: The admin's own words explaining a ban (a user or a workspace ban).
+    awaiting_ban_reason = State()
+    #: The text of a message the admin is sending to a specific user.
+    awaiting_message = State()

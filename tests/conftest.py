@@ -50,6 +50,7 @@ from cloudbot.adapters.persistence.sqlite_events import (
     SqliteAdminStateStore,
     SqliteEventLog,
 )
+from cloudbot.adapters.persistence.sqlite_moderation import SqliteModerationStore
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
@@ -68,6 +69,7 @@ from cloudbot.services.execution import ExecutionService
 from cloudbot.services.files import FilesService
 from cloudbot.services.forcejoin import ForceJoinService
 from cloudbot.services.metrics import MetricsService
+from cloudbot.services.moderation import ModerationService
 from cloudbot.services.notifier import NotifierService
 from cloudbot.services.ownership import OwnershipService
 from cloudbot.services.packages import PackagesService
@@ -157,17 +159,28 @@ async def forcejoin_store(database):
     return SqliteForceJoinStore(database)
 
 @pytest.fixture
-async def services(engine, database, users, sessions, event_log, admin_state, subscriptions, fake_directory):
+async def moderation_store(database):
+    return SqliteModerationStore(database)
+
+@pytest.fixture
+async def moderation(moderation_store):
+    return ModerationService(moderation_store)
+
+@pytest.fixture
+async def services(
+    engine, database, users, sessions, event_log, admin_state, subscriptions,
+    fake_directory, moderation,
+):
     ownership = OwnershipService(users)
     return Services(
         account=AccountService(users),
         billing=BillingService(subscriptions),
         backup=BackupService(SqliteBackupStore(database)),
-        workspaces=WorkspacesService(engine, users, ownership, subscriptions),
+        workspaces=WorkspacesService(engine, users, ownership, subscriptions, moderation),
         session=SessionService(users, engine, ownership),
         files=FilesService(engine, ownership),
-        execution=ExecutionService(engine, ownership),
-        sessions=SessionsService(engine, sessions, ownership),
+        execution=ExecutionService(engine, ownership, moderation),
+        sessions=SessionsService(engine, sessions, ownership, moderation),
         ownership=ownership,
         packages=PackagesService(engine, ownership),
         tunnels=TunnelsService(engine, ownership),
@@ -178,12 +191,13 @@ async def services(engine, database, users, sessions, event_log, admin_state, su
         events=EventsService(event_log),
         admin=AdminService(
             users, engine, event_log, admin_state, ownership, BotRuntime(FROZEN_NOW),
-            subscriptions=subscriptions,
+            subscriptions=subscriptions, moderation=moderation,
         ),
         notifier=NotifierService(event_log, admin_state),
         forcejoin=ForceJoinService(
             SqliteForceJoinStore(database), fake_directory, bot_id=42
         ),
+        moderation=moderation,
     )
 
 

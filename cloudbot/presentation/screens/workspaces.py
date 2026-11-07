@@ -222,7 +222,13 @@ def workspace_detail(
 
     # Transient, actionable state first: a locked plan, a run already going. These
     # change what the user can do, so they belong above any reference material.
-    if ws.status is WorkspaceStatus.LOCKED:
+    if ws.ban_reason:
+        # An admin ban: the owner sees a locked workspace carrying the admin's own
+        # reason. Distinct from a lapsed plan, and not liftable by the owner.
+        doc.blockquote(
+            fragment(catalog.t("ws.banned_banner", locale, reason=ws.ban_reason or "—"))
+        )
+    elif ws.status is WorkspaceStatus.LOCKED:
         doc.blockquote(fragment(catalog.t("ws.locked_banner", locale).replace("\n", " ")))
     if active_run:
         doc.p(italic(catalog.t("ws.run_active_caption", locale)))
@@ -444,12 +450,18 @@ def workspace_detail_markup(
             [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
         )
     elif ws.status is WorkspaceStatus.LOCKED:
-        rows.append(
-            [
-                inline(catalog.t("ws.renew", locale), _cb("ws:renew", ws_id), intent=Intent.SUCCESS),
-                inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
-            ]
-        )
+        if ws.ban_reason:
+            # No renew, no resume: an admin must lift this ban.
+            rows.append(
+                [inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)]
+            )
+        else:
+            rows.append(
+                [
+                    inline(catalog.t("ws.renew", locale), _cb("ws:renew", ws_id), intent=Intent.SUCCESS),
+                    inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
+                ]
+            )
         rows.append(
             [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
         )

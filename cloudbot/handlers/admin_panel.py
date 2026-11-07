@@ -39,6 +39,7 @@ from cloudbot.presentation.screens.admin import callbacks as admin_cb
 from cloudbot.presentation.screens.admin import registry
 from cloudbot.presentation.screens.admin import user_page as user_page_mod
 from cloudbot.presentation.screens.admin import users as users_screen_mod
+from cloudbot.presentation.screens.admin import moderation as moderation_screen_mod
 from cloudbot.presentation.screens.admin import wallet as wallet_screen_mod
 from cloudbot.presentation.screens.admin.actions import (
     action,
@@ -79,6 +80,8 @@ async def _view(
     audit_page=None,
     recent_events=None,
     overview=None,
+    banned_users=None,
+    banned_workspaces=None,
 ) -> AdminView:
     entered = await services.admin.entered(ctx.actor_tg_id)
     subs = await services.admin.subscriptions(ctx.actor_tg_id)
@@ -87,6 +90,20 @@ async def _view(
     fj_chats = await services.forcejoin.chats()
     fj_enabled = await services.forcejoin.enabled()
     backup = await _backup_view(services)
+    user_ban = None
+    workspace_bans: dict[str, str] = {}
+    if user_page is not None:
+        user_ban = await services.admin.user_ban(user_page.user.tg_id)
+        all_bans = await services.admin.banned_workspaces()
+        by_id = {ban.ws_id: ban.reason for ban in all_bans}
+        workspace_bans = {
+            str(wu.workspace.id): by_id[str(wu.workspace.id)]
+            for wu in user_page.workspaces
+            if str(wu.workspace.id) in by_id
+        }
+    if banned_users is None and banned_workspaces is None:
+        banned_users = await services.admin.banned_users()
+        banned_workspaces = await services.admin.banned_workspaces()
     return AdminView(
         locale=ctx.locale,
         now=now or _now(),
@@ -104,6 +121,10 @@ async def _view(
         forcejoin_enabled=fj_enabled,
         backup=backup,
         admin_id=ctx.actor_tg_id,
+        user_ban=user_ban,
+        banned_users=banned_users or [],
+        banned_workspaces=banned_workspaces or [],
+        workspace_bans=workspace_bans,
     )
 
 async def _backup_view(services: Services):
@@ -374,6 +395,93 @@ async def _route_notify_scope(cb, parsed: AdminCallback, ctx, services, sender, 
     else:
         await _show_notifications(cb, ctx, services, sender)
 
+
+# -- moderation --------------------------------------------------------------
+async def _route_user_ban(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    tg_id = parsed.arg_int(0)
+    summary = await services.admin.user_summary(tg_id)
+    label = _user_label(summary, tg_id, ctx.locale)
+    await state.set_state(AdminInput.awaiting_ban_reason)
+    await state.update_data(ban_kind="user", ban_subject=str(tg_id), ban_label=label)
+    await show_screen(
+        cb, moderation_screen_mod.ban_prompt("user", str(tg_id), label, ctx.locale), ctx=ctx, sender=sender
+    )
+
+async def _route_user_unban(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    tg_id = parsed.arg_int(0)
+    await services.admin.unban_user(tg_id)
+    events.admin_action(admin_id=ctx.actor_tg_id, action="user_unban", owner_tg_id=tg_id)
+    await _open_user(cb, ctx, services, sender, tg_id)
+
+async def _route_user_msg(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    tg_id = parsed.arg_int(0)
+    summary = await services.admin.user_summary(tg_id)
+    label = _user_label(summary, tg_id, ctx.locale)
+    await state.set_state(AdminInput.awaiting_message)
+    await state.update_data(msg_tg=tg_id)
+    await show_screen(cb, moderation_screen_mod.message_prompt(tg_id, label, ctx.locale), ctx=ctx, sender=sender)
+
+async def _route_ws_ban(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    ws_id = parsed.subject
+    label = await _subject_label(services, ws_id)
+    await state.set_state(AdminInput.awaiting_ban_reason)
+    await state.update_data(ban_kind="ws", ban_subject=ws_id, ban_label=label)
+    await show_screen(
+        cb, moderation_screen_mod.ban_prompt("ws", ws_id, label, ctx.locale), ctx=ctx, sender=sender
+    )
+
+async def _route_ws_unban(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    ws_id = parsed.subject
+    owner = await services.admin.owner_of(WorkspaceId(ws_id))
+    await services.admin.unban_workspace(WorkspaceId(ws_id))
+    events.admin_action(
+        admin_id=ctx.actor_tg_id, action="ws_unban", ws_id=ws_id, owner_tg_id=owner
+    )
+    await _back_to_owner(cb, ctx, services, sender, owner)
+
+async def _route_ban_go(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    kind, subject, days = parsed.args[0], parsed.args[1], parsed.arg_int(2)
+    data = await state.get_data()
+    await state.clear()
+    reason = str(data.get("reason") or "")
+    if kind == "user":
+        tg_id = int(subject)
+        await services.admin.ban_user(
+            tg_id, reason=reason, days=days or None, actor=ctx.actor_tg_id
+        )
+        events.admin_action(
+            admin_id=ctx.actor_tg_id,
+            action="user_ban",
+            owner_tg_id=tg_id,
+            params={"reason": reason, "days": days},
+        )
+        await _open_user(cb, ctx, services, sender, tg_id)
+        return
+    owner = await services.admin.owner_of(WorkspaceId(subject))
+    await services.admin.ban_workspace(WorkspaceId(subject), reason=reason, actor=ctx.actor_tg_id)
+    events.admin_action(
+        admin_id=ctx.actor_tg_id,
+        action="ws_ban",
+        ws_id=subject,
+        owner_tg_id=owner,
+        params={"reason": reason},
+    )
+    await _back_to_owner(cb, ctx, services, sender, owner)
+
+async def _open_user(cb, ctx: UserContext, services: Services, sender: RichSender, tg_id: int) -> None:
+    page = await services.admin.user_page(tg_id)
+    if page is None:
+        await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
+        return
+    recent = await services.admin.recent_for_user(tg_id, limit=10)
+    view = await _view(ctx, services, user_page=page, recent_events=recent)
+    await show_screen(cb, user_page_mod.user_screen(view), ctx=ctx, sender=sender)
+
+def _user_label(summary, tg_id: int, locale) -> str:
+    name = (summary.display_name if summary is not None else "") or ""
+    if name:
+        return f"{name} #{tg_id}"
+    return f"#{tg_id}"
 
 # -- audit -------------------------------------------------------------------
 async def _route_audit_cat(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
@@ -875,6 +983,12 @@ _ROUTES = {
     admin_cb.AUDIT_ALL: _route_audit_all,
     admin_cb.AUDIT: _route_audit,
     admin_cb.AUDIT_USER: _route_audit_user,
+    admin_cb.USER_BAN: _route_user_ban,
+    admin_cb.USER_UNBAN: _route_user_unban,
+    admin_cb.USER_MSG: _route_user_msg,
+    admin_cb.BAN_GO: _route_ban_go,
+    admin_cb.WS_BAN: _route_ws_ban,
+    admin_cb.WS_UNBAN: _route_ws_unban,
     admin_cb.WALLET: _route_wallet,
     admin_cb.WALLET_OP: _route_wallet_op,
     admin_cb.WALLET_PLAN: _route_wallet_plan,
@@ -1054,3 +1168,86 @@ async def on_backup_document(
         )
     )
     await show_screen(message, screen, ctx=ctx, sender=sender, force_send=True)
+
+# -- moderation: the two text steps -----------------------------------------
+@router.message(AdminInput.awaiting_ban_reason)
+async def on_ban_reason(
+    message: Message, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
+) -> None:
+    """Capture the admin's own words, then show the duration/confirm buttons.
+
+    The reason is kept in FSM state; the buttons carry the subject and the chosen
+    duration, so the actual ban is one explicit tap away.
+    """
+    data = await state.get_data()
+    kind = str(data.get("ban_kind") or "user")
+    subject = str(data.get("ban_subject") or "")
+    label = str(data.get("ban_label") or subject)
+    reason = (message.text or "").strip()
+    if not reason:
+        await show_screen(
+            message,
+            moderation_screen_mod.ban_prompt(kind, subject, label, ctx.locale),
+            ctx=ctx,
+            sender=sender,
+            force_send=True,
+        )
+        return
+    await state.update_data(reason=reason)
+    await show_screen(
+        message,
+        moderation_screen_mod.ban_prompt(kind, subject, label, ctx.locale, reason=reason),
+        ctx=ctx,
+        sender=sender,
+        force_send=True,
+    )
+
+@router.message(AdminInput.awaiting_message)
+async def on_admin_message(
+    message: Message,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
+) -> None:
+    """Send the admin's text to the user **as the bot**, and show the real outcome."""
+    from cloudbot.presentation.mapping.delivery import deliver
+
+    data = await state.get_data()
+    await state.clear()
+    tg_id = int(data.get("msg_tg") or 0)
+    text = (message.text or "").strip()
+    delivered = False
+    message_id: int | None = None
+    code = "unknown"
+    if text:
+        result = await deliver(sender, tg_id, text)
+        delivered = result.delivered
+        message_id = result.message_id
+        code = result.error
+    events.admin_action(
+        admin_id=ctx.actor_tg_id,
+        action="user_message",
+        owner_tg_id=tg_id,
+        params={
+            "delivered": delivered,
+            "message_id": message_id or 0,
+            "error": code,
+            "text": text[:500],
+        },
+    )
+    await show_screen(
+        message,
+        moderation_screen_mod.message_result(
+            tg_id,
+            text,
+            delivered=delivered,
+            message_id=message_id,
+            reason_code=code,
+            locale=ctx.locale,
+        ),
+        ctx=ctx,
+        sender=sender,
+        force_send=True,
+    )

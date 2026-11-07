@@ -12,12 +12,15 @@ from dataclasses import dataclass
 import structlog
 
 from cloudbot.core.errors import (
+    CannotBanAdmin,
     DomainError,
     EngineRefused,
     EngineUnavailable,
     InvalidInput,
     NotOwned,
     RateLimited,
+    UserBanned,
+    WorkspaceBanned,
     WorkspaceMissing,
 )
 from cloudbot.core.locale import Locale
@@ -79,6 +82,9 @@ ERROR_KEYS: dict[str, tuple[str, str]] = {
     "insufficient_storage": ("err.insufficient_storage.title", "err.insufficient_storage"),
     "timeout": ("err.timeout.title", "err.timeout"),
     "unknown": ("err.unknown.title", "err.unknown"),
+    "user_banned": ("err.user_banned.title", "err.user_banned.body"),
+    "workspace_banned": ("err.workspace_banned.title", "err.workspace_banned.body"),
+    "cannot_ban_admin": ("err.cannot_ban_admin.title", "err.cannot_ban_admin.body"),
 }
 
 _RETRY_CODES = frozenset({"conflict", "unprocessable", "write_rate_exceeded", "internal", "unavailable", "tunnel_url_unavailable", "timeout", "validation"})
@@ -257,6 +263,29 @@ def view_for_error(
         elif err.reason == "too_large":
             key = "err.domain.invalid_input.too_large"
         return ErrorView("invalid_input", "err.title.couldnt", key, retryable=True)
+    if isinstance(err, UserBanned):
+        return ErrorView(
+            "user_banned",
+            "err.user_banned.title",
+            "err.user_banned.body",
+            retryable=False,
+        )
+    if isinstance(err, WorkspaceBanned):
+        # The owner has no way out of an admin ban: no "resume", only the list.
+        return ErrorView(
+            "workspace_banned",
+            "err.workspace_banned.title",
+            "err.workspace_banned.body",
+            retryable=False,
+            extra_actions=(("menu.workspaces", "ws:list", Intent.PRIMARY),),
+        )
+    if isinstance(err, CannotBanAdmin):
+        return ErrorView(
+            "cannot_ban_admin",
+            "err.cannot_ban_admin.title",
+            "err.cannot_ban_admin.body",
+            retryable=False,
+        )
     if isinstance(err, RateLimited):
         return ErrorView(
             "rate_limited", "err.title", "err.domain.rate_limited", retryable=False
@@ -284,6 +313,23 @@ def _back_label(action: str, locale: Locale) -> str:
     return catalog.t("common.back", locale)
 
 
+def _ban_lines(doc: RichDoc, err: DomainError, locale: Locale) -> None:
+    """The one ban refusal: *why*, and (for a temporary ban) *until when*."""
+    if isinstance(err, UserBanned):
+        reason = (err.reason or "").strip()
+        if reason:
+            doc.p(catalog.t("err.user_banned.reason", locale, reason=reason))
+        if err.expires_at is not None:
+            from cloudbot.presentation.i18n.formatters import format_datetime
+
+            doc.p(catalog.t("err.user_banned.until", locale, when=format_datetime(err.expires_at, locale)))
+        else:
+            doc.p(catalog.t("err.user_banned.permanent", locale))
+    elif isinstance(err, WorkspaceBanned):
+        reason = (err.reason or "").strip()
+        if reason:
+            doc.p(catalog.t("err.workspace_banned.reason", locale, reason=reason))
+
 def error_screen(
     err: DomainError,
     locale: Locale,
@@ -298,6 +344,7 @@ def error_screen(
     doc = RichDoc(locale)
     doc.h(2, catalog.t(view.title_key, locale))
     doc.p(catalog.t(view.message_key, locale))
+    _ban_lines(doc, err, locale)
     if view.code == "workspace_suspended":
         doc.p(catalog.t("err.workspace_suspended.hint", locale))
     elif view.retryable:
@@ -326,7 +373,7 @@ def error_screen(
 
 
 def error_code_screen(
-    code: str, locale: Locale, *, ws_id: str | None = None, **kwargs
+    code: str, locale: Locale, *, ws_id: str | None = None, reason: str = "", **kwargs
 ) -> Screen:
     """Render an error screen directly from a code (for tests and internal use).
 
@@ -346,6 +393,8 @@ def error_code_screen(
     doc = RichDoc(locale)
     doc.h(2, catalog.t(view.title_key, locale))
     doc.p(catalog.t(view.message_key, locale))
+    if code == "workspace_banned" and reason:
+        doc.p(catalog.t("err.workspace_banned.reason", locale, reason=reason))
     if view.code == "workspace_suspended":
         doc.p(catalog.t("err.workspace_suspended.hint", locale))
     elif view.retryable:

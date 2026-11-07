@@ -44,6 +44,13 @@ AUDIT_CAT = "audit_cat"
 AUDIT_ALL = "audit_all"
 AUDIT = "audit"
 AUDIT_USER = "audit_user"
+# -- moderation: user/workspace bans + messaging a user ----------------------
+USER_BAN = "user_ban"
+USER_UNBAN = "user_unban"
+USER_MSG = "user_msg"
+BAN_GO = "ban_go"
+WS_BAN = "ws_ban"
+WS_UNBAN = "ws_unban"
 # -- wallet + subscription controls -----------------------------------------
 WALLET = "wallet"
 WALLET_OP = "wop"
@@ -194,6 +201,29 @@ def wallet_op(op: str, tg_id: int, step: str = "ask", arg: str = "") -> str:
 
 def wallet_plan(op: str, tg_id: int, plan_code: str, step: str = "ask", arg: str = "") -> str:
     return _action(WALLET_PLAN, op, int(tg_id), plan_code, step, arg)
+
+# -- moderation --------------------------------------------------------------
+def user_ban(tg_id: int) -> str:
+    """Open the ban-reason prompt for a user."""
+    return _action(USER_BAN, int(tg_id))
+
+def user_unban(tg_id: int) -> str:
+    """One tap: lift a user ban."""
+    return _action(USER_UNBAN, int(tg_id))
+
+def user_msg(tg_id: int) -> str:
+    """Open the "send this user a message" prompt."""
+    return _action(USER_MSG, int(tg_id))
+
+def ban_go(kind: str, subject: str, days: int = 0) -> str:
+    """Perform the ban whose reason is held in FSM state. ``days`` 0 is permanent."""
+    return _action(BAN_GO, kind, subject, int(days))
+
+def ws_ban(ws_id: str) -> str:
+    return _action(WS_BAN, ws_id)
+
+def ws_unban(ws_id: str) -> str:
+    return _action(WS_UNBAN, ws_id)
 
 # -- force-join gate ---------------------------------------------------------
 def forcejoin_add() -> str:
@@ -349,6 +379,29 @@ def parse(data: str) -> AdminParseResult:
         if isinstance(page, InvalidAdminCallback):
             return page
         return AdminCallback(action, (str(tg_id), str(page)))
+
+    if action in (USER_BAN, USER_UNBAN, USER_MSG):
+        if len(rest) != 1:
+            return _invalid(data, "bad_arity", action)
+        tg_id = _require_int(data, rest[0], action)
+        if isinstance(tg_id, InvalidAdminCallback):
+            return tg_id
+        return AdminCallback(action, (str(tg_id),))
+
+    if action in (WS_BAN, WS_UNBAN):
+        if len(rest) != 1 or not rest[0] or ":" in rest[0]:
+            return _invalid(data, "bad_arity", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action == BAN_GO:
+        if len(rest) != 3 or rest[0] not in ("user", "ws") or not rest[1]:
+            return _invalid(data, "bad_arity", action)
+        days = _require_int(data, rest[2], action)
+        if isinstance(days, InvalidAdminCallback):
+            return days
+        if days < 0:
+            return _invalid(data, "bad_arity", action)
+        return AdminCallback(action, (rest[0], rest[1], str(days)))
 
     if action == WALLET:
         if len(rest) != 1:

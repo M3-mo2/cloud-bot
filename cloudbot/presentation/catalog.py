@@ -46,6 +46,7 @@ from cloudbot.domain.admin import (
 )
 from cloudbot.domain.entities import FileEntry, Run, TerminalSession, Workspace
 from cloudbot.domain.forcejoin import ForceJoinChat, GateStatus
+from cloudbot.domain.moderation import UserBan, WorkspaceBan
 from cloudbot.domain.backup import (
     BackupConfig,
     BackupFile,
@@ -112,6 +113,7 @@ from cloudbot.presentation.screens.admin import notifications as admin_notify
 from cloudbot.presentation.screens.admin import overview as admin_overview
 from cloudbot.presentation.screens.admin import user_page as admin_user
 from cloudbot.presentation.screens.admin import users as admin_users
+from cloudbot.presentation.screens.admin import moderation as admin_moderation
 from cloudbot.presentation.screens.admin import workspace as admin_workspace
 from cloudbot.presentation.screens.admin.actions import action, confirmation_screen
 from cloudbot.presentation.screens.admin.notification_message import (
@@ -690,6 +692,35 @@ def _admin_view(locale: Locale, *, entered: bool = False) -> AdminView:
     )
 
 
+def _banned_user(tg_id: int, reason: str = "Abuse", *, expires_in_days: int | None = None):
+    return UserBan(
+        tg_id=tg_id,
+        reason=reason,
+        banned_at=NOW - timedelta(days=1),
+        banned_by=999,
+        expires_at=NOW + timedelta(days=expires_in_days) if expires_in_days else None,
+    )
+
+def _moderation_view(locale: Locale) -> AdminView:
+    view = _admin_view(locale)
+    from dataclasses import replace
+
+    return replace(
+        view,
+        banned_users=[
+            _banned_user(6508129575, "Repeated abuse of the engine", expires_in_days=7),
+            _banned_user(123456789, "Spam", expires_in_days=None),
+        ],
+        banned_workspaces=[
+            WorkspaceBan(
+                ws_id="ws_01M6HJASCWM9Z1PF755GT89NK4",
+                reason="Abuse of shared storage",
+                banned_at=NOW - timedelta(hours=3),
+                banned_by=999,
+            )
+        ],
+    )
+
 def plans_plan(code: str):
     from cloudbot.domain.plans import plan as _plan
 
@@ -1118,6 +1149,34 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
         loc,
     ),
     "admin_audit": lambda f, loc: admin_audit.audit_screen(_admin_view(loc)),
+    "admin_moderation": lambda f, loc: admin_moderation.moderation_screen(_moderation_view(loc)),
+    "admin_moderation_empty": lambda f, loc: admin_moderation.moderation_screen(
+        AdminView(locale=loc, now=NOW)
+    ),
+    "admin_ban_user_prompt": lambda f, loc: admin_moderation.ban_prompt(
+        "user", "6508129575", "Mohamed #6508129575", loc
+    ),
+    "admin_ban_user_confirm": lambda f, loc: admin_moderation.ban_prompt(
+        "user", "6508129575", "Mohamed #6508129575", loc, reason="Abuse"
+    ),
+    "admin_ban_ws_prompt": lambda f, loc: admin_moderation.ban_prompt(
+        "ws", "ws_01M6HJASCWM9Z1PF755GT89NK4", "demo (ws_01M6HJASCWM9Z1PF755GT89NK4)", loc
+    ),
+    "admin_ban_ws_confirm": lambda f, loc: admin_moderation.ban_prompt(
+        "ws", "ws_01M6HJASCWM9Z1PF755GT89NK4", "demo (ws_01M6HJASCWM9Z1PF755GT89NK4)",
+        loc, reason="Abuse of shared storage",
+    ),
+    "admin_msg_prompt": lambda f, loc: admin_moderation.message_prompt(
+        6508129575, "Mohamed #6508129575", loc
+    ),
+    "admin_msg_sent": lambda f, loc: admin_moderation.message_result(
+        6508129575, "Please review the engine rules.", delivered=True,
+        message_id=42, reason_code="", locale=loc,
+    ),
+    "admin_msg_failed": lambda f, loc: admin_moderation.message_result(
+        6508129575, "Please review the engine rules.", delivered=False,
+        message_id=None, reason_code="forbidden", locale=loc,
+    ),
     "admin_entered": lambda f, loc: admin_workspace.entered_workspace_screen(
         _admin_entered_view(loc)
     ),

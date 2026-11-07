@@ -72,6 +72,13 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     # so ``/admin`` and ``adm:`` callbacks reveal nothing.
     dispatcher.message.outer_middleware(AdminGateMiddleware())
     dispatcher.callback_query.outer_middleware(AdminGateMiddleware())
+    # The ban gate: a banned user is refused everywhere, including /start, before
+    # any handler runs. Registered after the admin gate (an admin is exempt) and
+    # before the force-join gate (a ban's refusal is the one the user must see).
+    from cloudbot.middleware.ban_gate import BanGateMiddleware
+
+    dispatcher.message.outer_middleware(BanGateMiddleware())
+    dispatcher.callback_query.outer_middleware(BanGateMiddleware())
     # The mandatory-subscription gate. Registered on the message/callback
     # observers (an update-level middleware only sees the ``Update`` wrapper), and
     # **after** the admin gate so a non-admin's ``/admin`` is still swallowed

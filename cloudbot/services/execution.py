@@ -16,6 +16,9 @@ from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.domain.value_objects import ExecResult, LogChunk, RunPage, WorkspaceId
 from cloudbot.services.ownership import OwnershipService
 
+# Forward-declared so the ban check is an optional collaborator; the service is
+# still constructible in tests that do not exercise bans.
+
 #: exec is hard-capped at 60 s by the engine; the bot never offers more.
 EXEC_MAX_SEC = 60
 #: Default history page size.
@@ -33,9 +36,25 @@ class TailState:
 
 
 class ExecutionService:
-    def __init__(self, engine: EnginePort, ownership: OwnershipService) -> None:
+    def __init__(
+        self,
+        engine: EnginePort,
+        ownership: OwnershipService,
+        moderation: "object | None" = None,
+    ) -> None:
         self._engine = engine
         self._ownership = ownership
+        self._moderation = moderation
+
+    async def _assert_executable(self, ws_id: WorkspaceId) -> None:
+        """Refuse a banned workspace at the service boundary (not only in the UI).
+
+        Every execution path — a run button, a terminal, the API, a scheduler —
+        funnels through one of the methods below, so a workspace ban can never be
+        bypassed by calling the service directly instead of pressing a button.
+        """
+        if self._moderation is not None:
+            await self._moderation.assert_executable(ws_id)
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -58,6 +77,7 @@ class ExecutionService:
         timeout_sec: int | None = None,
     ) -> ExecResult:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_executable(ws_id)
         clamped = self.clamp_exec_timeout(timeout_sec)
         return await self._engine.exec(ws_id, cmd, cwd=cwd, timeout_sec=clamped)
 
@@ -66,6 +86,7 @@ class ExecutionService:
         self, tg_id: int, ws_id: WorkspaceId, argv: list[str], *, cwd: str | None = None
     ) -> Run:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_executable(ws_id)
         if not argv:
             raise InvalidInput("argv", "empty")
         return await self._engine.create_run(ws_id, kind="command", argv=argv, cwd=cwd)
@@ -74,6 +95,7 @@ class ExecutionService:
         self, tg_id: int, ws_id: WorkspaceId, path: str, *, args: list[str] | None = None
     ) -> Run:
         await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_executable(ws_id)
         if not path:
             raise InvalidInput("file", "empty")
         return await self._engine.create_run(ws_id, kind="file", file=path, args=args)

@@ -59,10 +59,12 @@ class SessionsService:
         engine: EnginePort,
         store: SessionStore,
         ownership: OwnershipService,
+        moderation: "object | None" = None,
     ) -> None:
         self._engine = engine
         self._store = store
         self._ownership = ownership
+        self._moderation = moderation
 
     async def meta(self) -> EngineMeta:
         return await self._engine.meta()
@@ -77,6 +79,10 @@ class SessionsService:
         rows: int = DEFAULT_ROWS,
     ) -> TerminalSession:
         await self._ownership.assert_owned(tg_id, ws_id)
+        # Opening a terminal is a new execution: a banned workspace is refused at
+        # the service boundary, so no path can start a shell around the ban.
+        if self._moderation is not None:
+            await self._moderation.assert_executable(ws_id)
         self._validate_size(cols, rows)
         await self._enforce_cap(tg_id, ws_id)
         session = await self._engine.open_session(ws_id, cols=cols, rows=rows)

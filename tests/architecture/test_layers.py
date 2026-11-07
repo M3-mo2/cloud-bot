@@ -114,6 +114,8 @@ _ADMIN_CHECK_ALLOWED = {
     # The force-join gate exempts the owner for the anti-lockout rule; like every
     # other gate it reads the identity resolved once by the context middleware.
     "middleware/forcejoin.py",
+    # The ban gate exempts the owner so a ban can never lock the panel out.
+    "middleware/ban_gate.py",
     # ``/start`` is gate-exempt so its handler renders the gate itself; it reads
     # the identity the context middleware already resolved to skip the owner.
     "handlers/common.py",

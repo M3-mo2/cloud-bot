@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 135 |
-| Screens including the /dev tool | 138 |
-| Button edges | 453 |
-| Distinct destinations (actions) | 130 |
+| Catalog screens | 144 |
+| Screens including the /dev tool | 147 |
+| Button edges | 478 |
+| Distinct destinations (actions) | 136 |
 | Entry commands | 9 |
-| Callback re-entry actions | 130 |
+| Callback re-entry actions | 136 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 218 |
+| Contradictions: two-screen loops | 228 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -32,17 +32,17 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 
 | Command | Screens it can render |
 | --- | --- |
-| `/admin` | admin_overview, admin_audit, admin_backup, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_notifications, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
+| `/admin` | admin_overview, admin_audit, admin_backup, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `/dev` | dev_sections |
 | `/diag` | (handler only — no screen) |
 | `/health` | (handler only — no screen) |
 | `/help` | help, help_inside |
-| `/notifications` | admin_notifications, admin_audit, admin_backup, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
+| `/notifications` | admin_notifications, admin_audit, admin_backup, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `/paysupport` | wallet_support |
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 130 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 136 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -50,6 +50,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:audit_all` | admin_audit |
 | `adm:audit_cat` | admin_audit |
 | `adm:audit_user` | admin_audit |
+| `adm:ban_go` | admin_user |
 | `adm:bk_cancel` | admin_backup |
 | `adm:bk_daily` | admin_backup |
 | `adm:bk_dest` | admin_backup |
@@ -77,11 +78,16 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:notify_scope` | admin_user |
 | `adm:notify_toggle` | (handler only — no screen) |
 | `adm:resume` | admin_user |
-| `adm:sec` | admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
+| `adm:sec` | admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `adm:suspend` | admin_user |
 | `adm:user` | admin_user |
+| `adm:user_ban` | admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt |
+| `adm:user_msg` | admin_msg_prompt |
+| `adm:user_unban` | admin_user |
 | `adm:users_search` | (handler only — no screen) |
 | `adm:wallet` | (handler only — no screen) |
+| `adm:ws_ban` | admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt |
+| `adm:ws_unban` | admin_user |
 | `arc:apply` | archive_menu, archive_result |
 | `arc:export_prompt` | archive_export_prompt |
 | `arc:extract_prompt` | archive_extract_prompt |
@@ -184,7 +190,7 @@ One tree per command. The same screen reached twice is shown both times (that is
 ### `/admin`
 
 - **admin_overview** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -199,55 +205,78 @@ One tree per command. The same screen reached twice is shown both times (that is
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -272,11 +301,13 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
             - ↩ `admin_backup` (already on this path)
         - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -286,11 +317,13 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
             - … `admin_backup_restore_prompt` at depth 6 (not expanded)
         - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -333,11 +366,13 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_backup` (already on this path)
           - 📍 Send here → `adm:bk_dest` → admin_backup
             - ↩ `admin_backup` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -348,11 +383,13 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_backup` (already on this path)
       - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
         - **admin_backup_restore_prompt** — ♻️ Send a backup file
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -657,6 +694,64 @@ One tree per command. The same screen reached twice is shown both times (that is
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_moderation** — 🚫 Moderation & penalties
+      - 👤 Open #6508129575 → `adm:user` → admin_user
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 👤 Open #123456789 → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Lift the ban → `adm:ws_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -676,101 +771,84 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🔔 Watch only this user → `adm:notify_scope` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
-        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users
+      - 👤 Mohamed → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - ↩ `admin_user` (already on this path)
-        - **admin_users** — 👥 Users
-          - 👤 Mohamed → `adm:user` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-        - **admin_users_empty** — 👥 Users
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_users_empty** — 👥 Users
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+  - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - ↩ `admin_overview` (already on this path)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
 - **admin_audit** — 🧾 Audit log
   - New user → `adm:audit_cat` → admin_audit
     - ↩ `admin_audit` (already on this path)
@@ -784,7 +862,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - ↩ `admin_audit` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -855,6 +933,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -874,55 +970,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -940,16 +1059,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - ↩ `admin_audit` (already on this path)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -968,44 +1101,65 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - ↩ `admin_audit` (already on this path)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -1020,11 +1174,13 @@ One tree per command. The same screen reached twice is shown both times (that is
       - ✅ Restore now → `adm:bk_go` → admin_backup, admin_backup_restore_done, admin_backup_restore_refused
         - ↩ `admin_backup` (already on this path)
         - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1034,11 +1190,13 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
             - … `admin_backup_restore_prompt` at depth 6 (not expanded)
         - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1092,7 +1250,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_backup` (already on this path)
       - 📍 Send here → `adm:bk_dest` → admin_backup
         - ↩ `admin_backup` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -1149,6 +1307,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -1167,55 +1343,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1223,55 +1422,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -1289,16 +1511,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1321,11 +1557,13 @@ One tree per command. The same screen reached twice is shown both times (that is
     - ↩ `admin_backup` (already on this path)
   - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
     - **admin_backup_restore_prompt** — ♻️ Send a backup file
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - ↩ `admin_backup` (already on this path)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -1380,6 +1618,49 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - ↩ `admin_confirm_delete` (already on this path)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
       - 🧾 Audit log → `adm:audit_user` → admin_audit
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
@@ -1396,9 +1677,18 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -1445,6 +1735,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -1463,55 +1771,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1519,55 +1850,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -1634,6 +1988,49 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - ↩ `admin_confirm_suspend` (already on this path)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
       - 🧾 Audit log → `adm:audit_user` → admin_audit
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
@@ -1650,9 +2047,18 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -1699,6 +2105,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -1717,55 +2141,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -1773,55 +2220,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2317,7 +2787,7 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -2377,6 +2847,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2396,55 +2884,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2462,16 +2973,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2490,44 +3015,65 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -2550,7 +3096,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - ↩ `admin_forcejoin` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -2619,6 +3165,24 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -2638,55 +3202,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2704,16 +3291,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2732,44 +3333,753 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+- **admin_moderation** — 🚫 Moderation & penalties
+  - 👤 Open #6508129575 → `adm:user` → admin_user
+    - **admin_user** — 👤 User
+      - 🚪 Enter → `adm:enter` → admin_entered
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+        - **admin_confirm_delete** — 🗑 Delete workspace
+          - ✅ Proceed → `adm:delete` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+        - **admin_confirm_suspend** — ⏸️ Suspend workspace
+          - ✅ Proceed → `adm:suspend` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+      - ▶️ Resume → `adm:resume` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
+        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+      - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups
+          - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ⚡ Back up now → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⚙️ Settings only → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
+            - … `admin_backup_schedule` at depth 6 (not expanded)
+          - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
+            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
+          - 🧹 Prune old files → `adm:bk_prune` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_moderation` (already on this path)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_overview** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_overview_unreachable** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - ↩ `admin_user` (already on this path)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+  - ✅ Unban → `adm:user_unban` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - 👤 Open #123456789 → `adm:user` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - ✅ Unban → `adm:user_unban` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - ✅ Lift the ban → `adm:ws_unban` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+    - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+- **admin_moderation_empty** — 🚫 Moderation & penalties
+  - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+    - **admin_overview** — 🛠 Admin panel
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_backup** — 💾 Backups
+          - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ⚡ Back up now → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⚙️ Settings only → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
+            - … `admin_backup_schedule` at depth 6 (not expanded)
+          - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
+            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
+          - 🧹 Prune old files → `adm:bk_prune` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -2793,7 +4103,7 @@ One tree per command. The same screen reached twice is shown both times (that is
   - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -2877,58 +4187,99 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - ↩ `admin_notifications` (already on this path)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -2946,16 +4297,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -2974,44 +4339,65 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_notifications` (already on this path)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -3023,7 +4409,7 @@ One tree per command. The same screen reached twice is shown both times (that is
 - **admin_notify_gap** — ⚠️ Events were missed
 - **admin_notify_message** — ℹ️ Event
 - **admin_overview_unreachable** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -3037,55 +4423,78 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_audit` (already on this path)
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3111,11 +4520,13 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
             - ↩ `admin_backup` (already on this path)
         - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3125,11 +4536,13 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
             - … `admin_backup_restore_prompt` at depth 6 (not expanded)
         - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3172,11 +4585,13 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_backup` (already on this path)
           - 📍 Send here → `adm:bk_dest` → admin_backup
             - ↩ `admin_backup` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3187,11 +4602,13 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_backup` (already on this path)
       - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
         - **admin_backup_restore_prompt** — ♻️ Send a backup file
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -3496,6 +4913,64 @@ One tree per command. The same screen reached twice is shown both times (that is
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_moderation** — 🚫 Moderation & penalties
+      - 👤 Open #6508129575 → `adm:user` → admin_user
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 👤 Open #123456789 → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Lift the ban → `adm:ws_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -3515,101 +4990,84 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-            - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🔔 Watch only this user → `adm:notify_scope` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
-        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users
+      - 👤 Mohamed → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
-        - ↩ `admin_user` (already on this path)
-        - **admin_users** — 👥 Users
-          - 👤 Mohamed → `adm:user` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-        - **admin_users_empty** — 👥 Users
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_users_empty** — 👥 Users
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
+  - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
 - **admin_user** — 👤 User
   - 🚪 Enter → `adm:enter` → admin_entered
     - **admin_entered** — (no title)
@@ -3888,55 +5346,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -3944,55 +5425,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -4019,185 +5523,173 @@ One tree per command. The same screen reached twice is shown both times (that is
   - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
     - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 2)
     - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 2)
-  - 🧾 Audit log → `adm:audit_user` → admin_audit
-    - **admin_audit** — 🧾 Audit log
-      - New user → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - User blocked → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - Workspace created → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - Workspace deleted → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - All events → `adm:audit_all` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+  - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+    - **admin_ban_user_confirm** — 🚫 Ban user
+      - Ban 1 day(s) → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - Ban 7 day(s) → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - Ban permanently → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - ✖️ Cancel → `adm:user` → admin_user
+        - ↩ `admin_user` (already on this path)
+    - **admin_ban_user_prompt** — ✍️ Why?
+      - ✖️ Cancel → `adm:user` → admin_user
+        - ↩ `admin_user` (already on this path)
+    - **admin_ban_ws_confirm** — 🚫 Ban workspace
+      - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_backup** — 💾 Backups
+          - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ⚡ Back up now → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⚙️ Settings only → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
+            - … `admin_backup_schedule` at depth 6 (not expanded)
+          - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
+            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
+          - 🧹 Prune old files → `adm:bk_prune` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_user` (already on this path)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+    - **admin_ban_ws_prompt** — ✍️ Why?
+      - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_user` (already on this path)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+  - 🧾 Audit log → `adm:audit_user` → admin_audit
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
   - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+  - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+    - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 2)
+    - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
+    - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 2)
+    - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
+  - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+    - **admin_msg_prompt** — ✉️ Message a user
+      - ✖️ Cancel → `adm:user` → admin_user
+        - ↩ `admin_user` (already on this path)
   - 🔔 Watch only this user → `adm:notify_scope` → admin_user
     - ↩ `admin_user` (already on this path)
-  - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_backup** — 💾 Backups
-      - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
-        - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_confirm_full** — ⚠️ Confirm restore
-          - ✅ Restore now → `adm:bk_go` → admin_backup, admin_backup_restore_done, admin_backup_restore_refused
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_backup_restore_done` at depth 6 (not expanded)
-            - … `admin_backup_restore_refused` at depth 6 (not expanded)
-          - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_confirm_settings** — ⚠️ Confirm restore
-          - ✅ Restore now → `adm:bk_go` → admin_backup, admin_backup_restore_done, admin_backup_restore_refused
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_backup_restore_done` at depth 6 (not expanded)
-            - … `admin_backup_restore_refused` at depth 6 (not expanded)
-          - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
-            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
-        - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
-            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
-      - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
-        - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_confirm_full** — ⚠️ Confirm restore ↩ (already expanded at depth 4)
-        - **admin_backup_restore_confirm_settings** — ⚠️ Confirm restore ↩ (already expanded at depth 4)
-        - **admin_backup_restore_done** — ♻️ Restore ↩ (already expanded at depth 4)
-        - **admin_backup_restore_refused** — ♻️ Restore ↩ (already expanded at depth 4)
-      - ⚡ Back up now → `adm:bk_now` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - ⚙️ Settings only → `adm:bk_now` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
-        - **admin_backup_schedule** — 🗓 Backup schedule
-          - {n} hour → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - {n} hours → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - {n} hours → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - {n} hours → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Daily 03:00 → `adm:bk_daily` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Daily 04:00 → `adm:bk_daily` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 3 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 7 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 14 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 30 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - 📍 Send here → `adm:bk_dest` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-      - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
-        - **admin_backup_restore_prompt** — ♻️ Send a backup file
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧹 Prune old files → `adm:bk_prune` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+  - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+    - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-    - **admin_forcejoin** — 🔗 Mandatory subscriptions
-      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
-      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
-      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_notifications** — 🔔 Notifications
-      - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
-      - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_user` (already on this path)
-    - **admin_users** — 👥 Users
-      - 👤 Mohamed → `adm:user` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users
-      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_users** — 👥 Users
   - 👤 Mohamed → `adm:user` → admin_user
     - **admin_user** — 👤 User
@@ -4247,6 +5739,49 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
       - 🧾 Audit log → `adm:audit_user` → admin_audit
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
@@ -4263,9 +5798,18 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -4312,6 +5856,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -4330,55 +5892,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4386,55 +5971,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -4456,7 +6064,7 @@ One tree per command. The same screen reached twice is shown both times (that is
   - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -4540,6 +6148,24 @@ One tree per command. The same screen reached twice is shown both times (that is
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -4559,55 +6185,78 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - ↩ `admin_users_empty` (already on this path)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -4625,16 +6274,30 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -4649,44 +6312,65 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_users_empty` (already on this path)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - ↩ `admin_users_empty` (already on this path)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5299,7 +6983,7 @@ _No screen is rendered by this command._
   - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -5383,58 +7067,99 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - ↩ `admin_notifications` (already on this path)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -5452,16 +7177,30 @@ _No screen is rendered by this command._
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - ↩ `admin_notifications` (already on this path)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5480,44 +7219,65 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_notifications` (already on this path)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - ↩ `admin_notifications` (already on this path)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5538,7 +7298,7 @@ _No screen is rendered by this command._
     - ↩ `admin_audit` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -5609,6 +7369,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -5628,55 +7406,78 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -5694,16 +7495,30 @@ _No screen is rendered by this command._
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - ↩ `admin_audit` (already on this path)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5722,44 +7537,65 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - ↩ `admin_audit` (already on this path)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - ↩ `admin_audit` (already on this path)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -5774,11 +7610,13 @@ _No screen is rendered by this command._
       - ✅ Restore now → `adm:bk_go` → admin_backup, admin_backup_restore_done, admin_backup_restore_refused
         - ↩ `admin_backup` (already on this path)
         - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5788,11 +7626,13 @@ _No screen is rendered by this command._
           - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
             - … `admin_backup_restore_prompt` at depth 6 (not expanded)
         - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5846,7 +7686,7 @@ _No screen is rendered by this command._
         - ↩ `admin_backup` (already on this path)
       - 📍 Send here → `adm:bk_dest` → admin_backup
         - ↩ `admin_backup` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -5903,6 +7743,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -5921,55 +7779,78 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -5977,55 +7858,78 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -6043,16 +7947,30 @@ _No screen is rendered by this command._
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -6075,11 +7993,13 @@ _No screen is rendered by this command._
     - ↩ `admin_backup` (already on this path)
   - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
     - **admin_backup_restore_prompt** — ♻️ Send a backup file
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - ↩ `admin_backup` (already on this path)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -6134,6 +8054,49 @@ _No screen is rendered by this command._
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - ↩ `admin_confirm_delete` (already on this path)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
       - 🧾 Audit log → `adm:audit_user` → admin_audit
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
@@ -6150,9 +8113,18 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -6199,6 +8171,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -6217,55 +8207,78 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -6273,55 +8286,78 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -6388,6 +8424,49 @@ _No screen is rendered by this command._
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - ↩ `admin_confirm_suspend` (already on this path)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
       - 🧾 Audit log → `adm:audit_user` → admin_audit
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
@@ -6404,9 +8483,18 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -6453,6 +8541,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -6471,55 +8577,78 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -6527,55 +8656,78 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -7071,7 +9223,7 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -7131,6 +9283,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -7150,55 +9320,78 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -7216,16 +9409,30 @@ _No screen is rendered by this command._
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -7244,44 +9451,65 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - ↩ `admin_entered` (already on this path)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - ↩ `admin_entered` (already on this path)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -7304,7 +9532,7 @@ _No screen is rendered by this command._
     - ↩ `admin_forcejoin` (already on this path)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -7373,6 +9601,24 @@ _No screen is rendered by this command._
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -7392,55 +9638,78 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -7458,16 +9727,30 @@ _No screen is rendered by this command._
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - ↩ `admin_forcejoin` (already on this path)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -7486,44 +9769,753 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `admin_forcejoin` (already on this path)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+- **admin_moderation** — 🚫 Moderation & penalties
+  - 👤 Open #6508129575 → `adm:user` → admin_user
+    - **admin_user** — 👤 User
+      - 🚪 Enter → `adm:enter` → admin_entered
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+        - **admin_confirm_delete** — 🗑 Delete workspace
+          - ✅ Proceed → `adm:delete` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+        - **admin_confirm_suspend** — ⏸️ Suspend workspace
+          - ✅ Proceed → `adm:suspend` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+      - ▶️ Resume → `adm:resume` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
+        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+      - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups
+          - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ⚡ Back up now → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⚙️ Settings only → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
+            - … `admin_backup_schedule` at depth 6 (not expanded)
+          - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
+            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
+          - 🧹 Prune old files → `adm:bk_prune` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_moderation` (already on this path)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_overview** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_overview_unreachable** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - ↩ `admin_user` (already on this path)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+  - ✅ Unban → `adm:user_unban` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - 👤 Open #123456789 → `adm:user` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - ✅ Unban → `adm:user_unban` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - ✅ Lift the ban → `adm:ws_unban` → admin_user
+    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
+  - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+    - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+- **admin_moderation_empty** — 🚫 Moderation & penalties
+  - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+    - **admin_overview** — 🛠 Admin panel
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_backup** — 💾 Backups
+          - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ⚡ Back up now → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⚙️ Settings only → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
+            - … `admin_backup_schedule` at depth 6 (not expanded)
+          - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
+            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
+          - 🧹 Prune old files → `adm:bk_prune` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - ↩ `admin_moderation_empty` (already on this path)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - ↩ `admin_moderation_empty` (already on this path)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -7535,7 +10527,7 @@ _No screen is rendered by this command._
 - **admin_notify_gap** — ⚠️ Events were missed
 - **admin_notify_message** — ℹ️ Event
 - **admin_overview** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -7550,55 +10542,78 @@ _No screen is rendered by this command._
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -7623,11 +10638,13 @@ _No screen is rendered by this command._
           - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
             - ↩ `admin_backup` (already on this path)
         - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -7637,11 +10654,13 @@ _No screen is rendered by this command._
           - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
             - … `admin_backup_restore_prompt` at depth 6 (not expanded)
         - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -7684,11 +10703,13 @@ _No screen is rendered by this command._
             - ↩ `admin_backup` (already on this path)
           - 📍 Send here → `adm:bk_dest` → admin_backup
             - ↩ `admin_backup` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -7699,11 +10720,13 @@ _No screen is rendered by this command._
         - ↩ `admin_backup` (already on this path)
       - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
         - **admin_backup_restore_prompt** — ♻️ Send a backup file
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -8008,6 +11031,64 @@ _No screen is rendered by this command._
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_moderation** — 🚫 Moderation & penalties
+      - 👤 Open #6508129575 → `adm:user` → admin_user
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 👤 Open #123456789 → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Lift the ban → `adm:ws_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -8027,103 +11108,86 @@ _No screen is rendered by this command._
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🔔 Watch only this user → `adm:notify_scope` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
-        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users
+      - 👤 Mohamed → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - ↩ `admin_user` (already on this path)
-        - **admin_users** — 👥 Users
-          - 👤 Mohamed → `adm:user` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-        - **admin_users_empty** — 👥 Users
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - ↩ `admin_overview` (already on this path)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_users_empty** — 👥 Users
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+  - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - ↩ `admin_overview` (already on this path)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - ↩ `admin_overview` (already on this path)
+    - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
 - **admin_overview_unreachable** — 🛠 Admin panel
-  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+  - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log
       - New user → `adm:audit_cat` → admin_audit
         - ↩ `admin_audit` (already on this path)
@@ -8137,55 +11201,78 @@ _No screen is rendered by this command._
         - ↩ `admin_audit` (already on this path)
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - ↩ `admin_audit` (already on this path)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -8211,11 +11298,13 @@ _No screen is rendered by this command._
           - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
             - ↩ `admin_backup` (already on this path)
         - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -8225,11 +11314,13 @@ _No screen is rendered by this command._
           - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
             - … `admin_backup_restore_prompt` at depth 6 (not expanded)
         - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -8272,11 +11363,13 @@ _No screen is rendered by this command._
             - ↩ `admin_backup` (already on this path)
           - 📍 Send here → `adm:bk_dest` → admin_backup
             - ↩ `admin_backup` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -8287,11 +11380,13 @@ _No screen is rendered by this command._
         - ↩ `admin_backup` (already on this path)
       - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
         - **admin_backup_restore_prompt** — ♻️ Send a backup file
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - ↩ `admin_backup` (already on this path)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -8596,6 +11691,64 @@ _No screen is rendered by this command._
       - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_moderation** — 🚫 Moderation & penalties
+      - 👤 Open #6508129575 → `adm:user` → admin_user
+        - **admin_user** — 👤 User
+          - 🚪 Enter → `adm:enter` → admin_entered
+            - … `admin_entered` at depth 6 (not expanded)
+          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - ▶️ Resume → `adm:resume` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+            - … `admin_confirm_delete` at depth 6 (not expanded)
+            - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:audit_user` → admin_audit
+            - … `admin_audit` at depth 6 (not expanded)
+          - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
+          - 🔔 Watch only this user → `adm:notify_scope` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - ↩ `admin_moderation` (already on this path)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 👤 Open #123456789 → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Unban → `adm:user_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ✅ Lift the ban → `adm:ws_unban` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_notifications** — 🔔 Notifications
       - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
       - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -8615,101 +11768,84 @@ _No screen is rendered by this command._
         - ↩ `admin_overview_unreachable` (already on this path)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-            - ↩ `admin_user` (already on this path)
-      - ▶️ Resume → `adm:resume` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🔔 Watch only this user → `adm:notify_scope` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
-        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users
+      - 👤 Mohamed → `adm:user` → admin_user
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
-        - ↩ `admin_user` (already on this path)
-        - **admin_users** — 👥 Users
-          - 👤 Mohamed → `adm:user` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-        - **admin_users_empty** — 👥 Users
-          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_users_empty** — 👥 Users
+      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_overview_unreachable` (already on this path)
+  - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
     - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
     - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_overview_unreachable` (already on this path)
-    - **admin_user** — 👤 User ↩ (already expanded at depth 2)
-    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
+  - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
+    - **admin_backup** — 💾 Backups ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 2)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 2)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 2)
+    - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - ↩ `admin_overview_unreachable` (already on this path)
+    - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 2)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 2)
 - **admin_user** — 👤 User
   - 🚪 Enter → `adm:enter` → admin_entered
     - **admin_entered** — (no title)
@@ -8988,55 +12124,78 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -9044,55 +12203,78 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - ↩ `admin_entered` (already on this path)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - … `admin_users` at depth 6 (not expanded)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - ↩ `admin_entered` (already on this path)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -9119,185 +12301,173 @@ _No screen is rendered by this command._
   - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
     - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 2)
     - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 2)
-  - 🧾 Audit log → `adm:audit_user` → admin_audit
-    - **admin_audit** — 🧾 Audit log
-      - New user → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - User blocked → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - Workspace created → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - Workspace deleted → `adm:audit_cat` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - All events → `adm:audit_all` → admin_audit
-        - ↩ `admin_audit` (already on this path)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+  - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+    - **admin_ban_user_confirm** — 🚫 Ban user
+      - Ban 1 day(s) → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - Ban 7 day(s) → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - Ban permanently → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - ✖️ Cancel → `adm:user` → admin_user
+        - ↩ `admin_user` (already on this path)
+    - **admin_ban_user_prompt** — ✍️ Why?
+      - ✖️ Cancel → `adm:user` → admin_user
+        - ↩ `admin_user` (already on this path)
+    - **admin_ban_ws_confirm** — 🚫 Ban workspace
+      - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+        - ↩ `admin_user` (already on this path)
+      - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_backup** — 💾 Backups
+          - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+            - ↩ `admin_backup` (already on this path)
+            - … `admin_backup_restore_confirm_full` at depth 6 (not expanded)
+            - … `admin_backup_restore_confirm_settings` at depth 6 (not expanded)
+            - … `admin_backup_restore_done` at depth 6 (not expanded)
+            - … `admin_backup_restore_refused` at depth 6 (not expanded)
+          - ⚡ Back up now → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⚙️ Settings only → `adm:bk_now` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
+            - … `admin_backup_schedule` at depth 6 (not expanded)
+          - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
+            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
+          - 🧹 Prune old files → `adm:bk_prune` → admin_backup
+            - ↩ `admin_backup` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions
+          - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
+          - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
+          - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
+            - ↩ `admin_forcejoin` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_notifications** — 🔔 Notifications
+          - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
+          - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
+          - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_user` (already on this path)
+        - **admin_users** — 👥 Users
+          - 👤 Mohamed → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_users_empty** — 👥 Users
+          - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+    - **admin_ban_ws_prompt** — ✍️ Why?
+      - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - ↩ `admin_user` (already on this path)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
+  - 🧾 Audit log → `adm:audit_user` → admin_audit
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
   - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+  - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+    - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 2)
+    - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
+    - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 2)
+    - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
+  - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+    - **admin_msg_prompt** — ✉️ Message a user
+      - ✖️ Cancel → `adm:user` → admin_user
+        - ↩ `admin_user` (already on this path)
   - 🔔 Watch only this user → `adm:notify_scope` → admin_user
     - ↩ `admin_user` (already on this path)
-  - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
-    - **admin_backup** — 💾 Backups
-      - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
-        - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_confirm_full** — ⚠️ Confirm restore
-          - ✅ Restore now → `adm:bk_go` → admin_backup, admin_backup_restore_done, admin_backup_restore_refused
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_backup_restore_done` at depth 6 (not expanded)
-            - … `admin_backup_restore_refused` at depth 6 (not expanded)
-          - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_confirm_settings** — ⚠️ Confirm restore
-          - ✅ Restore now → `adm:bk_go` → admin_backup, admin_backup_restore_done, admin_backup_restore_refused
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_backup_restore_done` at depth 6 (not expanded)
-            - … `admin_backup_restore_refused` at depth 6 (not expanded)
-          - ⬅️ Cancel → `adm:bk_cancel` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_done** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
-            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
-        - **admin_backup_restore_refused** — ♻️ Restore
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-          - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
-            - … `admin_backup_restore_prompt` at depth 6 (not expanded)
-      - ♻️ Restore …settings-20261102T024139Z.json → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
-        - ↩ `admin_backup` (already on this path)
-        - **admin_backup_restore_confirm_full** — ⚠️ Confirm restore ↩ (already expanded at depth 4)
-        - **admin_backup_restore_confirm_settings** — ⚠️ Confirm restore ↩ (already expanded at depth 4)
-        - **admin_backup_restore_done** — ♻️ Restore ↩ (already expanded at depth 4)
-        - **admin_backup_restore_refused** — ♻️ Restore ↩ (already expanded at depth 4)
-      - ⚡ Back up now → `adm:bk_now` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - ⚙️ Settings only → `adm:bk_now` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - 🗓 Schedule → `adm:bk_sched` → admin_backup_schedule
-        - **admin_backup_schedule** — 🗓 Backup schedule
-          - {n} hour → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - {n} hours → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - {n} hours → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - {n} hours → `adm:bk_hours` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Daily 03:00 → `adm:bk_daily` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Daily 04:00 → `adm:bk_daily` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 3 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 7 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 14 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - Keep 30 → `adm:bk_keep` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - 📍 Send here → `adm:bk_dest` → admin_backup
-            - ↩ `admin_backup` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-      - 🔕 Turn the schedule off → `adm:bk_switch` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
-        - **admin_backup_restore_prompt** — ♻️ Send a backup file
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
-            - ↩ `admin_backup` (already on this path)
-            - … `admin_entered` at depth 6 (not expanded)
-            - … `admin_forcejoin` at depth 6 (not expanded)
-            - … `admin_notifications` at depth 6 (not expanded)
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-            - … `admin_users` at depth 6 (not expanded)
-            - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧹 Prune old files → `adm:bk_prune` → admin_backup
-        - ↩ `admin_backup` (already on this path)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+  - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+    - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
     - **admin_entered** — (no title) ↩ (already expanded at depth 2)
-    - **admin_forcejoin** — 🔗 Mandatory subscriptions
-      - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
-      - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
-      - ⏸️ Disable: Cloud World → `adm:fj_toggle` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - 🗑 Remove: Cloud World → `adm:fj_remove` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - ▶️ Enable: Cloud Chat → `adm:fj_toggle` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
-        - ↩ `admin_forcejoin` (already on this path)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_notifications** — 🔔 Notifications
-      - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Workspace created: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Workspace deleted: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Workspace suspended: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Run started: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔕 Run failed: Off → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Package install failed: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Tunnel created: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Engine unreachable: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Admin action: On → `adm:notify_toggle` → (handler only — no screen)
-      - 🔔 Turn all on → `adm:notify_all` → (handler only — no screen)
-      - ⏸️ Pause → `adm:notify_pause` → (handler only — no screen)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+    - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+    - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+    - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
     - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
     - ↩ `admin_user` (already on this path)
-    - **admin_users** — 👥 Users
-      - 👤 Mohamed → `adm:user` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-    - **admin_users_empty** — 👥 Users
-      - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
-      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+    - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+    - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_users** — 👥 Users
   - 👤 Mohamed → `adm:user` → admin_user
     - **admin_user** — 👤 User
@@ -9347,6 +12517,49 @@ _No screen is rendered by this command._
       - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
         - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
         - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
+      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user
+          - Ban 1 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban 7 day(s) → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - Ban permanently → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_user_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace
+          - 🚫 Ban the workspace → `adm:ban_go` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+        - **admin_ban_ws_prompt** — ✍️ Why?
+          - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
       - 🧾 Audit log → `adm:audit_user` → admin_audit
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
@@ -9363,9 +12576,18 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
       - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
+        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
+        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
+      - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+        - **admin_msg_prompt** — ✉️ Message a user
+          - ✖️ Cancel → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
       - 🔔 Watch only this user → `adm:notify_scope` → admin_user
         - ↩ `admin_user` (already on this path)
-      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
@@ -9412,6 +12634,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - ↩ `admin_user` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -9430,55 +12670,78 @@ _No screen is rendered by this command._
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_overview** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -9486,55 +12749,78 @@ _No screen is rendered by this command._
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - … `admin_overview` at depth 6 (not expanded)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - ↩ `admin_user` (already on this path)
+            - ↩ `admin_users` (already on this path)
+            - … `admin_users_empty` at depth 6 (not expanded)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - … `admin_overview` at depth 6 (not expanded)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -9556,7 +12842,7 @@ _No screen is rendered by this command._
   - 🔎 Search by id → `adm:users_search` → (handler only — no screen)
   - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
     - **admin_overview** — 🛠 Admin panel
-      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log
           - New user → `adm:audit_cat` → admin_audit
             - ↩ `admin_audit` (already on this path)
@@ -9640,6 +12926,24 @@ _No screen is rendered by this command._
           - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation** — 🚫 Moderation & penalties
+          - 👤 Open #6508129575 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - 👤 Open #123456789 → `adm:user` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Unban → `adm:user_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ✅ Lift the ban → `adm:ws_unban` → admin_user
+            - … `admin_user` at depth 6 (not expanded)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+            - ↩ `admin_overview` (already on this path)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_notifications** — 🔔 Notifications
           - 🔔 New user: On → `adm:notify_toggle` → (handler only — no screen)
           - 🔔 User blocked: On → `adm:notify_toggle` → (handler only — no screen)
@@ -9659,55 +12963,78 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel
-          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
             - … `admin_user` at depth 6 (not expanded)
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
-          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
+            - … `admin_notifications` at depth 6 (not expanded)
+            - ↩ `admin_overview` (already on this path)
+            - ↩ `admin_overview_unreachable` (already on this path)
+            - … `admin_user` at depth 6 (not expanded)
+            - … `admin_users` at depth 6 (not expanded)
+            - ↩ `admin_users_empty` (already on this path)
+          - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+            - … `admin_audit` at depth 6 (not expanded)
+            - … `admin_backup` at depth 6 (not expanded)
+            - … `admin_entered` at depth 6 (not expanded)
+            - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - ↩ `admin_overview_unreachable` (already on this path)
@@ -9725,16 +13052,30 @@ _No screen is rendered by this command._
           - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
             - … `admin_confirm_delete` at depth 6 (not expanded)
             - … `admin_confirm_suspend` at depth 6 (not expanded)
+          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+          - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+            - … `admin_ban_user_confirm` at depth 6 (not expanded)
+            - … `admin_ban_user_prompt` at depth 6 (not expanded)
+            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
+            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
+          - ✉️ Message → `adm:user_msg` → admin_msg_prompt
+            - … `admin_msg_prompt` at depth 6 (not expanded)
           - 🔔 Watch only this user → `adm:notify_scope` → admin_user
             - ↩ `admin_user` (already on this path)
-          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+          - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
             - … `admin_audit` at depth 6 (not expanded)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
+            - … `admin_moderation` at depth 6 (not expanded)
+            - … `admin_moderation_empty` at depth 6 (not expanded)
             - … `admin_notifications` at depth 6 (not expanded)
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
@@ -9749,44 +13090,65 @@ _No screen is rendered by this command._
             - ↩ `admin_overview` (already on this path)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
         - ↩ `admin_users_empty` (already on this path)
-      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User ↩ (already expanded at depth 4)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - ↩ `admin_users_empty` (already on this path)
-      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+      - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
         - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
+        - ↩ `admin_overview` (already on this path)
+        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
+        - **admin_user** — 👤 User ↩ (already expanded at depth 4)
+        - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
+        - ↩ `admin_users_empty` (already on this path)
+      - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
+        - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
+        - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_notifications** — 🔔 Notifications ↩ (already expanded at depth 4)
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
@@ -13838,7 +17200,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (218)
+### 3.5 Loops that are not obvious (228)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -13852,12 +17214,22 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **admin_backup** —“🗓 Schedule”→ **admin_backup_schedule** —“Daily 03:00”→ **admin_backup** (**unobvious**)
 - **admin_backup** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_backup** (expected (back/affordance))
 - **admin_backup** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_backup** (expected (back/affordance))
+- **admin_ban_user_confirm** —“Ban 1 day(s)”→ **admin_user** —“🚫 Ban”→ **admin_ban_user_confirm** (**unobvious**)
+- **admin_ban_user_prompt** —“✖️ Cancel”→ **admin_user** —“🚫 Ban”→ **admin_ban_user_prompt** (expected (back/affordance))
+- **admin_ban_ws_confirm** —“✖️ Cancel”→ **admin_user** —“🚫 Ban”→ **admin_ban_ws_confirm** (expected (back/affordance))
+- **admin_ban_ws_prompt** —“✖️ Cancel”→ **admin_user** —“🚫 Ban”→ **admin_ban_ws_prompt** (expected (back/affordance))
 - **admin_confirm_delete** —“✅ Proceed”→ **admin_user** —“⏸️ Suspend”→ **admin_confirm_delete** (**unobvious**)
 - **admin_confirm_suspend** —“✅ Proceed”→ **admin_user** —“⏸️ Suspend”→ **admin_confirm_suspend** (**unobvious**)
 - **admin_entered** —“🚪 Leave workspace”→ **admin_overview** —“👥 Users”→ **admin_entered** (**unobvious**)
 - **admin_entered** —“🚪 Leave workspace”→ **admin_overview_unreachable** —“👥 Users”→ **admin_entered** (**unobvious**)
 - **admin_forcejoin** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_forcejoin** (expected (back/affordance))
 - **admin_forcejoin** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_forcejoin** (expected (back/affordance))
+- **admin_moderation** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_moderation** (expected (back/affordance))
+- **admin_moderation** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_moderation** (expected (back/affordance))
+- **admin_moderation** —“✅ Lift the ban”→ **admin_user** —“⬅️ Back”→ **admin_moderation** (expected (back/affordance))
+- **admin_moderation_empty** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_moderation_empty** (expected (back/affordance))
+- **admin_moderation_empty** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_moderation_empty** (expected (back/affordance))
+- **admin_msg_prompt** —“✖️ Cancel”→ **admin_user** —“✉️ Message”→ **admin_msg_prompt** (expected (back/affordance))
 - **admin_notifications** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_notifications** (expected (back/affordance))
 - **admin_notifications** —“⬅️ Back”→ **admin_overview_unreachable** —“👥 Users”→ **admin_notifications** (expected (back/affordance))
 - **admin_overview** —“👥 Users”→ **admin_overview_unreachable** —“👥 Users”→ **admin_overview** (**unobvious**)
@@ -14092,7 +17464,9 @@ _None._
 A prompt asks the user to type (or upload, or pay); the reply is handled by a message handler whose filter is not a `Command`. These screens are real user flows even though no button leads to them.
 
 - `AdminInput.awaiting_backup_document` → admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
+- `AdminInput.awaiting_ban_reason` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
 - `AdminInput.awaiting_forcejoin_chat` → admin_forcejoin
+- `AdminInput.awaiting_message` → admin_msg_failed, admin_msg_sent
 - `AdminInput.awaiting_user_search` → admin_users, admin_users_empty
 - `AdminInput.awaiting_wallet_amount` → (handler only — no screen)
 - `AdminInput.awaiting_wallet_charge` → (handler only — no screen)
@@ -14116,11 +17490,11 @@ A prompt asks the user to type (or upload, or pay); the reply is handled by a me
 ### Inline screens built in handlers (not catalog screens)
 
 - `cloudbot/handlers/admin.py:53 (on_diag)`
-- `cloudbot/handlers/admin_panel.py:1011 (_stale)`
-- `cloudbot/handlers/admin_panel.py:208 (_route_users_search)`
-- `cloudbot/handlers/admin_panel.py:560 (_wallet_prompt)`
-- `cloudbot/handlers/admin_panel.py:966 (on_wallet_amount)`
-- `cloudbot/handlers/admin_panel.py:995 (_not_found)`
+- `cloudbot/handlers/admin_panel.py:1080 (on_wallet_amount)`
+- `cloudbot/handlers/admin_panel.py:1109 (_not_found)`
+- `cloudbot/handlers/admin_panel.py:1125 (_stale)`
+- `cloudbot/handlers/admin_panel.py:229 (_route_users_search)`
+- `cloudbot/handlers/admin_panel.py:668 (_wallet_prompt)`
 - `cloudbot/handlers/callbacks/navigation.py:31 (on_clear)`
 - `cloudbot/handlers/files.py:217 (_screen)`
 
@@ -14171,20 +17545,20 @@ _(no body text)_
 
 _Safety copy: <code>/var/www/data/cloudbot-pre-restore-20261103T204339Z.db</code>_
 
-- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
 
 ### admin_backup_restore_prompt — ♻️ Send a backup file
 
 _Send the backup file here as a document. It is checked before anything is replaced, and a safet…_
 
-- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_backup_restore_refused — ♻️ Restore
 
 _(no body text)_
 
-- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 - ♻️ Restore from a file → `adm:bk_restore` → admin_backup_restore_prompt
 
 ### admin_backup_schedule — 🗓 Backup schedule
@@ -14202,7 +17576,35 @@ _Pick the period, the time and the destination. A restart never moves the next r
 - Keep 14 → `adm:bk_keep` → admin_backup
 - Keep 30 → `adm:bk_keep` → admin_backup
 - 📍 Send here → `adm:bk_dest` → admin_backup
-- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+
+### admin_ban_user_confirm — 🚫 Ban user
+
+_Reason: Abuse_
+
+- Ban 1 day(s) → `adm:ban_go` → admin_user
+- Ban 7 day(s) → `adm:ban_go` → admin_user
+- Ban permanently → `adm:ban_go` → admin_user
+- ✖️ Cancel → `adm:user` → admin_user
+
+### admin_ban_user_prompt — ✍️ Why?
+
+_About Mohamed #6508129575._
+
+- ✖️ Cancel → `adm:user` → admin_user
+
+### admin_ban_ws_confirm — 🚫 Ban workspace
+
+_Reason: Abuse of shared storage_
+
+- 🚫 Ban the workspace → `adm:ban_go` → admin_user
+- ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+
+### admin_ban_ws_prompt — ✍️ Why?
+
+_About demo (ws_01M6HJASCWM9Z1PF755GT89NK4)._
+
+- ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_confirm_delete — 🗑 Delete workspace
 
@@ -14243,6 +17645,43 @@ _Press Add and send the @username, numeric id or t.me link. The bot must be an a
 - 🗑 Remove: Cloud Chat → `adm:fj_remove` → admin_forcejoin
 - 🔔 Turn the gate on → `adm:fj_switch` → admin_forcejoin
 - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+
+### admin_moderation — 🚫 Moderation & penalties
+
+_Banned users_
+
+- 👤 Open #6508129575 → `adm:user` → admin_user
+- ✅ Unban → `adm:user_unban` → admin_user
+- 👤 Open #123456789 → `adm:user` → admin_user
+- ✅ Unban → `adm:user_unban` → admin_user
+- ✅ Lift the ban → `adm:ws_unban` → admin_user
+- ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+
+### admin_moderation_empty — 🚫 Moderation & penalties
+
+_No bans are in force._
+
+- ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
+
+### admin_msg_failed — ⚠️ Not delivered
+
+_The user blocked the bot, so Telegram refused the message._
+
+- 🔁 Send another → `adm:user_msg` → admin_msg_prompt
+- ⬅️ Back → `adm:user` → admin_user
+
+### admin_msg_prompt — ✉️ Message a user
+
+_Send a message to Mohamed #6508129575. It is delivered as the bot._
+
+- ✖️ Cancel → `adm:user` → admin_user
+
+### admin_msg_sent — ✅ Delivered
+
+_Telegram accepted the message (id 42)._
+
+- 🔁 Send another → `adm:user_msg` → admin_msg_prompt
+- ⬅️ Back → `adm:user` → admin_user
 
 ### admin_notifications — 🔔 Notifications
 
@@ -14285,21 +17724,23 @@ _Workspace created_
 
 _Engine 0.0.20 · api v1 · health ok · ready ready_
 
-- 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_overview_unreachable — 🛠 Admin panel
 
 _The live fleet counts are unknown while the engine is unreachable._
 
-- 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-- 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_user — 👤 User
 
@@ -14309,10 +17750,13 @@ _Workspaces_
 - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
 - ▶️ Resume → `adm:resume` → admin_user
 - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
+- 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
 - 🧾 Audit log → `adm:audit_user` → admin_audit
 - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+- 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+- ✉️ Message → `adm:user_msg` → admin_msg_prompt
 - 🔔 Watch only this user → `adm:notify_scope` → admin_user
-- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
+- ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
 
 ### admin_users — 👥 Users
 

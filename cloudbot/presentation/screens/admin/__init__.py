@@ -20,6 +20,7 @@ from . import notifications as _notifications  # noqa: E402,F401
 from . import forcejoin as _forcejoin  # noqa: E402,F401
 from . import audit as _audit  # noqa: E402,F401
 from . import wallet as _wallet  # noqa: E402,F401
+from . import moderation as _moderation  # noqa: E402,F401
 
 __all__ = [
     "AdminSection",

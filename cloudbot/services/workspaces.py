@@ -48,11 +48,13 @@ class WorkspacesService:
         users: UserRepository,
         ownership: OwnershipService,
         subscriptions: Subscriptions | None = None,
+        moderation: "object | None" = None,
     ) -> None:
         self._engine = engine
         self._users = users
         self._ownership = ownership
         self._subscriptions = subscriptions
+        self._moderation = moderation
 
     async def meta(self, refresh: bool = False) -> EngineMeta:
         return await self._engine.meta(refresh=refresh)
@@ -132,11 +134,18 @@ class WorkspacesService:
         reports ``active`` is presented as ``locked`` when the owner's plan is not
         active. This is what the screens and the lock banner read.
         """
-        if self._subscriptions is None:
-            return workspaces
-        now = datetime.now(timezone.utc)
         result: list[Workspace] = []
+        now = datetime.now(timezone.utc)
         for ws in workspaces:
+            banned = await self._ban(ws.id)
+            if banned is not None:
+                # An admin ban outranks the subscription state: the owner sees a
+                # locked workspace carrying the admin's reason, never a "renew".
+                result.append(self._locked(ws, ban_reason=banned))
+                continue
+            if self._subscriptions is None:
+                result.append(ws)
+                continue
             subscription = await self._subscriptions.get(tg_id, str(ws.id))
             if derive_status(subscription, now).is_active:
                 result.append(ws)
@@ -144,21 +153,36 @@ class WorkspacesService:
                 result.append(self._locked(ws))
         return result
 
+    async def _ban(self, ws_id) -> str | None:
+        """The admin's ban reason, or ``None`` when the workspace is not banned."""
+        if self._moderation is None:
+            return None
+        ban = await self._moderation.workspace_ban(ws_id)
+        return ban.reason if ban is not None else None
+
     @staticmethod
-    def _locked(ws: Workspace) -> Workspace:
-        if ws.status is not WorkspaceStatus.ACTIVE:
-            return ws
-        return Workspace(
-            id=ws.id,
-            owner_tg_id=ws.owner_tg_id,
-            name=ws.name,
-            profile=ws.profile,
-            status=WorkspaceStatus.LOCKED,
-            limits=ws.limits,
-            summary=ws.summary,
-            created_at=ws.created_at,
-            last_activity_at=ws.last_activity_at,
-        )
+    def _locked(ws: Workspace, *, ban_reason: str = "") -> Workspace:
+        """Present a workspace as locked: by an expired plan or by an admin ban.
+
+        A non-``ACTIVE`` status other than ``LOCKED`` (``SUSPENDED``, ``DELETED``,
+        ``UNKNOWN``) is left exactly as the engine reported it — only an active
+        workspace is downgraded to ``LOCKED`` by a lapsed plan, and a ban forces
+        ``LOCKED`` regardless because it outranks every other state.
+        """
+        if ban_reason or ws.status is WorkspaceStatus.ACTIVE:
+            return Workspace(
+                id=ws.id,
+                owner_tg_id=ws.owner_tg_id,
+                name=ws.name,
+                profile=ws.profile,
+                status=WorkspaceStatus.LOCKED,
+                limits=ws.limits,
+                summary=ws.summary,
+                created_at=ws.created_at,
+                last_activity_at=ws.last_activity_at,
+                ban_reason=ban_reason or ws.ban_reason,
+            )
+        return ws
 
     async def create(
         self,
@@ -272,6 +296,10 @@ class WorkspacesService:
 
     async def resume(self, tg_id: int, ws_id: WorkspaceId) -> LifecycleResult:
         await self._ownership.assert_owned(tg_id, ws_id)
+        # A workspace ban is an admin decision: the owner can never resume past
+        # it, and the refusal carries the admin's reason (not a raw engine code).
+        if self._moderation is not None:
+            await self._moderation.assert_executable(ws_id)
         return await self._engine.resume_workspace(ws_id)
 
     async def stop(self, tg_id: int, ws_id: WorkspaceId) -> LifecycleResult:
@@ -301,4 +329,5 @@ class WorkspacesService:
             summary=ws.summary,
             created_at=ws.created_at,
             last_activity_at=ws.last_activity_at,
+            ban_reason=ws.ban_reason,
         )

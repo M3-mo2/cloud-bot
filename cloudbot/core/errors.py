@@ -7,6 +7,7 @@ user.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 
@@ -100,3 +101,39 @@ class RateLimited(DomainError):
     def __init__(self, retry_after_s: float) -> None:
         super().__init__(f"retry after {retry_after_s}s")
         self.retry_after_s = retry_after_s
+
+class UserBanned(DomainError):
+    """The user is banned: refused by the middleware, everywhere, before a handler.
+
+    Carries the admin's own words and (optionally) the end of a temporary ban, so
+    the one refusal screen can say *why* and *until when*.
+    """
+
+    code = "user_banned"
+
+    def __init__(self, reason: str = "", expires_at: "datetime | None" = None) -> None:
+        super().__init__(reason or self.code)
+        self.reason = reason
+        self.expires_at = expires_at
+
+class WorkspaceBanned(DomainError):
+    """An admin banned this workspace: new executions are refused at the service layer.
+
+    Kept apart from ``WorkspaceStatus.SUSPENDED`` (a user-facing pause): only an
+    admin can lift this, and the refusal carries the admin's reason.
+    """
+
+    code = "workspace_banned"
+
+    def __init__(self, ws_id: str, reason: str = "") -> None:
+        super().__init__(reason or self.code)
+        self.ws_id = ws_id
+        self.reason = reason
+
+class CannotBanAdmin(DomainError):
+    """An admin is never bannable — a ban must not be able to lock the panel out."""
+
+    code = "cannot_ban_admin"
+
+    def __init__(self) -> None:
+        super().__init__(self.code)
