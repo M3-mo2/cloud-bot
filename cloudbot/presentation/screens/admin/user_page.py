@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from cloudbot.domain.admin import AdminView, UserPage
+from cloudbot.domain.value_objects import WorkspaceStatus
 from cloudbot.domain.events import EventRecord
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import (
@@ -23,6 +24,44 @@ from cloudbot.presentation.screens.admin.actions import action, action_button
 from cloudbot.presentation.screens.screen import Screen
 
 from .section import AdminSection, register
+
+
+def _style(intent: Intent) -> str | None:
+    """The block-button style for an action's intent (``None`` = app default)."""
+    return {
+        Intent.DANGER: "danger",
+        Intent.SUCCESS: "success",
+        Intent.PRIMARY: "primary",
+    }.get(intent)
+
+
+def _facts(wu, view, locale: Locale, sub, now) -> str:
+    """One line of what matters about a workspace: plan, then disk.
+
+    The plan is what he asked to see — and it is the *subscription's* line, not the
+    engine's ``summary.state``, whose ``unlimited`` reads «بلا انتهاء» to a user who
+    pays by the week. Composed here (presentation) from domain data, with the same
+    ``plan_state_short`` the wallet and the menu print, so the three cannot drift.
+    Disk is the second fact because it is the one that fills up and surprises people.
+    """
+    from datetime import datetime, timezone
+
+    from cloudbot.domain.subscription import derive_status
+    from cloudbot.presentation.screens.wallet import plan_state_short
+
+    ws = wu.workspace
+    if wu.usage is not None:
+        disk = format_bytes_pair(
+            wu.usage.disk_bytes, wu.usage.disk_limit_bytes, locale, percent=wu.usage.disk_percent
+        )
+    else:
+        disk = catalog.t("admin.user.usage_unknown", locale)
+
+    moment = now or datetime.now(timezone.utc)
+    plan = plan_state_short(sub, derive_status(sub, moment), locale)
+    if str(ws.id) in getattr(view, "workspace_bans", {}):
+        plan = catalog.t("admin.user.ws_banned", locale, reason=view.workspace_bans[str(ws.id)] or "—")
+    return f"{plan} · {disk}"
 
 
 def _raw(text: str) -> Html:
@@ -70,83 +109,59 @@ def user_screen(view: AdminView) -> Screen:
 
     doc.div()
 
-    # -- his workspaces: one block each, no table -----------------------------
-    # This was a four-column table (name, id, status, usage). In a right-to-left
-    # message the numbers drifted away from their headers, and the 26-character
-    # workspace id took a whole column to say nothing the name had not. A block per
-    # workspace — bold name, then one compact line of facts — reads straight down.
-    doc.p(
-        fragment(
-            [
-                bold(f"✦ {catalog.t('admin.user.workspaces', locale)} ⟸ "),
-                bold(num(len(page.workspaces), locale)),
-            ]
-        )
-    )
+    # The keyboard below now carries only the account-level actions at the end of
+    # this screen; each workspace's own buttons are in-body (see below).
     kb: list[list] = []
-    enter = action("enter")
+
+    # -- workspaces: facts, then **that workspace's own buttons right under it** --
+    # The buttons used to live in the keyboard below everything, so a page with
+    # four workspaces had four identical `[دخول] [إيقاف] [حذف] [حظر]` row-pairs at
+    # the bottom and no way to tell which belonged to which workspace. In-body
+    # buttons (Bot API 10.3 blocks) let each set sit under the workspace it acts on.
+    doc.heading(
+        f"✦ {catalog.t('admin.user.workspaces', locale)} ⟸ "
+        f"{num(len(page.workspaces), locale)}",
+        size=2,
+    )
     if not page.workspaces:
-        doc.p(italic(catalog.t("admin.user.no_workspaces", locale)))
+        doc.paragraph(catalog.t("admin.user.no_workspaces", locale))
     else:
         for wu in page.workspaces:
             ws = wu.workspace
-            label_key, emoji = display_state(ws.status, ws.summary.state)
-            status = f"{emoji} {catalog.t(label_key, locale)}"
-            if wu.usage is not None:
-                usage = format_bytes_pair(
-                    wu.usage.disk_bytes,
-                    wu.usage.disk_limit_bytes,
-                    locale,
-                    percent=wu.usage.disk_percent,
-                )
-            else:
-                usage = catalog.t("admin.user.usage_unknown", locale)
-            ban_reason = view.workspace_bans.get(str(ws.id))
-            if ban_reason is not None:
-                status = catalog.t("admin.user.ws_banned", locale, reason=ban_reason or "—")
-
-            doc.p(bold(ws.name))
-            doc.p(_raw(f"{status} · {usage}"))
-
             subject = str(ws.id)
-            # Two rows per workspace at most: the way in, then the state change.
-            # Delete and ban sit one deliberate step further, on their own row —
-            # never mixed into the row a hand taps by habit.
-            first = [
-                action_button(enter, subject, locale)
-                if enter
-                else inline(catalog.t("admin.action.enter", locale), "nav:noop")
-            ]
-            for key in ("suspend", "resume"):
-                act = action(key)
-                if act is not None:
-                    first.append(action_button(act, subject, locale))
-                    break
-            kb.append(first)
+            sub = page.workspace_subscriptions.get(subject)
 
-            danger = []
-            act = action("delete")
-            if act is not None:
-                danger.append(action_button(act, subject, locale))
-            if ban_reason is not None:
+            doc.heading(ws.name, size=3)
+            doc.paragraph(_facts(wu, view, locale, sub, view.now))
+
+            # This workspace's own actions, one row, right under its facts.
+            row: list[tuple[str, str, str | None]] = []
+            enter = action("enter")
+            if enter is not None:
+                row.append((enter.label(locale), enter.ask_callback(subject), _style(enter.intent)))
+            state_act = action("suspend" if ws.status is WorkspaceStatus.ACTIVE else "resume")
+            if state_act is not None:
+                row.append((state_act.label(locale), state_act.ask_callback(subject), _style(state_act.intent)))
+            if row:
+                doc.buttons(row)
+
+            # Destructive actions on their own row: never beside the one a hand taps
+            # by habit.
+            danger: list[tuple[str, str, str | None]] = []
+            delete = action("delete")
+            if delete is not None:
+                danger.append((delete.label(locale), delete.ask_callback(subject), _style(delete.intent)))
+            if subject in view.workspace_bans:
                 danger.append(
-                    inline(
-                        catalog.t("admin.user.ws_unban", locale),
-                        admin_cb.ws_unban(subject),
-                        intent=Intent.SUCCESS,
-                    )
+                    (catalog.t("admin.user.ws_unban", locale), admin_cb.ws_unban(subject), "success")
                 )
             else:
                 danger.append(
-                    inline(
-                        catalog.t("admin.user.ws_ban", locale),
-                        admin_cb.ws_ban(subject),
-                        intent=Intent.DANGER,
-                    )
+                    (catalog.t("admin.user.ws_ban", locale), admin_cb.ws_ban(subject), "danger")
                 )
-            if danger:
-                kb.append(danger)
+            doc.buttons(danger)
 
+    doc.div()
     _recent_activity(doc, view, locale)
     kb.append(
         [

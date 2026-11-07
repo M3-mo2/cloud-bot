@@ -68,6 +68,12 @@ class AdminOverview:
 class UserPage:
     user: UserSummary
     workspaces: list[WorkspaceWithUsage] = field(default_factory=list)
+    #: ``ws_id -> that workspace's subscription`` (``None`` when it has none).
+    #: The **data**, not a formatted line: ``services`` must not import
+    #: ``presentation`` (an architecture test enforces it), so the screen formats it
+    #: with the same helper the wallet and the menu use. Reading the engine's
+    #: ``summary.state`` instead would print "بلا انتهاء" to a user paying weekly.
+    workspace_subscriptions: dict[str, "Subscription | None"] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

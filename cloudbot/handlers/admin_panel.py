@@ -236,7 +236,7 @@ async def _route_users_search(cb, parsed, ctx, services, sender, state, events) 
 # -- user page ---------------------------------------------------------------
 async def _route_user(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
     tg_id = parsed.arg_int(0)
-    page = await services.admin.user_page(tg_id)
+    page = await services.admin.user_page(tg_id, ctx.locale)
     if page is None:
         await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
         return
@@ -260,7 +260,7 @@ async def _route_cancel(cb, parsed: AdminCallback, ctx, services, sender, state,
     subject = parsed.subject
     owner = await services.admin.owner_of(WorkspaceId(subject))
     if owner is not None:
-        page = await services.admin.user_page(owner)
+        page = await services.admin.user_page(owner, ctx.locale)
         if page is not None:
             view = await _view(ctx, services, user_page=page)
             await show_screen(cb, user_page_mod.user_screen(view), ctx=ctx, sender=sender)
@@ -333,7 +333,7 @@ async def _back_to_owner(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, owner: int | None
 ) -> None:
     if owner is not None:
-        page = await services.admin.user_page(owner)
+        page = await services.admin.user_page(owner, ctx.locale)
         if page is not None:
             view = await _view(ctx, services, user_page=page)
             await show_screen(cb, user_page_mod.user_screen(view), ctx=ctx, sender=sender)
@@ -391,7 +391,7 @@ async def _route_notify_scope(cb, parsed: AdminCallback, ctx, services, sender, 
     await services.admin.set_notify_scope(
         ctx.actor_tg_id, None if current == tg_id else tg_id
     )
-    page = await services.admin.user_page(tg_id)
+    page = await services.admin.user_page(tg_id, ctx.locale)
     if page is not None:
         recent = await services.admin.recent_for_user(tg_id, limit=10)
         view = await _view(ctx, services, user_page=page, recent_events=recent)
@@ -473,7 +473,7 @@ async def _route_ban_go(cb, parsed: AdminCallback, ctx, services, sender, state,
     await _back_to_owner(cb, ctx, services, sender, owner)
 
 async def _open_user(cb, ctx: UserContext, services: Services, sender: RichSender, tg_id: int) -> None:
-    page = await services.admin.user_page(tg_id)
+    page = await services.admin.user_page(tg_id, ctx.locale)
     if page is None:
         await show_screen(cb, _not_found(ctx), ctx=ctx, sender=sender)
         return

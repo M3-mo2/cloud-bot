@@ -31,14 +31,36 @@ class FakeBot:
         self.deleted.append(message_id)
         return True
 
+    @staticmethod
+    def _text(rich_message) -> str:
+        """Everything the message will show, whichever form it was built in.
+
+        ``InputRichMessage`` allows *either* ``html`` **or** ``blocks``. A screen
+        that carries in-body buttons (Bot API 10.3) must build in blocks, so
+        ``.html`` is ``None`` for it — reading only ``.html`` made those screens look
+        empty to this harness and turned a screen change into a test failure.
+        """
+        html = getattr(rich_message, "html", None)
+        if html is not None:
+            return html
+        blocks = getattr(rich_message, "blocks", None) or []
+        parts: list[str] = []
+        for b in blocks:
+            text = getattr(b, "text", None)
+            if text:
+                parts.append(str(text))
+            for btn in getattr(b, "buttons", None) or []:
+                parts.append(str(getattr(btn, "text", "")))
+        return " ".join(parts)
+
     async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
-        self.sent.append(rich_message.html)
+        self.sent.append(self._text(rich_message))
         return Message.model_construct(chat={"id": chat_id}, message_id=1)
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
         if self.raise_on_edit is not None:
             raise self.raise_on_edit
-        self.sent.append(getattr(rich_message, "html", ""))
+        self.sent.append(self._text(rich_message))
         return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
 
     async def __call__(self, method):

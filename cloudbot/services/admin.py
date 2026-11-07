@@ -160,7 +160,7 @@ class AdminService:
             users=summaries, total=total, offset=offset, limit=limit, query=query
         )
 
-    async def user_page(self, tg_id: int) -> UserPage | None:
+    async def user_page(self, tg_id: int, locale=None) -> UserPage | None:
         user = await self._users.get(tg_id)
         if user is None:
             return None
@@ -171,7 +171,28 @@ class AdminService:
         # Admin exemption: read the subject's workspaces, not ours.
         await self._ownership.assert_admin_override(0, WorkspaceId("ws_admin"))
         workspaces = await self._workspaces_of(tg_id)
-        return UserPage(user=summary, workspaces=workspaces)
+        return UserPage(
+            user=summary,
+            workspaces=workspaces,
+            workspace_subscriptions=await self._workspace_subscriptions(tg_id, workspaces),
+        )
+
+    async def _workspace_subscriptions(
+        self, tg_id: int, workspaces: list[WorkspaceWithUsage]
+    ) -> dict[str, "Subscription | None"]:
+        """Each workspace's subscription row — data only, no formatting.
+
+        ``services`` may not import ``presentation`` (an architecture test enforces
+        the direction), so the plan line is composed by the screen from this map.
+        A workspace the store does not know maps to ``None``, which is the truth.
+        """
+        if self._subscriptions is None:
+            return {}
+        out: dict[str, object] = {}
+        for wu in workspaces:
+            key = str(wu.workspace.id)
+            out[key] = await self._subscriptions.get(tg_id, key)
+        return out
 
     async def _workspaces_of(self, tg_id: int) -> list[WorkspaceWithUsage]:
         owned = await self._users.owned_workspaces(tg_id)

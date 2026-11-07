@@ -14,15 +14,15 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 153 |
 | Screens including the /dev tool | 156 |
-| Button edges | 507 |
-| Distinct destinations (actions) | 143 |
+| Button edges | 503 |
+| Distinct destinations (actions) | 140 |
 | Entry commands | 9 |
-| Callback re-entry actions | 143 |
+| Callback re-entry actions | 140 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 243 |
+| Contradictions: two-screen loops | 241 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,11 +42,10 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 143 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 140 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
-| `adm:ask` | admin_confirm_delete, admin_confirm_suspend |
 | `adm:audit_all` | admin_audit |
 | `adm:audit_cat` | admin_audit |
 | `adm:audit_user` | admin_audit |
@@ -73,7 +72,6 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:bk_switch` | admin_backup |
 | `adm:cancel` | admin_overview, admin_overview_unreachable, admin_user |
 | `adm:delete` | admin_user |
-| `adm:enter` | admin_entered |
 | `adm:fj_add` | (handler only — no screen) |
 | `adm:fj_check` | (handler only — no screen) |
 | `adm:fj_remove` | admin_forcejoin |
@@ -93,7 +91,6 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `adm:user_unban` | admin_user |
 | `adm:users_search` | (handler only — no screen) |
 | `adm:wallet` | (handler only — no screen) |
-| `adm:ws_ban` | admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt |
 | `adm:ws_unban` | admin_user |
 | `arc:apply` | archive_menu, archive_result |
 | `arc:export_prompt` | archive_export_prompt |
@@ -592,19 +589,6 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -1014,19 +998,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - ↩ `admin_audit` (already on this path)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -1591,19 +1562,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -2075,19 +2033,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -2548,19 +2493,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -2620,45 +2552,23 @@ One tree per command. The same screen reached twice is shown both times (that is
 - **admin_confirm_delete** — 🗑 Delete workspace
   - ✅ Proceed → `adm:delete` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - ↩ `admin_confirm_delete` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - ↩ `admin_confirm_delete` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -2705,27 +2615,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -2804,7 +2693,31 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -3088,45 +3001,23 @@ One tree per command. The same screen reached twice is shown both times (that is
 - **admin_confirm_suspend** — ⏸️ Suspend workspace
   - ✅ Proceed → `adm:suspend` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - ↩ `admin_confirm_suspend` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - ↩ `admin_confirm_suspend` (already on this path)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -3173,27 +3064,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -3272,7 +3142,31 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -4270,19 +4164,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - ↩ `admin_entered` (already on this path)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -4682,19 +4563,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -4828,51 +4696,23 @@ One tree per command. The same screen reached twice is shown both times (that is
 - **admin_moderation** — 🚫 Moderation & penalties
   - 👤 Open #6508129575 → `adm:user` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -4919,27 +4759,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -5018,7 +4837,31 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -5562,19 +5405,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -5974,19 +5804,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -6516,19 +6333,6 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -6670,289 +6474,26 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_user** — 👤 User
-  - 🚪 Enter → `adm:enter` → admin_entered
-    - **admin_entered** — (no title)
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - **file_browser** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📁 src → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📄 main.py → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📄 README.md → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ▶️ Run → `run:choose` → run_mode
-        - **run_mode** — ▶️ Run
-          - ⚡ Quick command → `exec:prompt` → exec_prompt
-            - … `exec_prompt` at depth 6 (not expanded)
-          - 📜 Background job → `run:prompt` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗜 Archives → `arc:menu` → archive_menu
-        - **archive_menu** — 🗜 Archives
-          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
-            - … `archive_upload_prompt` at depth 6 (not expanded)
-          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
-            - … `archive_extract_prompt` at depth 6 (not expanded)
-          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
-            - … `archive_export_prompt` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals
-          - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - … `terminal_list` at depth 6 (not expanded)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_stale** — ♻️ This button is out of date
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
-            - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-        - **ws_settings** — ⚙️ Workspace settings
-          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **ws_settings_suspended** — ⚙️ Workspace settings
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+  - 🧾 Audit log → `adm:audit_user` → admin_audit
+    - **admin_audit** — 🧾 Audit log
+      - New user → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - User blocked → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - Workspace created → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - Workspace deleted → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - All events → `adm:audit_all` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
           - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -6963,11 +6504,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -6978,11 +6519,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -6993,11 +6534,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 📢 Broadcast → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7008,11 +6549,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7023,11 +6564,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7038,11 +6579,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7054,11 +6595,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
           - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7069,11 +6610,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7084,11 +6625,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7099,11 +6640,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 📢 Broadcast → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7114,11 +6655,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7129,11 +6670,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7144,11 +6685,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -7158,25 +6699,8 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-  - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-    - **admin_confirm_delete** — 🗑 Delete workspace
-      - ✅ Proceed → `adm:delete` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - ↩ `admin_user` (already on this path)
-    - **admin_confirm_suspend** — ⏸️ Suspend workspace
-      - ✅ Proceed → `adm:suspend` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - ↩ `admin_user` (already on this path)
-  - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-    - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 2)
-    - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 2)
-  - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+  - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+  - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
     - **admin_ban_user_confirm** — 🚫 Ban user
       - Ban 1 day(s) → `adm:ban_go` → admin_user
         - ↩ `admin_user` (already on this path)
@@ -7193,20 +6717,7 @@ One tree per command. The same screen reached twice is shown both times (that is
       - 🚫 Ban the workspace → `adm:ban_go` → admin_user
         - ↩ `admin_user` (already on this path)
       - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
             - ↩ `admin_backup` (already on this path)
@@ -7277,7 +6788,31 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -7346,11 +6881,11 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_overview_unreachable` at depth 6 (not expanded)
     - **admin_ban_ws_prompt** — ✍️ Why?
       - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_broadcast** — 📢 Broadcast ↩ (already expanded at depth 4)
         - **admin_broadcast_open** — 📢 Broadcast ↩ (already expanded at depth 4)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
@@ -7360,14 +6895,6 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_user` (already on this path)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:audit_user` → admin_audit
-    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-  - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-  - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-    - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 2)
-    - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
-    - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 2)
-    - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
   - ✉️ Message → `adm:user_msg` → admin_msg_prompt
     - **admin_msg_prompt** — ✉️ Message a user
       - ✖️ Cancel → `adm:user` → admin_user
@@ -7375,11 +6902,11 @@ One tree per command. The same screen reached twice is shown both times (that is
   - 🔔 Watch only this user → `adm:notify_scope` → admin_user
     - ↩ `admin_user` (already on this path)
   - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
     - **admin_broadcast** — 📢 Broadcast ↩ (already expanded at depth 4)
     - **admin_broadcast_open** — 📢 Broadcast ↩ (already expanded at depth 4)
-    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 4)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
     - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
     - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
@@ -7392,51 +6919,23 @@ One tree per command. The same screen reached twice is shown both times (that is
 - **admin_users** — 👥 Users
   - 👤 Mohamed → `adm:user` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -7483,27 +6982,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -7582,7 +7060,31 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -8130,19 +7632,6 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -9127,19 +8616,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -9539,19 +9015,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - ↩ `admin_audit` (already on this path)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -10116,19 +9579,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -10600,19 +10050,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -11073,19 +10510,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -11145,45 +10569,23 @@ _No screen is rendered by this command._
 - **admin_confirm_delete** — 🗑 Delete workspace
   - ✅ Proceed → `adm:delete` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - ↩ `admin_confirm_delete` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - ↩ `admin_confirm_delete` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -11230,27 +10632,6 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -11329,7 +10710,31 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -11613,45 +11018,23 @@ _No screen is rendered by this command._
 - **admin_confirm_suspend** — ⏸️ Suspend workspace
   - ✅ Proceed → `adm:suspend` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - ↩ `admin_confirm_suspend` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - ↩ `admin_confirm_suspend` (already on this path)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -11698,27 +11081,6 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -11797,7 +11159,31 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -12795,19 +12181,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - ↩ `admin_entered` (already on this path)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -13207,19 +12580,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -13353,51 +12713,23 @@ _No screen is rendered by this command._
 - **admin_moderation** — 🚫 Moderation & penalties
   - 👤 Open #6508129575 → `adm:user` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -13444,27 +12776,6 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -13543,7 +12854,31 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -14087,19 +13422,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -14629,19 +13951,6 @@ _No screen is rendered by this command._
         - ↩ `admin_overview` (already on this path)
         - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -15178,19 +14487,6 @@ _No screen is rendered by this command._
         - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
         - ↩ `admin_overview_unreachable` (already on this path)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -15332,289 +14628,26 @@ _No screen is rendered by this command._
     - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
     - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
 - **admin_user** — 👤 User
-  - 🚪 Enter → `adm:enter` → admin_entered
-    - **admin_entered** — (no title)
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - **file_browser** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📁 src → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📄 main.py → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📄 README.md → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ▶️ Run → `run:choose` → run_mode
-        - **run_mode** — ▶️ Run
-          - ⚡ Quick command → `exec:prompt` → exec_prompt
-            - … `exec_prompt` at depth 6 (not expanded)
-          - 📜 Background job → `run:prompt` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗜 Archives → `arc:menu` → archive_menu
-        - **archive_menu** — 🗜 Archives
-          - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
-            - … `archive_upload_prompt` at depth 6 (not expanded)
-          - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
-            - … `archive_extract_prompt` at depth 6 (not expanded)
-          - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
-            - … `archive_export_prompt` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals
-          - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
-            - … `terminal_list` at depth 6 (not expanded)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_stale** — ♻️ This button is out of date
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - 📜 Runs → `run:history` → run_history
-        - **run_history** — 📜 Runs
-          - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - … `live_logs_running` at depth 6 (not expanded)
-          - ✅ Finished → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ❌ Failed → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - ⏳ Active → `run:filter` → run_history
-            - ↩ `run_history` (already on this path)
-          - Next ➡️ → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-            - … `purge_conflict` at depth 6 (not expanded)
-            - ↩ `run_history` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
-            - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-        - **ws_settings** — ⚙️ Workspace settings
-          - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
-            - … `ws_stop_confirm` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - … `ws_suspend_confirm` at depth 6 (not expanded)
-          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **ws_settings_suspended** — ⚙️ Workspace settings
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-            - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+  - 🧾 Audit log → `adm:audit_user` → admin_audit
+    - **admin_audit** — 🧾 Audit log
+      - New user → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - User blocked → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - Workspace created → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - Workspace deleted → `adm:audit_cat` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - All events → `adm:audit_all` → admin_audit
+        - ↩ `admin_audit` (already on this path)
+      - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
         - **admin_overview** — 🛠 Admin panel
           - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15625,11 +14658,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15640,11 +14673,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15655,11 +14688,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 📢 Broadcast → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15670,11 +14703,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15685,11 +14718,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15700,11 +14733,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15716,11 +14749,11 @@ _No screen is rendered by this command._
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_overview_unreachable** — 🛠 Admin panel
           - 👥 Users → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15731,11 +14764,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🚫 Moderation & penalties → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15746,11 +14779,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔔 Notifications → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15761,11 +14794,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 📢 Broadcast → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15776,11 +14809,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🔗 Mandatory subscriptions → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15791,11 +14824,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 💾 Backups → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15806,11 +14839,11 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-            - … `admin_audit` at depth 6 (not expanded)
+            - ↩ `admin_audit` (already on this path)
             - … `admin_backup` at depth 6 (not expanded)
             - … `admin_broadcast` at depth 6 (not expanded)
             - … `admin_broadcast_open` at depth 6 (not expanded)
-            - ↩ `admin_entered` (already on this path)
+            - … `admin_entered` at depth 6 (not expanded)
             - … `admin_forcejoin` at depth 6 (not expanded)
             - … `admin_moderation` at depth 6 (not expanded)
             - … `admin_moderation_empty` at depth 6 (not expanded)
@@ -15820,25 +14853,8 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-  - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-    - **admin_confirm_delete** — 🗑 Delete workspace
-      - ✅ Proceed → `adm:delete` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - ↩ `admin_user` (already on this path)
-    - **admin_confirm_suspend** — ⏸️ Suspend workspace
-      - ✅ Proceed → `adm:suspend` → admin_user
-        - ↩ `admin_user` (already on this path)
-      - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-        - **admin_overview** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - **admin_overview_unreachable** — 🛠 Admin panel ↩ (already expanded at depth 4)
-        - ↩ `admin_user` (already on this path)
-  - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-    - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 2)
-    - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 2)
-  - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+  - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+  - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
     - **admin_ban_user_confirm** — 🚫 Ban user
       - Ban 1 day(s) → `adm:ban_go` → admin_user
         - ↩ `admin_user` (already on this path)
@@ -15855,20 +14871,7 @@ _No screen is rendered by this command._
       - 🚫 Ban the workspace → `adm:ban_go` → admin_user
         - ↩ `admin_user` (already on this path)
       - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_backup** — 💾 Backups
           - ♻️ Restore …ot-backup-20261103T024139Z.zip → `adm:bk_disk` → admin_backup, admin_backup_restore_confirm_full, admin_backup_restore_confirm_settings, admin_backup_restore_done, admin_backup_restore_refused
             - ↩ `admin_backup` (already on this path)
@@ -15939,7 +14942,31 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -16008,11 +15035,11 @@ _No screen is rendered by this command._
             - … `admin_overview_unreachable` at depth 6 (not expanded)
     - **admin_ban_ws_prompt** — ✍️ Why?
       - ✖️ Cancel → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+        - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
         - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
         - **admin_broadcast** — 📢 Broadcast ↩ (already expanded at depth 4)
         - **admin_broadcast_open** — 📢 Broadcast ↩ (already expanded at depth 4)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
         - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
         - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
@@ -16022,14 +15049,6 @@ _No screen is rendered by this command._
         - ↩ `admin_user` (already on this path)
         - **admin_users** — 👥 Users ↩ (already expanded at depth 4)
         - **admin_users_empty** — 👥 Users ↩ (already expanded at depth 4)
-  - 🧾 Audit log → `adm:audit_user` → admin_audit
-    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
-  - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-  - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-    - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 2)
-    - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
-    - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 2)
-    - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 2)
   - ✉️ Message → `adm:user_msg` → admin_msg_prompt
     - **admin_msg_prompt** — ✉️ Message a user
       - ✖️ Cancel → `adm:user` → admin_user
@@ -16037,11 +15056,11 @@ _No screen is rendered by this command._
   - 🔔 Watch only this user → `adm:notify_scope` → admin_user
     - ↩ `admin_user` (already on this path)
   - ⬅️ Back → `adm:sec` → admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notifications, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty
-    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 4)
+    - **admin_audit** — 🧾 Audit log ↩ (already expanded at depth 2)
     - **admin_backup** — 💾 Backups ↩ (already expanded at depth 4)
     - **admin_broadcast** — 📢 Broadcast ↩ (already expanded at depth 4)
     - **admin_broadcast_open** — 📢 Broadcast ↩ (already expanded at depth 4)
-    - **admin_entered** — (no title) ↩ (already expanded at depth 2)
+    - **admin_entered** — (no title) ↩ (already expanded at depth 4)
     - **admin_forcejoin** — 🔗 Mandatory subscriptions ↩ (already expanded at depth 4)
     - **admin_moderation** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
     - **admin_moderation_empty** — 🚫 Moderation & penalties ↩ (already expanded at depth 4)
@@ -16054,51 +15073,23 @@ _No screen is rendered by this command._
 - **admin_users** — 👥 Users
   - 👤 Mohamed → `adm:user` → admin_user
     - **admin_user** — 👤 User
-      - 🚪 Enter → `adm:enter` → admin_entered
-        - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+      - 🧾 Audit log → `adm:audit_user` → admin_audit
+        - **admin_audit** — 🧾 Audit log
+          - New user → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - User blocked → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace created → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - Workspace deleted → `adm:audit_cat` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - All events → `adm:audit_all` → admin_audit
+            - ↩ `admin_audit` (already on this path)
+          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
             - … `admin_overview` at depth 6 (not expanded)
             - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace
-          - ✅ Proceed → `adm:delete` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace
-          - ✅ Proceed → `adm:suspend` → admin_user
-            - ↩ `admin_user` (already on this path)
-          - ✖️ Cancel → `adm:cancel` → admin_overview, admin_overview_unreachable, admin_user
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-            - ↩ `admin_user` (already on this path)
-      - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-        - **admin_confirm_delete** — 🗑 Delete workspace ↩ (already expanded at depth 4)
-        - **admin_confirm_suspend** — ⏸️ Suspend workspace ↩ (already expanded at depth 4)
-      - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
+      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
+      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
         - **admin_ban_user_confirm** — 🚫 Ban user
           - Ban 1 day(s) → `adm:ban_go` → admin_user
             - ↩ `admin_user` (already on this path)
@@ -16145,27 +15136,6 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-      - 🧾 Audit log → `adm:audit_user` → admin_audit
-        - **admin_audit** — 🧾 Audit log
-          - New user → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - User blocked → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace created → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - Workspace deleted → `adm:audit_cat` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - All events → `adm:audit_all` → admin_audit
-            - ↩ `admin_audit` (already on this path)
-          - ⬅️ Back → `adm:menu` → admin_overview, admin_overview_unreachable
-            - … `admin_overview` at depth 6 (not expanded)
-            - … `admin_overview_unreachable` at depth 6 (not expanded)
-      - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
-      - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-        - **admin_ban_user_confirm** — 🚫 Ban user ↩ (already expanded at depth 4)
-        - **admin_ban_user_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
-        - **admin_ban_ws_confirm** — 🚫 Ban workspace ↩ (already expanded at depth 4)
-        - **admin_ban_ws_prompt** — ✍️ Why? ↩ (already expanded at depth 4)
       - ✉️ Message → `adm:user_msg` → admin_msg_prompt
         - **admin_msg_prompt** — ✉️ Message a user
           - ✖️ Cancel → `adm:user` → admin_user
@@ -16244,7 +15214,31 @@ _No screen is rendered by this command._
             - ↩ `admin_user` (already on this path)
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
-        - **admin_entered** — (no title) ↩ (already expanded at depth 4)
+        - **admin_entered** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+          - ▶️ Run → `run:choose` → run_mode
+            - … `run_mode` at depth 6 (not expanded)
+          - 🗜 Archives → `arc:menu` → archive_menu
+            - … `archive_menu` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+            - … `terminal_list` at depth 6 (not expanded)
+            - … `terminal_list_empty` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+          - 📜 Runs → `run:history` → run_history
+            - … `run_history` at depth 6 (not expanded)
+          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
+            - … `admin_overview` at depth 6 (not expanded)
+            - … `admin_overview_unreachable` at depth 6 (not expanded)
         - **admin_forcejoin** — 🔗 Mandatory subscriptions
           - ➕ Add a chat → `adm:fj_add` → (handler only — no screen)
           - 🔍 Check me → `adm:fj_check` → (handler only — no screen)
@@ -16792,19 +15786,6 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
         - **admin_user** — 👤 User
-          - 🚪 Enter → `adm:enter` → admin_entered
-            - … `admin_entered` at depth 6 (not expanded)
-          - ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-            - … `admin_confirm_delete` at depth 6 (not expanded)
-            - … `admin_confirm_suspend` at depth 6 (not expanded)
-          - 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
-            - … `admin_ban_user_confirm` at depth 6 (not expanded)
-            - … `admin_ban_user_prompt` at depth 6 (not expanded)
-            - … `admin_ban_ws_confirm` at depth 6 (not expanded)
-            - … `admin_ban_ws_prompt` at depth 6 (not expanded)
           - 🧾 Audit log → `adm:audit_user` → admin_audit
             - … `admin_audit` at depth 6 (not expanded)
           - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
@@ -20975,7 +19956,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (243)
+### 3.5 Loops that are not obvious (241)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -21008,8 +19989,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **admin_broadcast_open** —“⬅️ Back”→ **admin_user** —“⬅️ Back”→ **admin_broadcast_open** (expected (back/affordance))
 - **admin_broadcast_preview** —“✅ Send now”→ **admin_broadcast_preview_over_ceiling** —“➕ Send anyway (over the ceiling)”→ **admin_broadcast_preview** (**unobvious**)
 - **admin_broadcast_progress** —“📊 Open the current result”→ **admin_broadcast_result** —“🔁 Retry the failed”→ **admin_broadcast_progress** (**unobvious**)
-- **admin_confirm_delete** —“✅ Proceed”→ **admin_user** —“⏸️ Suspend”→ **admin_confirm_delete** (**unobvious**)
-- **admin_confirm_suspend** —“✅ Proceed”→ **admin_user** —“⏸️ Suspend”→ **admin_confirm_suspend** (**unobvious**)
 - **admin_entered** —“🚪 Leave workspace”→ **admin_overview** —“👥 Users”→ **admin_entered** (**unobvious**)
 - **admin_entered** —“🚪 Leave workspace”→ **admin_overview_unreachable** —“👥 Users”→ **admin_entered** (**unobvious**)
 - **admin_forcejoin** —“⬅️ Back”→ **admin_overview** —“👥 Users”→ **admin_forcejoin** (expected (back/affordance))
@@ -21610,12 +20589,8 @@ _The live fleet counts are unknown while the engine is unreachable._
 
 ### admin_user — 👤 User
 
-_✦ Workspaces ⟸ 1_
+_✦ Recent activity ⟸ 1_
 
-- 🚪 Enter → `adm:enter` → admin_entered
-- ⏸️ Suspend → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-- 🗑 Delete → `adm:ask` → admin_confirm_delete, admin_confirm_suspend
-- 🚫 Ban workspace → `adm:ws_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
 - 🧾 Audit log → `adm:audit_user` → admin_audit
 - 💳 Wallet & subscription → `adm:wallet` → (handler only — no screen)
 - 🚫 Ban → `adm:user_ban` → admin_ban_user_confirm, admin_ban_user_prompt, admin_ban_ws_confirm, admin_ban_ws_prompt
