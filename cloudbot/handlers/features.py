@@ -20,7 +20,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from cloudbot.core.errors import EngineRefused
-from cloudbot.handlers.execution import last_exec
+from cloudbot.handlers.execution import (
+    last_exec,
+    last_exec_result,
+    last_origin,
+    remember_origin,
+)
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
@@ -31,6 +36,8 @@ from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import archives as arc_screens
 from cloudbot.presentation.screens import metrics as met_screens
 from cloudbot.presentation.screens import packages as pkg_screens
+from cloudbot.presentation.screens import run as run_screens
+from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.presentation.screens import ports as port_screens
 from cloudbot.presentation.screens import processes as proc_screens
@@ -70,6 +77,8 @@ async def on_packages(cb: CallbackQuery, ctx: UserContext, services: Services, s
     ws_id = _wid(decoded.key[0])
     page = _page_of(decoded.key)
     pkg_list = await services.packages.list(ctx.tg_id, ws_id)
+    # Where the install offer's back button returns: the packages list itself.
+    remember_origin(ctx.tg_id, ws_id, "packages")
     await show_screen(
         cb,
         pkg_screens.packages_screen(pkg_list, ws_id, ctx.locale, page=page),
@@ -135,6 +144,7 @@ async def on_fix_missing_package(
             mode=ctx.mode,
             is_admin=ctx.is_admin,
             retry_attempt=retry_attempt,
+            has_origin=last_origin(ctx.tg_id, ws_id) is not None,
         ),
         ctx=ctx,
         sender=sender,
@@ -178,11 +188,136 @@ async def on_install_text(
             ctx.locale,
             mode=ctx.mode,
             is_admin=ctx.is_admin,
+            has_origin=last_origin(ctx.tg_id, ws_id) is not None,
         ),
         ctx=ctx,
         sender=sender,
         force_send=True,
     )
+
+
+@router.callback_query(F.data == "origin:back")
+async def on_origin_back(
+    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
+) -> None:
+    """Return to the screen the install offer came from.
+
+    The origin is looked up by the calling user and the workspace they are inside
+    — the callback carries no key parts, so nothing can be forged or misread.
+    Each branch reuses the existing screen builder; this handler only composes.
+
+    An origin that is gone (a restart wiped the process memory, or the run/session
+    was deleted) degrades to the workspace home: one predictable destination,
+    never a dead end and never a guessed wrong screen.
+    """
+    inside = await services.session.current(ctx.tg_id)
+    if inside is None:
+        workspaces = await services.workspaces.list(ctx.tg_id)
+        await show_screen(
+            cb, ws_screens.workspace_list(workspaces, ctx.locale), ctx=ctx, sender=sender
+        )
+        return
+    ws_id = inside.id
+    origin = last_origin(ctx.tg_id, ws_id)
+    if origin is not None:
+        kind, ref = origin
+        if kind == "packages":
+            pkg_list = await services.packages.list(ctx.tg_id, ws_id)
+            remember_origin(ctx.tg_id, ws_id, "packages")
+            await show_screen(
+                cb, pkg_screens.packages_screen(pkg_list, ws_id, ctx.locale), ctx=ctx, sender=sender
+            )
+            return
+        if kind == "run":
+            result = last_exec_result(ctx.tg_id, ws_id)
+            if result is not None:
+                offer = pkg_screens.missing_section(result.stderr or "", ws_id, ctx.locale)
+                again = cb_again(result, ws_id)
+                await show_screen(
+                    cb,
+                    run_screens.exec_result(
+                        result, ws_id, ctx.locale, missing_offer=offer, again_action=again
+                    ),
+                    ctx=ctx,
+                    sender=sender,
+                )
+                return
+            # No stored result: the run chooser is still the right neighbourhood.
+            page = await services.files.list(ctx.tg_id, ws_id, "/")
+            await show_screen(
+                cb,
+                run_screens.run_mode(inside, ctx.locale, has_files=bool(page.entries)),
+                ctx=ctx,
+                sender=sender,
+            )
+            return
+        if kind == "runlog" and ref:
+            try:
+                state = await services.execution.read_all_logs(ctx.tg_id, ws_id, ref)
+                run = await services.execution.get_run(ctx.tg_id, ws_id, ref)
+            except EngineRefused:
+                run = None
+            if run is not None:
+                remember_origin(ctx.tg_id, ws_id, "runlog", str(run.id))
+                await show_screen(
+                    cb,
+                    run_screens.live_logs(
+                        run,
+                        ctx.locale,
+                        stdout=state.stdout,
+                        stderr=state.stderr,
+                        truncated=state.truncated,
+                    ),
+                    ctx=ctx,
+                    sender=sender,
+                )
+                return
+        if kind == "terminal" and ref:
+            try:
+                session = await services.sessions.get(ctx.tg_id, ws_id, ref)
+            except EngineRefused:
+                session = None
+            if session is not None:
+                meta = await services.sessions.meta()
+                output = ""
+                truncated = False
+                if session.status.value != "unknown":
+                    try:
+                        read = await services.sessions.read_output(ctx.tg_id, ws_id, ref, 0)
+                        output, truncated = read.data, read.truncated
+                    except EngineRefused:
+                        output, truncated = "", False
+                remember_origin(ctx.tg_id, ws_id, "terminal", str(session.id))
+                await show_screen(
+                    cb,
+                    term_screens.terminal_view(
+                        session,
+                        ws_id,
+                        ctx.locale,
+                        output=output,
+                        truncated=truncated,
+                        meta=meta,
+                    ),
+                    ctx=ctx,
+                    sender=sender,
+                )
+                return
+    # No origin (a restart or a cold callback), or the origin is gone: home.
+    await show_screen(
+        cb,
+        ws_screens.workspace_detail(
+            inside, ctx.locale, active_run=inside.summary.runs_active > 0, mode=ctx.mode
+        ),
+        ctx=ctx,
+        sender=sender,
+    )
+
+
+def cb_again(result, ws_id) -> str | None:
+    """The "try again" callback for a rebuilt run-result screen, or ``None``."""
+    from cloudbot.presentation.keyboards.callbacks import cb as _cb
+
+    return _cb("exec:again", ws_id) if result.exit_code != 0 else None
 
 
 @router.callback_query(F.data.startswith("pkg:rm_all_confirm"))

@@ -38,6 +38,9 @@
 #  32. The architecture doctor finds real problems and runs offline (TASK devtool).
 #  33. The bug reproducer narrows a report to a screen with visible evidence and
 #      emits a stub test that fails on today's tree (TASK devtool).
+#  34. A bite test that puts the install result's old three-row markup back (the
+#      prompt-on-result and the exit away from the origin), restored (TASK
+#      package-return).
 #
 # Runs offline; no token, no network.
 set -euo pipefail
@@ -1184,6 +1187,50 @@ assert proc.returncode != 0, "the generated stub passed (it must fail now)"
 print(f"OK: reproduce → {repro.best.screen} (score {repro.best.score:.1f}); "
       f"stub fails on today's tree as intended")
 PYCODE
+
+echo
+echo "== 34. bite test: the install result returns to its origin, not away from it =="
+"$PY" - <<'PY'
+import pathlib, subprocess, sys
+
+# TASK package-return. The old result markup offered `pkg:install` (the type-a-name
+# prompt on top of the result) and `pkg:list`, so every exit led away from the screen
+# the offer was read on. Reinstate exactly that three-row markup: the bite test (the
+# first row must be `origin:back` and it must resolve to the run result) goes red.
+# Restore, and it is green again.
+target = pathlib.Path("cloudbot/presentation/screens/packages.py")
+original = target.read_text(encoding="utf-8")
+guard = "            [inline(label, _cb(\"origin:back\"), intent=Intent.SUCCESS)]\n"
+bite = (
+    "            [inline(catalog.t(\"package.install\", locale), _cb(\"pkg:install\", ws_id), intent=Intent.PRIMARY)]  # BITE\n"
+)
+bitten = original.replace(guard, bite, 1)
+assert bitten != original, "bite substitution did not apply (the back row moved?)"
+cmd = [sys.executable, "-m", "pytest", "-q",
+       "tests/unit/test_package_return.py",
+       "-k", "the_bite_a_run_offer_install_returns_to_the_run_result",
+       "--no-header", "-p", "no:cacheprovider"]
+before = subprocess.run(cmd, capture_output=True, text=True)
+try:
+    target.write_text(bitten, encoding="utf-8")
+    red = subprocess.run(cmd, capture_output=True, text=True)
+finally:
+    target.write_text(original, encoding="utf-8")
+green = subprocess.run(cmd, capture_output=True, text=True)
+if before.returncode != 0:
+    print("FAIL: the origin-back test was not green before the bite")
+    print(before.stdout[-800:]); sys.exit(1)
+if red.returncode == 0:
+    print("FAIL: the three-row markup did not make the origin-back test red (not evidence)")
+    print(red.stdout[-800:]); sys.exit(1)
+if green.returncode != 0:
+    print("FAIL: restoring the back row did not return the test to green")
+    print(green.stdout[-800:]); sys.exit(1)
+def line(r):
+    ls = [l for l in r.stdout.splitlines() if "passed" in l or "failed" in l]
+    return ls[-1].strip() if ls else ("red" if r.returncode else "green")
+print("OK: before ->", line(before), "| bite ->", line(red), "| restored ->", line(green))
+PY
 
 # ── the proof ledger counts itself ─────────────────────────────────────────────
 # The declared total used to be hand-written, and it drifted: it once claimed

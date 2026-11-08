@@ -141,14 +141,19 @@ def install_prompt(ws_id: WorkspaceId, locale: Locale) -> Screen:
 
 
 def installing_screen(ws_id: WorkspaceId, locale: Locale) -> Screen:
-    """Shown while a slow install runs, so the user sees progress, not silence."""
+    """Shown while a slow install runs, so the user sees progress, not silence.
+
+    It is **not** ``send_new``: started from a callback it must replace the screen
+    the offer was on (the same message), so the offer's buttons do not survive
+    under a progress screen. The typed-command path passes ``force_send`` itself.
+    """
     doc = RichDoc(locale)
     doc.h(2, catalog.t("package.install_title", locale))
     doc.p(catalog.t("package.installing", locale))
     markup = inline_markup(
         [[inline(catalog.t("package.install", locale), _cb("pkg:install", ws_id), intent=Intent.MUTED, disabled=True)]]
     )
-    return Screen(doc=doc, markup=markup, send_new=True)
+    return Screen(doc=doc, markup=markup)
 
 
 # -- missing-module install offer -------------------------------------------
@@ -238,6 +243,7 @@ def install_result_screen(
     mode: RunMode = RunMode.PRODUCTION,
     is_admin: bool = False,
     retry_attempt: str | None = None,
+    has_origin: bool = True,
 ) -> Screen:
     result = outcome.result
     doc = RichDoc(locale)
@@ -268,16 +274,42 @@ def install_result_screen(
 
     return Screen(
         doc=doc,
-        markup=install_result_markup(ws_id, locale, retry_attempt=retry_attempt),
+        markup=install_result_markup(
+            ws_id,
+            locale,
+            retry_attempt=retry_attempt,
+            has_origin=has_origin,
+            names=names if result.ok else None,
+        ),
     )
+
 
 def install_result_markup(
     ws_id: WorkspaceId,
     locale: Locale,
     *,
     retry_attempt: str | None = None,
+    has_origin: bool = True,
+    names: str | None = None,
 ):
+    """The install result's buttons: **back to where you were**, then retry.
+
+    The origin is recorded by the surface that showed the offer, never guessed
+    here. When it is known, the first (primary, success) row returns to it; when
+    it is not (a restart, a cold callback) that row is omitted rather than
+    pointing somewhere wrong, and ``pkg:list`` is the single fallback exit.
+
+    ``pkg:install`` is deliberately absent: it opens the *type a package name*
+    prompt, an input state that would sit on top of this result screen. It is not
+    a retry and must never be a row here. ``pkg:list`` is absent too unless it is
+    the fallback — when an origin exists, "back" already covers it.
+    """
     rows: list[list] = []
+    if has_origin:
+        label = catalog.t("package.result_back", locale, names=names) if names else catalog.t("package.result_back_plain", locale)
+        rows.append(
+            [inline(label, _cb("origin:back"), intent=Intent.SUCCESS)]
+        )
     if retry_attempt:
         # The exact command that failed, on one tap. Offered, never auto-run.
         rows.append(
@@ -289,13 +321,11 @@ def install_result_markup(
                 )
             ]
         )
-    rows.append(
-        [
-            inline(catalog.t("package.result_retry", locale), _cb("pkg:install", ws_id), intent=Intent.PRIMARY),
-            inline(catalog.t("package.title", locale), _cb("pkg:list", ws_id), intent=Intent.PRIMARY),
-        ]
-    )
-    rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
+    if not has_origin:
+        # No remembered origin: one predictable exit, never a dead end.
+        rows.append(
+            [inline(catalog.t("package.title", locale), _cb("pkg:list", ws_id), intent=Intent.PRIMARY)]
+        )
     return inline_markup(rows)
 
 

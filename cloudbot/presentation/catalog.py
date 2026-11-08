@@ -1195,6 +1195,11 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "package_install_failed_no_net": lambda f, loc: pkg_screens.install_result_screen(
         f["install_failed_no_net"], "requests", f["ws"].id, loc
     ),
+    # The result when no origin is remembered (a restart, a cold callback): no
+    # back row, and ``pkg:list`` is the single fallback exit.
+    "package_install_ok_no_origin": lambda f, loc: pkg_screens.install_result_screen(
+        f["install_ok"], "six requests", f["ws"].id, loc, has_origin=False
+    ),
     "package_remove_prompt": lambda f, loc: pkg_screens.remove_prompt(f["ws"].id, loc),
     "package_remove_all_confirm": lambda f, loc: pkg_screens.remove_all_confirm("demo", f["ws"].id, loc),
     # -- Phase 2b: tunnels ---------------------------------------------------

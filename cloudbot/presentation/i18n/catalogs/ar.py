@@ -731,7 +731,8 @@ MESSAGES: dict[str, str] = {
     "package.result_truncated": "⚠️ تم اختصار مخرجات التثبيت.",
     "package.result_duration": "استغرق {duration}",
     "package.result_target": "تم التثبيت في",
-    "package.result_retry": "🔁 حاول مجددًا",
+    "package.result_back": "✅ تم تثبيت {names} — رجوع",
+    "package.result_back_plain": "⬅️ رجوع",
 
     # -- missing-module install offer (on a failed run) ----------------------
     "package.fix_title": "✦ مكتبة ناقصة ⟸ {module}",

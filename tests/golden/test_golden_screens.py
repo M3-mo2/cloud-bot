@@ -135,6 +135,11 @@ KB_AFFECTED = {
     # Task 16/17: the sticky terminal view (typing=True) is the changed keyboard —
     # it keeps every terminal button and adds the one-tap "stop typing" exit (R2/R3).
     "terminal_view_typing",
+    # TASK package-return: the install result's keyboard is layout-load-bearing —
+    # back-to-origin first, retry only on failure, and the no-origin fallback.
+    "package_install_ok",
+    "package_install_failed_no_net",
+    "package_install_ok_no_origin",
 }
 
 

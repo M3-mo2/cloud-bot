@@ -25,6 +25,10 @@ router = Router(name="execution")
 _LAST_EXEC: "dict[tuple[int, str], str]" = {}
 _MAX_LAST_EXEC = 64
 
+#: The last exec result itself, so "back" can rebuild its result screen without
+#: re-running anything. Bounded and process-local, like ``_LAST_EXEC``.
+_LAST_EXEC_RESULT: "dict[tuple[int, str], object]" = {}
+
 
 def remember_exec(tg_id: int, ws_id, command: str) -> None:
     if not command:
@@ -36,6 +40,51 @@ def remember_exec(tg_id: int, ws_id, command: str) -> None:
 
 def last_exec(tg_id: int, ws_id) -> str | None:
     return _LAST_EXEC.get((tg_id, str(ws_id)))
+
+
+def remember_exec_result(tg_id: int, ws_id, result) -> None:
+    """Keep the last exec result so the run-result screen can be rebuilt."""
+    key = (tg_id, str(ws_id))
+    if key not in _LAST_EXEC_RESULT and len(_LAST_EXEC_RESULT) >= _MAX_LAST_EXEC:
+        _LAST_EXEC_RESULT.pop(next(iter(_LAST_EXEC_RESULT)), None)
+    _LAST_EXEC_RESULT[key] = result
+
+
+def last_exec_result(tg_id: int, ws_id):
+    return _LAST_EXEC_RESULT.get((tg_id, str(ws_id)))
+
+
+#: Where the user's last screen was, per (user, workspace): the destination the
+#: install result's back button returns to.
+#:
+#: **Process memory on purpose.** This describes where this user's last screen was
+#: — presentation state, not durable state. Losing it on a restart must degrade to
+#: "no back button" (a correctable screen with ``pkg:list`` as its exit), never to
+#: a guessed or wrong destination. It is bounded so a long-lived process cannot
+#: grow it without limit.
+_ORIGINS: "dict[tuple[int, str], tuple[str, str | None]]" = {}
+_MAX_ORIGINS = 64
+ORIGIN_KINDS = ("run", "runlog", "terminal", "packages")
+
+
+def remember_origin(tg_id: int, ws_id, kind: str, ref: str | None = None) -> None:
+    """Record the screen the user is on, for the install result's back button.
+
+    ``kind`` is one of :data:`ORIGIN_KINDS`; ``ref`` is the run or session id for
+    ``runlog``/``terminal``. Recorded at render time (by the surface itself), never
+    re-derived from a callback: by tap time the button's own callback is all the
+    handler has, and it must not have to guess which run or session it came from.
+    """
+    if kind not in ORIGIN_KINDS:
+        raise ValueError(f"unknown origin kind: {kind!r}")
+    key = (tg_id, str(ws_id))
+    if key not in _ORIGINS and len(_ORIGINS) >= _MAX_ORIGINS:
+        _ORIGINS.pop(next(iter(_ORIGINS)), None)
+    _ORIGINS[key] = (kind, None if ref is None else str(ref))
+
+
+def last_origin(tg_id: int, ws_id) -> tuple[str, str | None] | None:
+    return _ORIGINS.get((tg_id, str(ws_id)))
 
 
 def _wid(text: str):
@@ -83,6 +132,9 @@ async def _run_exec_and_show(
     result = await services.execution.exec(ctx.tg_id, ws_id, command)
     if result.exit_code != 0:
         events.run_failed(tg_id=ctx.tg_id, ws_id=str(ws_id), name=command)
+    # Where the install offer's back button must return: this result screen.
+    remember_origin(ctx.tg_id, ws_id, "run")
+    remember_exec_result(ctx.tg_id, ws_id, result)
     offer = pkg_screens.missing_section(result.stderr or "", ws_id, ctx.locale)
     again = _cb("exec:again", ws_id) if result.exit_code != 0 else None
     await show_screen(
@@ -212,6 +264,9 @@ async def _stream_logs(cb, ctx, services, sender, ws_id, run_id, *, update_only:
     # tail service; here we render the current state and persist it).
     state = await services.execution.read_all_logs(ctx.tg_id, ws_id, run_id)
     run = await services.execution.get_run(ctx.tg_id, ws_id, run_id)
+    # A file run's live logs is a screen the install offer can appear on; "back"
+    # must return to this exact run's logs.
+    remember_origin(ctx.tg_id, ws_id, "runlog", str(run.id))
     screen = run_screens.live_logs(
         run, ctx.locale, stdout=state.stdout, stderr=state.stderr, truncated=state.truncated
     )

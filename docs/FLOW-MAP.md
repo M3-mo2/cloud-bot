@@ -12,12 +12,12 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 163 |
-| Screens including the /dev tool | 166 |
-| Button edges | 534 |
-| Distinct destinations (actions) | 139 |
+| Catalog screens | 164 |
+| Screens including the /dev tool | 167 |
+| Button edges | 531 |
+| Distinct destinations (actions) | 140 |
 | Entry commands | 9 |
-| Callback re-entry actions | 139 |
+| Callback re-entry actions | 140 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 139 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 140 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -119,6 +119,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `nav:noop` | (handler only — no screen) |
 | `nav:refresh` | menu, menu_empty, menu_inside |
 | `nav:settings` | settings, settings_inside |
+| `origin:back` | exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside |
 | `pay:buy` | wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans |
 | `pay:history` | wallet_history, wallet_history_empty, wallet_history_page_2 |
 | `pay:pack` | wallet_packs |
@@ -19168,7 +19169,7 @@ A prompt asks the user to type (or upload, or pay); the reply is handled by a me
 - `FeatureInput.awaiting_archive_export` → archive_export_done
 - `FeatureInput.awaiting_archive_extract` → archive_dry_run
 - `FeatureInput.awaiting_archive_upload` → archive_dry_run, archive_upload_prompt
-- `FeatureInput.awaiting_package_install` → package_install_failed_no_net, package_install_ok, package_install_working
+- `FeatureInput.awaiting_package_install` → package_install_failed_no_net, package_install_ok, package_install_ok_no_origin, package_install_working
 - `FeatureInput.awaiting_package_remove` → package_list, package_list_empty
 - `FeatureInput.awaiting_port` → tunnel_publish_confirm_unlistened
 - `Input.waiting_exec_command` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok
@@ -19889,17 +19890,19 @@ _Nothing is running in this workspace._
 
 _The install did not complete (exit code 1)._
 
-- 🔁 Try again → `pkg:install` → package_install_prompt
-- 🐍 Packages → `pkg:list` → package_list, package_list_empty
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `origin:back` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### package_install_ok — ✅ Packages installed
 
 _Installed six requests._
 
-- 🔁 Try again → `pkg:install` → package_install_prompt
+- ✅ Installed six requests — Back → `origin:back` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+
+### package_install_ok_no_origin — ✅ Packages installed
+
+_Installed six requests._
+
 - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### package_install_prompt — ➕ Install packages
 

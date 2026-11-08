@@ -65,8 +65,6 @@ NAV_LABEL_EXCEPTIONS: frozenset[str] = frozenset(
         "admin.back",
         # Re-run the last exec; the destination is a prompt, not a screen to name.
         "exec.run_again",
-        # Retry the install flow from its result screen.
-        "package.result_retry",
         # On the cap screen this opens the list *to remove one*; the verb is the point.
         "tunnel.remove_one",
         # Same Publish destination, deliberately labelled with its ceiling

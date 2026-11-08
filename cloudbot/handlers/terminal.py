@@ -198,6 +198,11 @@ async def _show_view(cb, ctx, services, sender, ws_id, ses_id, *, state: FSMCont
         except EngineRefused as exc:
             if exc.engine_code != "session_ended":
                 raise
+    # The live terminal is a screen the install offer can appear on; "back" from
+    # the install result must return to this exact session's view.
+    from cloudbot.handlers.execution import remember_origin
+
+    remember_origin(ctx.tg_id, ws_id, "terminal", str(session.id))
     screen = term_screens.terminal_view(
         session, ws_id, ctx.locale, output=output, truncated=truncated, meta=meta, typing=typing
     )

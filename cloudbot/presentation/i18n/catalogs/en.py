@@ -732,7 +732,8 @@ MESSAGES: dict[str, str] = {
     "package.result_truncated": "⚠️ Install output was shortened.",
     "package.result_duration": "Took {duration}",
     "package.result_target": "Installed into",
-    "package.result_retry": "🔁 Try again",
+    "package.result_back": "✅ Installed {names} — Back",
+    "package.result_back_plain": "⬅️ Back",
 
     # -- missing-module install offer (on a failed run) ----------------------
     "package.fix_title": "✦ Missing library ⟸ {module}",
