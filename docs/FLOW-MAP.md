@@ -12,9 +12,9 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 159 |
-| Screens including the /dev tool | 162 |
-| Button edges | 510 |
+| Catalog screens | 160 |
+| Screens including the /dev tool | 163 |
+| Button edges | 515 |
 | Distinct destinations (actions) | 137 |
 | Entry commands | 9 |
 | Callback re-entry actions | 137 |
@@ -22,7 +22,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 236 |
+| Contradictions: two-screen loops | 243 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -99,10 +99,10 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `dev:sections` | dev_sections |
 | `dev:tap` | dev_inspect |
 | `exec:prompt` | exec_prompt |
-| `file:cd` | file_browser, file_browser_empty |
-| `file:delete` | file_browser, file_browser_empty |
+| `file:cd` | file_browser, file_browser_empty, file_browser_page_2 |
+| `file:delete` | file_browser, file_browser_empty, file_browser_page_2 |
 | `file:delete_confirm` | file_delete_confirm |
-| `file:ls` | file_browser, file_browser_empty |
+| `file:ls` | file_browser, file_browser_empty, file_browser_page_2 |
 | `file:mkdir` | file_mkdir |
 | `file:rename` | file_rename |
 | `file:rename_same` | file_rename |
@@ -450,9 +450,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -722,9 +723,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -1103,9 +1105,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -1542,9 +1545,10 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `admin_broadcast` (already on this path)
         - **admin_broadcast_open** — ✦ Broadcast ⟸ 3 broadcast(s) in the history ↩ (already expanded at depth 4)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -1970,9 +1974,10 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **admin_broadcast** — ✦ Broadcast ⟸ 3 broadcast(s) in the history ↩ (already expanded at depth 4)
         - ↩ `admin_broadcast_open` (already on this path)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -2427,9 +2432,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -2844,9 +2850,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -3129,7 +3136,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_overview_unreachable** — (no title) ↩ (already expanded at depth 4)
     - **admin_user** — (no title) ↩ (already expanded at depth 2)
 - **admin_entered** — (no title)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty
+  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
@@ -3143,11 +3150,42 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+        - ↩ `file_browser` (already on this path)
+        - **file_browser_empty** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -3175,9 +3213,10 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -3186,9 +3225,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -3243,9 +3283,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -3259,19 +3300,8 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — (no title)
-      - 📤 Upload → `file:upload` → file_upload
-        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
-      - ➕ New Folder → `file:mkdir` → file_mkdir
-        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
-      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
-        - **file_browser** — (no title) ↩ (already expanded at depth 2)
-        - ↩ `file_browser_empty` (already on this path)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -3987,9 +4017,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -4350,9 +4381,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -4717,9 +4749,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -5097,9 +5130,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -5637,9 +5671,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -6139,9 +6174,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -6324,9 +6360,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -6691,9 +6728,10 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -7174,9 +7212,10 @@ _No screen is rendered by this command._
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -7204,9 +7243,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -7215,9 +7255,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -7272,9 +7313,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -7294,12 +7336,16 @@ _No screen is rendered by this command._
 - **help_inside** — ❓ Help
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7310,9 +7356,24 @@ _No screen is rendered by this command._
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -7470,9 +7531,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -7481,9 +7543,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -7538,9 +7601,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -7705,9 +7769,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -8056,9 +8121,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -8437,9 +8503,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -8876,9 +8943,10 @@ _No screen is rendered by this command._
         - ↩ `admin_broadcast` (already on this path)
         - **admin_broadcast_open** — ✦ Broadcast ⟸ 3 broadcast(s) in the history ↩ (already expanded at depth 4)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -9304,9 +9372,10 @@ _No screen is rendered by this command._
         - **admin_broadcast** — ✦ Broadcast ⟸ 3 broadcast(s) in the history ↩ (already expanded at depth 4)
         - ↩ `admin_broadcast_open` (already on this path)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -9761,9 +9830,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -10178,9 +10248,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -10463,7 +10534,7 @@ _No screen is rendered by this command._
     - **admin_overview_unreachable** — (no title) ↩ (already expanded at depth 4)
     - **admin_user** — (no title) ↩ (already expanded at depth 2)
 - **admin_entered** — (no title)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty
+  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
@@ -10477,11 +10548,42 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+        - ↩ `file_browser` (already on this path)
+        - **file_browser_empty** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -10509,9 +10611,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -10520,9 +10623,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -10577,9 +10681,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -10593,19 +10698,8 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — (no title)
-      - 📤 Upload → `file:upload` → file_upload
-        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
-      - ➕ New Folder → `file:mkdir` → file_mkdir
-        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
-      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
-        - **file_browser** — (no title) ↩ (already expanded at depth 2)
-        - ↩ `file_browser_empty` (already on this path)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -11321,9 +11415,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -11684,9 +11779,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -12051,9 +12147,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -12604,9 +12701,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -13062,9 +13160,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -13564,9 +13663,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -13749,9 +13849,10 @@ _No screen is rendered by this command._
             - ↩ `admin_users` (already on this path)
             - … `admin_users_empty` at depth 6 (not expanded)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -14116,9 +14217,10 @@ _No screen is rendered by this command._
             - … `admin_users` at depth 6 (not expanded)
             - ↩ `admin_users_empty` (already on this path)
         - **admin_entered** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -14621,9 +14723,10 @@ _No screen is rendered by this command._
     - **help_inside** — ❓ Help
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -14651,9 +14754,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -14662,9 +14766,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -14719,9 +14824,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -14794,12 +14900,16 @@ _No screen is rendered by this command._
 - **settings_inside** — ⚙️ Settings
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -14810,9 +14920,24 @@ _No screen is rendered by this command._
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -14970,9 +15095,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -14981,9 +15107,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15038,9 +15165,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -15261,9 +15389,10 @@ _No screen is rendered by this command._
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15291,9 +15420,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -15302,9 +15432,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15359,9 +15490,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -15429,9 +15561,10 @@ _No screen is rendered by this command._
     - **ws_list_inside** — (no title)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15459,9 +15592,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -15470,9 +15604,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15527,9 +15662,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -15777,9 +15913,10 @@ _No screen is rendered by this command._
     - **ws_list_inside** — (no title)
       - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15807,9 +15944,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -15818,9 +15956,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -15875,9 +16014,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -16115,12 +16255,16 @@ _No screen is rendered by this command._
         - ↩ `menu_inside` (already on this path)
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -16131,9 +16275,24 @@ _No screen is rendered by this command._
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -16291,9 +16450,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -16302,9 +16462,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -16359,9 +16520,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -16434,7 +16596,7 @@ _No screen is rendered by this command._
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 - **ws_detail** — (no title)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty
+  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
@@ -16448,14 +16610,45 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+        - ↩ `file_browser` (already on this path)
+        - **file_browser_empty** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -16464,9 +16657,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -16521,9 +16715,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -16537,19 +16732,8 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — (no title)
-      - 📤 Upload → `file:upload` → file_upload
-        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
-      - ➕ New Folder → `file:mkdir` → file_mkdir
-        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
-      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
-        - **file_browser** — (no title) ↩ (already expanded at depth 2)
-        - ↩ `file_browser_empty` (already on this path)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -17061,7 +17245,7 @@ _No screen is rendered by this command._
         - **wallet_expired** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
         - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
         - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty
+  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
@@ -17075,11 +17259,42 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+        - ↩ `file_browser` (already on this path)
+        - **file_browser_empty** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - ↩ `ws_detail_locked` (already on this path)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -17106,9 +17321,10 @@ _No screen is rendered by this command._
             - … `ws_list_inside` at depth 6 (not expanded)
         - ↩ `ws_detail_locked` (already on this path)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -17163,9 +17379,10 @@ _No screen is rendered by this command._
             - ↩ `ws_detail_locked` (already on this path)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -17179,19 +17396,8 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — (no title)
-      - 📤 Upload → `file:upload` → file_upload
-        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
-      - ➕ New Folder → `file:mkdir` → file_mkdir
-        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
-      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
-        - **file_browser** — (no title) ↩ (already expanded at depth 2)
-        - ↩ `file_browser_empty` (already on this path)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
@@ -17317,7 +17523,7 @@ _No screen is rendered by this command._
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
 - **ws_detail_more** — (no title)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty
+  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
@@ -17331,11 +17537,42 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+        - ↩ `file_browser` (already on this path)
+        - **file_browser_empty** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_more` (already on this path)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -17363,9 +17600,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -17380,9 +17618,10 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_more` (already on this path)
             - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -17396,19 +17635,8 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — (no title)
-      - 📤 Upload → `file:upload` → file_upload
-        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
-      - ➕ New Folder → `file:mkdir` → file_mkdir
-        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
-      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
-        - **file_browser** — (no title) ↩ (already expanded at depth 2)
-        - ↩ `file_browser_empty` (already on this path)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -18275,12 +18503,16 @@ _No screen is rendered by this command._
 - **ws_detail_suspended** — (no title)
   - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
     - **ws_detail** — (no title)
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -18291,9 +18523,24 @@ _No screen is rendered by this command._
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
+            - … `file_browser_page_2` at depth 6 (not expanded)
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_more` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **file_browser_page_2** — (no title)
+          - 📤 Upload → `file:upload` → file_upload
+            - … `file_upload` at depth 6 (not expanded)
+          - ➕ New Folder → `file:mkdir` → file_mkdir
+            - … `file_mkdir` at depth 6 (not expanded)
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - ↩ `file_browser_page_2` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -18451,9 +18698,10 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -18462,9 +18710,10 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
@@ -18569,9 +18818,10 @@ _No screen is rendered by this command._
     - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - ↩ `ws_detail_suspended` (already on this path)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty
+  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title) ↩ (already expanded at depth 4)
     - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -18618,7 +18868,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (236)
+### 3.5 Loops that are not obvious (243)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -18671,14 +18921,21 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **archive_menu** —“⬅️ Back”→ **ws_detail** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **archive_menu** —“⬅️ Back”→ **ws_detail_more** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **dev_report** —“⬅️ Sections”→ **dev_sections** —“🩺 Run the architecture doctor”→ **dev_report** (**unobvious**)
+- **file_browser** —“⬆️ Up”→ **file_browser_empty** —“⬆️ Up”→ **file_browser** (**unobvious**)
+- **file_browser** —“⬆️ Up”→ **file_browser_page_2** —“⬆️ Up”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser** (**unobvious**)
+- **file_browser_empty** —“⬆️ Up”→ **file_browser_page_2** —“⬆️ Up”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser_empty** (**unobvious**)
+- **file_browser_page_2** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
+- **file_browser_page_2** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
+- **file_browser_page_2** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
+- **file_browser_page_2** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
 - **live_logs_finished** —“🗑 Delete log”→ **run_history** —“📜 run_0…K4”→ **live_logs_finished** (**unobvious**)
 - **menu** —“⚙️ Settings”→ **settings** —“🏠 Home”→ **menu** (**unobvious**)
 - **menu** —“💳 Wallet”→ **wallet** —“🏠 Home”→ **menu** (**unobvious**)
@@ -18912,10 +19169,10 @@ A prompt asks the user to type (or upload, or pay); the reply is handled by a me
 - `Input.waiting_exec_command` → exec_result_fail, exec_result_ok
 - `Input.waiting_job_args` → job_started
 - `Input.waiting_job_command` → job_started
-- `Input.waiting_mkdir_path` → file_browser, file_browser_empty
+- `Input.waiting_mkdir_path` → file_browser, file_browser_empty, file_browser_page_2
 - `Input.waiting_name` → ws_create_name, ws_create_network
 - `Input.waiting_rename_path` → (handler only — no screen)
-- `Input.waiting_upload` → file_browser, file_browser_empty
+- `Input.waiting_upload` → file_browser, file_browser_empty, file_browser_page_2
 - `TerminalInput.awaiting_command` → terminal_ended, terminal_view_ended, terminal_view_failed, terminal_view_running, terminal_view_typing
 
 ### Inline screens built in handlers (not catalog screens)
@@ -19126,7 +19383,7 @@ _Suspend demo (ws_01M6HJASCWM9Z1PF755GT89NK4)? Its files are kept._
 
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
+- 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run → `run:choose` → run_mode
 - 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -19408,6 +19665,7 @@ _(no body text)_
 
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
+- ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### file_browser_empty — (no title)
@@ -19416,15 +19674,24 @@ _(no body text)_
 
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
-- ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+- ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
+- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+
+### file_browser_page_2 — (no title)
+
+_(no body text)_
+
+- 📤 Upload → `file:upload` → file_upload
+- ➕ New Folder → `file:mkdir` → file_mkdir
+- ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### file_delete_confirm — 🗑 Delete file?
 
 _/main.py will be permanently deleted._
 
-- ✅ Delete → `file:delete` → file_browser, file_browser_empty
-- ✖️ Cancel → `file:cd` → file_browser, file_browser_empty
+- ✅ Delete → `file:delete` → file_browser, file_browser_empty, file_browser_page_2
+- ✖️ Cancel → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
 
 ### file_mkdir — ➕ New Folder
 
@@ -19452,7 +19719,7 @@ _def greet(name): print(f"Hello, {name}") sha256 9f2c4e7a1b · lines 1–5 of 5_
 - ▶️ Run → `run:file` → job_prompt
 - ✏️ Rename → `file:rename` → file_rename
 - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-- 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+- 🔙 Folder → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### file_view_binary — 📦 archive.zip
@@ -19461,7 +19728,7 @@ _(no body text)_
 
 - ✏️ Rename → `file:rename` → file_rename
 - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-- 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+- 🔙 Folder → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### fj_gate — (no title)
@@ -19825,14 +20092,14 @@ _One file that prints a message, ready to run._
 
 _Python module_
 
-- 📁 See the files → `file:ls` → file_browser, file_browser_empty
+- 📁 See the files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### tpl_done_failed — ⚠️ Template stopped
 
 _Flask API_
 
-- 📁 See the files → `file:ls` → file_browser, file_browser_empty
+- 📁 See the files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ⬅️ Back → `tpl:list` → tpl_list
 
 ### tpl_done_refused — ⛔ Template not created
@@ -20159,7 +20426,7 @@ _demo will be permanently deleted._
 
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
+- 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run (disabled) → `run:choose` → run_mode
 - 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -20174,7 +20441,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - 🔄 Renew → `ws:renew` → wallet_plans
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
+- 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 
@@ -20182,7 +20449,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
+- 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run → `run:choose` → run_mode
 - 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -20202,7 +20469,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
+- 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run (disabled) → `run:choose` → run_mode
 - 🖥 Terminals (disabled) → `term:list` → terminal_list, terminal_list_empty, terminal_stale
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended

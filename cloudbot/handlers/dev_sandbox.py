@@ -53,11 +53,23 @@ class FakeBot:
         self.sent: list[dict[str, Any]] = []
 
     async def send_rich_message(self, chat_id, rich_message, reply_markup=None, reply_parameters=None):
-        self.sent.append({"html": getattr(rich_message, "html", ""), "markup": reply_markup})
+        self.sent.append(
+            {
+                "html": getattr(rich_message, "html", None),
+                "blocks": getattr(rich_message, "blocks", None),
+                "markup": reply_markup,
+            }
+        )
         return Message.model_construct(chat={"id": chat_id}, message_id=len(self.sent))
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
-        self.sent.append({"html": getattr(rich_message, "html", ""), "markup": reply_markup})
+        self.sent.append(
+            {
+                "html": getattr(rich_message, "html", None),
+                "blocks": getattr(rich_message, "blocks", None),
+                "markup": reply_markup,
+            }
+        )
         return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
 
     async def delete_message(self, chat_id, message_id):
@@ -215,10 +227,15 @@ class DevSandbox:
     async def tap(self, data: str, uid: int = 1) -> tuple[bool, str | None, str | None]:
         """Feed one callback through the real dispatcher via the fake bot.
 
-        Returns ``(rendered, html, error)``: whether a new screen was produced, the
-        rendered html (the last message), and an exception summary if the tap
-        raised. The tool is safe when a screen is broken: the exception is reported,
-        not propagated.
+        Returns ``(rendered, text, error)``: whether a new screen was produced, the
+        rendered body of the last message **in whichever form it was built**, and
+        an exception summary if the tap raised. The tool is safe when a screen is
+        broken: the exception is reported, not propagated.
+
+        A screen with in-body buttons (Bot API 10.3) builds in **blocks** and has
+        no html; returning only html would report the tap as having rendered
+        nothing. ``_screen_text`` reads both forms so the inspector keeps its
+        promise for every screen.
         """
         before = len(self.bot.sent)
         try:
@@ -227,7 +244,21 @@ class DevSandbox:
             return False, None, f"{type(exc).__name__}: {exc}"
         if len(self.bot.sent) <= before:
             return False, None, None
-        return True, self.bot.sent[-1]["html"], None
+        return True, _screen_text(self.bot.sent[-1]), None
+
+
+def _screen_text(sent: dict[str, Any]) -> str:
+    """Everything a rendered message says, in whichever form it was built."""
+    if sent.get("html"):
+        return sent["html"]
+    parts: list[str] = []
+    for block in sent.get("blocks") or []:
+        text = getattr(block, "text", None)
+        if text:
+            parts.append(text)
+        for button in getattr(block, "buttons", None) or []:
+            parts.append(getattr(button, "text", "") or "")
+    return "\n".join(parts)
 
 
 def reset_tokens() -> None:

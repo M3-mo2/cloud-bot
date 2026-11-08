@@ -48,11 +48,23 @@ class FakeBot:
     async def send_rich_message(
         self, chat_id, rich_message, reply_markup=None, reply_parameters=None
     ):
-        self.sent.append({"html": rich_message.html, "markup": reply_markup})
+        self.sent.append(
+            {
+                "html": rich_message.html,
+                "blocks": rich_message.blocks,
+                "markup": reply_markup,
+            }
+        )
         return Message.model_construct(chat={"id": chat_id}, message_id=len(self.sent))
 
     async def edit_message_text(self, chat_id, message_id, rich_message=None, reply_markup=None):
-        self.sent.append({"html": getattr(rich_message, "html", ""), "markup": reply_markup})
+        self.sent.append(
+            {
+                "html": getattr(rich_message, "html", None),
+                "blocks": getattr(rich_message, "blocks", None),
+                "markup": reply_markup,
+            }
+        )
         return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
 
     async def delete_message(self, chat_id, message_id):
@@ -129,6 +141,26 @@ async def _replay(chunks):
         yield chunk
 
 
+def _screen_text(sent: dict) -> str:
+    """Everything a rendered message says, in whichever form it was built.
+
+    A screen with in-body buttons (Bot API 10.3) builds in **blocks** and has no
+    html; a screen without them builds in html. Tests that assert on what the
+    user sees must read both, or they silently pass an empty string for the
+    blocks form (TASK file-tree).
+    """
+    if sent.get("html"):
+        return sent["html"]
+    parts: list[str] = []
+    for block in sent.get("blocks") or []:
+        text = getattr(block, "text", None)
+        if text:
+            parts.append(text)
+        for button in getattr(block, "buttons", None) or []:
+            parts.append(getattr(button, "text", "") or "")
+    return "\n".join(parts)
+
+
 async def test_a_document_driven_through_the_dispatcher_reaches_the_engine():
     container, ws, bot, dispatcher, received = await _harness()
     try:
@@ -145,8 +177,15 @@ async def test_a_document_driven_through_the_dispatcher_reaches_the_engine():
         assert received == [CONTENT], "the engine did not receive the file's bytes"
         # And the refreshed listing screen came back (the last thing sent).
         assert bot.sent, "nothing rendered after the upload"
-        last = bot.sent[-1]["html"]
-        assert "📁 Files" in last or "📁 الملفات" in last, last[:200]
+        # TASK file-tree: the listing is now a blocks tree with an in-body button
+        # per entry, so it has no ``html``. Read the blocks too — the assertion's
+        # intent ("the refreshed listing came back") is unchanged; only the form
+        # it is rendered in moved. This is an updated assertion, not a weakened
+        # one: it still requires the list screen, now whichever form carries it,
+        # and it names the screen by the header the tree task gave it
+        # (``✦ Files ⟸ <path>``), which no other screen in the flow prints.
+        last = _screen_text(bot.sent[-1])
+        assert "✦ Files ⟸ /dest" in last or "✦ الملفات ⟸ /dest" in last, last[:200]
         # The state was cleared, as the handler promises.
         assert await dispatcher.fsm.storage.get_state(_key(bot, TG)) is None
     finally:

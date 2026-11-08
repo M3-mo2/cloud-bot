@@ -230,16 +230,43 @@ def fixtures() -> dict[str, Any]:
         stdout_bytes=312,
         stderr_bytes=0,
     )
+    #: TASK file-tree's own drawing: two folders, three files, and enough other
+    #: entries to exercise the pager. Folders sort before files, and the names
+    #: are deliberately out of order so ``_ordered`` is the thing being measured.
     file_page = FilePage(
-        path="/",
+        path="/app",
         entries=(
-            FileEntry("/src", "src", "dir", None, "drwxr-xr-x", NOW, None),
-            FileEntry("/main.py", "main.py", "file", 812, "-rw-r--r--", NOW, "python3"),
-            FileEntry("/README.md", "README.md", "file", 1200, "-rw-r--r--", NOW, None),
+            FileEntry("/app/src", "src", "dir", None, "drwxr-xr-x", NOW, None),
+            FileEntry("/app/utils", "utils", "dir", None, "drwxr-xr-x", NOW, None),
+            FileEntry("/app/main.py", "main.py", "file", 1229, "-rw-r--r--", NOW, "python3"),
+            FileEntry("/app/config.py", "config.py", "file", 340, "-rw-r--r--", NOW, "python3"),
+            FileEntry("/app/README.md", "README.md", "file", 2150, "-rw-r--r--", NOW, None),
+            FileEntry(
+                "/app/requirements.txt",
+                "requirements.txt",
+                "file",
+                18,
+                "-rw-r--r--",
+                NOW,
+                None,
+            ),
         ),
-        count=3,
-        total=3,
+        count=6,
+        total=6,
         truncated=False,
+    )
+    #: The second page of an eleven-entry folder: one entry left, a "page 2 of 2"
+    #: footer and a previous-page button. Locking it proves the pager is drawn.
+    paged_file_page = FilePage(
+        path="/app",
+        entries=(
+            FileEntry("/app/zzz_last.py", "zzz_last.py", "file", 900, "-rw-r--r--", NOW, "python3"),
+        ),
+        count=1,
+        total=11,
+        truncated=False,
+        offset=10,
+        limit=10,
     )
     empty_page = FilePage(path="/src", entries=(), count=0, total=0, truncated=False, offset=0, limit=20)
     content = FileContent(
@@ -563,6 +590,7 @@ def fixtures() -> dict[str, Any]:
         run=run,
         finished_run=finished_run,
         file_page=file_page,
+        paged_file_page=paged_file_page,
         empty_page=empty_page,
         content=content,
         binary_content=binary_content,
@@ -1087,6 +1115,9 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
         engine_message="disk is full",
     ),
     "file_browser": lambda f, loc: file_screens.file_browser(f["file_page"], f["ws"].id, loc),
+    "file_browser_page_2": lambda f, loc: file_screens.file_browser(
+        f["paged_file_page"], f["ws"].id, loc, page_index=1
+    ),
     "file_browser_empty": lambda f, loc: file_screens.file_browser(f["empty_page"], f["ws"].id, loc),
     "file_view": lambda f, loc: file_screens.file_view(f["content"], f["ws"].id, loc),
     "file_view_binary": lambda f, loc: file_screens.file_view(f["binary_content"], f["ws"].id, loc),

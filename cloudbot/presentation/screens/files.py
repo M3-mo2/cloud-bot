@@ -31,8 +31,8 @@ from cloudbot.presentation.screens.screen import Screen
 
 PAGE_SIZE = _PAGE_SIZE
 
-#: A tree line's own name is elided so a pathological filename cannot push the
-#: size off the line. The **callback keeps the full path** — only the visible
+#: A button's own name is elided so a pathological filename cannot make an
+#: unreadable label. The **callback keeps the full path** — only the visible
 #: label is shortened.
 MAX_LABEL_CHARS = 24
 
@@ -58,14 +58,15 @@ def _icon(entry: FileEntry) -> str:
     return "📄"
 
 
-def _type_label(entry: FileEntry, locale: Locale) -> str:
+def _entry_fact(entry: FileEntry, locale: Locale) -> str:
+    """The one fact a tree line carries after a file's name: its size.
+
+    A folder carries no size (folders are not bytes a user can act on), and a file
+    the engine did not stat shows ``—`` rather than an invented ``0``.
+    """
     if entry.type == "dir":
-        return catalog.t("file.type.folder", locale)
-    if entry.type == "symlink":
-        return catalog.t("file.type.symlink", locale)
-    if entry.runnable:
-        return catalog.t("file.runnable", locale, lang=entry.runnable)
-    return catalog.t("file.type.file", locale)
+        return ""
+    return format_bytes(entry.size, locale) if entry.size is not None else "—"
 
 
 def _ordered(entries: tuple[FileEntry, ...]) -> list[FileEntry]:
@@ -85,7 +86,7 @@ def _tree_line(entry: FileEntry, branch: str, locale: Locale) -> str:
     name = neutralize_bidi(entry.name)
     if entry.type == "dir":
         return f"{branch}{_icon(entry)} {name}/"
-    size = format_bytes(entry.size, locale) if entry.size is not None else "—"
+    size = _entry_fact(entry, locale)
     return f"{branch}{_icon(entry)} {name} · {size}"
 
 
@@ -170,25 +171,26 @@ def file_browser(
             doc.buttons(row)
 
         total_pages = _total_pages_for(page.total)
-        nav_row: list[tuple[str, str, str | None]] = []
-        if page_index > 0:
-            nav_row.append(
-                (
-                    catalog.t("common.previous", locale),
-                    _cb("file:ls", ws_id, page_index - 1),
-                    "primary",
+        if total_pages > 1:
+            nav_row: list[tuple[str, str, str | None]] = []
+            if page_index > 0:
+                nav_row.append(
+                    (
+                        catalog.t("common.previous", locale),
+                        _cb("file:ls", ws_id, page_index - 1),
+                        "primary",
+                    )
                 )
-            )
-        if page_index + 1 < total_pages:
-            nav_row.append(
-                (
-                    catalog.t("common.next", locale),
-                    _cb("file:ls", ws_id, page_index + 1),
-                    "primary",
+            if page_index + 1 < total_pages:
+                nav_row.append(
+                    (
+                        catalog.t("common.next", locale),
+                        _cb("file:ls", ws_id, page_index + 1),
+                        "primary",
+                    )
                 )
-            )
-        if nav_row:
-            doc.buttons(nav_row, align="center")
+            if nav_row:
+                doc.buttons(nav_row, align="center")
         doc.footer(
             catalog.t(
                 "file.footer",
