@@ -1,13 +1,16 @@
 """Starter-template screens: the list, the confirmation, and the honest result.
 
-Three screens, one flow (TASK python-templates):
+Three screens, one flow (TASK python-templates, TASK template-folders):
 
-* **A — the list** (``tpl:list``): one block per template, then a button per
-  template and a way back to the workspace.
-* **B — the confirmation** (``tpl:pick``): names the template and lists **every**
-  path it will create. If any target path already exists the screen says which
-  one and the create button is disabled — no template ever silently overwrites a
-  user's file.
+* **A — the list** (``tpl:list``): one quiet line per template (its icon and
+  title), then a button per template and a way back to the workspace. No
+  description: the confirmation is where a user reads it.
+* **B — the confirmation** (``tpl:pick``): names the template, explains it, and
+  lists every path it will create — each under the template's **own folder**
+  (``hello/hello.py``), which is what the user sees on disk. If the folder
+  already exists the screen says so and the create button is disabled — no
+  template ever silently overwrites a user's work, and two different templates
+  can still live side by side.
 * **C — the result** (``tpl:confirm`` performs the write): created, refused, or
   failed, each stated honestly (partial state is named, never implied).
 
@@ -54,6 +57,19 @@ def _title(template: Template, locale: Locale) -> str:
     return catalog.t(template.title_key, locale)
 
 
+def _icon_key(template: Template) -> str:
+    """The catalog key of the template's own leading mark (``tpl.hello.icon``).
+
+    The rule is derived from ``title_key`` so a new template needs no extra field;
+    the icon itself is catalog data, never domain prose.
+    """
+    return template.title_key.rsplit(".", 1)[0] + ".icon"
+
+
+def _icon(template: Template, locale: Locale) -> str:
+    return catalog.t(_icon_key(template), locale)
+
+
 def _detail(template: Template, locale: Locale) -> str:
     return catalog.t(template.detail_key, locale)
 
@@ -66,32 +82,18 @@ def _ws_of(ws_id: WorkspaceId | str) -> str:
     return str(ws_id)
 
 
-#: One distinguishing leading emoji per template, for its pick button. Presentation
-#: owns the visual; the domain catalog stays prose-free. Distinct on the screen so
-#: two buttons never share a leading mark (the house emoji rule).
-_PICK_EMOJI: dict[str, str] = {
-    "hello": "👋",
-    "script-with-args": "📝",
-    "module": "📚",
-    "flask-api": "🌶️",
-    "cli-app": "🧰",
-    "data-csv": "📈",
-    "async-fetch": "🛰️",
-    "pytest-suite": "🧪",
-}
-
-
 def _pick_label(template: Template, locale: Locale) -> str:
-    emoji = _PICK_EMOJI.get(template.key, "✦")
-    return f"{emoji} {_title(template, locale)}"
+    """The pick button: the template's own icon and title."""
+    return f"{_icon(template, locale)} {_title(template, locale)}"
 
 
 # -- A. the list --------------------------------------------------------------
 def list_screen(ws_id: WorkspaceId | str, locale: Locale) -> Screen:
-    """The template catalog: the house header, then one block per template.
+    """The template catalog: the house header, then one line per template.
 
-    One block per subject (never a table): a bold title and one sentence, then
-    the templates' own buttons two to a row, each landing on the confirmation.
+    One short intro line, then each template on its own line (icon + title, no
+    description), so the screen stays quiet. The description lives on the
+    confirmation, where a user actually needs it.
     """
     ws = _ws_of(ws_id)
     doc = RichDoc(locale)
@@ -105,8 +107,7 @@ def list_screen(ws_id: WorkspaceId | str, locale: Locale) -> Screen:
     doc.p(catalog.t("tpl.list.intro", locale))
 
     for template in catalog_templates.TEMPLATES:
-        doc.p(bold(f"✦ {_title(template, locale)}"))
-        doc.p(_detail(template, locale))
+        doc.p(f"{_icon(template, locale)} {_title(template, locale)}")
 
     rows: list[list] = []
     pick_row: list = []
@@ -137,12 +138,12 @@ def confirm_screen(
 ) -> Screen:
     """Name the template, list every path, and create only when nothing collides.
 
-    ``conflicts`` are the target paths that already exist; a non-empty set means
-    nothing will be written, and the create button is disabled rather than
+    ``conflicts`` are the target folders that already exist; a non-empty set
+    means nothing will be written, and the create button is disabled rather than
     offering an overwrite this task deliberately does not have.
     """
     ws = _ws_of(ws_id)
-    paths = catalog_templates.paths(template)
+    paths = catalog_templates.relative_paths(template)
     doc = RichDoc(locale)
 
     doc.h(2, f"📦 {_title(template, locale)}")
@@ -192,7 +193,7 @@ def done_created(
                 "tpl.done.created_body",
                 locale,
                 count=format_count("count.files", len(written), locale),
-                root="<code>/</code>",
+                root=f"<code>{_path(catalog_templates.template_root(template.key))}</code>",
             )
         )
     )
@@ -283,6 +284,11 @@ def _reason(error_code: str, locale: Locale) -> str:
 
 
 def _path(path: str) -> str:
+    """Escape a path; template paths are shown as the user sees them on disk.
+
+    The domain composes workspace-absolute paths (``/hello/hello.py``) for the
+    engine; the screen shows the folder-relative form (``hello/hello.py``).
+    """
     from cloudbot.presentation.rich.tags import esc
 
-    return esc(path)
+    return esc(path.lstrip("/"))

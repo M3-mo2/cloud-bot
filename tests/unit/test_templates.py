@@ -1,16 +1,20 @@
-"""TASK python-templates — the starter catalog, the write path and the bite.
+"""TASK python-templates + TASK template-folders — the catalog, the folder rule and the bite.
 
-Covers the four claims the task makes testable:
+Covers the claims the tasks make testable:
 
 1. **Internal consistency** — every template's files are runnable as written:
-   every path is relative and inside the root, every non-stdlib import names a
-   dependency its README mentions, every local import names a file the template
-   creates, and a README exists.
-2. **Exact writes** — the create flow writes exactly the declared paths and
-   nothing else (measured against the paths the engine received).
-3. **The bite** — a template whose file already exists refuses and writes
-   **zero** files; removing the collision check makes the guard fail.
-4. **Entry point** — the workspace screen carries the templates button, its
+   every declared path is relative to the template folder, every non-stdlib
+   import names a dependency its README mentions, every local import names a
+   file the template creates, and a README exists.
+2. **The folder rule** — every template writes under a directory named after its
+   key, and ``template_root`` refuses a key or file path that could escape the
+   workspace (``../``, an absolute path, a key with a slash).
+3. **Exact writes** — the create flow writes exactly the composed paths (the
+   folder prefix plus the declared path) and nothing else.
+4. **Coexistence and the bite** — two *different* templates in one workspace both
+   succeed; without the folder prefix the second collides on ``README.md``. The
+   *same* template twice still refuses, and names the folder.
+5. **Entry point** — the workspace screen carries the templates button, its
    callback is routable, and the label is unique across every screen.
 
 The three result screens (created / refused / failed) are locked as goldens by
@@ -67,6 +71,44 @@ def test_every_path_is_relative_and_inside_the_root(template):
         parts = path.split("/")
         assert ".." not in parts, f"parent escape {path!r} in {template.key}"
         assert "" not in parts, f"empty segment in {path!r}"
+
+
+def test_every_key_is_a_safe_directory_name():
+    """A key names a folder: lowercase, hyphenated, one segment, never a path."""
+    for key in tpl.keys():
+        assert tpl.template_root(key) == key
+        assert key == key.lower()
+        assert "/" not in key and key not in (".", "..")
+
+
+@pytest.mark.parametrize("bad_key", ["Hello", "../escape", "a/b", "/abs", "a.b", "", "a_b"])
+def test_template_root_refuses_a_key_that_could_be_a_path(bad_key):
+    with pytest.raises(ValueError):
+        tpl.template_root(bad_key)
+
+
+@pytest.mark.parametrize(
+    "bad_path",
+    ["../escape.py", "/abs.py", "a//b.py", "./x.py", ""],
+)
+def test_template_relative_path_refuses_a_path_that_could_escape(bad_path):
+    template = tpl.by_key("hello")
+    assert template is not None
+    with pytest.raises(ValueError):
+        tpl.template_relative_path(template, tpl.TemplateFile(path=bad_path, content=""))
+
+
+@pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
+def test_every_composed_path_starts_with_the_key_folder(template):
+    """The composed path is ``<key>/<declared path>`` — always inside the workspace."""
+    for file, relative, absolute in zip(
+        template.files, template.relative_paths(), template.paths()
+    ):
+        assert relative == f"{template.key}/{file.path}"
+        assert absolute == f"/{template.key}/{file.path}"
+        assert not relative.startswith("/")
+        assert ".." not in relative.split("/")
+        assert absolute.startswith("/" + template.key + "/")
 
 
 @pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
@@ -131,12 +173,14 @@ def test_a_dependency_free_template_really_runs(key, tmp_path):
 
     template = tpl.by_key(key)
     assert template is not None
+    # Write into the template's own folder — the layout the bot actually creates.
+    project = tmp_path / template.key
     for file in template.files:
-        target = tmp_path / file.path
+        target = project / file.path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(file.content, encoding="utf-8")
     result = subprocess.run(
-        [sys.executable, *_RUNNABLE[key]], cwd=tmp_path, capture_output=True, text=True
+        [sys.executable, *_RUNNABLE[key]], cwd=project, capture_output=True, text=True
     )
     assert result.returncode == 0, (key, result.stdout, result.stderr)
 
@@ -218,6 +262,63 @@ async def test_the_create_flow_writes_exactly_the_declared_paths_and_nothing_els
         assert len(received) == len(tpl.paths(template)), "a path was written twice"
 
 
+async def test_two_different_templates_both_succeed_and_nothing_is_overwritten():
+    """Two starters side by side: their trees are disjoint, so both creates land.
+
+    Bite: this is exactly what the folder prefix buys. The next test composes the
+    same paths *without* the prefix and proves the second create collides on
+    ``README.md`` — so removing the rule makes coexistence impossible.
+    """
+    engine = FakeEngine()
+    ws = await _clean_workspace(engine)
+    service = _service(engine)
+
+    hello = tpl.by_key("hello")
+    suite = tpl.by_key("pytest-suite")
+    assert hello is not None and suite is not None
+
+    for template in (hello, suite):
+        writes = [
+            FileWrite(path=tpl.template_path(template, f), content=f.content)
+            for f in template.files
+        ]
+        result = await service.create_many(TG, ws.id, writes, folder="/" + template.key)
+        assert result.ok, (template.key, result)
+
+    hello_paths = set(hello.paths())
+    suite_paths = set(suite.paths())
+    assert hello_paths.isdisjoint(suite_paths), hello_paths & suite_paths
+    page = await engine.list_files(ws.id, "/")
+    landed = {e.path for e in page.entries}
+    assert hello_paths | suite_paths <= landed
+    # No file was overwritten: both READMEs exist on their own paths.
+    assert "/hello/README.md" in landed and "/pytest-suite/README.md" in landed
+
+
+async def test_without_the_folder_prefix_the_second_template_collides():
+    """The bite, demonstrated: drop the prefix and hello blocks pytest-suite.
+
+    This is the failure the folder rule removes — the second create is refused on
+    ``/README.md``, which both templates ship. If the rule were reverted, the test
+    above would fail the same way.
+    """
+    engine = FakeEngine()
+    ws = await _clean_workspace(engine)
+    service = _service(engine)
+
+    hello = tpl.by_key("hello")
+    suite = tpl.by_key("pytest-suite")
+    assert hello is not None and suite is not None
+
+    # The old, folder-less composition.
+    first = [FileWrite(path="/" + f.path, content=f.content) for f in hello.files]
+    second = [FileWrite(path="/" + f.path, content=f.content) for f in suite.files]
+    assert (await service.create_many(TG, ws.id, first)).ok
+    with pytest.raises(TemplatePathsExist) as exc:
+        await service.create_many(TG, ws.id, second)
+    assert "/README.md" in exc.value.paths
+
+
 # ---------------------------------------------------------------------------
 # 3. the bite — a collision refuses and writes zero files
 # ---------------------------------------------------------------------------
@@ -228,8 +329,10 @@ async def test_a_collision_refuses_and_writes_zero_files():
 
     template = tpl.by_key("hello")
     assert template is not None
-    # A user's own file already occupies one of the template's paths.
-    await engine.write_file(ws.id, "/hello.py", "print('mine')\n")
+    # The template's folder already exists (the user has a starter called hello),
+    # which is the one thing that makes a re-create a refusal.
+    await engine.mkdir(ws.id, "/hello")
+    await engine.write_file(ws.id, "/hello/hello.py", "print('mine')\n")
 
     received: list[str] = []
     original = engine.write_file
@@ -245,13 +348,13 @@ async def test_a_collision_refuses_and_writes_zero_files():
         for f in template.files
     ]
     with pytest.raises(TemplatePathsExist) as exc:
-        await service.create_many(TG, ws.id, writes)
+        await service.create_many(TG, ws.id, writes, folder="/hello")
 
-    assert "/hello.py" in exc.value.paths
+    assert exc.value.paths == ("/hello",), exc.value.paths
     assert received == [], "the refusal wrote a file"
     # The user's file is untouched.
     page = await engine.list_files(ws.id, "/")
-    mine = [e for e in page.entries if e.path == "/hello.py"]
+    mine = [e for e in page.entries if e.path == "/hello/hello.py"]
     assert mine and mine[0].size == len("print('mine')\n")
 
 
@@ -267,19 +370,22 @@ async def test_the_collision_guard_is_load_bearing():
     service = _service(engine)
     template = tpl.by_key("hello")
     assert template is not None
-    await engine.write_file(ws.id, "/hello.py", "print('mine')\n")
+    await engine.mkdir(ws.id, "/hello")
+    await engine.write_file(ws.id, "/hello/hello.py", "print('mine')\n")
 
     async def no_collisions(*_args, **_kwargs):
         return []
 
+    # Both halves of the guard are removed: the folder probe and the file probe.
     service.existing = no_collisions  # type: ignore[assignment]
+    service.folder_conflicts = no_collisions  # type: ignore[assignment]
 
     writes = [
         FileWrite(path=tpl.template_path(template, f), content=f.content)
         for f in template.files
     ]
-    result = await service.create_many(TG, ws.id, writes)
-    assert result.ok and "/hello.py" in result.written  # the bite: it overwrote
+    result = await service.create_many(TG, ws.id, writes, folder="/hello")
+    assert result.ok and "/hello/hello.py" in result.written  # the bite: it overwrote
 
 
 async def test_a_partial_engine_refusal_is_reported_honestly():
@@ -393,29 +499,72 @@ def test_the_failed_screen_never_prints_the_raw_engine_message(locale):
         template,
         "ws_x",
         locale,
-        failed_path="/README.md",
+        failed_path="/flask-api/README.md",
         error_code="insufficient_storage",
-        written=("/app.py",),
+        written=("/flask-api/app.py",),
         engine_message="internal detail a user must never see",
     ).doc.html
     assert "internal detail a user must never see" not in html
     assert catalog.t("err.insufficient_storage", locale) in html
-    # Partial state is stated, not implied.
-    assert "/app.py" in html
+    # Partial state is stated, not implied, with the path the user sees on disk.
+    assert "flask-api/app.py" in html
 
 
 @pytest.mark.parametrize("locale", LOCALES)
-def test_the_list_is_one_block_per_template_and_never_a_table(locale):
+def test_the_list_is_one_line_per_template_and_never_a_table(locale):
+    """His rule: the templates screen carries no long copy.
+
+    Each template is **one** paragraph (icon + title); its description belongs to
+    the confirmation, where a user actually needs it. A known description is
+    asserted absent here and present there.
+    """
     from cloudbot.presentation.screens import templates as tpl_screens
 
     screen = tpl_screens.list_screen("ws_x", locale)
     html = screen.doc.html
     assert "<table" not in html, "the template list must not be a table"
+
+    # One paragraph per template, and nothing else beyond header + intro.
     for template in tpl.TEMPLATES:
-        assert catalog.t(template.title_key, locale) in html
-        assert catalog.t(template.detail_key, locale) in html
+        title = catalog.t(template.title_key, locale)
+        icon = catalog.t(f"{template.title_key.rsplit('.', 1)[0]}.icon", locale)
+        assert f"<p>{icon} {title}</p>" in html, (template.key, locale)
+        assert catalog.t(template.detail_key, locale) not in html, (
+            f"the list still prints {template.key}'s description"
+        )
+
     # The header is the house shape: ✦ label ⟸ count.
     assert "⟸" in html
+
+    # The description is exactly where it is needed: the confirmation.
+    hello = tpl.by_key("hello")
+    assert hello is not None
+    confirm = tpl_screens.confirm_screen(hello, "ws_x", locale).doc.html
+    assert catalog.t(hello.detail_key, locale) in confirm
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_the_list_intro_is_a_single_line(locale):
+    """The intro is one line, not three (his "too much text" complaint)."""
+    from cloudbot.presentation.screens import templates as tpl_screens
+
+    intro = catalog.t("tpl.list.intro", locale)
+    assert "\n" not in intro
+    assert intro.count(".") <= 1, intro
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_the_confirm_screen_lists_folder_relative_paths(locale):
+    """Every path on the confirmation starts with ``<key>/`` — what disk shows."""
+    from cloudbot.presentation.screens import templates as tpl_screens
+
+    for template in tpl.TEMPLATES:
+        html = tpl_screens.confirm_screen(template, "ws_x", locale).doc.html
+        for relative in template.relative_paths():
+            assert relative.startswith(template.key + "/"), relative
+            assert f"<code>{relative}</code>" in html, (template.key, relative, locale)
+        # The workspace-absolute form (a leading slash) is not what a user reads.
+        assert f"<code>/{template.key}/" not in html
 
 
 @pytest.mark.parametrize("locale", LOCALES)
@@ -506,14 +655,14 @@ async def test_the_flow_creates_the_declared_files_end_to_end():
         assert catalog.t("tpl.list.title", Locale.EN) in bot.sent[-1]
 
         await dispatcher.feed_update(bot, _callback(2, TG, cb("tpl:pick", "hello", ws.id)))
-        assert "/hello.py" in bot.sent[-1]
+        assert "hello/hello.py" in bot.sent[-1]
         # Nothing written yet — pick only confirms.
-        assert bot.sent and "/hello.py" in bot.sent[-1]
+        assert bot.sent and "hello/hello.py" in bot.sent[-1]
 
         await dispatcher.feed_update(bot, _callback(3, TG, cb("tpl:confirm", "hello", ws.id)))
         template = tpl.by_key("hello")
         assert template is not None
-        page = await container.engine.list_files(ws.id, "/")
+        page = await container.engine.list_files(ws.id, "/hello")
         landed = {e.path for e in page.entries}
         assert landed == set(tpl.paths(template)), landed
         assert catalog.t("tpl.done.created_title", Locale.EN) in bot.sent[-1]
@@ -521,21 +670,72 @@ async def test_the_flow_creates_the_declared_files_end_to_end():
         await container.aclose()
 
 
-async def test_a_template_never_overwrites_an_existing_file_end_to_end():
+async def test_two_different_templates_coexist_in_one_workspace():
+    """The whole point: hello and pytest-suite side by side, nothing overwritten.
+
+    Bite: remove the folder prefix and this fails on ``README.md`` — the second
+    create would collide with the first one's file.
+    """
     container, ws, bot, dispatcher = await _harness()
     try:
-        await container.engine.write_file(ws.id, "/hello.py", "print('mine')\n")
+        await dispatcher.feed_update(bot, _callback(1, TG, cb("tpl:confirm", "hello", ws.id)))
+        hello = tpl.by_key("hello")
+        assert hello is not None
+        hello_page = await container.engine.list_files(ws.id, "/hello")
+        hello_paths = {e.path for e in hello_page.entries}
+        assert hello_paths == set(tpl.paths(hello)), hello_paths
+
+        await dispatcher.feed_update(
+            bot, _callback(2, TG, cb("tpl:confirm", "pytest-suite", ws.id))
+        )
+        suite = tpl.by_key("pytest-suite")
+        assert suite is not None
+        suite_page = await container.engine.list_files(ws.id, "/pytest-suite")
+        suite_paths = {e.path for e in suite_page.entries}
+        assert suite_paths == set(tpl.paths(suite)), suite_paths
+
+        # Both trees still hold their own README, and the root has no loose file.
+        for path in hello_paths | suite_paths:
+            assert (await container.engine.stat_file(ws.id, path)).path == path
+        root = await container.engine.list_files(ws.id, "/")
+        loose = {e.path for e in root.entries}
+        assert "/README.md" not in loose, loose
+        assert "/hello.py" not in loose and "/hello/hello.py" in (hello_paths | set()), loose
+    finally:
+        await container.aclose()
+
+
+async def test_the_same_template_twice_refuses_on_the_folder():
+    """The guard is not lost: a second hello is refused, and it names the folder."""
+    container, ws, bot, dispatcher = await _harness()
+    try:
+        await dispatcher.feed_update(bot, _callback(1, TG, cb("tpl:confirm", "hello", ws.id)))
+        assert catalog.t("tpl.done.created_title", Locale.EN) in bot.sent[-1]
+
+        await dispatcher.feed_update(bot, _callback(2, TG, cb("tpl:confirm", "hello", ws.id)))
+        assert catalog.t("tpl.done.refused_title", Locale.EN) in bot.sent[-1]
+        assert "<code>hello</code>" in bot.sent[-1]
+    finally:
+        await container.aclose()
+
+
+async def test_a_template_never_overwrites_an_existing_folder_end_to_end():
+    container, ws, bot, dispatcher = await _harness()
+    try:
+        await container.engine.mkdir(ws.id, "/hello")
+        await container.engine.write_file(ws.id, "/hello/hello.py", "print('mine')\n")
 
         # The confirmation already flags the collision (the create button is muted).
         await dispatcher.feed_update(bot, _callback(1, TG, cb("tpl:pick", "hello", ws.id)))
         assert catalog.t("tpl.confirm.nothing_written", Locale.EN) in bot.sent[-1]
+        assert "<code>hello</code>" in bot.sent[-1]
 
         # Confirming anyway refuses and writes nothing.
         await dispatcher.feed_update(bot, _callback(2, TG, cb("tpl:confirm", "hello", ws.id)))
         assert catalog.t("tpl.done.refused_title", Locale.EN) in bot.sent[-1]
-        page = await container.engine.list_files(ws.id, "/")
-        hello = [e for e in page.entries if e.path == "/hello.py"]
+        page = await container.engine.list_files(ws.id, "/hello")
+        hello = [e for e in page.entries if e.path == "/hello/hello.py"]
         assert hello and hello[0].size == len("print('mine')\n")
-        assert not any(e.path == "/README.md" for e in page.entries)
+        assert not any(e.path == "/hello/README.md" for e in page.entries)
     finally:
         await container.aclose()

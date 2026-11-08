@@ -7469,7 +7469,7 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -7477,15 +7477,15 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -15009,7 +15009,7 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -15017,15 +15017,15 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -16329,7 +16329,7 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -16337,15 +16337,15 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -16897,7 +16897,7 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 📦 Starter templates → `tpl:list` → tpl_list
     - **tpl_list** — (no title)
-      - 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module
           - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
             - … `tpl_done_created` at depth 6 (not expanded)
@@ -16919,15 +16919,15 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
@@ -17822,7 +17822,7 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 📦 Starter templates → `tpl:list` → tpl_list
     - **tpl_list** — (no title)
-      - 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module
           - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
             - … `tpl_done_created` at depth 6 (not expanded)
@@ -17844,15 +17844,15 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
@@ -18579,7 +18579,7 @@ _No screen is rendered by this command._
             - ↩ `ws_detail_suspended` (already on this path)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -18587,15 +18587,15 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -18919,8 +18919,8 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **terminal_view_failed** —“➕ New terminal”→ **terminal_view_running** —“Ctrl-C”→ **terminal_view_failed** (**unobvious**)
 - **terminal_view_failed** —“➕ New terminal”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_failed** (**unobvious**)
 - **terminal_view_running** —“Ctrl-C”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_running** (**unobvious**)
-- **tpl_confirm** —“✅ Create the files”→ **tpl_list** —“✦ Command-line tool”→ **tpl_confirm** (**unobvious**)
-- **tpl_confirm_conflict** —“✅ Create the files”→ **tpl_list** —“✦ Command-line tool”→ **tpl_confirm_conflict** (**unobvious**)
+- **tpl_confirm** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm** (**unobvious**)
+- **tpl_confirm_conflict** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm_conflict** (**unobvious**)
 - **tpl_list** —“⬅️ Back”→ **ws_detail** —“📦 Starter templates”→ **tpl_list** (expected (back/affordance))
 - **tpl_list** —“⬅️ Back”→ **ws_detail_more** —“📦 Starter templates”→ **tpl_list** (expected (back/affordance))
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_list** —“🗑 Remove 8080”→ **tunnel_already_published** (**unobvious**)
@@ -20015,11 +20015,11 @@ _Simple script_
 
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
-- 👋 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 📚 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🌶️ Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- ✦ Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list

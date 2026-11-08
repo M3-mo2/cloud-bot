@@ -1,4 +1,16 @@
-"""File browser, file view, and file action screens."""
+"""File browser, file view, and file action screens.
+
+The browser is a **tree**, not a table: the open folder is named in the header
+and its immediate children are drawn as indented, branch-glyphed lines, each with
+its own button **inside the message body** (Bot API 10.3 blocks). The old
+three-column table is gone — in a right-to-left message its numbers drifted away
+from their headers, which is exactly why the house rule forbids it.
+
+The tree is deliberately **one level deep**: it shows the current directory and
+its immediate children. A recursive walk of a workspace can be thousands of
+entries and would neither render nor be useful; deeper levels are reached by
+tapping the folder (hard rule 6 in TASK file-tree).
+"""
 
 from __future__ import annotations
 
@@ -12,14 +24,20 @@ from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
 from cloudbot.presentation.keyboards.styles import Intent
 from cloudbot.presentation.pagination import PAGE_SIZE as _PAGE_SIZE
-from cloudbot.presentation.pagination import footer as _footer
-from cloudbot.presentation.pagination import pager_rows as _pager_rows
 from cloudbot.presentation.pagination import total_pages_for as _total_pages_for
 from cloudbot.presentation.rich.document import RichDoc
-from cloudbot.presentation.rich.tags import Html, italic
+from cloudbot.presentation.rich.tags import Html, italic, neutralize_bidi
 from cloudbot.presentation.screens.screen import Screen
 
 PAGE_SIZE = _PAGE_SIZE
+
+#: A tree line's own name is elided so a pathological filename cannot push the
+#: size off the line. The **callback keeps the full path** — only the visible
+#: label is shortened.
+MAX_LABEL_CHARS = 24
+
+#: Two buttons per row, as TASK file-tree draws it.
+BUTTON_COLUMNS = 2
 
 
 def _num(value: int, locale: Locale) -> str:
@@ -50,6 +68,75 @@ def _type_label(entry: FileEntry, locale: Locale) -> str:
     return catalog.t("file.type.file", locale)
 
 
+def _ordered(entries: tuple[FileEntry, ...]) -> list[FileEntry]:
+    """Folders first, then files, each group sorted by name.
+
+    A user looking for a folder should not have to scan past twenty files; that
+    is the whole reason the rule is written down. The engine already sorts this
+    way, but the screen owns the guarantee because it owns the layout.
+    """
+    folders = sorted((e for e in entries if e.type == "dir"), key=lambda e: e.name.casefold())
+    files = sorted((e for e in entries if e.type != "dir"), key=lambda e: e.name.casefold())
+    return folders + files
+
+
+def _tree_line(entry: FileEntry, branch: str, locale: Locale) -> str:
+    """One tree line: branch glyph, icon, name (folders get ``/``), then size."""
+    name = neutralize_bidi(entry.name)
+    if entry.type == "dir":
+        return f"{branch}{_icon(entry)} {name}/"
+    size = format_bytes(entry.size, locale) if entry.size is not None else "—"
+    return f"{branch}{_icon(entry)} {name} · {size}"
+
+
+def _tree_text(entries: list[FileEntry], locale: Locale) -> str:
+    lines: list[str] = []
+    last = len(entries) - 1
+    for index, entry in enumerate(entries):
+        branch = "└── " if index == last else "├── "
+        lines.append(_tree_line(entry, branch, locale))
+    return "\n".join(lines)
+
+
+def _label(entry: FileEntry) -> str:
+    """The button label: the entry's own name, elided when it is very long.
+
+    The label carries the name so a user can tell which row is which — that was
+    the complaint about the old keyboard, where four rows of identical buttons
+    could not be told apart. Only the label is truncated; the callback is not.
+    """
+    name = entry.name
+    if len(name) > MAX_LABEL_CHARS:
+        name = name[: MAX_LABEL_CHARS - 1] + "…"
+    if entry.type == "dir":
+        name += "/"
+    return f"{_icon(entry)} {name}"
+
+
+def entry_action(entry: FileEntry, ws_id: WorkspaceId) -> str:
+    """The callback an entry's own button emits: ``file:cd`` / ``file:view``.
+
+    A folder navigates into itself; a file opens its view. These are exactly the
+    actions the old keyboard emitted, so the routing layer is untouched.
+    """
+    verb = "file:cd" if entry.type == "dir" else "file:view"
+    return _cb(verb, ws_id, entry.path)
+
+
+def _entry_buttons(entries: list[FileEntry], ws_id: WorkspaceId) -> list[list[tuple[str, str, str | None]]]:
+    """One button per entry, two to a row, each reaching that entry's action."""
+    rows: list[list[tuple[str, str, str | None]]] = []
+    row: list[tuple[str, str, str | None]] = []
+    for entry in entries:
+        row.append((_label(entry), entry_action(entry, ws_id), "primary"))
+        if len(row) == BUTTON_COLUMNS:
+            rows.append(row)
+            row = []
+    if row:
+        rows.append(row)
+    return rows
+
+
 def file_browser(
     page: FilePage,
     ws_id: WorkspaceId,
@@ -57,79 +144,78 @@ def file_browser(
     *,
     page_index: int = 0,
 ) -> Screen:
-    doc = RichDoc(locale)
-    doc.h(2, catalog.t("file.title", locale))
-    doc.p(_raw(f"<code>{page.path}</code>"))
-    doc.div()
+    """The open folder as a tree, with each entry's button in the body beside it.
 
-    if not page.entries:
-        doc.p(catalog.t("file.empty", locale))
+    Builds entirely in **blocks**: ``InputRichMessage`` allows either html or
+    blocks, never both, and an in-body callback button exists only in the blocks
+    form (Telegram refuses ``<tg-button callback_data=...>`` in html). Mixing the
+    two would silently drop content, so ``RichDoc.build()`` raises on it.
+    """
+    doc = RichDoc(locale)
+    rule = catalog.t("ws.head.rule", locale)
+    title = catalog.t("file.title", locale).replace("📁 ", "")
+
+    doc.paragraph(rule)
+    doc.heading(f"✦ {title} ⟸ {neutralize_bidi(page.path)}", size=2)
+    doc.paragraph(rule)
+
+    entries = _ordered(page.entries)
+    if not entries:
+        doc.paragraph(catalog.t("file.empty", locale))
     else:
-        rows = []
-        for entry in page.entries:
-            size = format_bytes(entry.size, locale) if entry.size is not None else "—"
-            rows.append(
-                [
-                    _raw(f"{_icon(entry)} <code>{_esc(entry.name)}</code>"),
-                    _type_label(entry, locale),
-                    size,
-                ]
-            )
-        doc.table(
-            [
-                catalog.t("file.column.name", locale),
-                catalog.t("file.column.type", locale),
-                catalog.t("file.column.size", locale),
-            ],
-            rows,
-        )
+        # A preformatted block keeps the branch glyphs on their own lines. Plain
+        # paragraph text is RichText, not html, so nothing here is escaped markup.
+        doc.pre_block(_tree_text(entries, locale))
+        for row in _entry_buttons(entries, ws_id):
+            doc.buttons(row)
+
         total_pages = _total_pages_for(page.total)
-        doc.p(
-            _footer(
-                page_index,
-                total_pages,
+        nav_row: list[tuple[str, str, str | None]] = []
+        if page_index > 0:
+            nav_row.append(
+                (
+                    catalog.t("common.previous", locale),
+                    _cb("file:ls", ws_id, page_index - 1),
+                    "primary",
+                )
+            )
+        if page_index + 1 < total_pages:
+            nav_row.append(
+                (
+                    catalog.t("common.next", locale),
+                    _cb("file:ls", ws_id, page_index + 1),
+                    "primary",
+                )
+            )
+        if nav_row:
+            doc.buttons(nav_row, align="center")
+        doc.footer(
+            catalog.t(
+                "file.footer",
                 locale,
-                key="file.footer",
                 count=_num(page.total, locale),
+                page=_num(page_index + 1, locale),
+                total=_num(total_pages, locale),
             )
         )
     if page.truncated:
-        doc.p(catalog.t("file.truncated", locale))
+        doc.paragraph(catalog.t("file.truncated", locale))
 
     return Screen(doc=doc, markup=file_browser_markup(page, ws_id, locale, page_index=page_index))
 
 
 def file_browser_markup(page: FilePage, ws_id: WorkspaceId, locale: Locale, *, page_index: int = 0):
+    """The keyboard: the actions that are not entries.
+
+    The per-entry navigation moved **into the body** (``file_browser``), so this
+    keyboard no longer repeats the listing. What remains is the folder's own
+    tools and the way out. The parent-folder button is kept near the bottom so it
+    is never the first thing a thumb hits.
+    """
     path = page.path
     rows: list[list] = []
-
-    # Breadcrumbs. R1: the current directory is the screen you are already on,
-    # so it is omitted, never a muted button — that muted entry also duplicated
-    # the home destination in the empty root-level listing.
-    crumbs = _breadcrumbs(path)
-    crumb_row = [inline(catalog.t("file.home", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY)]
-    for label, target in crumbs:
-        crumb_row.append(inline(label, _cb("file:cd", ws_id, target), intent=Intent.PRIMARY))
-    rows.append(crumb_row)
-
-    for entry in page.entries:
-        if entry.type == "dir":
-            rows.append(
-                [inline(f"📁 {entry.name}", _cb("file:cd", ws_id, entry.path), intent=Intent.PRIMARY)]
-            )
-        else:
-            rows.append(
-                [inline(f"📄 {entry.name}", _cb("file:view", ws_id, entry.path), intent=Intent.PRIMARY)]
-            )
-
     rows.append([inline(catalog.t("file.upload", locale), _cb("file:upload", ws_id, path), intent=Intent.SUCCESS)])
     rows.append([inline(catalog.t("file.new_folder", locale), _cb("file:mkdir", ws_id, path), intent=Intent.PRIMARY)])
-    rows += _pager_rows(
-        page_index,
-        _total_pages_for(page.total),
-        lambda target: _cb("file:ls", ws_id, target),
-        locale,
-    )
     if path != "/":
         rows.append([inline(catalog.t("file.up", locale), _cb("file:cd", ws_id, _parent(path)), intent=Intent.PRIMARY)])
     rows.append([inline(catalog.t("file.workspace", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])

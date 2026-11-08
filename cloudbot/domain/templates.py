@@ -14,11 +14,17 @@ Rules this catalog keeps (TASK python-templates):
 * Every file is **runnable as written**: no import of a module the template does
   not create, no placeholder that raises, no ``../`` or absolute file path.
 * Every template ships a short ``README.md``: what it is, how to run it.
-* Paths are relative to the workspace root and always stay inside it.
+* Each template writes into **its own folder**, named after its ``key``, so two
+  different starters can live in one workspace side by side. The declared
+  ``TemplateFile.path`` values stay relative to that folder; one function
+  (:func:`template_relative_path`) composes the final path.
+* A ``key`` is ``[a-z][a-z0-9-]*`` — it names a directory, so a key that could be
+  a path (a slash, ``..``, an absolute path) is refused.
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 __all__ = [
@@ -28,8 +34,14 @@ __all__ = [
     "by_key",
     "keys",
     "paths",
+    "relative_paths",
     "template_path",
+    "template_relative_path",
+    "template_root",
 ]
+
+#: A key is a single lowercase path segment; it becomes a directory name.
+_KEY_RE = re.compile(r"[a-z][a-z0-9-]*\Z")
 
 #: The profile a template applies to. The engine's ``/v1/meta`` default profile.
 TEMPLATE_PROFILE = "python"
@@ -37,7 +49,7 @@ TEMPLATE_PROFILE = "python"
 
 @dataclass(frozen=True)
 class TemplateFile:
-    """One file a template writes, ``path`` relative to the workspace root."""
+    """One file a template writes, ``path`` relative to the template's folder."""
 
     path: str
     content: str
@@ -58,16 +70,50 @@ class Template:
     notes_key: str
 
     def paths(self) -> tuple[str, ...]:
-        return tuple(f.path for f in self.files)
+        """Every workspace-absolute path this template writes, in order."""
+        return tuple(template_path(self, f) for f in self.files)
+
+    def relative_paths(self) -> tuple[str, ...]:
+        """Every path as the user sees it on disk (``hello/hello.py``)."""
+        return tuple(template_relative_path(self, f) for f in self.files)
+
+
+def template_root(key: str) -> str:
+    """The folder a template owns: its ``key``, validated as one path segment.
+
+    The key names a directory, so a value that is not ``[a-z][a-z0-9-]*`` — a
+    slash, a leading dot, an absolute path, ``..`` — is refused here rather than
+    becoming a path the engine would have to reject later.
+    """
+    if not _KEY_RE.match(key):
+        raise ValueError(f"invalid template key: {key!r}")
+    return key
+
+
+def template_relative_path(template: Template, file: TemplateFile) -> str:
+    """The path a user sees on disk: the template folder plus the file path.
+
+    This is the one place the folder prefix is composed, so the catalog keeps
+    readable template-relative paths and the screen and the write cannot
+    disagree.
+    """
+    root = template_root(template.key)
+    path = file.path
+    if not path or path.startswith("/"):
+        raise ValueError(f"invalid template file path: {path!r} in {template.key!r}")
+    parts = path.split("/")
+    if any(part in ("", ".", "..") for part in parts):
+        raise ValueError(f"invalid template file path: {path!r} in {template.key!r}")
+    return f"{root}/{path}"
 
 
 def template_path(template: Template, file: TemplateFile) -> str:
     """The workspace-absolute path for ``file`` (root is ``/``).
 
-    A template's paths are relative; this is the one place the leading ``/`` is
-    added, so the screen and the write path cannot disagree.
+    Composed from :func:`template_relative_path`, so the folder rule is owned by
+    exactly one function; the leading ``/`` is added only here.
     """
-    return "/" + file.path
+    return "/" + template_relative_path(template, file)
 
 
 def _f(path: str, content: str) -> TemplateFile:
@@ -574,4 +620,9 @@ def by_key(key: str) -> Template | None:
 
 def paths(template: Template) -> tuple[str, ...]:
     """Every workspace-absolute path ``template`` will write, in order."""
-    return tuple(template_path(template, f) for f in template.files)
+    return template.paths()
+
+
+def relative_paths(template: Template) -> tuple[str, ...]:
+    """Every path as the user sees it on disk (``hello/hello.py``), in order."""
+    return template.relative_paths()

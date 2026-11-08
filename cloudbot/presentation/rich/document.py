@@ -183,6 +183,17 @@ class RichDoc:
         self._blocks.append(InputRichBlockSectionHeading(text=text, size=max(1, min(6, size))))
         return self
 
+    def pre_block(self, text: str, language: str | None = None) -> "RichDoc":
+        """A preformatted block (a fixed-width body) — the blocks form of <pre>.
+
+        Used where alignment is the content: a tree's branch glyphs only line up
+        in a fixed-width block, and block paragraph text has no line breaks.
+        """
+        from aiogram.types import InputRichBlockPreformatted
+
+        self._blocks.append(InputRichBlockPreformatted(text=text, language=language))
+        return self
+
     def footer(self, text: str) -> "RichDoc":
         from aiogram.types import InputRichBlockFooter
 

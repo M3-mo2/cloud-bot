@@ -1069,21 +1069,21 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
         _template("module"), f["ws"].id, loc
     ),
     "tpl_confirm_conflict": lambda f, loc: tpl_screens.confirm_screen(
-        _template("hello"), f["ws"].id, loc, conflicts=["/hello.py"]
+        _template("hello"), f["ws"].id, loc, conflicts=["/hello"]
     ),
     "tpl_done_created": lambda f, loc: tpl_screens.done_created(
         _template("module"), f["ws"].id, loc, tpl_templates.paths(_template("module"))
     ),
     "tpl_done_refused": lambda f, loc: tpl_screens.done_refused(
-        _template("hello"), f["ws"].id, loc, ["/hello.py"]
+        _template("hello"), f["ws"].id, loc, ["/hello"]
     ),
     "tpl_done_failed": lambda f, loc: tpl_screens.done_failed(
         _template("flask-api"),
         f["ws"].id,
         loc,
-        failed_path="/README.md",
+        failed_path="/flask-api/README.md",
         error_code="insufficient_storage",
-        written=("/app.py",),
+        written=("/flask-api/app.py",),
         engine_message="disk is full",
     ),
     "file_browser": lambda f, loc: file_screens.file_browser(f["file_page"], f["ws"].id, loc),

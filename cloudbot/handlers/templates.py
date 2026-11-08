@@ -69,7 +69,10 @@ async def on_pick(
     await services.ownership.assert_owned(ctx.tg_id, ws_id)
     from cloudbot.domain import templates as tpl_catalog
 
-    conflicts = await services.files.existing(ctx.tg_id, ws_id, list(tpl_catalog.paths(template)))
+    folder = "/" + tpl_catalog.template_root(template.key)
+    conflicts = await services.files.folder_conflicts(
+        ctx.tg_id, ws_id, folder, list(tpl_catalog.paths(template))
+    )
     await show_screen(
         cb,
         tpl_screens.confirm_screen(template, ws_id, ctx.locale, conflicts=conflicts),
@@ -97,12 +100,13 @@ async def on_confirm(
 
     from cloudbot.domain import templates as tpl_catalog
 
+    folder = "/" + tpl_catalog.template_root(template.key)
     writes = [
         FileWrite(path=tpl_catalog.template_path(template, f), content=f.content)
         for f in template.files
     ]
     try:
-        result = await services.files.create_many(ctx.tg_id, ws_id, writes)
+        result = await services.files.create_many(ctx.tg_id, ws_id, writes, folder=folder)
     except TemplatePathsExist as refused:
         await show_screen(
             cb,

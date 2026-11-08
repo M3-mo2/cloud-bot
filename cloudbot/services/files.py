@@ -25,7 +25,9 @@ class TemplatePathsExist(InvalidInput):
     """A multi-file create was refused because target paths already exist.
 
     Carries the conflicting paths in order so the refusal screen can name every
-    one; nothing was written when this is raised.
+    one; nothing was written when this is raised. A starter template passes its
+    **folder** as the guarded path, so the refusal names the folder rather than
+    one file inside it.
     """
 
     code = "template_paths_exist"
@@ -152,6 +154,22 @@ class FilesService:
                 found.append(path)
         return found
 
+    async def folder_conflicts(
+        self, tg_id: int, ws_id: WorkspaceId, folder: str, paths: list[str]
+    ) -> list[str]:
+        """The template folder if it — or a file inside it — already exists.
+
+        A starter template owns a whole directory, so a collision inside it is
+        still a collision on the folder: the refusal names ``folder`` and never
+        one file within it. A *different* template's folder is untouched, which
+        is what lets two starters coexist.
+        """
+        if await self.exists(tg_id, ws_id, folder):
+            return [folder]
+        if await self.existing(tg_id, ws_id, list(paths)):
+            return [folder]
+        return []
+
     async def create_many(
         self,
         tg_id: int,
@@ -159,6 +177,7 @@ class FilesService:
         files: list[FileWrite],
         *,
         overwrite: bool = False,
+        folder: str | None = None,
     ) -> CreateManyResult:
         """Write several files, refusing the whole set on any collision.
 
@@ -168,6 +187,12 @@ class FilesService:
         ``overwrite=False`` a template can never silently overwrite a user's
         file: nothing is written and no path is touched.
 
+        ``folder`` is for a caller that owns a whole directory (a starter
+        template): the guard then asks about the folder itself **and** any file
+        already inside it, so the one refusal names the folder rather than one
+        file within it. A *different* template writing into its own folder is not
+        a collision. Without ``folder`` the target file paths are the guard.
+
         There is no engine transaction across a set of ``PUT``s, so a refusal
         part-way is reported honestly — ``written`` lists what landed and
         ``failed_path`` / ``error_code`` name where it stopped.
@@ -176,7 +201,12 @@ class FilesService:
         await self._assert_writable(tg_id, ws_id)
 
         if not overwrite:
-            conflicts = await self.existing(tg_id, ws_id, [f.path for f in files])
+            if folder is not None:
+                conflicts = await self.folder_conflicts(
+                    tg_id, ws_id, folder, [f.path for f in files]
+                )
+            else:
+                conflicts = await self.existing(tg_id, ws_id, [f.path for f in files])
             if conflicts:
                 raise TemplatePathsExist(conflicts)
 
