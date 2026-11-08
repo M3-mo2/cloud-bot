@@ -143,10 +143,12 @@ listed below, split into what was fixed in passing and what is left for a human.
   destination.
 * `design.table_width` on `port_list`: five columns. Trimming it drops information.
 * `callbacks.unreachable_handler`: `term:refresh`, `term:resize`, `term:rsz*`,
-  `file:more`, `ws:less`, `arc:result` are routed but never emitted by a screen.
+  `file:more`, `arc:result` are routed but never emitted by a screen.
   Several are compatibility routes for buttons drawn by an older build; deleting
   them needs a decision. `dev:` is emitted only by the dev tool outside the
-  catalogue, so it is exempt by design.
+  catalogue, so it is exempt by design. `ws:less` is no longer on this list: TASK
+  no-more-less deleted the workspace home's disclosure control, and its route with
+  it.
 * `layer.handler_builds_screen`: the admin panel and a few small handlers build
   their own screens. A warning, not an error — a candidate refactor, one screen
   module per report.

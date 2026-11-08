@@ -1065,12 +1065,8 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
         [f["ws"], f["suspended"]], loc, inside=f["ws"]
     ),
     "ws_detail": lambda f, loc: ws_screens.workspace_detail(f["ws"], loc, now=NOW, active_run=True),
-    # The expanded workspace home ("More"): the same screen with its secondary
-    # tools revealed. It is its own catalog state so the flow map cannot claim the
-    # tools behind "More" are unreachable.
-    "ws_detail_more": lambda f, loc: ws_screens.workspace_detail(
-        f["ws"], loc, now=NOW, active_run=False, more=True
-    ),
+    # The workspace home is one flat page with no disclosure control (TASK
+    # no-more-less), so there is no second, expanded variant of it.
     "ws_detail_suspended": lambda f, loc: ws_screens.workspace_detail(f["suspended"], loc, now=NOW),
     "ws_detail_locked": lambda f, loc: ws_screens.workspace_detail(f["locked"], loc, now=NOW),
     "ws_settings": lambda f, loc: ws_screens.workspace_settings(f["ws"], loc),

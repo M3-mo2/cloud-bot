@@ -211,8 +211,6 @@ MESSAGES: dict[str, str] = {
     "ws.head.title": "مساحه عملك",
     "ws.head.since": "يعمل منذ",
     "ws.head.just_now": "<b>قبل قليل</b>",
-    "ws.more": "⋯ المزيد",
-    "ws.less": "⋯ أقل",
     "ws.detail.runs_line": "{total} إجمالًا، {active} نشِط",
     "ws.cpu.cores": "نواة واحدة",
     "ws.cpu.cores_plural": "{n} نوى",

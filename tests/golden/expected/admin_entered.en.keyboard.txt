@@ -1,6 +1,7 @@
 📁 Files [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK4:0] enabled | ▶️ Run [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🗜 Archives [arc:menu:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🖥 Terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
-📜 Runs [run:history:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
-⋯ More [ws:more:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+📜 Runs [run:history:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🐍 Packages [pkg:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+🌐 Public links [tnl:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🔌 Ports [port:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+🧠 Processes [proc:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 📊 Resources [met:view:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 ⚙️ Settings [ws:settings:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🚪 Leave workspace [adm:leave] enabled

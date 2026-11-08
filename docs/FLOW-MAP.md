@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 166 |
-| Screens including the /dev tool | 169 |
-| Button edges | 542 |
-| Distinct destinations (actions) | 140 |
+| Catalog screens | 165 |
+| Screens including the /dev tool | 168 |
+| Button edges | 536 |
+| Distinct destinations (actions) | 138 |
 | Entry commands | 9 |
-| Callback re-entry actions | 140 |
+| Callback re-entry actions | 138 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 261 |
+| Contradictions: two-screen loops | 246 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -40,9 +40,9 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/notifications` | admin_notifications, admin_audit, admin_backup, admin_broadcast, admin_broadcast_open, admin_confirm_delete, admin_confirm_suspend, admin_entered, admin_forcejoin, admin_moderation, admin_moderation_empty, admin_notify_capped, admin_notify_gap, admin_notify_message, admin_overview, admin_overview_unreachable, admin_user, admin_users, admin_users_empty |
 | `/paysupport` | wallet_support |
 | `/settings` | settings, settings_inside |
-| `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 140 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 138 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -119,7 +119,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `nav:noop` | (handler only — no screen) |
 | `nav:refresh` | menu, menu_empty, menu_inside |
 | `nav:settings` | settings, settings_inside |
-| `origin:back` | exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside |
+| `origin:back` | exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside |
 | `pay:buy` | wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans |
 | `pay:history` | wallet_history, wallet_history_empty, wallet_history_page_2 |
 | `pay:pack` | wallet_packs |
@@ -169,23 +169,21 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `ws:continue` | ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used |
 | `ws:delete` | ws_list, ws_list_empty, ws_list_inside |
 | `ws:delete_confirm` | ws_delete_confirm |
-| `ws:home` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside |
-| `ws:less` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `ws:home` | ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside |
 | `ws:list` | ws_list, ws_list_empty, ws_list_inside |
 | `ws:logout` | ws_list, ws_list_empty, ws_list_inside |
-| `ws:more` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 | `ws:new` | ws_create_name |
 | `ws:packs` | wallet_packs |
-| `ws:plan` | ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `ws:plan` | ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended |
 | `ws:renew` | wallet_plans |
-| `ws:resume` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `ws:resume` | ws_detail, ws_detail_locked, ws_detail_suspended |
 | `ws:settings` | ws_settings, ws_settings_suspended |
-| `ws:stop` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `ws:stop` | ws_detail, ws_detail_locked, ws_detail_suspended |
 | `ws:stop_confirm` | ws_stop_confirm |
-| `ws:suspend` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm |
-| `ws:suspend_confirm` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm |
+| `ws:suspend` | ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm |
+| `ws:suspend_confirm` | ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm |
 | `ws:tgl` | ws_create_network |
-| `ws:view` | ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
+| `ws:view` | ws_detail, ws_detail_locked, ws_detail_suspended |
 
 ## 2. The tree, from each entry
 
@@ -467,11 +465,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -740,11 +757,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -1122,11 +1158,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -1562,11 +1617,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -1991,11 +2065,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -2449,11 +2542,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -2867,11 +2979,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -3164,10 +3295,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `file_browser` (already on this path)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -3178,56 +3308,12 @@ One tree per command. The same screen reached twice is shown both times (that is
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -3268,11 +3354,20 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -3281,10 +3376,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
@@ -3320,10 +3414,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🗜 Archives → `arc:menu` → archive_menu
     - **archive_menu** — 🗜 Archives
@@ -3339,10 +3432,9 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **archive_export_prompt** — 📦 Export a folder
           - ✖️ Cancel → `arc:menu` → archive_menu
             - ↩ `archive_menu` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
@@ -3556,10 +3648,9 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
         - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
@@ -3568,10 +3659,9 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
@@ -3584,20 +3674,18 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🗑 Delete log → `run:delete` → run_history
             - ↩ `run_history` (already on this path)
           - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **live_logs_running** — 📜 Live logs
           - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
           - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
             - … `live_logs_finished` at depth 6 (not expanded)
             - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ✅ Finished → `run:filter` → run_history
         - ↩ `run_history` (already on this path)
@@ -3609,54 +3697,462 @@ One tree per command. The same screen reached twice is shown both times (that is
         - ↩ `run_history` (already on this path)
       - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
         - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ⬅️ Back → `run:history` → run_history
             - ↩ `run_history` (already on this path)
         - ↩ `run_history` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+    - **package_list** — 🐍 Packages
+      - ➕ Install packages → `pkg:install` → package_install_prompt
+        - **package_install_prompt** — ➕ Install packages
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+        - **package_remove_prompt** — 🗑 Remove a package
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+        - **package_remove_all_confirm** — 🧹 Remove all packages?
+          - ✅ Delete permanently → `pkg:rm_all` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **package_list_empty** — 🐍 Packages
+      - ➕ Install packages → `pkg:install` → package_install_prompt
+        - **package_install_prompt** — ➕ Install packages ↩ (already expanded at depth 4)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+    - **tunnel_already_published** — 🌐 Public links
+      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+        - **tunnel_publish** — ➕ Publish a port
+          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+        - **tunnel_publish_none** — ➕ Publish a port
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+        - **tunnel_publish_unattributed** — ➕ Publish a port
+          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - 🌐 9090 · owner unknown → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+      - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+        - ↩ `tunnel_already_published` (already on this path)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_remove_confirm** — 🗑 Remove this link?
+          - ✅ Delete permanently → `tnl:remove` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **tunnel_gate_allow_net** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_allow_tunnels** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_deleted** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_locked** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_server** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_suspended** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_at_cap** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_empty** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_stopped** — 🌐 Public links ↩ (already expanded at depth 4)
+  - 🔌 Ports → `port:list` → port_list, port_list_partial
+    - **port_list** — 🔌 Listening ports
+      - 🔄 Refresh → `port:list` → port_list, port_list_partial
+        - ↩ `port_list` (already on this path)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+        - **tunnel_publish** — ➕ Publish a port ↩ (already expanded at depth 4)
+        - **tunnel_publish_none** — ➕ Publish a port ↩ (already expanded at depth 4)
+        - **tunnel_publish_unattributed** — ➕ Publish a port ↩ (already expanded at depth 4)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **port_list_partial** — 🔌 Listening ports ↩ (already expanded at depth 4)
+  - 🧠 Processes → `proc:list` → process_list, process_list_empty
+    - **process_list** — 🧠 Processes
+      - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+        - **process_gone** — ✅ Already stopped
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **process_stop_confirm** — ⏹ Stop this process?
+          - ⏹ Stop → `proc:stop` → process_gone, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ✖️ Cancel → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+        - **process_stopped** — ⏹ Process stopped
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+        - **process_gone** — ✅ Already stopped ↩ (already expanded at depth 4)
+        - **process_stop_confirm** — ⏹ Stop this process? ↩ (already expanded at depth 4)
+        - **process_stopped** — ⏹ Process stopped ↩ (already expanded at depth 4)
+      - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+        - ↩ `process_list` (already on this path)
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
+  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
+    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
         - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace?
@@ -3664,28 +4160,24 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings
-      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — (no title)
@@ -4127,11 +4619,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -4491,11 +5002,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -4859,11 +5389,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -5240,11 +5789,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -5781,11 +6349,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -6284,11 +6871,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -6470,11 +7076,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -6838,11 +7463,30 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -7186,10 +7830,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -7280,10 +7923,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -7306,51 +7948,8 @@ _No screen is rendered by this command._
     - **menu_inside** — (no title)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -7391,11 +7990,20 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -7404,10 +8012,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
@@ -7430,7 +8037,7 @@ _No screen is rendered by this command._
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
         - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 - **help_inside** — ❓ Help
-  - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+  - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
@@ -7442,10 +8049,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -7456,10 +8062,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -7470,10 +8075,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run
@@ -7482,10 +8086,9 @@ _No screen is rendered by this command._
           - 📜 Background job → `run:prompt` → job_prompt
             - … `job_prompt` at depth 6 (not expanded)
           - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗜 Archives → `arc:menu` → archive_menu
         - **archive_menu** — 🗜 Archives
@@ -7495,10 +8098,9 @@ _No screen is rendered by this command._
             - … `archive_extract_prompt` at depth 6 (not expanded)
           - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
             - … `archive_export_prompt` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
         - **terminal_list** — 🖥 Terminals
@@ -7528,10 +8130,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_list_empty** — 🖥 Terminals
           - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
@@ -7544,10 +8145,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -7570,10 +8170,9 @@ _No screen is rendered by this command._
           - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
             - … `purge_conflict` at depth 6 (not expanded)
             - ↩ `run_history` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
@@ -7625,49 +8224,37 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
+      - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+        - **package_list** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+            - … `package_remove_prompt` at depth 6 (not expanded)
+          - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+            - … `package_remove_all_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **package_list_empty** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+        - **tunnel_already_published** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
             - … `tunnel_gate_allow_net` at depth 6 (not expanded)
             - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
             - … `tunnel_gate_deleted` at depth 6 (not expanded)
@@ -7678,79 +8265,271 @@ _No screen is rendered by this command._
             - … `tunnel_list_at_cap` at depth 6 (not expanded)
             - … `tunnel_list_empty` at depth 6 (not expanded)
             - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🔌 Ports → `port:list` → port_list, port_list_partial
+        - **port_list** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
             - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🧠 Processes → `proc:list` → process_list, process_list_empty
+        - **process_list** — 🧠 Processes
+          - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings
           - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
             - … `ws_stop_confirm` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_suspend_confirm` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **ws_settings_suspended** — ⚙️ Workspace settings
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — (no title)
@@ -7766,17 +8545,67 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title)
+      - 🔄 Renew → `ws:renew` → wallet_plans
+        - **wallet_plans** — 📦 Choose a plan
+          - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ✓ Monthly (your current plan) → `nav:noop` → (handler only — no screen)
+          - Buy Yearly — 1200 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title)
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 2)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `ws_detail_suspended` (already on this path)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ▶️ Run → `run:choose` → run_mode
+        - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
+      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+        - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
+        - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
@@ -7887,11 +8716,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -8239,11 +9087,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -8621,11 +9488,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -9061,11 +9947,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -9490,11 +10395,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -9948,11 +10872,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -10366,11 +11309,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -10663,10 +11625,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -10677,56 +11638,12 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -10767,11 +11684,20 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - ↩ `file_browser` (already on this path)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -10780,10 +11706,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
@@ -10819,10 +11744,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🗜 Archives → `arc:menu` → archive_menu
     - **archive_menu** — 🗜 Archives
@@ -10838,10 +11762,9 @@ _No screen is rendered by this command._
         - **archive_export_prompt** — 📦 Export a folder
           - ✖️ Cancel → `arc:menu` → archive_menu
             - ↩ `archive_menu` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
@@ -11055,10 +11978,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
         - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
@@ -11067,10 +11989,9 @@ _No screen is rendered by this command._
         - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
@@ -11083,20 +12004,18 @@ _No screen is rendered by this command._
           - 🗑 Delete log → `run:delete` → run_history
             - ↩ `run_history` (already on this path)
           - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **live_logs_running** — 📜 Live logs
           - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
           - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
             - … `live_logs_finished` at depth 6 (not expanded)
             - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ✅ Finished → `run:filter` → run_history
         - ↩ `run_history` (already on this path)
@@ -11108,54 +12027,462 @@ _No screen is rendered by this command._
         - ↩ `run_history` (already on this path)
       - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
         - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ⬅️ Back → `run:history` → run_history
             - ↩ `run_history` (already on this path)
         - ↩ `run_history` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+    - **package_list** — 🐍 Packages
+      - ➕ Install packages → `pkg:install` → package_install_prompt
+        - **package_install_prompt** — ➕ Install packages
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+        - **package_remove_prompt** — 🗑 Remove a package
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+        - **package_remove_all_confirm** — 🧹 Remove all packages?
+          - ✅ Delete permanently → `pkg:rm_all` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **package_list_empty** — 🐍 Packages
+      - ➕ Install packages → `pkg:install` → package_install_prompt
+        - **package_install_prompt** — ➕ Install packages ↩ (already expanded at depth 4)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+    - **tunnel_already_published** — 🌐 Public links
+      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+        - **tunnel_publish** — ➕ Publish a port
+          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+        - **tunnel_publish_none** — ➕ Publish a port
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+        - **tunnel_publish_unattributed** — ➕ Publish a port
+          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - 🌐 9090 · owner unknown → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+      - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+        - ↩ `tunnel_already_published` (already on this path)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_remove_confirm** — 🗑 Remove this link?
+          - ✅ Delete permanently → `tnl:remove` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **tunnel_gate_allow_net** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_allow_tunnels** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_deleted** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_locked** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_server** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_suspended** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_at_cap** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_empty** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_stopped** — 🌐 Public links ↩ (already expanded at depth 4)
+  - 🔌 Ports → `port:list` → port_list, port_list_partial
+    - **port_list** — 🔌 Listening ports
+      - 🔄 Refresh → `port:list` → port_list, port_list_partial
+        - ↩ `port_list` (already on this path)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+        - **tunnel_publish** — ➕ Publish a port ↩ (already expanded at depth 4)
+        - **tunnel_publish_none** — ➕ Publish a port ↩ (already expanded at depth 4)
+        - **tunnel_publish_unattributed** — ➕ Publish a port ↩ (already expanded at depth 4)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **port_list_partial** — 🔌 Listening ports ↩ (already expanded at depth 4)
+  - 🧠 Processes → `proc:list` → process_list, process_list_empty
+    - **process_list** — 🧠 Processes
+      - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+        - **process_gone** — ✅ Already stopped
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **process_stop_confirm** — ⏹ Stop this process?
+          - ⏹ Stop → `proc:stop` → process_gone, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ✖️ Cancel → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+        - **process_stopped** — ⏹ Process stopped
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+        - **process_gone** — ✅ Already stopped ↩ (already expanded at depth 4)
+        - **process_stop_confirm** — ⏹ Stop this process? ↩ (already expanded at depth 4)
+        - **process_stopped** — ⏹ Process stopped ↩ (already expanded at depth 4)
+      - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+        - ↩ `process_list` (already on this path)
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
+  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
+    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
         - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace?
@@ -11163,28 +12490,24 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings
-      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
     - **admin_overview** — (no title)
@@ -11626,11 +12949,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -11990,11 +13332,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -12358,11 +13719,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -12912,11 +14292,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -13371,11 +14770,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -13874,11 +15292,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -14060,11 +15497,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -14428,11 +15884,30 @@ _No screen is rendered by this command._
             - … `terminal_stale` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+            - … `package_list` at depth 6 (not expanded)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - 🔌 Ports → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - … `port_list_partial` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -14858,10 +16333,9 @@ _No screen is rendered by this command._
         - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -14909,60 +16383,16 @@ _No screen is rendered by this command._
         - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
     - **help_inside** — ❓ Help
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -15003,11 +16433,20 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -15016,10 +16455,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
@@ -15051,10 +16489,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -15082,10 +16519,9 @@ _No screen is rendered by this command._
         - **menu** — (no title) ↩ (already expanded at depth 4)
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — (no title) ↩ (already expanded at depth 4)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
@@ -15095,7 +16531,7 @@ _No screen is rendered by this command._
     - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
     - **menu_inside** — (no title) ↩ (already expanded at depth 4)
 - **settings_inside** — ⚙️ Settings
-  - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+  - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
@@ -15107,10 +16543,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -15121,10 +16556,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -15135,10 +16569,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run
@@ -15147,10 +16580,9 @@ _No screen is rendered by this command._
           - 📜 Background job → `run:prompt` → job_prompt
             - … `job_prompt` at depth 6 (not expanded)
           - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗜 Archives → `arc:menu` → archive_menu
         - **archive_menu** — 🗜 Archives
@@ -15160,10 +16592,9 @@ _No screen is rendered by this command._
             - … `archive_extract_prompt` at depth 6 (not expanded)
           - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
             - … `archive_export_prompt` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
         - **terminal_list** — 🖥 Terminals
@@ -15193,10 +16624,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_list_empty** — 🖥 Terminals
           - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
@@ -15209,10 +16639,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -15235,10 +16664,9 @@ _No screen is rendered by this command._
           - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
             - … `purge_conflict` at depth 6 (not expanded)
             - ↩ `run_history` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
@@ -15290,49 +16718,37 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
+      - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+        - **package_list** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+            - … `package_remove_prompt` at depth 6 (not expanded)
+          - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+            - … `package_remove_all_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **package_list_empty** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+        - **tunnel_already_published** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
             - … `tunnel_gate_allow_net` at depth 6 (not expanded)
             - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
             - … `tunnel_gate_deleted` at depth 6 (not expanded)
@@ -15343,79 +16759,271 @@ _No screen is rendered by this command._
             - … `tunnel_list_at_cap` at depth 6 (not expanded)
             - … `tunnel_list_empty` at depth 6 (not expanded)
             - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🔌 Ports → `port:list` → port_list, port_list_partial
+        - **port_list** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
             - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🧠 Processes → `proc:list` → process_list, process_list_empty
+        - **process_list** — 🧠 Processes
+          - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings
           - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
             - … `ws_stop_confirm` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_suspend_confirm` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **ws_settings_suspended** — ⚙️ Workspace settings
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — (no title)
@@ -15431,17 +17039,67 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title)
+      - 🔄 Renew → `ws:renew` → wallet_plans
+        - **wallet_plans** — 📦 Choose a plan
+          - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ✓ Monthly (your current plan) → `nav:noop` → (handler only — no screen)
+          - Buy Yearly — 1200 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title)
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 2)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `ws_detail_suspended` (already on this path)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ▶️ Run → `run:choose` → run_mode
+        - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
+      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+        - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
+        - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
@@ -15472,10 +17130,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -15566,10 +17223,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **settings_inside** — ⚙️ Settings
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -15592,51 +17248,8 @@ _No screen is rendered by this command._
     - **menu_inside** — (no title)
       - ➕ New Workspace → `ws:new` → ws_create_name
         - **ws_create_name** — ➕ New Workspace ↩ (already expanded at depth 4)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -15677,11 +17290,20 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - … `ws_list_inside` at depth 6 (not expanded)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -15690,10 +17312,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
@@ -15742,10 +17363,9 @@ _No screen is rendered by this command._
         - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -15764,51 +17384,8 @@ _No screen is rendered by this command._
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -15849,11 +17426,20 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -15862,10 +17448,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
@@ -16019,10 +17604,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -16050,10 +17634,9 @@ _No screen is rendered by this command._
             - ↩ `menu` (already on this path)
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -16063,10 +17646,9 @@ _No screen is rendered by this command._
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **settings_inside** — ⚙️ Settings
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -16094,10 +17676,9 @@ _No screen is rendered by this command._
         - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - ↩ `ws_create_name` (already on this path)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -16116,51 +17697,8 @@ _No screen is rendered by this command._
         - ↩ `menu_empty` (already on this path)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - ↩ `ws_list_inside` (already on this path)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -16201,11 +17739,20 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+            - … `ws_settings` at depth 6 (not expanded)
+            - … `ws_settings_suspended` at depth 6 (not expanded)
+          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+            - … `ws_list` at depth 6 (not expanded)
+            - … `ws_list_empty` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
+        - **ws_detail_locked** — (no title)
+          - 🔄 Renew → `ws:renew` → wallet_plans
+            - … `wallet_plans` at depth 6 (not expanded)
+          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+            - … `file_browser` at depth 6 (not expanded)
+            - … `file_browser_empty` at depth 6 (not expanded)
+            - … `file_browser_page_2` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -16214,10 +17761,9 @@ _No screen is rendered by this command._
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - … `file_browser` at depth 6 (not expanded)
@@ -16371,10 +17917,9 @@ _No screen is rendered by this command._
             - ↩ `menu_empty` (already on this path)
             - … `menu_inside` at depth 6 (not expanded)
         - **help_inside** — ❓ Help
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -16402,10 +17947,9 @@ _No screen is rendered by this command._
             - … `menu` at depth 6 (not expanded)
             - ↩ `menu_empty` (already on this path)
             - … `menu_inside` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -16415,10 +17959,9 @@ _No screen is rendered by this command._
         - ↩ `menu_empty` (already on this path)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **settings_inside** — ⚙️ Settings
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -16458,7 +18001,7 @@ _No screen is rendered by this command._
             - … `settings` at depth 6 (not expanded)
             - … `settings_inside` at depth 6 (not expanded)
         - ↩ `menu_inside` (already on this path)
-  - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+  - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
@@ -16470,10 +18013,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -16484,10 +18026,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -16498,10 +18039,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run
@@ -16510,10 +18050,9 @@ _No screen is rendered by this command._
           - 📜 Background job → `run:prompt` → job_prompt
             - … `job_prompt` at depth 6 (not expanded)
           - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗜 Archives → `arc:menu` → archive_menu
         - **archive_menu** — 🗜 Archives
@@ -16523,10 +18062,9 @@ _No screen is rendered by this command._
             - … `archive_extract_prompt` at depth 6 (not expanded)
           - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
             - … `archive_export_prompt` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
         - **terminal_list** — 🖥 Terminals
@@ -16556,10 +18094,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_list_empty** — 🖥 Terminals
           - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
@@ -16572,10 +18109,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -16598,10 +18134,9 @@ _No screen is rendered by this command._
           - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
             - … `purge_conflict` at depth 6 (not expanded)
             - ↩ `run_history` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
@@ -16653,49 +18188,37 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
+      - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+        - **package_list** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+            - … `package_remove_prompt` at depth 6 (not expanded)
+          - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+            - … `package_remove_all_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **package_list_empty** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+        - **tunnel_already_published** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
             - … `tunnel_gate_allow_net` at depth 6 (not expanded)
             - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
             - … `tunnel_gate_deleted` at depth 6 (not expanded)
@@ -16706,79 +18229,271 @@ _No screen is rendered by this command._
             - … `tunnel_list_at_cap` at depth 6 (not expanded)
             - … `tunnel_list_empty` at depth 6 (not expanded)
             - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🔌 Ports → `port:list` → port_list, port_list_partial
+        - **port_list** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
             - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🧠 Processes → `proc:list` → process_list, process_list_empty
+        - **process_list** — 🧠 Processes
+          - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings
           - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
             - … `ws_stop_confirm` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_suspend_confirm` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **ws_settings_suspended** — ⚙️ Workspace settings
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — (no title)
@@ -16794,17 +18509,67 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - ↩ `menu_inside` (already on this path)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title)
+      - 🔄 Renew → `ws:renew` → wallet_plans
+        - **wallet_plans** — 📦 Choose a plan
+          - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ✓ Monthly (your current plan) → `nav:noop` → (handler only — no screen)
+          - Buy Yearly — 1200 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_suspended** — (no title)
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 2)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `ws_detail_suspended` (already on this path)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ▶️ Run → `run:choose` → run_mode
+        - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
+      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+        - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
+        - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
@@ -16834,10 +18599,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -16848,12 +18612,11 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title)
           - 🔄 Renew → `ws:renew` → wallet_plans
@@ -16869,64 +18632,10 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
-            - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
@@ -16962,10 +18671,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
       - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🗜 Archives → `arc:menu` → archive_menu
     - **archive_menu** — 🗜 Archives
@@ -16981,10 +18689,9 @@ _No screen is rendered by this command._
         - **archive_export_prompt** — 📦 Export a folder
           - ✖️ Cancel → `arc:menu` → archive_menu
             - ↩ `archive_menu` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
     - **terminal_list** — 🖥 Terminals
@@ -17198,10 +18905,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
         - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
@@ -17210,10 +18916,9 @@ _No screen is rendered by this command._
         - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
         - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
@@ -17226,20 +18931,18 @@ _No screen is rendered by this command._
           - 🗑 Delete log → `run:delete` → run_history
             - ↩ `run_history` (already on this path)
           - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **live_logs_running** — 📜 Live logs
           - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
           - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
             - … `live_logs_finished` at depth 6 (not expanded)
             - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - ✅ Finished → `run:filter` → run_history
         - ↩ `run_history` (already on this path)
@@ -17251,18 +18954,16 @@ _No screen is rendered by this command._
         - ↩ `run_history` (already on this path)
       - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
         - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
           - ⬅️ Back → `run:history` → run_history
             - ↩ `run_history` (already on this path)
         - ↩ `run_history` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 📦 Starter templates → `tpl:list` → tpl_list
     - **tpl_list** — (no title)
@@ -17328,46 +19029,455 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - ↩ `ws_detail` (already on this path)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+    - **package_list** — 🐍 Packages
+      - ➕ Install packages → `pkg:install` → package_install_prompt
+        - **package_install_prompt** — ➕ Install packages
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+        - **package_remove_prompt** — 🗑 Remove a package
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+        - **package_remove_all_confirm** — 🧹 Remove all packages?
+          - ✅ Delete permanently → `pkg:rm_all` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
+            - ↩ `package_list` (already on this path)
+            - … `package_list_empty` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **package_list_empty** — 🐍 Packages
+      - ➕ Install packages → `pkg:install` → package_install_prompt
+        - **package_install_prompt** — ➕ Install packages ↩ (already expanded at depth 4)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+  - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+    - **tunnel_already_published** — 🌐 Public links
+      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+        - **tunnel_publish** — ➕ Publish a port
+          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+        - **tunnel_publish_none** — ➕ Publish a port
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+        - **tunnel_publish_unattributed** — ➕ Publish a port
+          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - 🌐 9090 · owner unknown → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_limit_reached` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_publishing` at depth 6 (not expanded)
+            - … `tunnel_timeout` at depth 6 (not expanded)
+          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
+            - … `tunnel_publish_custom` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+      - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+        - ↩ `tunnel_already_published` (already on this path)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **tunnel_remove_confirm** — 🗑 Remove this link?
+          - ✅ Delete permanently → `tnl:remove` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+            - ↩ `tunnel_already_published` (already on this path)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **tunnel_gate_allow_net** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_allow_tunnels** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_deleted** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_locked** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_server** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_gate_suspended** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_at_cap** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_empty** — 🌐 Public links ↩ (already expanded at depth 4)
+    - **tunnel_list_stopped** — 🌐 Public links ↩ (already expanded at depth 4)
+  - 🔌 Ports → `port:list` → port_list, port_list_partial
+    - **port_list** — 🔌 Listening ports
+      - 🔄 Refresh → `port:list` → port_list, port_list_partial
+        - ↩ `port_list` (already on this path)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+        - **tunnel_publish** — ➕ Publish a port ↩ (already expanded at depth 4)
+        - **tunnel_publish_none** — ➕ Publish a port ↩ (already expanded at depth 4)
+        - **tunnel_publish_unattributed** — ➕ Publish a port ↩ (already expanded at depth 4)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **port_list_partial** — 🔌 Listening ports ↩ (already expanded at depth 4)
+  - 🧠 Processes → `proc:list` → process_list, process_list_empty
+    - **process_list** — 🧠 Processes
+      - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+        - **process_gone** — ✅ Already stopped
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **process_stop_confirm** — ⏹ Stop this process?
+          - ⏹ Stop → `proc:stop` → process_gone, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ✖️ Cancel → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+        - **process_stopped** — ⏹ Process stopped
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+        - **process_gone** — ✅ Already stopped ↩ (already expanded at depth 4)
+        - **process_stop_confirm** — ⏹ Stop this process? ↩ (already expanded at depth 4)
+        - **process_stopped** — ⏹ Process stopped ↩ (already expanded at depth 4)
+      - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+        - ↩ `process_list` (already on this path)
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
+    - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
+  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
+    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
         - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace?
@@ -17375,28 +19485,24 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings
-      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — (no title)
@@ -17434,10 +19540,9 @@ _No screen is rendered by this command._
         - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -17454,10 +19559,9 @@ _No screen is rendered by this command._
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
@@ -17576,10 +19680,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -17590,43 +19693,12 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
@@ -17667,11 +19739,6 @@ _No screen is rendered by this command._
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -17679,11 +19746,11 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+        - ↩ `ws_detail_locked` (already on this path)
         - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
             - ↩ `file_browser` (already on this path)
@@ -17708,32 +19775,27 @@ _No screen is rendered by this command._
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
         - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace?
@@ -17741,28 +19803,24 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings
-      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
         - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
     - **ws_list** — (no title)
@@ -17800,10 +19858,9 @@ _No screen is rendered by this command._
         - **menu_inside** — (no title)
           - ➕ New Workspace → `ws:new` → ws_create_name
             - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - … `ws_detail` at depth 6 (not expanded)
             - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
             - ↩ `ws_list` (already on this path)
             - … `ws_list_empty` at depth 6 (not expanded)
@@ -17820,1087 +19877,15 @@ _No screen is rendered by this command._
         - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
         - **menu_inside** — (no title) ↩ (already expanded at depth 4)
     - **ws_list_inside** — (no title)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - ↩ `ws_detail_locked` (already on this path)
-        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — (no title) ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - ↩ `ws_list_inside` (already on this path)
-- **ws_detail_more** — (no title)
-  - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-    - **file_browser** — (no title)
-      - 📤 Upload → `file:upload` → file_upload
-        - **file_upload** — 📤 Upload
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ➕ New Folder → `file:mkdir` → file_mkdir
-        - **file_mkdir** — ➕ New Folder
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — (no title)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_browser_page_2** — (no title)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title)
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - ↩ `ws_detail_suspended` (already on this path)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
-    - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
-  - ▶️ Run → `run:choose` → run_mode
-    - **run_mode** — ▶️ Run
-      - ⚡ Quick command → `exec:prompt` → exec_prompt
-        - **exec_prompt** — ⚡ Quick command
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - 📜 Background job → `run:prompt` → job_prompt
-        - **job_prompt** — 📜 Background job
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-      - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🗜 Archives → `arc:menu` → archive_menu
-    - **archive_menu** — 🗜 Archives
-      - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
-        - **archive_upload_prompt** — 📤 Upload and extract
-          - ✖️ Cancel → `arc:menu` → archive_menu
-            - ↩ `archive_menu` (already on this path)
-      - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
-        - **archive_extract_prompt** — 📂 Extract a file
-          - ✖️ Cancel → `arc:menu` → archive_menu
-            - ↩ `archive_menu` (already on this path)
-      - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
-        - **archive_export_prompt** — 📦 Export a folder
-          - ✖️ Cancel → `arc:menu` → archive_menu
-            - ↩ `archive_menu` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-    - **terminal_list** — 🖥 Terminals
-      - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **terminal_view_ended** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - ↩ `terminal_view_ended` (already on this path)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_failed** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - ↩ `terminal_view_failed` (already on this path)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer** — 🖥 Terminal
-          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer_installed** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_running** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_typing** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-      - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - ↩ `terminal_list` (already on this path)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
-    - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-  - 📜 Runs → `run:history` → run_history
-    - **run_history** — 📜 Runs
-      - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
-        - **live_logs_finished** — ✅ Finished (exit 0)
-          - 🔁 Run again → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - 🗑 Delete log → `run:delete` → run_history
-            - ↩ `run_history` (already on this path)
-          - 🧹 Clear → `nav:clear` → (handler only — no screen)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **live_logs_running** — 📜 Live logs
-          - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
-          - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
-            - … `live_logs_finished` at depth 6 (not expanded)
-            - ↩ `live_logs_running` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ✅ Finished → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ❌ Failed → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - ⏳ Active → `run:filter` → run_history
-        - ↩ `run_history` (already on this path)
-      - Next ➡️ → `run:history` → run_history
-        - ↩ `run_history` (already on this path)
-      - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-        - **purge_conflict** — 🗑 Purge history
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ⬅️ Back → `run:history` → run_history
-            - ↩ `run_history` (already on this path)
-        - ↩ `run_history` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 📦 Starter templates → `tpl:list` → tpl_list
-    - **tpl_list** — (no title)
-      - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module
-          - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
-            - … `tpl_done_created` at depth 6 (not expanded)
-            - … `tpl_done_failed` at depth 6 (not expanded)
-            - … `tpl_done_refused` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `tpl:list` → tpl_list
-            - ↩ `tpl_list` (already on this path)
-        - **tpl_confirm_conflict** — 📦 Simple script
-          - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
-            - … `tpl_done_created` at depth 6 (not expanded)
-            - … `tpl_done_failed` at depth 6 (not expanded)
-            - … `tpl_done_refused` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `tpl:list` → tpl_list
-            - ↩ `tpl_list` (already on this path)
-        - ↩ `tpl_list` (already on this path)
-      - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-    - **package_list** — 🐍 Packages
-      - ➕ Install packages → `pkg:install` → package_install_prompt
-        - **package_install_prompt** — ➕ Install packages
-          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
-            - ↩ `package_list` (already on this path)
-            - … `package_list_empty` at depth 6 (not expanded)
-      - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
-        - **package_remove_prompt** — 🗑 Remove a package
-          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
-            - ↩ `package_list` (already on this path)
-            - … `package_list_empty` at depth 6 (not expanded)
-      - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
-        - **package_remove_all_confirm** — 🧹 Remove all packages?
-          - ✅ Delete permanently → `pkg:rm_all` → package_list, package_list_empty
-            - ↩ `package_list` (already on this path)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - ✖️ Cancel → `pkg:list` → package_list, package_list_empty
-            - ↩ `package_list` (already on this path)
-            - … `package_list_empty` at depth 6 (not expanded)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **package_list_empty** — 🐍 Packages
-      - ➕ Install packages → `pkg:install` → package_install_prompt
-        - **package_install_prompt** — ➕ Install packages ↩ (already expanded at depth 4)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-    - **tunnel_already_published** — 🌐 Public links
-      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-        - **tunnel_publish** — ➕ Publish a port
-          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_limit_reached` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-            - … `tunnel_publishing` at depth 6 (not expanded)
-            - … `tunnel_timeout` at depth 6 (not expanded)
-          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
-            - … `tunnel_publish_custom` at depth 6 (not expanded)
-          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-        - **tunnel_publish_none** — ➕ Publish a port
-          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
-            - … `tunnel_publish_custom` at depth 6 (not expanded)
-          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-        - **tunnel_publish_unattributed** — ➕ Publish a port
-          - 🌐 8080 → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_limit_reached` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-            - … `tunnel_publishing` at depth 6 (not expanded)
-            - … `tunnel_timeout` at depth 6 (not expanded)
-          - 🌐 9090 · owner unknown → `tnl:port` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_limit_reached, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_publishing, tunnel_timeout
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_limit_reached` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-            - … `tunnel_publishing` at depth 6 (not expanded)
-            - … `tunnel_timeout` at depth 6 (not expanded)
-          - ✏️ Type a port → `tnl:port_custom` → tunnel_publish_custom
-            - … `tunnel_publish_custom` at depth 6 (not expanded)
-          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-      - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-        - ↩ `tunnel_already_published` (already on this path)
-        - **tunnel_gate_allow_net** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_gate_allow_tunnels** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_gate_deleted** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_gate_locked** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_gate_server** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_gate_suspended** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_list** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - ↩ `tunnel_list` (already on this path)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-            - … `tunnel_remove_confirm` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_list_at_cap** — 🌐 Public links
-          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - ↩ `tunnel_list_at_cap` (already on this path)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-            - … `tunnel_remove_confirm` at depth 6 (not expanded)
-          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - ↩ `tunnel_list_at_cap` (already on this path)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-            - … `tunnel_remove_confirm` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_list_empty** — 🌐 Public links
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_list_stopped** — 🌐 Public links
-          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - ↩ `tunnel_list_stopped` (already on this path)
-            - … `tunnel_remove_confirm` at depth 6 (not expanded)
-          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - ↩ `tunnel_list_stopped` (already on this path)
-            - … `tunnel_remove_confirm` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **tunnel_remove_confirm** — 🗑 Remove this link?
-          - ✅ Delete permanently → `tnl:remove` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - ✖️ Cancel → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - ↩ `tunnel_already_published` (already on this path)
-            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
-            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
-            - … `tunnel_gate_deleted` at depth 6 (not expanded)
-            - … `tunnel_gate_locked` at depth 6 (not expanded)
-            - … `tunnel_gate_server` at depth 6 (not expanded)
-            - … `tunnel_gate_suspended` at depth 6 (not expanded)
-            - … `tunnel_list` at depth 6 (not expanded)
-            - … `tunnel_list_at_cap` at depth 6 (not expanded)
-            - … `tunnel_list_empty` at depth 6 (not expanded)
-            - … `tunnel_list_stopped` at depth 6 (not expanded)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **tunnel_gate_allow_net** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_gate_allow_tunnels** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_gate_deleted** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_gate_locked** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_gate_server** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_gate_suspended** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_list** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_list_at_cap** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_list_empty** — 🌐 Public links ↩ (already expanded at depth 4)
-    - **tunnel_list_stopped** — 🌐 Public links ↩ (already expanded at depth 4)
-  - 🔌 Ports → `port:list` → port_list, port_list_partial
-    - **port_list** — 🔌 Listening ports
-      - 🔄 Refresh → `port:list` → port_list, port_list_partial
-        - ↩ `port_list` (already on this path)
-        - **port_list_partial** — 🔌 Listening ports
-          - 🔄 Refresh → `port:list` → port_list, port_list_partial
-            - ↩ `port_list` (already on this path)
-            - ↩ `port_list_partial` (already on this path)
-          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-            - … `tunnel_publish` at depth 6 (not expanded)
-            - … `tunnel_publish_none` at depth 6 (not expanded)
-            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-        - **tunnel_publish** — ➕ Publish a port ↩ (already expanded at depth 4)
-        - **tunnel_publish_none** — ➕ Publish a port ↩ (already expanded at depth 4)
-        - **tunnel_publish_unattributed** — ➕ Publish a port ↩ (already expanded at depth 4)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **port_list_partial** — 🔌 Listening ports ↩ (already expanded at depth 4)
-  - 🧠 Processes → `proc:list` → process_list, process_list_empty
-    - **process_list** — 🧠 Processes
-      - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
-        - **process_gone** — ✅ Already stopped
-          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-            - ↩ `process_list` (already on this path)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **process_stop_confirm** — ⏹ Stop this process?
-          - ⏹ Stop → `proc:stop` → process_gone, process_stopped
-            - … `process_gone` at depth 6 (not expanded)
-            - … `process_stopped` at depth 6 (not expanded)
-          - ✖️ Cancel → `proc:list` → process_list, process_list_empty
-            - ↩ `process_list` (already on this path)
-            - … `process_list_empty` at depth 6 (not expanded)
-        - **process_stopped** — ⏹ Process stopped
-          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-            - ↩ `process_list` (already on this path)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
-        - **process_gone** — ✅ Already stopped ↩ (already expanded at depth 4)
-        - **process_stop_confirm** — ⏹ Stop this process? ↩ (already expanded at depth 4)
-        - **process_stopped** — ⏹ Process stopped ↩ (already expanded at depth 4)
-      - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-        - ↩ `process_list` (already on this path)
-        - **process_list_empty** — 🧠 Processes
-          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-            - ↩ `process_list` (already on this path)
-            - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - ↩ `process_list` (already on this path)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - ↩ `process_list` (already on this path)
-            - … `process_list_empty` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
-  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
-    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
-  - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-    - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - ↩ `ws_detail_more` (already on this path)
-    - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-    - **ws_settings** — ⚙️ Workspace settings
-      - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
-        - **ws_stop_confirm** — 🛑 Stop everything?
-          - 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_suspend_confirm** — ⏸️ Suspend workspace?
-          - ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_suspend_confirm` (already on this path)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace?
-          - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **ws_settings_suspended** — ⚙️ Workspace settings
-      - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-      - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-        - **ws_delete_confirm** — 🗑 Delete workspace? ↩ (already expanded at depth 4)
-      - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — (no title)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — (no title)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-        - **menu_empty** — ☁️ CloudBot
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — (no title)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-    - **ws_list_empty** — 📦 My Workspaces
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — (no title) ↩ (already expanded at depth 4)
-        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — (no title)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - ↩ `ws_detail_more` (already on this path)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
         - **ws_list** — (no title) ↩ (already expanded at depth 2)
         - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
         - ↩ `ws_list_inside` (already on this path)
 - **ws_detail_suspended** — (no title)
-  - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+  - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
         - **file_browser** — (no title)
@@ -18912,10 +19897,9 @@ _No screen is rendered by this command._
             - ↩ `file_browser` (already on this path)
             - … `file_browser_empty` at depth 6 (not expanded)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
         - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -18926,10 +19910,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
             - … `file_browser_page_2` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
         - **file_browser_page_2** — (no title)
           - 📤 Upload → `file:upload` → file_upload
@@ -18940,10 +19923,9 @@ _No screen is rendered by this command._
             - … `file_browser` at depth 6 (not expanded)
             - … `file_browser_empty` at depth 6 (not expanded)
             - ↩ `file_browser_page_2` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run
@@ -18952,10 +19934,9 @@ _No screen is rendered by this command._
           - 📜 Background job → `run:prompt` → job_prompt
             - … `job_prompt` at depth 6 (not expanded)
           - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
       - 🗜 Archives → `arc:menu` → archive_menu
         - **archive_menu** — 🗜 Archives
@@ -18965,10 +19946,9 @@ _No screen is rendered by this command._
             - … `archive_extract_prompt` at depth 6 (not expanded)
           - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
             - … `archive_export_prompt` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
       - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
         - **terminal_list** — 🖥 Terminals
@@ -18998,10 +19978,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
         - **terminal_list_empty** — 🖥 Terminals
           - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
@@ -19014,10 +19993,9 @@ _No screen is rendered by this command._
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
@@ -19040,10 +20018,9 @@ _No screen is rendered by this command._
           - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
             - … `purge_conflict` at depth 6 (not expanded)
             - ↩ `run_history` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
@@ -19095,49 +20072,37 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-      - ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title)
-          - 🔄 Renew → `ws:renew` → wallet_plans
-            - … `wallet_plans` at depth 6 (not expanded)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **ws_detail_more** — (no title)
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-            - … `file_browser` at depth 6 (not expanded)
-            - … `file_browser_empty` at depth 6 (not expanded)
-            - … `file_browser_page_2` at depth 6 (not expanded)
-          - ▶️ Run → `run:choose` → run_mode
-            - … `run_mode` at depth 6 (not expanded)
-          - 🗜 Archives → `arc:menu` → archive_menu
-            - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 📜 Runs → `run:history` → run_history
-            - … `run_history` at depth 6 (not expanded)
-          - 📦 Starter templates → `tpl:list` → tpl_list
-            - … `tpl_list` at depth 6 (not expanded)
-          - 🐍 Packages → `pkg:list` → package_list, package_list_empty
-            - … `package_list` at depth 6 (not expanded)
-            - … `package_list_empty` at depth 6 (not expanded)
-          - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-            - … `tunnel_already_published` at depth 6 (not expanded)
+      - 🐍 Packages → `pkg:list` → package_list, package_list_empty
+        - **package_list** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
+            - … `package_remove_prompt` at depth 6 (not expanded)
+          - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
+            - … `package_remove_all_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **package_list_empty** — 🐍 Packages
+          - ➕ Install packages → `pkg:install` → package_install_prompt
+            - … `package_install_prompt` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+      - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+        - **tunnel_already_published** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - ↩ `tunnel_already_published` (already on this path)
             - … `tunnel_gate_allow_net` at depth 6 (not expanded)
             - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
             - … `tunnel_gate_deleted` at depth 6 (not expanded)
@@ -19148,57 +20113,271 @@ _No screen is rendered by this command._
             - … `tunnel_list_at_cap` at depth 6 (not expanded)
             - … `tunnel_list_empty` at depth 6 (not expanded)
             - … `tunnel_list_stopped` at depth 6 (not expanded)
-          - 🔌 Ports → `port:list` → port_list, port_list_partial
-            - … `port_list` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_gate_allow_net** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_gate_allow_tunnels** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_gate_deleted** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_gate_locked** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_gate_server** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_gate_suspended** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_list** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - ↩ `tunnel_list` (already on this path)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_list_at_cap** — 🌐 Public links
+          - ➕ Publish a port · limit reached → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - ↩ `tunnel_list_at_cap` (already on this path)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - … `tunnel_list_stopped` at depth 6 (not expanded)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_list_empty** — 🌐 Public links
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **tunnel_list_stopped** — 🌐 Public links
+          - 🔗 8082 · not serving → `nav:noop` → (handler only — no screen)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
+            - … `tunnel_already_published` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_net` at depth 6 (not expanded)
+            - … `tunnel_gate_allow_tunnels` at depth 6 (not expanded)
+            - … `tunnel_gate_deleted` at depth 6 (not expanded)
+            - … `tunnel_gate_locked` at depth 6 (not expanded)
+            - … `tunnel_gate_server` at depth 6 (not expanded)
+            - … `tunnel_gate_suspended` at depth 6 (not expanded)
+            - … `tunnel_list` at depth 6 (not expanded)
+            - … `tunnel_list_at_cap` at depth 6 (not expanded)
+            - … `tunnel_list_empty` at depth 6 (not expanded)
+            - ↩ `tunnel_list_stopped` (already on this path)
+            - … `tunnel_remove_confirm` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+      - 🔌 Ports → `port:list` → port_list, port_list_partial
+        - **port_list** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - ↩ `port_list` (already on this path)
             - … `port_list_partial` at depth 6 (not expanded)
-          - 🧠 Processes → `proc:list` → process_list, process_list_empty
-            - … `process_list` at depth 6 (not expanded)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **port_list_partial** — 🔌 Listening ports
+          - 🔄 Refresh → `port:list` → port_list, port_list_partial
+            - … `port_list` at depth 6 (not expanded)
+            - ↩ `port_list_partial` (already on this path)
+          - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
+            - … `tunnel_publish` at depth 6 (not expanded)
+            - … `tunnel_publish_none` at depth 6 (not expanded)
+            - … `tunnel_publish_unattributed` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+      - 🧠 Processes → `proc:list` → process_list, process_list_empty
+        - **process_list** — 🧠 Processes
+          - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
+            - … `process_gone` at depth 6 (not expanded)
+            - … `process_stop_confirm` at depth 6 (not expanded)
+            - … `process_stopped` at depth 6 (not expanded)
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
           - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
-          - ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
             - ↩ `ws_detail_suspended` (already on this path)
-          - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-            - … `ws_settings` at depth 6 (not expanded)
-            - … `ws_settings_suspended` at depth 6 (not expanded)
-          - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-            - … `ws_list` at depth 6 (not expanded)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - ↩ `ws_detail_suspended` (already on this path)
+        - **process_list_empty** — 🧠 Processes
+          - 🔄 Refresh → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - ↩ `process_list_empty` (already on this path)
+          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+        - **metrics** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - ↩ `metrics` (already on this path)
+            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **metrics_idle_incomplete** — 📊 Resources
+          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+            - … `metrics` at depth 6 (not expanded)
+            - ↩ `metrics_idle_incomplete` (already on this path)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings
           - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
             - … `ws_stop_confirm` at depth 6 (not expanded)
-          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+          - ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
             - … `ws_suspend_confirm` at depth 6 (not expanded)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
         - **ws_settings_suspended** — ⚙️ Workspace settings
-          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
           - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
             - … `ws_delete_confirm` at depth 6 (not expanded)
-          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+          - ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
       - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
         - **ws_list** — (no title)
@@ -19214,16 +20393,45 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **ws_list_inside** — (no title)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - ↩ `ws_list_inside` (already on this path)
-    - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-    - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+    - **ws_detail_locked** — (no title)
+      - 🔄 Renew → `ws:renew` → wallet_plans
+        - **wallet_plans** — 📦 Choose a plan
+          - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ✓ Monthly (your current plan) → `nav:noop` → (handler only — no screen)
+          - Buy Yearly — 1200 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - ↩ `wallet_plans` (already on this path)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+          - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+            - … `wallet` at depth 6 (not expanded)
+            - … `wallet_expired` at depth 6 (not expanded)
+            - … `wallet_no_plan` at depth 6 (not expanded)
+            - … `wallet_two_plans` at depth 6 (not expanded)
+      - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
+        - **file_browser** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
+        - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
+      - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
+        - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+        - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
+      - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title) ↩ (already expanded at depth 4)
+        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+        - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
     - ↩ `ws_detail_suspended` (already on this path)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
     - **file_browser** — (no title) ↩ (already expanded at depth 4)
@@ -19275,7 +20483,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (261)
+### 3.5 Loops that are not obvious (246)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -19326,7 +20534,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **archive_extract_prompt** —“✖️ Cancel”→ **archive_menu** —“📂 Extract a file”→ **archive_extract_prompt** (expected (back/affordance))
 - **archive_menu** —“📤 Upload and extract”→ **archive_upload_prompt** —“✖️ Cancel”→ **archive_menu** (expected (back/affordance))
 - **archive_menu** —“⬅️ Back”→ **ws_detail** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
-- **archive_menu** —“⬅️ Back”→ **ws_detail_more** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **dev_report** —“⬅️ Sections”→ **dev_sections** —“🩺 Run the architecture doctor”→ **dev_report** (**unobvious**)
 - **exec_missing_mapped** —“🔁 Try again”→ **exec_missing_two** —“🔁 Try again”→ **exec_missing_mapped** (**unobvious**)
 - **exec_missing_mapped** —“🔁 Try again”→ **exec_missing_unknown** —“🔁 Try again”→ **exec_missing_mapped** (**unobvious**)
@@ -19335,16 +20542,13 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **file_browser** —“⬆️ Up”→ **file_browser_page_2** —“⬆️ Up”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser** (**unobvious**)
-- **file_browser** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser_empty** —“⬆️ Up”→ **file_browser_page_2** —“⬆️ Up”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser_empty** (**unobvious**)
-- **file_browser_empty** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_empty** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser_empty** (**unobvious**)
 - **file_browser_page_2** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
 - **file_browser_page_2** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
-- **file_browser_page_2** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
 - **file_browser_page_2** —“📦 Workspace”→ **ws_detail_suspended** —“📁 Files”→ **file_browser_page_2** (**unobvious**)
 - **live_logs_finished** —“🗑 Delete log”→ **run_history** —“📜 run_0…K4”→ **live_logs_finished** (**unobvious**)
 - **menu** —“⚙️ Settings”→ **settings** —“🏠 Home”→ **menu** (**unobvious**)
@@ -19369,30 +20573,28 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **metrics** —“🔄 Refresh”→ **metrics_idle_incomplete** —“🔄 Refresh”→ **metrics** (**unobvious**)
 - **metrics** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics** (**unobvious**)
 - **metrics** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics** (**unobvious**)
-- **metrics** —“⬅️ Back”→ **ws_detail_more** —“📊 Resources”→ **metrics** (expected (back/affordance))
+- **metrics** —“⬅️ Back”→ **ws_detail** —“📊 Resources”→ **metrics** (expected (back/affordance))
 - **metrics_idle_incomplete** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics_idle_incomplete** (**unobvious**)
 - **metrics_idle_incomplete** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics_idle_incomplete** (**unobvious**)
-- **metrics_idle_incomplete** —“⬅️ Back”→ **ws_detail_more** —“📊 Resources”→ **metrics_idle_incomplete** (expected (back/affordance))
+- **metrics_idle_incomplete** —“⬅️ Back”→ **ws_detail** —“📊 Resources”→ **metrics_idle_incomplete** (expected (back/affordance))
 - **package_install_prompt** —“✖️ Cancel”→ **package_list** —“➕ Install packages”→ **package_install_prompt** (expected (back/affordance))
 - **package_install_prompt** —“✖️ Cancel”→ **package_list_empty** —“➕ Install packages”→ **package_install_prompt** (expected (back/affordance))
 - **package_list** —“🧹 Remove all”→ **package_remove_all_confirm** —“✅ Delete permanently”→ **package_list** (**unobvious**)
 - **package_list** —“🗑 Remove one”→ **package_remove_prompt** —“✖️ Cancel”→ **package_list** (expected (back/affordance))
-- **package_list** —“⬅️ Back”→ **ws_detail_more** —“🐍 Packages”→ **package_list** (expected (back/affordance))
-- **package_list_empty** —“⬅️ Back”→ **ws_detail_more** —“🐍 Packages”→ **package_list_empty** (expected (back/affordance))
+- **package_list** —“⬅️ Back”→ **ws_detail** —“🐍 Packages”→ **package_list** (expected (back/affordance))
+- **package_list_empty** —“⬅️ Back”→ **ws_detail** —“🐍 Packages”→ **package_list_empty** (expected (back/affordance))
 - **port_list** —“🔄 Refresh”→ **port_list_partial** —“🔄 Refresh”→ **port_list** (**unobvious**)
-- **port_list** —“⬅️ Back”→ **ws_detail_more** —“🔌 Ports”→ **port_list** (expected (back/affordance))
-- **port_list_partial** —“⬅️ Back”→ **ws_detail_more** —“🔌 Ports”→ **port_list_partial** (expected (back/affordance))
+- **port_list** —“⬅️ Back”→ **ws_detail** —“🔌 Ports”→ **port_list** (expected (back/affordance))
+- **port_list_partial** —“⬅️ Back”→ **ws_detail** —“🔌 Ports”→ **port_list_partial** (expected (back/affordance))
 - **process_gone** —“🔄 Refresh”→ **process_list** —“⏹ Stop python3”→ **process_gone** (**unobvious**)
 - **process_list** —“🔄 Refresh”→ **process_list_empty** —“🔄 Refresh”→ **process_list** (**unobvious**)
 - **process_list** —“⏹ Stop python3”→ **process_stop_confirm** —“✖️ Cancel”→ **process_list** (expected (back/affordance))
 - **process_list** —“⏹ Stop python3”→ **process_stopped** —“🔄 Refresh”→ **process_list** (**unobvious**)
-- **process_list** —“⬅️ Back”→ **ws_detail_more** —“🧠 Processes”→ **process_list** (expected (back/affordance))
-- **process_list_empty** —“⬅️ Back”→ **ws_detail_more** —“🧠 Processes”→ **process_list_empty** (expected (back/affordance))
+- **process_list** —“⬅️ Back”→ **ws_detail** —“🧠 Processes”→ **process_list** (expected (back/affordance))
+- **process_list_empty** —“⬅️ Back”→ **ws_detail** —“🧠 Processes”→ **process_list_empty** (expected (back/affordance))
 - **purge_conflict** —“⬅️ Back”→ **run_history** —“🗑 Purge history”→ **purge_conflict** (expected (back/affordance))
 - **run_history** —“⬅️ Back”→ **ws_detail** —“📜 Runs”→ **run_history** (expected (back/affordance))
-- **run_history** —“⬅️ Back”→ **ws_detail_more** —“📜 Runs”→ **run_history** (expected (back/affordance))
 - **run_mode** —“✖️ Cancel”→ **ws_detail** —“▶️ Run”→ **run_mode** (expected (back/affordance))
-- **run_mode** —“✖️ Cancel”→ **ws_detail_more** —“▶️ Run”→ **run_mode** (expected (back/affordance))
 - **run_mode** —“✖️ Cancel”→ **ws_detail_suspended** —“▶️ Run”→ **run_mode** (expected (back/affordance))
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_offer** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
@@ -19406,7 +20608,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **terminal_list** —“➕ New terminal”→ **terminal_view_running** —“🖥 Terminals”→ **terminal_list** (**unobvious**)
 - **terminal_list** —“➕ New terminal”→ **terminal_view_typing** —“🖥 Terminals”→ **terminal_list** (**unobvious**)
 - **terminal_list** —“⬅️ Back”→ **ws_detail** —“🖥 Terminals”→ **terminal_list** (expected (back/affordance))
-- **terminal_list** —“⬅️ Back”→ **ws_detail_more** —“🖥 Terminals”→ **terminal_list** (expected (back/affordance))
 - **terminal_list** —“⬅️ Back”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_list** (expected (back/affordance))
 - **terminal_list_empty** —“➕ New terminal”→ **terminal_view_ended** —“➕ New terminal”→ **terminal_list_empty** (**unobvious**)
 - **terminal_list_empty** —“➕ New terminal”→ **terminal_view_failed** —“➕ New terminal”→ **terminal_list_empty** (**unobvious**)
@@ -19415,7 +20616,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **terminal_list_empty** —“➕ New terminal”→ **terminal_view_running** —“🖥 Terminals”→ **terminal_list_empty** (**unobvious**)
 - **terminal_list_empty** —“➕ New terminal”→ **terminal_view_typing** —“🖥 Terminals”→ **terminal_list_empty** (**unobvious**)
 - **terminal_list_empty** —“⬅️ Back”→ **ws_detail** —“🖥 Terminals”→ **terminal_list_empty** (expected (back/affordance))
-- **terminal_list_empty** —“⬅️ Back”→ **ws_detail_more** —“🖥 Terminals”→ **terminal_list_empty** (expected (back/affordance))
 - **terminal_list_empty** —“⬅️ Back”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_list_empty** (expected (back/affordance))
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_failed** —“➕ New terminal”→ **terminal_view_ended** (**unobvious**)
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_offer** —“Ctrl-C”→ **terminal_view_ended** (**unobvious**)
@@ -19435,7 +20635,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **tpl_confirm** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm** (**unobvious**)
 - **tpl_confirm_conflict** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm_conflict** (**unobvious**)
 - **tpl_list** —“⬅️ Back”→ **ws_detail** —“📦 Starter templates”→ **tpl_list** (expected (back/affordance))
-- **tpl_list** —“⬅️ Back”→ **ws_detail_more** —“📦 Starter templates”→ **tpl_list** (expected (back/affordance))
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_list** —“🗑 Remove 8080”→ **tunnel_already_published** (**unobvious**)
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_list_at_cap** —“🗑 Remove 8080”→ **tunnel_already_published** (**unobvious**)
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_list_stopped** —“🗑 Remove 8080”→ **tunnel_already_published** (**unobvious**)
@@ -19443,53 +20642,53 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **tunnel_already_published** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_already_published** (expected (back/affordance))
 - **tunnel_already_published** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_already_published** (expected (back/affordance))
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_remove_confirm** —“✅ Delete permanently”→ **tunnel_already_published** (**unobvious**)
-- **tunnel_already_published** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_already_published** (expected (back/affordance))
+- **tunnel_already_published** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_already_published** (expected (back/affordance))
 - **tunnel_gate_allow_net** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_gate_allow_net** (expected (back/affordance))
 - **tunnel_gate_allow_net** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_gate_allow_net** (expected (back/affordance))
 - **tunnel_gate_allow_net** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_gate_allow_net** (expected (back/affordance))
-- **tunnel_gate_allow_net** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_gate_allow_net** (expected (back/affordance))
+- **tunnel_gate_allow_net** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_gate_allow_net** (expected (back/affordance))
 - **tunnel_gate_allow_tunnels** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_gate_allow_tunnels** (expected (back/affordance))
 - **tunnel_gate_allow_tunnels** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_gate_allow_tunnels** (expected (back/affordance))
 - **tunnel_gate_allow_tunnels** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_gate_allow_tunnels** (expected (back/affordance))
-- **tunnel_gate_allow_tunnels** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_gate_allow_tunnels** (expected (back/affordance))
+- **tunnel_gate_allow_tunnels** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_gate_allow_tunnels** (expected (back/affordance))
 - **tunnel_gate_deleted** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_gate_deleted** (expected (back/affordance))
 - **tunnel_gate_deleted** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_gate_deleted** (expected (back/affordance))
 - **tunnel_gate_deleted** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_gate_deleted** (expected (back/affordance))
-- **tunnel_gate_deleted** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_gate_deleted** (expected (back/affordance))
+- **tunnel_gate_deleted** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_gate_deleted** (expected (back/affordance))
 - **tunnel_gate_locked** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_gate_locked** (expected (back/affordance))
 - **tunnel_gate_locked** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_gate_locked** (expected (back/affordance))
 - **tunnel_gate_locked** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_gate_locked** (expected (back/affordance))
-- **tunnel_gate_locked** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_gate_locked** (expected (back/affordance))
+- **tunnel_gate_locked** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_gate_locked** (expected (back/affordance))
 - **tunnel_gate_server** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_gate_server** (expected (back/affordance))
 - **tunnel_gate_server** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_gate_server** (expected (back/affordance))
 - **tunnel_gate_server** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_gate_server** (expected (back/affordance))
-- **tunnel_gate_server** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_gate_server** (expected (back/affordance))
+- **tunnel_gate_server** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_gate_server** (expected (back/affordance))
 - **tunnel_gate_suspended** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_gate_suspended** (expected (back/affordance))
 - **tunnel_gate_suspended** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_gate_suspended** (expected (back/affordance))
 - **tunnel_gate_suspended** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_gate_suspended** (expected (back/affordance))
-- **tunnel_gate_suspended** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_gate_suspended** (expected (back/affordance))
+- **tunnel_gate_suspended** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_gate_suspended** (expected (back/affordance))
 - **tunnel_list** —“🗑 Remove 8080”→ **tunnel_list_at_cap** —“🗑 Remove 8080”→ **tunnel_list** (**unobvious**)
 - **tunnel_list** —“🗑 Remove 8080”→ **tunnel_list_stopped** —“🗑 Remove 8080”→ **tunnel_list** (**unobvious**)
 - **tunnel_list** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_list** (expected (back/affordance))
 - **tunnel_list** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_list** (expected (back/affordance))
 - **tunnel_list** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_list** (expected (back/affordance))
 - **tunnel_list** —“🗑 Remove 8080”→ **tunnel_remove_confirm** —“✅ Delete permanently”→ **tunnel_list** (**unobvious**)
-- **tunnel_list** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_list** (expected (back/affordance))
+- **tunnel_list** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_list** (expected (back/affordance))
 - **tunnel_list_at_cap** —“🗑 Remove 8080”→ **tunnel_list_stopped** —“🗑 Remove 8080”→ **tunnel_list_at_cap** (**unobvious**)
 - **tunnel_list_at_cap** —“➕ Publish a port · limit reached”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_list_at_cap** (expected (back/affordance))
 - **tunnel_list_at_cap** —“➕ Publish a port · limit reached”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_list_at_cap** (expected (back/affordance))
 - **tunnel_list_at_cap** —“➕ Publish a port · limit reached”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_list_at_cap** (expected (back/affordance))
 - **tunnel_list_at_cap** —“🗑 Remove 8080”→ **tunnel_remove_confirm** —“✅ Delete permanently”→ **tunnel_list_at_cap** (**unobvious**)
-- **tunnel_list_at_cap** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_list_at_cap** (expected (back/affordance))
+- **tunnel_list_at_cap** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_list_at_cap** (expected (back/affordance))
 - **tunnel_list_empty** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_list_empty** (expected (back/affordance))
 - **tunnel_list_empty** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_list_empty** (expected (back/affordance))
 - **tunnel_list_empty** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_list_empty** (expected (back/affordance))
-- **tunnel_list_empty** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_list_empty** (expected (back/affordance))
+- **tunnel_list_empty** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_list_empty** (expected (back/affordance))
 - **tunnel_list_stopped** —“➕ Publish a port”→ **tunnel_publish** —“✖️ Cancel”→ **tunnel_list_stopped** (expected (back/affordance))
 - **tunnel_list_stopped** —“➕ Publish a port”→ **tunnel_publish_none** —“✖️ Cancel”→ **tunnel_list_stopped** (expected (back/affordance))
 - **tunnel_list_stopped** —“➕ Publish a port”→ **tunnel_publish_unattributed** —“✖️ Cancel”→ **tunnel_list_stopped** (expected (back/affordance))
 - **tunnel_list_stopped** —“🗑 Remove 8080”→ **tunnel_remove_confirm** —“✅ Delete permanently”→ **tunnel_list_stopped** (**unobvious**)
-- **tunnel_list_stopped** —“⬅️ Back”→ **ws_detail_more** —“🌐 Public links”→ **tunnel_list_stopped** (expected (back/affordance))
+- **tunnel_list_stopped** —“⬅️ Back”→ **ws_detail** —“🌐 Public links”→ **tunnel_list_stopped** (expected (back/affordance))
 - **tunnel_publish** —“✏️ Type a port”→ **tunnel_publish_custom** —“✖️ Cancel”→ **tunnel_publish** (expected (back/affordance))
 - **tunnel_publish_custom** —“✖️ Cancel”→ **tunnel_publish_none** —“✏️ Type a port”→ **tunnel_publish_custom** (expected (back/affordance))
 - **tunnel_publish_custom** —“✖️ Cancel”→ **tunnel_publish_unattributed** —“✏️ Type a port”→ **tunnel_publish_custom** (expected (back/affordance))
@@ -19525,18 +20724,12 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **ws_create_plan** —“Monthly — 150 Stars”→ **ws_create_plan_short** —“Monthly — 150 Stars ✓”→ **ws_create_plan** (**unobvious**)
 - **ws_create_plan** —“Monthly — 150 Stars”→ **ws_create_plan_trial_used** —“Monthly — 150 Stars”→ **ws_create_plan** (**unobvious**)
 - **ws_create_plan_short** —“Monthly — 150 Stars ✓”→ **ws_create_plan_trial_used** —“Monthly — 150 Stars”→ **ws_create_plan_short** (**unobvious**)
-- **ws_detail** —“⋯ More”→ **ws_detail_more** —“⋯ Less”→ **ws_detail** (**unobvious**)
-- **ws_detail** —“⋯ More”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail** (**unobvious**)
 - **ws_detail** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail** (**unobvious**)
 - **ws_detail_locked** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_locked** (**unobvious**)
 - **ws_detail_locked** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_locked** (**unobvious**)
-- **ws_detail_more** —“⋯ Less”→ **ws_detail_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_more** (**unobvious**)
-- **ws_detail_more** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_more** (**unobvious**)
 - **ws_detail_suspended** —“🚪 Log out of workspace”→ **ws_list_inside** —“🏠 demo”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings** —“⏸️ Suspend”→ **ws_detail_suspended** (**unobvious**)
 - **ws_detail_suspended** —“⚙️ Settings”→ **ws_settings_suspended** —“▶️ Resume”→ **ws_detail_suspended** (**unobvious**)
@@ -19813,7 +21006,11 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 🗜 Archives → `arc:menu` → archive_menu
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
 - 📜 Runs → `run:history` → run_history
-- ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🐍 Packages → `pkg:list` → package_list, package_list_empty
+- 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+- 🔌 Ports → `port:list` → port_list, port_list_partial
+- 🧠 Processes → `proc:list` → process_list, process_list_empty
+- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
 
@@ -19976,14 +21173,14 @@ _Upload and extract an archive, extract a file already in the workspace, or expo
 - 📤 Upload and extract → `arc:upload` → archive_upload_prompt
 - 📂 Extract a file → `arc:extract_prompt` → archive_extract_prompt
 - 📦 Export a folder → `arc:export_prompt` → archive_export_prompt
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### archive_result — ✅ Archive result
 
 _Refused entries_
 
 - 🗜 Archives → `arc:menu` → archive_menu
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### archive_upload_prompt — 📤 Upload and extract
 
@@ -20057,7 +21254,7 @@ _That request couldn't be accepted._
 
 _This workspace is paused._
 
-- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
 - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
 ### exec_missing_mapped — ❌ Failed (exit 1)
@@ -20069,7 +21266,7 @@ _pillow is not installed in this workspace._
 - 🔁 Run again → `exec:prompt` → exec_prompt
 - 📜 Background job → `run:prompt` → job_prompt
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### exec_missing_two — ❌ Failed (exit 1)
 
@@ -20081,7 +21278,7 @@ _flask is not installed in this workspace._
 - 🔁 Run again → `exec:prompt` → exec_prompt
 - 📜 Background job → `run:prompt` → job_prompt
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### exec_missing_unknown — ❌ Failed (exit 1)
 
@@ -20092,7 +21289,7 @@ _mystery_lib is not in the known list, and its pip name may differ._
 - 🔁 Run again → `exec:prompt` → exec_prompt
 - 📜 Background job → `run:prompt` → job_prompt
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### exec_prompt — ⚡ Quick command
 
@@ -20107,7 +21304,7 @@ _Traceback File "/workspace/main.py", line 3, in <module> 120 ms_
 - 🔁 Run again → `exec:prompt` → exec_prompt
 - 📜 Background job → `run:prompt` → job_prompt
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### exec_result_ok — ✅ Finished (exit 0)
 
@@ -20116,7 +21313,7 @@ _hello from main.py args: ['a', 'b'] stderr (empty)68 ms_
 - 🔁 Run again → `exec:prompt` → exec_prompt
 - 📜 Background job → `run:prompt` → job_prompt
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### file_browser — (no title)
 
@@ -20125,7 +21322,7 @@ _(no body text)_
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
 - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### file_browser_empty — (no title)
 
@@ -20134,7 +21331,7 @@ _(no body text)_
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
 - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### file_browser_page_2 — (no title)
 
@@ -20143,7 +21340,7 @@ _(no body text)_
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
 - ⬆️ Up → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### file_delete_confirm — 🗑 Delete file?
 
@@ -20179,7 +21376,7 @@ _def greet(name): print(f"Hello, {name}") sha256 9f2c4e7a1b · lines 1–5 of 5_
 - ✏️ Rename → `file:rename` → file_rename
 - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
 - 🔙 Folder → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### file_view_binary — 📦 archive.zip
 
@@ -20188,7 +21385,7 @@ _(no body text)_
 - ✏️ Rename → `file:rename` → file_rename
 - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
 - 🔙 Folder → `file:cd` → file_browser, file_browser_empty, file_browser_page_2
-- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### fj_gate — (no title)
 
@@ -20206,7 +21403,7 @@ _CloudBot runs your code safely in an isolated sandbox — you never need to tou
 
 _CloudBot runs your code safely in an isolated sandbox — you never need to touch a server._
 
-- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### job_prompt — 📜 Background job
 
@@ -20222,7 +21419,7 @@ _Tap “Live logs” to watch output._
 - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
 - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
 - 📜 Runs → `run:history` → run_history
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### language_card — 🌐 Choose your language
 
@@ -20245,7 +21442,7 @@ _اختر لغتك_
 
 - العربية → `lang:ar` → menu, menu_empty, menu_inside
 - ✓ English (disabled) → `lang:en` → menu, menu_empty, menu_inside
-- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### live_logs_finished — ✅ Finished (exit 0)
 
@@ -20254,7 +21451,7 @@ _(no body text)_
 - 🔁 Run again → `run:file` → job_prompt
 - 🗑 Delete log → `run:delete` → run_history
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### live_logs_running — 📜 Live logs
 
@@ -20262,7 +21459,7 @@ _Status: Running_
 
 - ⏹ Stop → `run:stop_confirm` → (handler only — no screen)
 - 🔄 Refresh → `run:refresh` → live_logs_finished, live_logs_running
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### menu — (no title)
 
@@ -20287,7 +21484,7 @@ _Development environments and cloud hosting — right from your phone._
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
 - ➕ New Workspace → `ws:new` → ws_create_name
-- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### metrics — 📊 Resources
 
@@ -20295,7 +21492,7 @@ _Sampled roughly every 3 seconds. Refresh to take a new snapshot._
 
 - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### metrics_idle_incomplete — 📊 Resources
 
@@ -20303,19 +21500,19 @@ _Nothing is running in this workspace._
 
 - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### package_install_failed_no_net — ❌ Install failed
 
 _The install did not complete (exit code 1)._
 
-- ⬅️ Back → `origin:back` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- ⬅️ Back → `origin:back` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### package_install_ok — ✅ Packages installed
 
 _Installed six requests._
 
-- ✅ Installed six requests — Back → `origin:back` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- ✅ Installed six requests — Back → `origin:back` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### package_install_ok_no_origin — ✅ Packages installed
 
@@ -20342,14 +21539,14 @@ _2 installed_
 - ➕ Install packages → `pkg:install` → package_install_prompt
 - 🗑 Remove one → `pkg:rm_prompt` → package_remove_prompt
 - 🧹 Remove all → `pkg:rm_all_confirm` → package_remove_all_confirm
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### package_list_empty — 🐍 Packages
 
 _0 installed_
 
 - ➕ Install packages → `pkg:install` → package_install_prompt
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### package_remove_all_confirm — 🧹 Remove all packages?
 
@@ -20370,7 +21567,7 @@ _2 ports_
 
 - 🔄 Refresh → `port:list` → port_list, port_list_partial
 - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### port_list_partial — 🔌 Listening ports
 
@@ -20378,14 +21575,14 @@ _1 ports_
 
 - 🔄 Refresh → `port:list` → port_list, port_list_partial
 - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### process_gone — ✅ Already stopped
 
 _That process had already exited — nothing left to stop._
 
 - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### process_list — 🧠 Processes
 
@@ -20395,7 +21592,7 @@ _2 live_
 - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
 - 🔄 Refresh → `proc:list` → process_list, process_list_empty
 - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### process_list_empty — 🧠 Processes
 
@@ -20403,7 +21600,7 @@ _0 live_
 
 - 🔄 Refresh → `proc:list` → process_list, process_list_empty
 - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### process_stop_confirm — ⏹ Stop this process?
 
@@ -20417,13 +21614,13 @@ _The whole process tree for python3 bot.py will be stopped._
 _The process tree was stopped._
 
 - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### purge_conflict — 🗑 Purge history
 
 _(no body text)_
 
-- 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
 - ⬅️ Back → `run:history` → run_history
 
 ### run_history — 📜 Runs
@@ -20436,7 +21633,7 @@ _12 runs_
 - ⏳ Active → `run:filter` → run_history
 - Next ➡️ → `run:history` → run_history
 - 🗑 Purge history → `run:purge_confirm` → purge_conflict, run_history
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### run_mode — ▶️ Run
 
@@ -20445,7 +21642,7 @@ _How would you like to run code in demo?_
 - ⚡ Quick command → `exec:prompt` → exec_prompt
 - 📜 Background job → `run:prompt` → job_prompt
 - 📄 Run a file → `run:pick_file` → (handler only — no screen)
-- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### settings — ⚙️ Settings
 
@@ -20459,7 +21656,7 @@ _Help and language._
 
 _Help and language._
 
-- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### terminal_command — ⌨️ Send a command
 
@@ -20474,7 +21671,7 @@ _That terminal has closed._
 - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_list — 🖥 Terminals
 
@@ -20483,14 +21680,14 @@ _2 terminals_
 - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_list_empty — 🖥 Terminals
 
 _You don't have any terminals open in this workspace._
 
 - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_stale — ♻️ This button is out of date
 
@@ -20575,7 +21772,7 @@ _One file that prints a message, ready to run._
 _Python module_
 
 - 📁 See the files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tpl_done_failed — ⚠️ Template stopped
 
@@ -20606,7 +21803,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_already_published — 🌐 Public links
 
@@ -20615,56 +21812,56 @@ _Page 1 of 1_
 - 🔗 Open 8080 → URL `https://example-abc.trycloudflare.com`
 - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
 - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_gate_allow_net — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_gate_allow_tunnels — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_gate_deleted — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_gate_locked — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_gate_server — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_gate_suspended — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_limit_reached — ⚠️ Link limit reached
 
 _You've reached the maximum of 2 published links. Remove one first, then publish again._
 
 - 🗑 Remove a link → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_list — 🌐 Public links
 
@@ -20673,7 +21870,7 @@ _Page 1 of 1_
 - 🔗 Open 8080 → URL `https://example-abc.trycloudflare.com`
 - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
 - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_list_at_cap — 🌐 Public links
 
@@ -20684,14 +21881,14 @@ _Page 1 of 1_
 - ➕ Publish a port · limit reached (disabled) → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
 - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
 - 🗑 Remove 8081 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_list_empty — 🌐 Public links
 
 _No public links in this workspace._
 
 - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_list_stopped — 🌐 Public links
 
@@ -20702,7 +21899,7 @@ _Page 1 of 1_
 - ➕ Publish a port → `tnl:publish` → tunnel_publish, tunnel_publish_none, tunnel_publish_unattributed
 - 🗑 Remove 8080 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
 - 🗑 Remove 8082 → `tnl:remove_confirm` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_publish — ➕ Publish a port
 
@@ -20871,20 +22068,20 @@ _Decide what this workspace may reach, then continue to the plans._
 
 _Plan for demo:_
 
-- 🎁 Free trial — 3 days → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Monthly — 150 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🎁 Free trial — 3 days → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Monthly — 150 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
 - ⬅️ Back → `ws:back_net` → ws_create_network
 
 ### ws_create_plan_short — 📦 Choose a plan
 
 _Plan for demo:_
 
-- 🎁 Free trial — 3 days → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Monthly — 150 Stars ✓ → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🎁 Free trial — 3 days → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Monthly — 150 Stars ✓ → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
 - ⭐ Buy Stars → `ws:packs` → wallet_packs
 - ⬅️ Back → `ws:back_net` → ws_create_network
 
@@ -20892,9 +22089,9 @@ _Plan for demo:_
 
 _Plan for demo:_
 
-- Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Monthly — 150 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Monthly — 150 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
+- Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
 - ⬅️ Back → `ws:back_net` → ws_create_network
 
 ### ws_delete_confirm — 🗑 Delete workspace?
@@ -20902,7 +22099,7 @@ _Plan for demo:_
 _demo will be permanently deleted._
 
 - ✅ Delete permanently → `ws:delete` → ws_list, ws_list_empty, ws_list_inside
-- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### ws_detail — (no title)
 
@@ -20914,7 +22111,11 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
 - 📜 Runs → `run:history` → run_history
 - 📦 Starter templates → `tpl:list` → tpl_list
-- ⋯ More → `ws:more` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🐍 Packages → `pkg:list` → package_list, package_list_empty
+- 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
+- 🔌 Ports → `port:list` → port_list, port_list_partial
+- 🧠 Processes → `proc:list` → process_list, process_list_empty
+- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 
@@ -20927,30 +22128,11 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 
-### ws_detail_more — (no title)
-
-_▬▬▭▭▬▬▭▭▬▬▭▭_
-
-- 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
-- ▶️ Run → `run:choose` → run_mode
-- 🗜 Archives → `arc:menu` → archive_menu
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-- 📜 Runs → `run:history` → run_history
-- 📦 Starter templates → `tpl:list` → tpl_list
-- 🐍 Packages → `pkg:list` → package_list, package_list_empty
-- 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
-- 🔌 Ports → `port:list` → port_list, port_list_partial
-- 🧠 Processes → `proc:list` → process_list, process_list_empty
-- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-- ⋯ Less → `ws:less` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
-- 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-
 ### ws_detail_suspended — (no title)
 
 _▬▬▭▭▬▬▭▭▬▬▭▭_
 
-- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
 - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run (disabled) → `run:choose` → run_mode
 - 🖥 Terminals (disabled) → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -20974,35 +22156,35 @@ _You don't have any workspaces yet._
 
 _(no body text)_
 
-- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+- 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
 ### ws_settings — ⚙️ Workspace settings
 
 _» From here you control this workspace: delete it, pause it, or stop every running process._
 
 - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
-- ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
+- ⏸️ Suspend → `ws:suspend_confirm` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
 - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-- ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### ws_settings_suspended — ⚙️ Workspace settings
 
 _» From here you control this workspace: delete it, pause it, or stop every running process._
 
-- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
 - 🗑 Delete workspace → `ws:delete_confirm` → ws_delete_confirm
-- ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⬅️ Back to workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### ws_stop_confirm — 🛑 Stop everything?
 
 _All runs, terminals and background processes in demo will be stopped._
 
-- 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- 🛑 Stop All → `ws:stop` → ws_detail, ws_detail_locked, ws_detail_suspended
+- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### ws_suspend_confirm — ⏸️ Suspend workspace?
 
 _demo will be paused. Running work stops and new work is refused._
 
-- ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_suspend_confirm
-- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+- ⏸️ Suspend → `ws:suspend` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_suspend_confirm
+- ✖️ Cancel → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended

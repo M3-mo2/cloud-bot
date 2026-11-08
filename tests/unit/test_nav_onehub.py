@@ -39,7 +39,8 @@ INSIDE = frozenset(
         "language_picker_inside",
         "ws_list_inside",
         "ws_detail",
-        "ws_detail_more",
+        # ``ws_detail_more`` is gone: the workspace home is one flat page with no
+        # disclosure control (TASK no-more-less), so it is no longer a screen.
         "ws_detail_suspended",
         "ws_detail_locked",
         "ws_create_name",

@@ -212,8 +212,6 @@ MESSAGES: dict[str, str] = {
     "ws.head.title": "Your workspace",
     "ws.head.since": "Running since",
     "ws.head.just_now": "<b>just now</b>",
-    "ws.more": "⋯ More",
-    "ws.less": "⋯ Less",
     "ws.detail.runs_line": "{total} total, {active} active",
     "ws.cpu.cores": "{n} core",
     "ws.cpu.cores_plural": "{n} cores",

@@ -132,16 +132,47 @@ Keyboard: **➕ New Workspace** (inline, success), **🏠 Home** (inline, primar
 
 ### 2.3 Keyboard — `active` workspace
 
-| Label (AR) | Label (EN) | Type | Style | Flags |
+**One flat grid, no disclosure control.** A hosting product's home shows the
+tools; a user should not have to discover a «المزيد» button to find them. The
+grid reads as a user's day:
+
+```
+[ 📁 الملفات ]      [ ▶️ تشغيل ]
+[ 🗜 الأرشيفات ]    [ 🖥 الطرفيات ]
+[ 📜 التشغيلات ]    [ 📦 قوالب جاهزة ]
+[ 🐍 المكتبات ]     [ 🌐 الروابط العامة ]
+[ 🔌 المنافذ ]      [ 🧠 العمليات ]
+[ 📊 الموارد ]
+[ ⚙️ الإعدادات ]
+[ 🚪 تسجيل الخروج من مساحة العمل ]
+```
+
+Everyday work first, then what the workspace is doing, then observation.
+**Settings sits alone on its own row** and is the last grid row: pausing,
+stopping everything and deleting live behind it, and a destructive screen is
+never adjacent to a button a hand taps by habit. The grid's odd count leaves the
+last row with one button; it is never padded with a placeholder.
+
+| Label (AR) | Label (EN) | Callback | Style | Flags |
 | --- | --- | --- | --- | --- |
-| 📁 الملفات | 📁 Files | inline | primary | — |
-| ▶️ تشغيل | ▶️ Run | inline | success | `disabled` if a run is active |
-| 📜 التشغيلات | 📜 Runs | inline | primary | — |
-| ⏸️ إيقاف مؤقت | ⏸️ Suspend | inline | primary | — |
-| 🚪 تسجيل الخروج من مساحة العمل | 🚪 Log out of workspace | inline | primary | leaves the session |
-| 🛑 إيقاف الكل | 🛑 Stop All | inline | danger | confirm |
-| 🗑 حذف | 🗑 Delete | inline | danger | confirm |
-| … | … | inline | — | the shared nav block (see below) |
+| 📁 الملفات | 📁 Files | `file:ls` | primary | — |
+| ▶️ تشغيل | ▶️ Run | `run:choose` | success | `disabled` if a run is active |
+| 🗜 الأرشيفات | 🗜 Archives | `arc:menu` | primary | — |
+| 🖥 الطرفيات | 🖥 Terminals | `term:list` | primary | — |
+| 📜 التشغيلات | 📜 Runs | `run:history` | primary | — |
+| 📦 قوالب جاهزة | 📦 Starter templates | `tpl:list` | primary | owner's home only, not the admin's entered view |
+| 🐍 المكتبات | 🐍 Packages | `pkg:list` | primary | — |
+| 🌐 الروابط العامة | 🌐 Public links | `tnl:list` | primary | — |
+| 🔌 المنافذ | 🔌 Ports | `port:list` | primary | — |
+| 🧠 العمليات | 🧠 Processes | `proc:list` | primary | — |
+| 📊 الموارد | 📊 Resources | `met:view` | primary | — |
+| ⚙️ الإعدادات | ⚙️ Settings | `ws:settings` | primary | own row, last grid row |
+| 🚪 تسجيل الخروج من مساحة العمل | 🚪 Log out of workspace | `ws:logout` | primary | leaves the session; one button on its own row |
+
+There is no `ws:more`/`ws:less` and no `ws_detail_more`: the disclosure control
+and its routes were deleted (TASK no-more-less), so the home has exactly one
+shape. Administrative actions (suspend, stop-all, delete) are on the Settings
+screen, not here.
 
 ### 2.4 Keyboard — `suspended` workspace
 

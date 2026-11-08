@@ -56,7 +56,6 @@ INSIDE_SCREENS: frozenset[str] = frozenset(
         "language_picker_inside",
         "ws_list_inside",
         "ws_detail",
-        "ws_detail_more",
         "ws_detail_suspended",
         "ws_detail_locked",
         "admin_entered",

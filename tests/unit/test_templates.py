@@ -875,7 +875,18 @@ def test_the_confirm_screen_lists_folder_relative_paths(locale):
 
 
 @pytest.mark.parametrize("locale", LOCALES)
-def test_the_workspace_entry_is_its_own_full_width_row(locale):
+def test_the_workspace_entry_sits_in_the_flat_grid_not_a_dedicated_row(locale):
+    """TASK no-more-less: the starter-templates entry is a normal grid button.
+
+    It used to own a full-width row of its own on the workspace home. That row
+    existed because the home was a mixed layout — everyday tools, then the
+    templates entry, then the «المزيد» disclosure — and the extra row was how it
+    stayed visually distinct from the overflow. With the disclosure gone and the
+    page flattened, every tool is one grid, two per row, so the templates entry
+    now sits beside Runs exactly like the rest. It is still one entry, still
+    reachable in a single tap, and still absent from suspended/locked homes
+    (asserted above); only its layout changed.
+    """
     ws = _detail()
     screen = ws_screens.workspace_detail(ws, locale)
     rows = [
@@ -883,7 +894,10 @@ def test_the_workspace_entry_is_its_own_full_width_row(locale):
         for row in screen.markup.inline_keyboard
         if any((b.callback_data or "").startswith("tpl:list") for b in row)
     ]
-    assert len(rows) == 1 and len(rows[0]) == 1, rows
+    assert len(rows) == 1, rows
+    assert len(rows[0]) == 2, rows
+    assert any((b.callback_data or "").startswith("run:history") for b in rows[0]), rows
+    assert all(len(row) <= 2 for row in screen.markup.inline_keyboard), "grid rows are two wide"
 
 
 # ---------------------------------------------------------------------------

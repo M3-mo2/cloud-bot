@@ -54,7 +54,7 @@ locked (INTEGRATION-GUIDE §8.4).
 
 | Router | Entry point (callback/command) | Kind | Gate today | Gate after this task |
 | --- | --- | --- | --- | --- |
-| `workspaces` | `ws:list`, `ws:view`, `ws:home`, `ws:more`, `ws:less` | read / enter | none (render only) | read — allowed |
+| `workspaces` | `ws:list`, `ws:view`, `ws:home` | read / enter | none (render only) | read — allowed |
 | `workspaces` | `ws:new`, `ws:plan`, `ws:continue` | create (needs a plan) | plan is mandatory at create | unchanged (create attaches a plan) |
 | `workspaces` | `ws:settings`, `ws:stop`, `ws:suspend`, `ws:resume`, `ws:delete` | lifecycle/control | none | control — unchanged (not compute) |
 | `workspaces` | `ws:renew` | billing navigation | none | unchanged |

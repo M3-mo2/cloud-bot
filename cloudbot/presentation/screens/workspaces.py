@@ -169,7 +169,6 @@ def workspace_detail(
     confirmation: str | None = None,
     mode: RunMode = RunMode.PRODUCTION,
     session: bool = True,
-    more: bool = False,
     plan_state: str | None = None,
 ) -> Screen:
     """The workspace home: identity, age, then the specification on request.
@@ -179,8 +178,8 @@ def workspace_detail(
     behind the collapsed "technical details" table, which stays one tap away and
     out of the way of the visits that only want files or a run.
 
-    ``more`` reveals the secondary tool destinations in the keyboard; the body
-    never depends on it, so the screen reads the same however the user reached it.
+    The tool grid is flat: every destination is on the page, one shape always.
+    There is no disclosure control — a hosting product's home shows the tools.
     """
 
     if now is None:
@@ -301,7 +300,7 @@ def workspace_detail(
 
     return Screen(
         doc=doc,
-        markup=workspace_detail_markup(ws, locale, active_run=active_run, session=session, more=more),
+        markup=workspace_detail_markup(ws, locale, active_run=active_run, session=session),
     )
 
 
@@ -357,10 +356,20 @@ def workspace_settings(
     return Screen(doc=doc, markup=inline_markup(rows))
 
 
-#: Tool destinations behind "More", in display order. Each is (label key, callback).
-#: These are the screens a user reaches less often than files/runs/terminals, so they
-#: are the ones worth collapsing rather than the ones worth deleting.
-_EXTRA_TOOLS: tuple[tuple[str, str], ...] = (
+#: The tool grid on an active workspace home, in reading order, two per row.
+#: Each entry is (label key, callback). The order is a user's day, not a
+#: developer's list: everyday work first (files, run, archives, terminals, runs,
+#: templates), then "what is my workspace doing" (packages, public links, ports),
+#: then observation (processes, metrics). Settings is appended on its own last
+#: row — pausing and deleting live there, and a destructive screen is never
+#: adjacent to a button a hand taps by habit.
+_TOOLS: tuple[tuple[str, str], ...] = (
+    ("ws.files", "file:ls"),
+    ("ws.run", "run:choose"),
+    ("ws.archives", "arc:menu"),
+    ("ws.terminals", "term:list"),
+    ("ws.runs", "run:history"),
+    ("ws.templates", "tpl:list"),
     ("ws.packages", "pkg:list"),
     ("ws.public_links", "tnl:list"),
     ("ws.ports", "port:list"),
@@ -375,64 +384,43 @@ def workspace_detail_markup(
     *,
     active_run: bool = False,
     session: bool = True,
-    more: bool = False,
 ):
-    """The language of this screen, in his order.
+    """The language of this screen, in his order — one flat page, no toggle.
 
-    Everyday tools first (files, run, runs, terminals), then the one archived
-    corner (archives) directly under the file tools it belongs to, then the single
-    settings destination. Pausing, stopping everything and deleting left this grid
-    entirely: they are administration, and they have their own screen — putting a
-    destructive button among the buttons a user taps all day is how it gets tapped.
+    Everyday tools first, then what the workspace is doing, then observation;
+    Settings alone on the last row. Pausing, stopping everything and deleting
+    left this grid entirely: they are administration, and they have their own
+    screen — putting a destructive button among the buttons a user taps all day
+    is how it gets tapped.
     """
     ws_id = ws.id
     rows: list[list] = []
 
-    def _more_row(expanded: bool) -> list:
-        label = catalog.t("ws.less" if expanded else "ws.more", locale)
-        action = _cb("ws:less" if expanded else "ws:more", ws_id)
-        return [inline(label, action, intent=Intent.PRIMARY)]
-
     if ws.status is WorkspaceStatus.ACTIVE:
-        rows.append(
-            [
-                inline(catalog.t("ws.files", locale), _cb("file:ls", ws_id, 0), intent=Intent.PRIMARY),
-                inline(
-                    catalog.t("ws.run", locale),
-                    _cb("run:choose", ws_id),
+        # Two per row, in ``_TOOLS`` order; the odd count leaves Settings alone
+        # rather than padding the row with a placeholder.
+        tools = list(_TOOLS)
+        # Starter templates write files into this workspace, so only the owner's
+        # own home offers them: the admin's entered view (session=False) is a
+        # read-only inspection surface, and writing starter files there would be
+        # a change to an admin screen this task must not make.
+        if not session:
+            tools = [entry for entry in tools if entry[1] != "tpl:list"]
+
+        def _tool_button(key: str, action: str):
+            if action == "run:choose":
+                return inline(
+                    catalog.t(key, locale),
+                    _cb(action, ws_id),
                     intent=Intent.SUCCESS if not active_run else Intent.MUTED,
                     disabled=active_run,
-                ),
-            ]
-        )
-        # Archives sits with the file tools, not in the overflow: it is where a user
-        # goes after uploading a zip, which is a files-adjacent errand.
-        rows.append(
-            [
-                inline(catalog.t("ws.archives", locale), _cb("arc:menu", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("ws.terminals", locale), _cb("term:list", ws_id), intent=Intent.PRIMARY),
-            ]
-        )
-        rows.append(
-            [inline(catalog.t("ws.runs", locale), _cb("run:history", ws_id), intent=Intent.PRIMARY)]
-        )
-        # Starter templates: its own row, primary intent. It writes files into
-        # this workspace, so it belongs with the everyday tools — not in the
-        # overflow and never as a second nav entry. Only the owner's own home
-        # offers it: the admin's entered view (session=False) is a read-only
-        # inspection surface, and writing starter files there would be a change
-        # to an admin screen this task must not make.
-        if session:
-            rows.append(
-                [inline(catalog.t("ws.templates", locale), _cb("tpl:list", ws_id), intent=Intent.PRIMARY)]
-            )
-        if more:
-            extra = [
-                inline(catalog.t(key, locale), _cb(action, ws_id), intent=Intent.PRIMARY)
-                for key, action in _EXTRA_TOOLS
-            ]
-            rows += [extra[i : i + 2] for i in range(0, len(extra), 2)]
-        rows.append(_more_row(more))
+                )
+            if action == "file:ls":
+                return inline(catalog.t(key, locale), _cb(action, ws_id, 0), intent=Intent.PRIMARY)
+            return inline(catalog.t(key, locale), _cb(action, ws_id), intent=Intent.PRIMARY)
+
+        for index in range(0, len(tools), 2):
+            rows.append([_tool_button(key, action) for key, action in tools[index : index + 2]])
         rows.append(
             [inline(catalog.t("ws.settings", locale), _cb("ws:settings", ws_id), intent=Intent.PRIMARY)]
         )
