@@ -99,6 +99,7 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
         features,
         files,
         forcejoin,
+        templates,
         terminal,
         workspaces,
     )
@@ -116,6 +117,9 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     dispatcher.include_router(admin_panel.router)
     dispatcher.include_router(workspaces.router)
     dispatcher.include_router(files.router)
+    # Starter templates: a workspace-scoped write behind a confirmation. It goes
+    # after the file router so a ``tpl:`` callback can never be mistaken for one.
+    dispatcher.include_router(templates.router)
     dispatcher.include_router(execution.router)
     dispatcher.include_router(features.router)
     dispatcher.include_router(admin.router)

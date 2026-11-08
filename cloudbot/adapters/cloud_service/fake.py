@@ -343,6 +343,18 @@ class FakeEngine:
         self, ws_id: WorkspaceId, path: str, content: str, *, encoding: str = "text"
     ) -> None:
         await self.get_workspace(ws_id)
+        # Record the write so a multi-file create can be measured by its effects,
+        # not merely by "a call happened": update or append the entry in place.
+        entries = self._files.setdefault(str(ws_id), [])
+        body = content.encode("utf-8")
+        name = path.rstrip("/").rsplit("/", 1)[-1]
+        for index, entry in enumerate(entries):
+            if entry.path == path:
+                entries[index] = FileEntry(
+                    path, name, "file", len(body), "-rw-r--r--", _NOW, None
+                )
+                return
+        entries.append(FileEntry(path, name, "file", len(body), "-rw-r--r--", _NOW, None))
 
     async def delete_file(self, ws_id: WorkspaceId, path: str) -> None:
         await self.get_workspace(ws_id)

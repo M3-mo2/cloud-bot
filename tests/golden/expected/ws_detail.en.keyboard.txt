@@ -1,6 +1,7 @@
 📁 Files [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK4:0] enabled | ▶️ Run [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK4] disabled
 🗜 Archives [arc:menu:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🖥 Terminals [term:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 📜 Runs [run:history:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+📦 Starter templates [tpl:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 ⋯ More [ws:more:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 ⚙️ Settings [ws:settings:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🚪 Log out of workspace [ws:logout:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled

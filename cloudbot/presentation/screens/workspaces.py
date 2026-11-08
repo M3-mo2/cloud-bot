@@ -416,6 +416,16 @@ def workspace_detail_markup(
         rows.append(
             [inline(catalog.t("ws.runs", locale), _cb("run:history", ws_id), intent=Intent.PRIMARY)]
         )
+        # Starter templates: its own row, primary intent. It writes files into
+        # this workspace, so it belongs with the everyday tools — not in the
+        # overflow and never as a second nav entry. Only the owner's own home
+        # offers it: the admin's entered view (session=False) is a read-only
+        # inspection surface, and writing starter files there would be a change
+        # to an admin screen this task must not make.
+        if session:
+            rows.append(
+                [inline(catalog.t("ws.templates", locale), _cb("tpl:list", ws_id), intent=Intent.PRIMARY)]
+            )
         if more:
             extra = [
                 inline(catalog.t(key, locale), _cb(action, ws_id), intent=Intent.PRIMARY)

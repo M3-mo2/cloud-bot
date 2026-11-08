@@ -22,6 +22,7 @@ def _reset_global_routers():
         features,
         files,
         forcejoin,
+        templates,
         terminal,
         workspaces,
     )
@@ -34,6 +35,7 @@ def _reset_global_routers():
         admin_panel,
         workspaces,
         files,
+        templates,
         execution,
         features,
         forcejoin,

@@ -85,6 +85,7 @@ def _handler_modules():
         features,
         files,
         forcejoin,
+        templates,
         terminal,
         workspaces,
     )
@@ -97,6 +98,7 @@ def _handler_modules():
         admin_panel,
         workspaces,
         files,
+        templates,
         execution,
         features,
         admin,

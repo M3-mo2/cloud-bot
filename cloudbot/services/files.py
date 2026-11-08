@@ -1,22 +1,76 @@
-"""File use-cases: list, view, write, delete, mkdir, rename, upload.
+"""File use-cases: list, view, write, delete, mkdir, rename, upload, create many.
 
 Encodes binary safely and enforces the upload cap before a wasted round trip.
+
+``create_many`` is the one multi-file write (starter templates): it checks every
+target path for a collision **before** it writes anything, and it reports exactly
+how far it got if the engine refuses part-way. The engine has no transaction for
+a set of writes (INTEGRATION-GUIDE §3 — one file per ``PUT``), so atomicity is
+never claimed: the caller is told the truth about partial state.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import AsyncIterator
 
-from cloudbot.core.errors import InvalidInput
+from cloudbot.core.errors import EngineRefused, InvalidInput
 from cloudbot.domain.meta import EngineMeta
 from cloudbot.domain.ports.engine import EnginePort
 from cloudbot.domain.value_objects import FileContent, FilePage, WorkspaceId
 from cloudbot.services.ownership import OwnershipService
 
+
+class TemplatePathsExist(InvalidInput):
+    """A multi-file create was refused because target paths already exist.
+
+    Carries the conflicting paths in order so the refusal screen can name every
+    one; nothing was written when this is raised.
+    """
+
+    code = "template_paths_exist"
+
+    def __init__(self, paths: list[str]) -> None:
+        super().__init__("template", "exists")
+        self.paths = tuple(paths)
+
+
 #: Listing page size — UI 03 pages at 10–20 rows.
 LIST_PAGE_LIMIT = 20
 #: Rich-message code blocks are bounded; keep the tail.
 MAX_PREVIEW_BYTES = 12 * 1024
+
+#: Engine codes that mean "the path is absent" for a ``files/stat`` probe. The
+#: real engine answers 404 ``not_found``; ``not_directory`` (422) means an
+#: ancestor is a file, which also means the target path is not an existing file.
+_MISSING_CODES = frozenset({"not_found", "not_directory"})
+
+
+@dataclass(frozen=True)
+class FileWrite:
+    """One file to write: ``path`` absolute in the workspace, ``content`` text."""
+
+    path: str
+    content: str
+
+
+@dataclass(frozen=True)
+class CreateManyResult:
+    """The honest outcome of writing several files.
+
+    ``written`` are the paths that landed, in order; ``failed_path``,
+    ``error_code`` and ``message`` are set when the engine refused a write after
+    some had already landed (partial state is stated, never implied).
+    """
+
+    written: tuple[str, ...] = ()
+    failed_path: str | None = None
+    error_code: str = ""
+    message: str = ""
+
+    @property
+    def ok(self) -> bool:
+        return self.failed_path is None
 
 
 class FilesService:
@@ -70,6 +124,76 @@ class FilesService:
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_writable(tg_id, ws_id)
         await self._engine.write_file(ws_id, path, content, encoding=encoding)
+
+    async def exists(self, tg_id: int, ws_id: WorkspaceId, path: str) -> bool:
+        """Whether ``path`` names a file that already exists.
+
+        A ``files/stat`` probe; a ``not_found`` (or ``not_directory``) answer is
+        a clean "no", never an error. Any other refusal propagates so the caller
+        cannot mistake an engine outage for an absent file and overwrite it.
+        """
+        await self._ownership.assert_owned(tg_id, ws_id)
+        try:
+            await self._engine.stat_file(ws_id, path)
+        except EngineRefused as exc:
+            if exc.engine_code in _MISSING_CODES:
+                return False
+            raise
+        # Any stat success means the path exists — file, directory or symlink.
+        # A directory on the target path is a collision too: writing over it would
+        # be refused by the engine (``not_directory``) after earlier files landed.
+        return True
+
+    async def existing(self, tg_id: int, ws_id: WorkspaceId, paths: list[str]) -> list[str]:
+        """The subset of ``paths`` that already exists, in the given order."""
+        found: list[str] = []
+        for path in paths:
+            if await self.exists(tg_id, ws_id, path):
+                found.append(path)
+        return found
+
+    async def create_many(
+        self,
+        tg_id: int,
+        ws_id: WorkspaceId,
+        files: list[FileWrite],
+        *,
+        overwrite: bool = False,
+    ) -> CreateManyResult:
+        """Write several files, refusing the whole set on any collision.
+
+        Every rule the single write enforces still holds: ownership, the plan
+        gate, and the engine's own path/size checks (the content goes through
+        ``write_file`` unchanged). The collision check runs **first**, so with
+        ``overwrite=False`` a template can never silently overwrite a user's
+        file: nothing is written and no path is touched.
+
+        There is no engine transaction across a set of ``PUT``s, so a refusal
+        part-way is reported honestly — ``written`` lists what landed and
+        ``failed_path`` / ``error_code`` name where it stopped.
+        """
+        await self._ownership.assert_owned(tg_id, ws_id)
+        await self._assert_writable(tg_id, ws_id)
+
+        if not overwrite:
+            conflicts = await self.existing(tg_id, ws_id, [f.path for f in files])
+            if conflicts:
+                raise TemplatePathsExist(conflicts)
+
+        written: list[str] = []
+        for item in files:
+            try:
+                await self._engine.write_file(ws_id, item.path, item.content)
+            except EngineRefused as exc:
+                return CreateManyResult(
+                    written=tuple(written),
+                    failed_path=item.path,
+                    error_code=exc.engine_code,
+                    message=getattr(exc, "message", "") or "",
+                )
+            written.append(item.path)
+        return CreateManyResult(written=tuple(written))
+
 
     async def mkdir(self, tg_id: int, ws_id: WorkspaceId, path: str) -> None:
         await self._ownership.assert_owned(tg_id, ws_id)

@@ -112,6 +112,8 @@ from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.presentation.screens import wallet as wallet_screens
 from cloudbot.presentation.screens import workspaces as ws_screens
+from cloudbot.presentation.screens import templates as tpl_screens
+from cloudbot.domain import templates as tpl_templates
 from cloudbot.presentation.screens.forcejoin import gate_screen
 from cloudbot.domain.billing import STAR_PACKS
 from cloudbot.presentation.screens.admin import audit as admin_audit
@@ -147,6 +149,13 @@ _WS_LAST_ACTIVITY = _WS_NOW - timedelta(minutes=2)
 
 #: Screens that are deliberately not RTL even in Arabic (bilingual by design).
 NEVER_RTL = {"language_card"}
+
+
+def _template(key: str) -> tpl_templates.Template:
+    """A fixed starter template for the goldens (the catalog is static)."""
+    template = tpl_templates.by_key(key)
+    assert template is not None, key
+    return template
 
 #: A builder receives the fixture dict and a locale, and returns a pure ``Screen``.
 ScreenBuilder = Callable[[dict[str, Any], Locale], Screen]
@@ -1054,6 +1063,29 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "ws_delete_confirm": lambda f, loc: ws_screens.delete_confirm(f["ws"], loc),
     "ws_stop_confirm": lambda f, loc: ws_screens.stop_confirm(f["ws"], loc),
     "ws_suspend_confirm": lambda f, loc: ws_screens.suspend_confirm(f["ws"], loc),
+    # -- starter templates (TASK python-templates) ---------------------------
+    "tpl_list": lambda f, loc: tpl_screens.list_screen(f["ws"].id, loc),
+    "tpl_confirm": lambda f, loc: tpl_screens.confirm_screen(
+        _template("module"), f["ws"].id, loc
+    ),
+    "tpl_confirm_conflict": lambda f, loc: tpl_screens.confirm_screen(
+        _template("hello"), f["ws"].id, loc, conflicts=["/hello.py"]
+    ),
+    "tpl_done_created": lambda f, loc: tpl_screens.done_created(
+        _template("module"), f["ws"].id, loc, tpl_templates.paths(_template("module"))
+    ),
+    "tpl_done_refused": lambda f, loc: tpl_screens.done_refused(
+        _template("hello"), f["ws"].id, loc, ["/hello.py"]
+    ),
+    "tpl_done_failed": lambda f, loc: tpl_screens.done_failed(
+        _template("flask-api"),
+        f["ws"].id,
+        loc,
+        failed_path="/README.md",
+        error_code="insufficient_storage",
+        written=("/app.py",),
+        engine_message="disk is full",
+    ),
     "file_browser": lambda f, loc: file_screens.file_browser(f["file_page"], f["ws"].id, loc),
     "file_browser_empty": lambda f, loc: file_screens.file_browser(f["empty_page"], f["ws"].id, loc),
     "file_view": lambda f, loc: file_screens.file_view(f["content"], f["ws"].id, loc),
@@ -1357,6 +1389,8 @@ def _section_of(name: str) -> str:
     if name in ("menu", "menu_empty", "menu_inside", "help", "help_inside", "settings", "settings_inside"):
         return "menu"
     if name.startswith("ws_"):
+        return "workspaces"
+    if name.startswith("tpl_"):
         return "workspaces"
     if name.startswith("file_"):
         return "files"
