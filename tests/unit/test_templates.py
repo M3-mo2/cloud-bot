@@ -1,20 +1,28 @@
-"""TASK python-templates + TASK template-folders — the catalog, the folder rule and the bite.
+"""TASK python-templates + TASK template-folders + TASK template-catalog-v2.
 
 Covers the claims the tasks make testable:
 
 1. **Internal consistency** — every template's files are runnable as written:
    every declared path is relative to the template folder, every non-stdlib
    import names a dependency its README mentions, every local import names a
-   file the template creates, and a README exists.
-2. **The folder rule** — every template writes under a directory named after its
+   file the template creates, and a README exists. TASK template-catalog-v2
+   tightens this: twelve templates, unique keys **and unique icons**, and the
+   standard library only — except the three templates whose whole point is a
+   package (flask, httpx, pytest), each named in its own README.
+2. **They actually run** — every dependency-free template is written to a temp
+   directory and executed. ``telegram-bot`` is special-cased: with no token it
+   must exit with its "no token" message rather than block in a long poll.
+   ``telegram-checker`` and ``http-api-client`` are never run against the
+   network; their parsing helpers are unit-tested over fixture strings instead.
+3. **The folder rule** — every template writes under a directory named after its
    key, and ``template_root`` refuses a key or file path that could escape the
    workspace (``../``, an absolute path, a key with a slash).
-3. **Exact writes** — the create flow writes exactly the composed paths (the
+4. **Exact writes** — the create flow writes exactly the composed paths (the
    folder prefix plus the declared path) and nothing else.
-4. **Coexistence and the bite** — two *different* templates in one workspace both
+5. **Coexistence and the bite** — two *different* templates in one workspace both
    succeed; without the folder prefix the second collides on ``README.md``. The
    *same* template twice still refuses, and names the folder.
-5. **Entry point** — the workspace screen carries the templates button, its
+6. **Entry point** — the workspace screen carries the templates button, its
    callback is routable, and the label is unique across every screen.
 
 The three result screens (created / refused / failed) are locked as goldens by
@@ -47,19 +55,74 @@ LOCALES = (Locale.EN, Locale.AR)
 TG = 777
 
 #: Packages a template may use on purpose; the README must mention each one.
+#: TASK template-catalog-v2: the list is closed — nothing else may import pip.
 KNOWN_DEPENDENCIES = {
     "flask": "flask",
     "httpx": "httpx",
     "pytest": "pytest",
 }
 
+#: Templates that talk to the network and are therefore never run in tests.
+NETWORK_TEMPLATES = {"telegram-checker", "http-api-client"}
+
 
 # ---------------------------------------------------------------------------
 # 1. internal consistency
 # ---------------------------------------------------------------------------
-def test_there_are_six_to_eight_templates():
-    assert 6 <= len(tpl.TEMPLATES) <= 8
-    assert len({t.key for t in tpl.TEMPLATES}) == len(tpl.TEMPLATES)
+def test_the_catalog_is_the_twelve_expected_templates():
+    """TASK template-catalog-v2: exactly twelve, and the ids are the contract."""
+    assert len(tpl.TEMPLATES) == 12
+    assert tpl.keys() == (
+        "hello",
+        "script-with-args",
+        "module",
+        "pytest-suite",
+        "data-csv",
+        "flask-api",
+        "cli-app",
+        "async-fetch",
+        "telegram-bot",
+        "web-page",
+        "telegram-checker",
+        "http-api-client",
+    )
+
+
+def test_keys_and_icons_are_unique_and_well_formed():
+    """The table of twelve: unique keys, unique icons, every key a safe segment."""
+    import re
+
+    keys = [t.key for t in tpl.TEMPLATES]
+    icons = [t.icon for t in tpl.TEMPLATES]
+    assert len(set(keys)) == len(keys), keys
+    assert len(set(icons)) == len(icons), icons
+    for key in keys:
+        assert re.fullmatch(r"[a-z][a-z0-9-]*", key), key
+        assert key == key.lower()
+        assert "/" not in key and key not in (".", "..")
+    for template in tpl.TEMPLATES:
+        assert template.icon, f"{template.key} has no icon"
+        assert template.icon.strip() == template.icon
+
+
+def test_only_the_three_declared_dependencies_may_be_imported():
+    """Standard library only, except flask / httpx / pytest, each in its README.
+
+    The catalog's own package files (``mypkg`` in ``module``) are not packages
+    from pip — they are the template's own code — so they are allowed by name.
+    """
+    for template in tpl.TEMPLATES:
+        local = _local_roots(template)
+        for file in template.files:
+            if not file.path.endswith(".py"):
+                continue
+            for module in _imports(file.content):
+                if module in sys.stdlib_module_names or module in local:
+                    continue
+                assert module in KNOWN_DEPENDENCIES, (
+                    f"{template.key}:{file.path} imports {module!r}; the catalog "
+                    "allows only flask, httpx and pytest"
+                )
 
 
 @pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
@@ -117,6 +180,21 @@ def test_every_template_has_a_readme(template):
 
 
 @pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
+def test_every_readme_is_the_three_line_shape(template):
+    """TASK template-catalog-v2: what it is, how to run it, what it needs.
+
+    A heading, then exactly three non-empty lines. The rule is checked, not
+    trusted, so a future template cannot ship a wall of prose.
+    """
+    readme = next(f.content for f in template.files if f.path == "README.md")
+    lines = [line for line in readme.splitlines() if line.strip()]
+    assert lines[0] == f"# {template.key}", (template.key, lines[0])
+    body = [line for line in lines[1:] if not line.startswith("#")]
+    assert len(body) == 3, (template.key, body)
+    assert body[0] and body[1] and body[2], template.key
+
+
+@pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
 def test_contents_are_ascii_code(template):
     """Code files: no Arabic and no non-ASCII (the product has no locale in code)."""
     for file in template.files:
@@ -157,13 +235,26 @@ def test_every_python_file_compiles(template):
 
 
 #: The dependency-free templates really run (their command, run from the root).
+#: ``telegram-checker`` and ``http-api-client`` are deliberately absent: they
+#: reach the network, and their parsing is unit-tested below instead.
 _RUNNABLE = {
     "hello": ["hello.py"],
-    "script-with-args": ["greet.py", "World", "--times", "2"],
-    "cli-typer-or-argparse-app": ["cli.py", "sum", "1", "2", "3"],
+    "script-with-args": ["greet.py", "World", "--times", "2", "--verbose"],
+    "cli-app": ["cli.py", "add", "buy milk"],
     "data-csv": ["summarize.py"],
     "module": ["-m", "unittest", "discover", "-s", "tests", "-q"],
+    "web-page": ["server.py", "--check"],
 }
+
+
+def _write_template(template, root):
+    """Write a template's declared files under ``root`` (its own folder)."""
+    project = root / template.key
+    for file in template.files:
+        target = project / file.path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(file.content, encoding="utf-8")
+    return project
 
 
 @pytest.mark.parametrize("key", sorted(_RUNNABLE))
@@ -174,19 +265,93 @@ def test_a_dependency_free_template_really_runs(key, tmp_path):
     template = tpl.by_key(key)
     assert template is not None
     # Write into the template's own folder — the layout the bot actually creates.
-    project = tmp_path / template.key
-    for file in template.files:
-        target = project / file.path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(file.content, encoding="utf-8")
+    project = _write_template(template, tmp_path)
     result = subprocess.run(
-        [sys.executable, *_RUNNABLE[key]], cwd=project, capture_output=True, text=True
+        [sys.executable, *_RUNNABLE[key]],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=15,
     )
     assert result.returncode == 0, (key, result.stdout, result.stderr)
 
 
-@pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
-def test_every_import_resolves_to_stdlib_dependency_or_created_file(template):
+def test_the_telegram_bot_exits_with_its_no_token_message(tmp_path):
+    """No token: the bot must say so and exit, never hang in a long poll."""
+    import subprocess
+
+    template = tpl.by_key("telegram-bot")
+    assert template is not None
+    project = _write_template(template, tmp_path)
+    import os
+
+    env = {key: value for key, value in os.environ.items() if key != "TELEGRAM_BOT_TOKEN"}
+    result = subprocess.run(
+        [sys.executable, "bot.py"],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=15,
+        env=env,
+    )
+    assert result.returncode != 0, (result.stdout, result.stderr)
+    assert "TELEGRAM_BOT_TOKEN" in result.stderr, result.stderr
+    assert "api.telegram.org" not in result.stderr
+
+
+def test_the_module_runs_as_a_module(tmp_path):
+    """``python -m mypkg`` works because the template ships ``__main__.py``."""
+    import subprocess
+
+    template = tpl.by_key("module")
+    assert template is not None
+    project = _write_template(template, tmp_path)
+    result = subprocess.run(
+        [sys.executable, "-m", "mypkg"],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+    assert "5" in result.stdout
+
+
+def test_the_cli_app_writes_and_lists_its_json_file(tmp_path):
+    """``add`` writes the file; ``list`` reads it back — standard library only."""
+    import json
+    import subprocess
+
+    template = tpl.by_key("cli-app")
+    assert template is not None
+    project = _write_template(template, tmp_path)
+    added = subprocess.run(
+        [sys.executable, "cli.py", "add", "buy milk"],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert added.returncode == 0, (added.stdout, added.stderr)
+    stored = json.loads((project / "items.json").read_text(encoding="utf-8"))
+    assert stored == ["buy milk"]
+    listed = subprocess.run(
+        [sys.executable, "cli.py", "list"],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert listed.returncode == 0
+    assert "buy milk" in listed.stdout
+
+
+def _assert_imports_resolve(template):
+    """Every import in ``template`` is stdlib, a named dependency, or its own file.
+
+    Extracted from the parametrised test so the bite below can hand it a broken
+    template and prove the check is what rejects it — not the test's existence.
+    """
     local = _local_roots(template)
     created = {f.path for f in template.files}
     readme = next(f.content for f in template.files if f.path == "README.md")
@@ -213,6 +378,147 @@ def test_every_import_resolves_to_stdlib_dependency_or_created_file(template):
                 f"{module}.py" in created
                 or any(p.startswith(module + "/") for p in created)
             ), f"{template.key}: {module!r} has no file"
+
+
+@pytest.mark.parametrize("template", tpl.TEMPLATES, ids=[t.key for t in tpl.TEMPLATES])
+def test_every_import_resolves_to_stdlib_dependency_or_created_file(template):
+    _assert_imports_resolve(template)
+
+
+def test_the_import_guard_bites():
+    """Bite: a template importing an undeclared package must fail the guard.
+
+    TASK template-catalog-v2 asks for exactly this proof: take a real, clean
+    template, add ``import requests`` (a package it neither declares nor ships),
+    and show the very check above rejects it. Without that, the guard could be
+    vacuous and no one would notice.
+    """
+    hello = tpl.by_key("hello")
+    assert hello is not None
+    broken = tpl.Template(
+        key=hello.key,
+        title_key=hello.title_key,
+        detail_key=hello.detail_key,
+        notes_key=hello.notes_key,
+        icon=hello.icon,
+        files=(
+            tpl.TemplateFile(
+                path="hello.py", content="import requests\n\nprint('hi')\n"
+            ),
+            *[f for f in hello.files if f.path != "hello.py"],
+        ),
+    )
+    with pytest.raises(AssertionError, match="requests"):
+        _assert_imports_resolve(broken)
+
+
+# -- the network templates: their parsers are pure, so test them that way -----
+TELEGRAM_EXISTS_PAGE = """<!DOCTYPE html>
+<html><head><title>Telegram: Contact @durov</title></head>
+<body><div class="tgme_page_title"><span dir="auto">Pavel Durov</span></div></body></html>
+"""
+
+TELEGRAM_MISSING_PAGE = """<!DOCTYPE html>
+<html><head><title>Telegram: Contact @no_such_user_xyz</title></head>
+<body><div class="tgme_page_icon"><i class="tgme_icon_user"></i></div></body></html>
+"""
+
+
+def _module_from_template(key: str, path: str):
+    """Import a template's Python file as a module, without touching the disk twice."""
+    import importlib.util
+    import tempfile
+    from pathlib import Path
+
+    template = tpl.by_key(key)
+    assert template is not None
+    source = next(f.content for f in template.files if f.path == path)
+    with tempfile.TemporaryDirectory() as tmp:
+        target = Path(tmp) / Path(path).name
+        target.write_text(source, encoding="utf-8")
+        spec = importlib.util.spec_from_file_location(f"_tpl_{key}", target)
+        assert spec and spec.loader
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+
+def test_the_checker_classifies_a_taken_username():
+    """An "exists" page: 200 plus a tgme_page_title is a taken username."""
+    checker = _module_from_template("telegram-checker", "check.py")
+    assert checker.classify(200, TELEGRAM_EXISTS_PAGE) == "exists"
+    assert checker.page_title(TELEGRAM_EXISTS_PAGE) == "Pavel Durov"
+
+
+def test_the_checker_classifies_a_free_username():
+    """A 404 is an available username, whether or not the body is pretty."""
+    checker = _module_from_template("telegram-checker", "check.py")
+    assert checker.classify(404, TELEGRAM_MISSING_PAGE) == "available"
+    assert checker.page_title(TELEGRAM_MISSING_PAGE) is None
+
+
+def test_the_checker_calls_an_unrecognised_response_unknown():
+    """A 200 with no title is neither taken nor free — say "unknown", not a lie."""
+    checker = _module_from_template("telegram-checker", "check.py")
+    assert checker.classify(200, "<html><body>something else</body></html>") == "unknown"
+    assert checker.classify(429, "") == "unknown"
+
+
+def test_the_checker_rate_limits_between_requests():
+    """The delay is real and between requests: Telegram 429s a burst."""
+    checker = _module_from_template("telegram-checker", "check.py")
+    assert checker.DELAY_SECONDS > 0
+    calls: list[str] = []
+
+    def fake_fetch(name: str):
+        calls.append(name)
+        return 404, ""
+
+    sleeps: list[float] = []
+    original_fetch, original_sleep = checker.fetch, checker.time.sleep
+    checker.fetch = fake_fetch
+    checker.time.sleep = sleeps.append
+    try:
+        rows = checker.check(["one", "two", "three"])
+    finally:
+        checker.fetch, checker.time.sleep = original_fetch, original_sleep
+    assert calls == ["one", "two", "three"]
+    assert len(sleeps) == 2, sleeps
+    assert all(value > 0 for value in sleeps)
+    assert [row[1] for row in rows] == ["available", "available", "available"]
+
+
+def test_the_api_client_parses_json_and_picks_fields():
+    """``parse_json`` and ``pick_fields`` are pure and do the one useful thing."""
+    client = _module_from_template("http-api-client", "client.py")
+    import pytest as _pytest
+
+    payload = client.parse_json('{"name": "cpython", "stars": 60000, "private": false}')
+    assert payload["name"] == "cpython"
+    assert client.pick_fields(payload, ["name", "stars"]) == [
+        ("name", "cpython"),
+        ("stars", 60000),
+    ]
+    # Missing fields are skipped, never rendered as None.
+    assert client.pick_fields(payload, ["missing"]) == []
+    # A non-JSON body raises a ValueError with a readable message.
+    with _pytest.raises(ValueError, match="not JSON"):
+        client.parse_json("<html>not json</html>")
+
+
+def test_the_api_client_reports_the_status_and_the_body_on_error(tmp_path, capsys):
+    """A 404 prints its status and body and exits non-zero — no invented data."""
+    client = _module_from_template("http-api-client", "client.py")
+
+    def fake_fetch(url: str):
+        return 404, '{"error": "not found"}'
+
+    client.fetch = fake_fetch
+    code = client.main(["--url", "https://api.example.test/missing"])
+    captured = capsys.readouterr()
+    assert code == 1
+    assert "status: 404" in captured.out
+    assert "not found" in captured.out
 
 
 # ---------------------------------------------------------------------------
@@ -525,10 +831,11 @@ def test_the_list_is_one_line_per_template_and_never_a_table(locale):
     assert "<table" not in html, "the template list must not be a table"
 
     # One paragraph per template, and nothing else beyond header + intro.
+    # TASK template-catalog-v2: the icon is the template's own `icon` field (an emoji
+    # carried by the domain catalog), not a `tpl.<key>.icon` translation.
     for template in tpl.TEMPLATES:
         title = catalog.t(template.title_key, locale)
-        icon = catalog.t(f"{template.title_key.rsplit('.', 1)[0]}.icon", locale)
-        assert f"<p>{icon} {title}</p>" in html, (template.key, locale)
+        assert f"<p>{template.icon} {title}</p>" in html, (template.key, locale)
         assert catalog.t(template.detail_key, locale) not in html, (
             f"the list still prints {template.key}'s description"
         )

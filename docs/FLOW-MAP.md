@@ -14,15 +14,15 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 159 |
 | Screens including the /dev tool | 162 |
-| Button edges | 511 |
-| Distinct destinations (actions) | 138 |
+| Button edges | 510 |
+| Distinct destinations (actions) | 137 |
 | Entry commands | 9 |
-| Callback re-entry actions | 138 |
+| Callback re-entry actions | 137 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
-| Contradictions: orphans | 1 |
-| Contradictions: two-screen loops | 239 |
+| Contradictions: orphans | 5 |
+| Contradictions: two-screen loops | 236 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 138 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 137 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -107,7 +107,6 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `file:rename` | file_rename |
 | `file:rename_same` | file_rename |
 | `file:upload` | file_upload |
-| `file:view` | file_view, file_view_binary |
 | `lang:ar` | menu, menu_empty, menu_inside |
 | `lang:en` | menu, menu_empty, menu_inside |
 | `met:view` | metrics, metrics_idle_incomplete |
@@ -3131,60 +3130,7 @@ One tree per command. The same screen reached twice is shown both times (that is
     - **admin_user** — (no title) ↩ (already expanded at depth 2)
 - **admin_entered** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
-    - **file_browser** — 📁 Files
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📁 src → `file:cd` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
-      - 📄 main.py → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py
-          - ▶️ Run → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_view_binary** — 📦 archive.zip
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📄 README.md → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py ↩ (already expanded at depth 4)
-        - **file_view_binary** — 📦 archive.zip ↩ (already expanded at depth 4)
+    - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -3313,7 +3259,19 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title)
+      - 📤 Upload → `file:upload` → file_upload
+        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
+      - ➕ New Folder → `file:mkdir` → file_mkdir
+        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+        - **file_browser** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `file_browser_empty` (already on this path)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -7337,19 +7295,7 @@ _No screen is rendered by this command._
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - **file_browser** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📁 src → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📄 main.py → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📄 README.md → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
+        - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
@@ -7359,15 +7305,12 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
+        - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
@@ -7481,6 +7424,14 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
+          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
           - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
@@ -7489,15 +7440,23 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -10505,60 +10464,7 @@ _No screen is rendered by this command._
     - **admin_user** — (no title) ↩ (already expanded at depth 2)
 - **admin_entered** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
-    - **file_browser** — 📁 Files
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📁 src → `file:cd` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
-      - 📄 main.py → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py
-          - ▶️ Run → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_view_binary** — 📦 archive.zip
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📄 README.md → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py ↩ (already expanded at depth 4)
-        - **file_view_binary** — 📦 archive.zip ↩ (already expanded at depth 4)
+    - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -10687,7 +10593,19 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title)
+      - 📤 Upload → `file:upload` → file_upload
+        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
+      - ➕ New Folder → `file:mkdir` → file_mkdir
+        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+        - **file_browser** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `file_browser_empty` (already on this path)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -14877,19 +14795,7 @@ _No screen is rendered by this command._
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - **file_browser** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📁 src → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📄 main.py → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📄 README.md → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
+        - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
@@ -14899,15 +14805,12 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
+        - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
@@ -15021,6 +14924,14 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
+          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
           - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
@@ -15029,15 +14940,23 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -16197,19 +16116,7 @@ _No screen is rendered by this command._
   - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - **file_browser** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📁 src → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📄 main.py → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📄 README.md → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
+        - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
@@ -16219,15 +16126,12 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
+        - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
@@ -16341,6 +16245,14 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
+          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
           - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
@@ -16349,15 +16261,23 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -16515,60 +16435,7 @@ _No screen is rendered by this command._
     - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 - **ws_detail** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
-    - **file_browser** — 📁 Files
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📁 src → `file:cd` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
-      - 📄 main.py → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py
-          - ▶️ Run → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_view_binary** — 📦 archive.zip
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📄 README.md → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py ↩ (already expanded at depth 4)
-        - **file_view_binary** — 📦 archive.zip ↩ (already expanded at depth 4)
+    - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -16670,7 +16537,19 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title)
+      - 📤 Upload → `file:upload` → file_upload
+        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
+      - ➕ New Folder → `file:mkdir` → file_mkdir
+        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+        - **file_browser** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `file_browser_empty` (already on this path)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -16923,6 +16802,14 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
+      - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
       - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
@@ -16931,15 +16818,23 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
       - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
@@ -17167,60 +17062,7 @@ _No screen is rendered by this command._
         - **wallet_no_plan** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
         - **wallet_two_plans** — 💳 Wallet & subscription ↩ (already expanded at depth 4)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
-    - **file_browser** — 📁 Files
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📁 src → `file:cd` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
-      - 📄 main.py → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py
-          - ▶️ Run → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_view_binary** — 📦 archive.zip
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - ↩ `ws_detail_locked` (already on this path)
-            - … `ws_detail_more` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📄 README.md → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py ↩ (already expanded at depth 4)
-        - **file_view_binary** — 📦 archive.zip ↩ (already expanded at depth 4)
+    - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -17337,7 +17179,19 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title)
+      - 📤 Upload → `file:upload` → file_upload
+        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
+      - ➕ New Folder → `file:mkdir` → file_mkdir
+        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+        - **file_browser** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `file_browser_empty` (already on this path)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_locked` (already on this path)
+        - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
@@ -17464,60 +17318,7 @@ _No screen is rendered by this command._
         - ↩ `ws_list_inside` (already on this path)
 - **ws_detail_more** — (no title)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
-    - **file_browser** — 📁 Files
-      - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📤 Upload → `file:upload` → file_upload
-            - … `file_upload` at depth 6 (not expanded)
-          - ➕ New Folder → `file:mkdir` → file_mkdir
-            - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - ↩ `file_browser_empty` (already on this path)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📁 src → `file:cd` → file_browser, file_browser_empty
-        - ↩ `file_browser` (already on this path)
-        - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
-      - 📄 main.py → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py
-          - ▶️ Run → `run:file` → job_prompt
-            - … `job_prompt` at depth 6 (not expanded)
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **file_view_binary** — 📦 archive.zip
-          - ✏️ Rename → `file:rename` → file_rename
-            - … `file_rename` at depth 6 (not expanded)
-          - 🗑 Delete → `file:delete_confirm` → file_delete_confirm
-            - … `file_delete_confirm` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
-            - … `ws_detail` at depth 6 (not expanded)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_more` (already on this path)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📄 README.md → `file:view` → file_view, file_view_binary
-        - **file_view** — 🐍 main.py ↩ (already expanded at depth 4)
-        - **file_view_binary** — 📦 archive.zip ↩ (already expanded at depth 4)
+    - **file_browser** — (no title)
       - 📤 Upload → `file:upload` → file_upload
         - **file_upload** — 📤 Upload
           - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
@@ -17595,7 +17396,19 @@ _No screen is rendered by this command._
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
-    - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title)
+      - 📤 Upload → `file:upload` → file_upload
+        - **file_upload** — 📤 Upload ↩ (already expanded at depth 4)
+      - ➕ New Folder → `file:mkdir` → file_mkdir
+        - **file_mkdir** — ➕ New Folder ↩ (already expanded at depth 4)
+      - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
+        - **file_browser** — (no title) ↩ (already expanded at depth 2)
+        - ↩ `file_browser_empty` (already on this path)
+      - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - ↩ `ws_detail_more` (already on this path)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run
       - ⚡ Quick command → `exec:prompt` → exec_prompt
@@ -17848,6 +17661,14 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
+      - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
       - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
@@ -17856,15 +17677,23 @@ _No screen is rendered by this command._
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
       - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
-      - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+      - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
+        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
+        - ↩ `tpl_list` (already on this path)
+      - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
         - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
         - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
         - ↩ `tpl_list` (already on this path)
@@ -18447,19 +18276,7 @@ _No screen is rendered by this command._
   - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
     - **ws_detail** — (no title)
       - 📁 Files → `file:ls` → file_browser, file_browser_empty
-        - **file_browser** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📁 src → `file:cd` → file_browser, file_browser_empty
-            - ↩ `file_browser` (already on this path)
-            - … `file_browser_empty` at depth 6 (not expanded)
-          - 📄 main.py → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
-          - 📄 README.md → `file:view` → file_view, file_view_binary
-            - … `file_view` at depth 6 (not expanded)
-            - … `file_view_binary` at depth 6 (not expanded)
+        - **file_browser** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
@@ -18469,15 +18286,12 @@ _No screen is rendered by this command._
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_more` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-        - **file_browser_empty** — 📁 Files
-          - 📁 Files → `file:ls` → file_browser, file_browser_empty
-            - … `file_browser` at depth 6 (not expanded)
-            - ↩ `file_browser_empty` (already on this path)
+        - **file_browser_empty** — (no title)
           - 📤 Upload → `file:upload` → file_upload
             - … `file_upload` at depth 6 (not expanded)
           - ➕ New Folder → `file:mkdir` → file_mkdir
             - … `file_mkdir` at depth 6 (not expanded)
-          - 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+          - ⬆️ Up → `file:cd` → file_browser, file_browser_empty
             - … `file_browser` at depth 6 (not expanded)
             - ↩ `file_browser_empty` (already on this path)
           - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
@@ -18591,6 +18405,14 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
+          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
           - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
@@ -18599,15 +18421,23 @@ _No screen is rendered by this command._
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+            - … `tpl_confirm` at depth 6 (not expanded)
+            - … `tpl_confirm_conflict` at depth 6 (not expanded)
+            - ↩ `tpl_list` (already on this path)
+          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
             - … `tpl_confirm` at depth 6 (not expanded)
             - … `tpl_confirm_conflict` at depth 6 (not expanded)
             - ↩ `tpl_list` (already on this path)
@@ -18740,8 +18570,8 @@ _No screen is rendered by this command._
     - **ws_detail_more** — (no title) ↩ (already expanded at depth 4)
     - ↩ `ws_detail_suspended` (already on this path)
   - 📁 Files → `file:ls` → file_browser, file_browser_empty
-    - **file_browser** — 📁 Files ↩ (already expanded at depth 4)
-    - **file_browser_empty** — 📁 Files ↩ (already expanded at depth 4)
+    - **file_browser** — (no title) ↩ (already expanded at depth 4)
+    - **file_browser_empty** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
   - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
@@ -18776,15 +18606,19 @@ A dead end is a screen from which no button path reaches a home screen (menu, wo
 
 Transient cards (no buttons by design — sent to the user, not navigated): `admin_notify_capped`, `admin_notify_gap`, `admin_notify_message`, `tunnel_publishing`
 
-### 3.4 Orphans (1)
+### 3.4 Orphans (5)
 
 A screen not reachable from any command entry through the button graph. Error screens are excluded: the error guard reaches them, not a button.
 
+- **file_delete_confirm** — 🗑 Delete file?
+- **file_rename** — ✏️ Rename
+- **file_view** — 🐍 main.py
+- **file_view_binary** — 📦 archive.zip
 - **terminal_command** — ⌨️ Send a command
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (239)
+### 3.5 Loops that are not obvious (236)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -18837,9 +18671,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **archive_menu** —“⬅️ Back”→ **ws_detail** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **archive_menu** —“⬅️ Back”→ **ws_detail_more** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **dev_report** —“⬅️ Sections”→ **dev_sections** —“🩺 Run the architecture doctor”→ **dev_report** (**unobvious**)
-- **file_browser** —“📁 Files”→ **file_browser_empty** —“📁 Files”→ **file_browser** (**unobvious**)
-- **file_browser** —“📄 README.md”→ **file_view** —“🔙 Folder”→ **file_browser** (**unobvious**)
-- **file_browser** —“📄 README.md”→ **file_view_binary** —“🔙 Folder”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_locked** —“📁 Files”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail_more** —“📁 Files”→ **file_browser** (**unobvious**)
@@ -19036,7 +18867,7 @@ _None: the inside/outside rule holds on every catalog screen._
 
 ### 3.7 Depths (0)
 
-The deepest chain found from the entry screens is 4 screens long: `admin_entered` → `file_browser` → `file_view` → `file_delete_confirm`
+The deepest chain found from the entry screens is 4 screens long: `admin_entered` → `terminal_list` → `terminal_view_running` → `terminal_ended`
 
 Screens more than 4 taps from `/start`:
 
@@ -19052,6 +18883,10 @@ _None._
 
 ### Catalog entries that no command reaches
 
+- **file_delete_confirm** — 🗑 Delete file?
+- **file_rename** — ✏️ Rename
+- **file_view** — 🐍 main.py
+- **file_view_binary** — 📦 archive.zip
 - **terminal_command** — ⌨️ Send a command
 
 ### Reached after a text / document / payment step (not a button)
@@ -19567,26 +19402,21 @@ _hello from main.py args: ['a', 'b'] stderr (empty)68 ms_
 - 🧹 Clear → `nav:clear` → (handler only — no screen)
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
-### file_browser — 📁 Files
+### file_browser — (no title)
 
-_/_
+_(no body text)_
 
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
-- 📁 src → `file:cd` → file_browser, file_browser_empty
-- 📄 main.py → `file:view` → file_view, file_view_binary
-- 📄 README.md → `file:view` → file_view, file_view_binary
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
-### file_browser_empty — 📁 Files
+### file_browser_empty — (no title)
 
-_/src_
+_(no body text)_
 
-- 📁 Files → `file:ls` → file_browser, file_browser_empty
 - 📤 Upload → `file:upload` → file_upload
 - ➕ New Folder → `file:mkdir` → file_mkdir
-- 🔙 Folder → `file:cd` → file_browser, file_browser_empty
+- ⬆️ Up → `file:cd` → file_browser, file_browser_empty
 - 📦 Workspace → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### file_delete_confirm — 🗑 Delete file?
@@ -19979,7 +19809,7 @@ _Status: 🟢 Running_
 
 ### tpl_confirm — 📦 Python module
 
-_A package, a test and a README._
+_A package with __main__.py, so python -m mypkg runs it._
 
 - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
 - ⬅️ Back → `tpl:list` → tpl_list
@@ -20018,11 +19848,15 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
+- 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### tunnel_already_published — 🌐 Public links

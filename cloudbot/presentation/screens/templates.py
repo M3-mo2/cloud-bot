@@ -57,17 +57,14 @@ def _title(template: Template, locale: Locale) -> str:
     return catalog.t(template.title_key, locale)
 
 
-def _icon_key(template: Template) -> str:
-    """The catalog key of the template's own leading mark (``tpl.hello.icon``).
+def _icon(template: Template) -> str:
+    """The template's own leading mark: an emoji carried by the domain catalog.
 
-    The rule is derived from ``title_key`` so a new template needs no extra field;
-    the icon itself is catalog data, never domain prose.
+    TASK template-catalog-v2 moved the icon onto :class:`Template` itself: it is
+    the same mark in both locales, so it is data, not a translated string, and a
+    new template cannot forget it.
     """
-    return template.title_key.rsplit(".", 1)[0] + ".icon"
-
-
-def _icon(template: Template, locale: Locale) -> str:
-    return catalog.t(_icon_key(template), locale)
+    return template.icon
 
 
 def _detail(template: Template, locale: Locale) -> str:
@@ -84,7 +81,7 @@ def _ws_of(ws_id: WorkspaceId | str) -> str:
 
 def _pick_label(template: Template, locale: Locale) -> str:
     """The pick button: the template's own icon and title."""
-    return f"{_icon(template, locale)} {_title(template, locale)}"
+    return f"{_icon(template)} {_title(template, locale)}"
 
 
 # -- A. the list --------------------------------------------------------------
@@ -107,7 +104,7 @@ def list_screen(ws_id: WorkspaceId | str, locale: Locale) -> Screen:
     doc.p(catalog.t("tpl.list.intro", locale))
 
     for template in catalog_templates.TEMPLATES:
-        doc.p(f"{_icon(template, locale)} {_title(template, locale)}")
+        doc.p(f"{_icon(template)} {_title(template, locale)}")
 
     rows: list[list] = []
     pick_row: list = []
