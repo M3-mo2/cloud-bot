@@ -20,6 +20,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from cloudbot.core.errors import EngineRefused
+from cloudbot.handlers.execution import last_exec
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.i18n.catalog import catalog
@@ -30,13 +31,14 @@ from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import archives as arc_screens
 from cloudbot.presentation.screens import metrics as met_screens
 from cloudbot.presentation.screens import packages as pkg_screens
+from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.presentation.screens import ports as port_screens
 from cloudbot.presentation.screens import processes as proc_screens
 from cloudbot.presentation.screens import tunnels as tnl_screens
 from cloudbot.presentation.screens.tunnels import DetectedPort
 from cloudbot.services.bundle import Services
 from cloudbot.services.events import RequestEvents
-from cloudbot.services.packages import parse_package_input
+from cloudbot.services.packages import parse_package_input, validate_package_name
 from cloudbot.services.tunnels import TunnelAlreadyPublished, parse_port
 from cloudbot.states.feature_input import FeatureInput
 
@@ -84,6 +86,59 @@ async def on_install_prompt(
     await state.set_state(FeatureInput.awaiting_package_install)
     await state.update_data(ws_id=ws_id)
     await show_screen(cb, pkg_screens.install_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
+
+@router.callback_query(F.data.startswith(pkg_screens.FIX_PREFIX))
+async def on_fix_missing_package(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    events: RequestEvents,
+) -> None:
+    """One tap installs exactly the pip package the failed run's button named.
+
+    The pip name arrives **in the callback**, which is user input: it is
+    re-validated through ``validate_package_name`` before it can reach ``pip``.
+    The install path is the existing one — no second implementation — and the
+    result is the existing result screen, with "try again" repeating the command
+    that failed (offered, never auto-run).
+    """
+    decoded = decode_required(cb.data, 1)
+    name = validate_package_name(decoded.key[0])
+    inside = await services.session.current(ctx.tg_id)
+    if inside is None:
+        # The offer's button names a package, not a workspace. Outside a session
+        # there is nothing to install into: show the list (a correctable screen).
+        workspaces = await services.workspaces.list(ctx.tg_id)
+        await show_screen(
+            cb,
+            ws_screens.workspace_list(workspaces, ctx.locale),
+            ctx=ctx,
+            sender=sender,
+        )
+        return
+    ws_id = inside.id
+    await show_screen(cb, pkg_screens.installing_screen(ws_id, ctx.locale), ctx=ctx, sender=sender)
+    outcome = await services.packages.install(ctx.tg_id, ws_id, [name])
+    if not outcome.ok:
+        events.package_install_failed(tg_id=ctx.tg_id, ws_id=str(ws_id), names=name)
+    # After a successful install, offer the exact command that failed — one tap,
+    # never automatic.
+    retry_attempt = last_exec(ctx.tg_id, ws_id) if outcome.ok else None
+    await show_screen(
+        cb,
+        pkg_screens.install_result_screen(
+            outcome,
+            name,
+            ws_id,
+            ctx.locale,
+            mode=ctx.mode,
+            is_admin=ctx.is_admin,
+            retry_attempt=retry_attempt,
+        ),
+        ctx=ctx,
+        sender=sender,
+    )
 
 
 @router.message(FeatureInput.awaiting_package_install)

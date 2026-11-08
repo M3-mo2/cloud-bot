@@ -411,6 +411,7 @@ MESSAGES: dict[str, str] = {
     "exec.stderr_empty": "الخطأ القياسي (فارغ)",
     "exec.stderr": "الخطأ القياسي",
     "exec.run_again": "🔁 إعادة",
+    "exec.again_same": "🔁 جرّب تاني",
     "exec.not_kept": "تُعرض هذه المخرجات هنا ولا تُحفظ.",
 
     # -- runs ----------------------------------------------------------------
@@ -731,6 +732,14 @@ MESSAGES: dict[str, str] = {
     "package.result_duration": "استغرق {duration}",
     "package.result_target": "تم التثبيت في",
     "package.result_retry": "🔁 حاول مجددًا",
+
+    # -- missing-module install offer (on a failed run) ----------------------
+    "package.fix_title": "✦ مكتبة ناقصة ⟸ {module}",
+    "package.fix_missing_tail": "مش متثبتة في المساحة دي.",
+    "package.fix_from": "اسمها في الخطأ: {module}",
+    "package.fix_install": "📦 ثبّت {pip}",
+    "package.fix_unknown_tail": "مش في القائمة المعروفة، واسمها في pip ممكن يكون مختلف.",
+    "package.fix_unknown_button": "✍️ اكتب اسم الحزمة",
 
     # -- tunnels (Phase 2b) --------------------------------------------------
     "tunnel.title": "🌐 الروابط العامة",

@@ -71,14 +71,35 @@ def exec_prompt(ws_id: WorkspaceId, locale: Locale) -> Screen:
     return Screen(doc=doc, markup=markup, send_new=True)
 
 
-def exec_result(result: ExecResult, ws_id: WorkspaceId, locale: Locale) -> Screen:
+def exec_result(
+    result: ExecResult,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    missing_offer: tuple[str, list[list]] | None = None,
+    again_action: str | None = None,
+) -> Screen:
+    """A finished command's result.
+
+    ``missing_offer`` is the package screen's ``(html, rows)`` offer for the
+    modules the traceback named; when present it sits **above** the result facts,
+    exactly where the failure is read. ``again_action`` re-runs the exact command
+    that failed — offered as a button, never run automatically.
+    """
     doc = RichDoc(locale)
+
+    offer_html, offer_rows = missing_offer if missing_offer is not None else ("", [])
+
     if result.exit_code == 124:
         doc.h(2, catalog.t("exec.timed_out", locale))
     elif result.exit_code == 0:
         doc.h(2, catalog.t("exec.finished", locale, code=_num(0, locale)))
     else:
         doc.h(2, catalog.t("exec.failed", locale, code=_num(result.exit_code, locale)))
+
+    if offer_html:
+        # Directly under the failure it explains, and above the result facts.
+        doc.raw(offer_html)
 
     stdout = result.stdout or ""
     stderr = result.stderr or ""
@@ -96,20 +117,26 @@ def exec_result(result: ExecResult, ws_id: WorkspaceId, locale: Locale) -> Scree
         doc.p(catalog.t("exec.truncated", locale))
     doc.p(italic(format_ms(result.duration_ms, locale)))
 
-    markup = inline_markup(
+    rows: list[list] = []
+    if again_action is not None:
+        # Beside the result it repeats: the same command, on one tap.
+        rows.append(
+            [inline(catalog.t("exec.again_same", locale), again_action, intent=Intent.SUCCESS)]
+        )
+    rows += offer_rows
+    rows.append(
         [
-            [
-                inline(catalog.t("exec.run_again", locale), _cb("exec:prompt", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("run.background", locale), _cb("run:prompt", ws_id), intent=Intent.SUCCESS),
-            ],
-            [
-                inline(catalog.t("common.clear", locale), "nav:clear", intent=Intent.PRIMARY),
-                inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
-            ],
+            inline(catalog.t("exec.run_again", locale), _cb("exec:prompt", ws_id), intent=Intent.PRIMARY),
+            inline(catalog.t("run.background", locale), _cb("run:prompt", ws_id), intent=Intent.SUCCESS),
         ]
     )
-    return Screen(doc=doc, markup=markup)
-
+    rows.append(
+        [
+            inline(catalog.t("common.clear", locale), "nav:clear", intent=Intent.PRIMARY),
+            inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
+        ]
+    )
+    return Screen(doc=doc, markup=inline_markup(rows))
 
 # -- background job ----------------------------------------------------------
 def file_picker(entries, ws_id: WorkspaceId, locale: Locale) -> Screen:
@@ -205,6 +232,15 @@ def live_logs(
         f"<pre><code class=\"language-text\">{_esc(stderr or '')}</code></pre></details>"
     )
 
+    # A run started from a file fails for the same reasons a typed command does,
+    # and this screen is where that failure is read. The offer is built from the
+    # run's own stderr, so a missing package is one tap away here as well.
+    from cloudbot.presentation.screens.packages import missing_section
+
+    offer_html, offer_rows = missing_section(stderr or "", run.workspace_id, locale)
+    if offer_html:
+        doc.raw(offer_html)
+
     if truncated:
         doc.blockquote(catalog.t("run.log_truncated", locale))
     if trimmed:
@@ -230,7 +266,7 @@ def live_logs(
                    f"<code>{_esc(run.command_display)}</code>"))
         doc.p(italic(_progress_line(run, elapsed_s, locale)))
 
-    markup = live_logs_markup(run, locale)
+    markup = live_logs_markup(run, locale, extra_rows=offer_rows)
     return Screen(doc=doc, markup=markup)
 
 
@@ -259,27 +295,33 @@ def _run_duration(run: Run, elapsed_s: float | None, locale: Locale) -> str:
     return "—"
 
 
-def live_logs_markup(run: Run, locale: Locale):
+def live_logs_markup(run: Run, locale: Locale, *, extra_rows: list[list] | None = None):
+    """The live log screen's buttons.
+
+    ``extra_rows`` carries the missing-package offer built from the run's stderr;
+    it sits before the run controls so the fix is the first thing offered.
+    """
     ws_id = run.workspace_id
+    head = list(extra_rows or [])
     if run.status.is_terminal:
-        return inline_markup(
+        rows = [
             [
-                [
-                    inline(catalog.t("exec.run_again", locale), _cb("run:file", ws_id, str(run.id)), intent=Intent.PRIMARY),
-                    inline(catalog.t("run.delete_log", locale), _cb("run:delete", ws_id, run.id), intent=Intent.DANGER),
-                ],
-                [
-                    inline(catalog.t("common.clear", locale), "nav:clear", intent=Intent.PRIMARY),
-                    inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
-                ],
-            ]
-        )
+                inline(catalog.t("exec.run_again", locale), _cb("run:file", ws_id, str(run.id)), intent=Intent.PRIMARY),
+                inline(catalog.t("run.delete_log", locale), _cb("run:delete", ws_id, run.id), intent=Intent.DANGER),
+            ],
+            [
+                inline(catalog.t("common.clear", locale), "nav:clear", intent=Intent.PRIMARY),
+                inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY),
+            ],
+        ]
+        return inline_markup([*head, *rows])
     # No "clear output" here: the engine has no log-truncation endpoint, so the
     # old button just re-read the same bytes and was indistinguishable from
     # Refresh (it even carried the same callback). Two destinations exist while a
     # run is live — Stop and Refresh — and the output clears when the run does.
     return inline_markup(
         [
+            *head,
             [
                 inline(catalog.t("run.stop", locale), _cb("run:stop_confirm", ws_id, run.id), intent=Intent.DANGER),
                 inline(catalog.t("common.refresh", locale), _cb("run:refresh", ws_id, run.id), intent=Intent.PRIMARY),

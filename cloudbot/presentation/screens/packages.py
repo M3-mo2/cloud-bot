@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from cloudbot.core.locale import Locale
 from cloudbot.core.modes import RunMode
+from cloudbot.domain.python_packages import missing_modules, pip_name_for
 from cloudbot.domain.value_objects import PackageList, WorkspaceId
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_duration, localize_digits
@@ -150,6 +151,83 @@ def installing_screen(ws_id: WorkspaceId, locale: Locale) -> Screen:
     return Screen(doc=doc, markup=markup, send_new=True)
 
 
+# -- missing-module install offer -------------------------------------------
+#: The callback prefix a one-tap install carries. The pip name is user input on
+#: the way back in (a callback can be forged), so the handler re-validates it.
+FIX_PREFIX = "pkg:fix:"
+
+
+def fix_callback(pip_name: str) -> str:
+    """The callback that installs exactly ``pip_name``.
+
+    The shape is ``pkg:fix:<pip-name>``: the name, not a workspace, because the
+    tap installs into the workspace the user is inside. The handler re-validates
+    the name (a callback is user input) before it reaches ``pip``.
+    """
+    return f"{FIX_PREFIX}{pip_name}"
+
+
+def missing_section(
+    stderr: str, ws_id: WorkspaceId, locale: Locale
+) -> tuple[str, list[list]]:
+    """The missing-package offer as **(html, keyboard rows)**, or ``("", [])``.
+
+    One block per missing module (max five, from :func:`missing_modules`):
+
+    * a **known** module gets a header, a line naming its pip package, and an
+      install button that says «ثبّت <pip>». When the pip name differs from the
+      module the traceback named, an italic line names the module — the user must
+      see *why* the button says ``pillow`` when his error said ``PIL``;
+    * an **unknown** one gets **no install button**: one line saying the package
+      is not in the known list and its pip name may differ, plus the existing
+      "type the package name" prompt. We never invent a name and never silently
+      try the module name.
+
+    Nothing is installed here; a row exists only for a module the traceback named,
+    and a tap on its button is what installs it.
+    """
+    doc = RichDoc(locale)
+    rows: list[list] = []
+    for module in missing_modules(stderr):
+        pip = pip_name_for(module)
+        doc.h(2, _raw(f"<b>{esc(catalog.t('package.fix_title', locale, module=module))}</b>"))
+        if pip is not None:
+            doc.p(
+                _raw(
+                    f"<code>{esc(pip)}</code> "
+                    f"{esc(catalog.t('package.fix_missing_tail', locale))}"
+                )
+            )
+            if pip.casefold() != module.casefold():
+                # Why the button says a different name than the traceback did.
+                doc.p(italic(catalog.t("package.fix_from", locale, module=module)))
+            rows.append(
+                [
+                    inline(
+                        catalog.t("package.fix_install", locale, pip=pip),
+                        fix_callback(pip),
+                        intent=Intent.SUCCESS,
+                    )
+                ]
+            )
+        else:
+            doc.p(
+                _raw(
+                    f"<code>{esc(module)}</code> "
+                    f"{esc(catalog.t('package.fix_unknown_tail', locale))}"
+                )
+            )
+            rows.append(
+                [
+                    inline(
+                        catalog.t("package.fix_unknown_button", locale),
+                        _cb("pkg:install", ws_id),
+                        intent=Intent.PRIMARY,
+                    )
+                ]
+            )
+    return doc.html, rows
+
 # -- install result ----------------------------------------------------------
 def install_result_screen(
     outcome: InstallOutcome,
@@ -159,6 +237,7 @@ def install_result_screen(
     *,
     mode: RunMode = RunMode.PRODUCTION,
     is_admin: bool = False,
+    retry_attempt: str | None = None,
 ) -> Screen:
     result = outcome.result
     doc = RichDoc(locale)
@@ -187,19 +266,37 @@ def install_result_screen(
     if payload and mode is RunMode.DEBUG and is_admin:
         RawPayloadDetails(payload[:MAX_OUTPUT_CHARS], mode=mode, is_admin=is_admin).render(doc)
 
-    return Screen(doc=doc, markup=install_result_markup(ws_id, locale))
+    return Screen(
+        doc=doc,
+        markup=install_result_markup(ws_id, locale, retry_attempt=retry_attempt),
+    )
 
-
-def install_result_markup(ws_id: WorkspaceId, locale: Locale):
-    return inline_markup(
-        [
+def install_result_markup(
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    retry_attempt: str | None = None,
+):
+    rows: list[list] = []
+    if retry_attempt:
+        # The exact command that failed, on one tap. Offered, never auto-run.
+        rows.append(
             [
-                inline(catalog.t("package.result_retry", locale), _cb("pkg:install", ws_id), intent=Intent.PRIMARY),
-                inline(catalog.t("package.title", locale), _cb("pkg:list", ws_id), intent=Intent.PRIMARY),
-            ],
-            [inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)],
+                inline(
+                    catalog.t("exec.again_same", locale),
+                    _cb("exec:again", ws_id),
+                    intent=Intent.SUCCESS,
+                )
+            ]
+        )
+    rows.append(
+        [
+            inline(catalog.t("package.result_retry", locale), _cb("pkg:install", ws_id), intent=Intent.PRIMARY),
+            inline(catalog.t("package.title", locale), _cb("pkg:list", ws_id), intent=Intent.PRIMARY),
         ]
     )
+    rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws_id), intent=Intent.PRIMARY)])
+    return inline_markup(rows)
 
 
 # -- remove ------------------------------------------------------------------

@@ -1014,6 +1014,15 @@ def _wallet_history_paged(locale: Locale):
     )
 
 
+#: Tracebacks the missing-package screens render. The mapped one names PIL (pip
+#: ``pillow``); the unknown one names a module no entry covers.
+_MISSING_PIL = "ModuleNotFoundError: No module named 'PIL'\n"
+_MISSING_UNKNOWN = "ModuleNotFoundError: No module named 'mystery_lib'\n"
+_MISSING_TWO = (
+    "ModuleNotFoundError: No module named 'flask'\n"
+    "ModuleNotFoundError: No module named 'PIL'\n"
+)
+
 #: name → builder. This is the registry's payload; ``SECTION_OF`` assigns each
 #: name to a section (a first-class grouping, not a prefix convention).
 SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
@@ -1129,6 +1138,29 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "exec_prompt": lambda f, loc: run_screens.exec_prompt(f["ws"].id, loc),
     "exec_result_ok": lambda f, loc: run_screens.exec_result(f["exec_ok"], f["ws"].id, loc),
     "exec_result_fail": lambda f, loc: run_screens.exec_result(ExecResult(1, "", "Traceback\n  File \"/workspace/main.py\", line 3, in <module>\n", 120, False), f["ws"].id, loc),
+    # The failed run that offers the missing package: a known module whose pip
+    # name differs (PIL -> pillow), and one whose pip name we do not know.
+    "exec_missing_mapped": lambda f, loc: run_screens.exec_result(
+        ExecResult(1, "", _MISSING_PIL, 120, False),
+        f["ws"].id,
+        loc,
+        missing_offer=pkg_screens.missing_section(_MISSING_PIL, f["ws"].id, loc),
+        again_action="exec:again:" + str(f["ws"].id),
+    ),
+    "exec_missing_unknown": lambda f, loc: run_screens.exec_result(
+        ExecResult(1, "", _MISSING_UNKNOWN, 120, False),
+        f["ws"].id,
+        loc,
+        missing_offer=pkg_screens.missing_section(_MISSING_UNKNOWN, f["ws"].id, loc),
+        again_action="exec:again:" + str(f["ws"].id),
+    ),
+    "exec_missing_two": lambda f, loc: run_screens.exec_result(
+        ExecResult(1, "", _MISSING_TWO, 120, False),
+        f["ws"].id,
+        loc,
+        missing_offer=pkg_screens.missing_section(_MISSING_TWO, f["ws"].id, loc),
+        again_action="exec:again:" + str(f["ws"].id),
+    ),
     "job_prompt": lambda f, loc: run_screens.job_prompt(f["ws"].id, loc),
     "job_started": lambda f, loc: run_screens.run_started(f["run"], loc),
     "live_logs_running": lambda f, loc: run_screens.live_logs(f["run"], loc, stdout="Loading data...\nprocessed 100 records\n"),

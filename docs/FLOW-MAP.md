@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 160 |
-| Screens including the /dev tool | 163 |
-| Button edges | 515 |
-| Distinct destinations (actions) | 137 |
+| Catalog screens | 163 |
+| Screens including the /dev tool | 166 |
+| Button edges | 534 |
+| Distinct destinations (actions) | 139 |
 | Entry commands | 9 |
-| Callback re-entry actions | 137 |
+| Callback re-entry actions | 139 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 243 |
+| Contradictions: two-screen loops | 246 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 137 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 139 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -98,6 +98,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `dev:section` | dev_sections |
 | `dev:sections` | dev_sections |
 | `dev:tap` | dev_inspect |
+| `exec:again` | exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_prompt, exec_result_fail, exec_result_ok |
 | `exec:prompt` | exec_prompt |
 | `file:cd` | file_browser, file_browser_empty, file_browser_page_2 |
 | `file:delete` | file_browser, file_browser_empty, file_browser_page_2 |
@@ -124,6 +125,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `pay:packs` | wallet_packs |
 | `pay:plans` | wallet_plans |
 | `pay:wallet` | wallet, wallet_expired, wallet_no_plan, wallet_two_plans |
+| `pkg:fix` | (handler only — no screen) |
 | `pkg:install` | package_install_prompt |
 | `pkg:list` | package_list, package_list_empty |
 | `pkg:rm_all` | package_list, package_list_empty |
@@ -18868,7 +18870,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (243)
+### 3.5 Loops that are not obvious (246)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -18921,6 +18923,9 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **archive_menu** —“⬅️ Back”→ **ws_detail** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **archive_menu** —“⬅️ Back”→ **ws_detail_more** —“🗜 Archives”→ **archive_menu** (expected (back/affordance))
 - **dev_report** —“⬅️ Sections”→ **dev_sections** —“🩺 Run the architecture doctor”→ **dev_report** (**unobvious**)
+- **exec_missing_mapped** —“🔁 Try again”→ **exec_missing_two** —“🔁 Try again”→ **exec_missing_mapped** (**unobvious**)
+- **exec_missing_mapped** —“🔁 Try again”→ **exec_missing_unknown** —“🔁 Try again”→ **exec_missing_mapped** (**unobvious**)
+- **exec_missing_two** —“🔁 Try again”→ **exec_missing_unknown** —“🔁 Try again”→ **exec_missing_two** (**unobvious**)
 - **file_browser** —“⬆️ Up”→ **file_browser_empty** —“⬆️ Up”→ **file_browser** (**unobvious**)
 - **file_browser** —“⬆️ Up”→ **file_browser_page_2** —“⬆️ Up”→ **file_browser** (**unobvious**)
 - **file_browser** —“📦 Workspace”→ **ws_detail** —“📁 Files”→ **file_browser** (**unobvious**)
@@ -19166,7 +19171,7 @@ A prompt asks the user to type (or upload, or pay); the reply is handled by a me
 - `FeatureInput.awaiting_package_install` → package_install_failed_no_net, package_install_ok, package_install_working
 - `FeatureInput.awaiting_package_remove` → package_list, package_list_empty
 - `FeatureInput.awaiting_port` → tunnel_publish_confirm_unlistened
-- `Input.waiting_exec_command` → exec_result_fail, exec_result_ok
+- `Input.waiting_exec_command` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok
 - `Input.waiting_job_args` → job_started
 - `Input.waiting_job_command` → job_started
 - `Input.waiting_mkdir_path` → file_browser, file_browser_empty, file_browser_page_2
@@ -19634,6 +19639,40 @@ _This workspace is paused._
 
 - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+
+### exec_missing_mapped — ❌ Failed (exit 1)
+
+_pillow is not installed in this workspace._
+
+- 🔁 Try again → `exec:again` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_prompt, exec_result_fail, exec_result_ok
+- 📦 Install pillow → `pkg:fix` → (handler only — no screen)
+- 🔁 Run again → `exec:prompt` → exec_prompt
+- 📜 Background job → `run:prompt` → job_prompt
+- 🧹 Clear → `nav:clear` → (handler only — no screen)
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+
+### exec_missing_two — ❌ Failed (exit 1)
+
+_flask is not installed in this workspace._
+
+- 🔁 Try again → `exec:again` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_prompt, exec_result_fail, exec_result_ok
+- 📦 Install flask → `pkg:fix` → (handler only — no screen)
+- 📦 Install pillow → `pkg:fix` → (handler only — no screen)
+- 🔁 Run again → `exec:prompt` → exec_prompt
+- 📜 Background job → `run:prompt` → job_prompt
+- 🧹 Clear → `nav:clear` → (handler only — no screen)
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
+
+### exec_missing_unknown — ❌ Failed (exit 1)
+
+_mystery_lib is not in the known list, and its pip name may differ._
+
+- 🔁 Try again → `exec:again` → exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_prompt, exec_result_fail, exec_result_ok
+- ✍️ Type the package name → `pkg:install` → package_install_prompt
+- 🔁 Run again → `exec:prompt` → exec_prompt
+- 📜 Background job → `run:prompt` → job_prompt
+- 🧹 Clear → `nav:clear` → (handler only — no screen)
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_more, ws_detail_suspended
 
 ### exec_prompt — ⚡ Quick command
 

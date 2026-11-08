@@ -200,15 +200,42 @@ def terminal_view(
     if typing and not session.status.is_terminal:
         doc.p(italic(catalog.t("terminal.input_active", locale)))
 
+    # A package that is missing is the single most common reason a first command
+    # fails in a fresh workspace, and the terminal is where it surfaces. The offer
+    # is built from the session's own output, so it appears for a `python3 app.py`
+    # typed here exactly as it does for a run started from the run screen.
+    from cloudbot.presentation.screens.packages import missing_section
+
+    offer_html, offer_rows = missing_section(output or "", ws_id, locale)
+    if offer_html:
+        # ``missing_section`` is the screen that owns this wording and this button;
+        # calling it keeps one implementation instead of a terminal-only copy.
+        doc.raw(offer_html)
+
     return Screen(
         doc=doc,
-        markup=terminal_view_markup(session, ws_id, locale, typing=typing),
+        markup=terminal_view_markup(
+            session, ws_id, locale, typing=typing, extra_rows=offer_rows
+        ),
     )
 
 
 def terminal_view_markup(
-    session: TerminalSession, ws_id: WorkspaceId, locale: Locale, *, typing: bool = False
+    session: TerminalSession,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    typing: bool = False,
+    extra_rows: list[list] | None = None,
 ):
+    """The live terminal's buttons.
+
+    ``extra_rows`` carries the missing-package offer built by
+    :func:`cloudbot.presentation.screens.packages.missing_section` from the
+    session output. They go **before the exit rows** so a user who came here to
+    install something finds it without scrolling past navigation, and they are
+    never the only way out.
+    """
     # One exit, not two. The live terminal's exit is **🖥 My terminals** — the
     # list is where a user manages sessions (open another, remove an ended one),
     # and from it the workspace home is the very next tap (its own Back). A second
@@ -225,6 +252,8 @@ def terminal_view_markup(
             ],
             [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
         ]
+        if extra_rows:
+            rows = [*extra_rows, *rows]
         return inline_markup(rows)
     if typing:
         # Sticky command mode: the live view keeps every terminal button (R2) and
@@ -243,6 +272,8 @@ def terminal_view_markup(
                 inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY),
             ],
         ]
+        if extra_rows:
+            rows = [*extra_rows, *rows]
         return inline_markup(rows)
     rows = [
         [
@@ -255,6 +286,8 @@ def terminal_view_markup(
         ],
         [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
     ]
+    if extra_rows:
+        rows = [*extra_rows, *rows]
     return inline_markup(rows)
 
 

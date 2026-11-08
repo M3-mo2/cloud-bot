@@ -412,6 +412,7 @@ MESSAGES: dict[str, str] = {
     "exec.stderr_empty": "stderr (empty)",
     "exec.stderr": "stderr",
     "exec.run_again": "🔁 Run again",
+    "exec.again_same": "🔁 Try again",
     "exec.not_kept": "This output is shown here and not kept.",
 
     # -- runs ----------------------------------------------------------------
@@ -732,6 +733,14 @@ MESSAGES: dict[str, str] = {
     "package.result_duration": "Took {duration}",
     "package.result_target": "Installed into",
     "package.result_retry": "🔁 Try again",
+
+    # -- missing-module install offer (on a failed run) ----------------------
+    "package.fix_title": "✦ Missing library ⟸ {module}",
+    "package.fix_missing_tail": "is not installed in this workspace.",
+    "package.fix_from": "Your error named: {module}",
+    "package.fix_install": "📦 Install {pip}",
+    "package.fix_unknown_tail": "is not in the known list, and its pip name may differ.",
+    "package.fix_unknown_button": "✍️ Type the package name",
 
     # -- tunnels (Phase 2b) --------------------------------------------------
     "tunnel.title": "🌐 Public links",

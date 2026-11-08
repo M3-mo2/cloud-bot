@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
-from cloudbot.presentation.keyboards.callbacks import decode_required
+from cloudbot.presentation.keyboards.callbacks import cb as _cb, decode_required
 from cloudbot.presentation.rich.sender import RichSender
 from cloudbot.presentation.screens import run as run_screens
 from cloudbot.presentation.screens import run_logs as history_screens
@@ -17,6 +17,25 @@ from cloudbot.services.events import RequestEvents
 from cloudbot.states.input import Input
 
 router = Router(name="execution")
+
+#: The command behind the most recent result, per (user, workspace), so a
+#: "try again" button repeats **exactly** what failed. Bounded and process-local:
+#: after a restart the button is gone with the screen, and a tap on a stale one
+#: falls back to the prompt (a correctable screen, never a guessed command).
+_LAST_EXEC: "dict[tuple[int, str], str]" = {}
+_MAX_LAST_EXEC = 64
+
+
+def remember_exec(tg_id: int, ws_id, command: str) -> None:
+    if not command:
+        return
+    if len(_LAST_EXEC) >= _MAX_LAST_EXEC:
+        _LAST_EXEC.pop(next(iter(_LAST_EXEC)), None)
+    _LAST_EXEC[(tg_id, str(ws_id))] = command
+
+
+def last_exec(tg_id: int, ws_id) -> str | None:
+    return _LAST_EXEC.get((tg_id, str(ws_id)))
 
 
 def _wid(text: str):
@@ -44,6 +63,38 @@ async def on_exec_prompt(cb: CallbackQuery, ctx: UserContext, sender: RichSender
     await show_screen(cb, run_screens.exec_prompt(_wid(ws_id), ctx.locale), ctx=ctx, sender=sender)
 
 
+async def _run_exec_and_show(
+    event,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    events: RequestEvents,
+    ws_id,
+    command: str,
+) -> None:
+    """Run one command and render its result, with the missing-package offer.
+
+    The offer is built from the traceback's own module names (never invented),
+    and the retry button re-runs this same ``command`` on one tap. Nothing here
+    installs or re-runs on its own: a tap on an offer button is the only trigger.
+    """
+    from cloudbot.presentation.screens import packages as pkg_screens
+
+    result = await services.execution.exec(ctx.tg_id, ws_id, command)
+    if result.exit_code != 0:
+        events.run_failed(tg_id=ctx.tg_id, ws_id=str(ws_id), name=command)
+    offer = pkg_screens.missing_section(result.stderr or "", ws_id, ctx.locale)
+    again = _cb("exec:again", ws_id) if result.exit_code != 0 else None
+    await show_screen(
+        event,
+        run_screens.exec_result(
+            result, ws_id, ctx.locale, missing_offer=offer, again_action=again
+        ),
+        ctx=ctx,
+        sender=sender,
+        force_send=isinstance(event, Message),
+    )
+
 @router.message(Input.waiting_exec_command)
 async def on_exec_command(
     message: Message,
@@ -57,10 +108,34 @@ async def on_exec_command(
     ws_id = _wid(data["ws_id"])
     command = (message.text or "").strip()
     await state.clear()
-    result = await services.execution.exec(ctx.tg_id, ws_id, command)
-    if result.exit_code != 0:
-        events.run_failed(tg_id=ctx.tg_id, ws_id=str(ws_id), name=command)
-    await show_screen(message, run_screens.exec_result(result, ws_id, ctx.locale), ctx=ctx, sender=sender, force_send=True)
+    # Remember what was run so the result screen's "try again" repeats exactly
+    # this command, on the workspace it ran on.
+    remember_exec(ctx.tg_id, ws_id, command)
+    await _run_exec_and_show(message, ctx, services, sender, events, ws_id, command)
+
+@router.callback_query(F.data.startswith("exec:again"))
+async def on_exec_again(
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
+    events: RequestEvents,
+) -> None:
+    """Re-run the exact command that failed — only when the user taps it."""
+    decoded = decode_required(cb.data, 1)
+    ws_id = _wid(decoded.key[0])
+    command = last_exec(ctx.tg_id, ws_id)
+    if not command:
+        # Nothing to repeat (a restart, or a button from another workspace):
+        # ask for the command again instead of guessing one.
+        await state.set_state(Input.waiting_exec_command)
+        await state.update_data(ws_id=str(ws_id))
+        await show_screen(
+            cb, run_screens.exec_prompt(ws_id, ctx.locale), ctx=ctx, sender=sender
+        )
+        return
+    await _run_exec_and_show(cb, ctx, services, sender, events, ws_id, command)
 
 
 # -- background job ----------------------------------------------------------
