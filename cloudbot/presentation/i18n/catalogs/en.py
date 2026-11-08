@@ -696,7 +696,6 @@ MESSAGES: dict[str, str] = {
 
     # -- packages (Phase 2a) -------------------------------------------------
     "package.title": "🐍 Packages",
-    "package.count": "{n} installed",
     "package.column.name": "Package",
     "package.column.version": "Version",
     "package.empty": "No packages are installed in this workspace.",
@@ -1561,5 +1560,6 @@ PLURALS: dict[str, dict[str, str]] = {
     "count.stopped_runs": {"one": "{n} run", "other": "{n} runs"},
     "count.stopped_sessions": {"one": "{n} terminal", "other": "{n} terminals"},
     "count.stopped_processes": {"one": "{n} process", "other": "{n} processes"},
+    "count.packages": {"one": "{n} installed", "other": "{n} installed"},
     "count.templates": {"one": "{n} template", "other": "{n} templates"},
 }

@@ -21,7 +21,11 @@ from cloudbot.domain.python_packages import (
 )
 from cloudbot.domain.value_objects import PackageList, WorkspaceId
 from cloudbot.presentation.i18n.catalog import catalog
-from cloudbot.presentation.i18n.formatters import format_duration, localize_digits
+from cloudbot.presentation.i18n.formatters import (
+    format_count,
+    format_duration,
+    localize_digits,
+)
 from cloudbot.presentation.keyboards.buttons import inline
 from cloudbot.presentation.keyboards.callbacks import cb as _cb
 from cloudbot.presentation.keyboards.markup import inline_markup
@@ -72,7 +76,7 @@ def packages_screen(
     page = max(0, min(page, total_pages - 1))
     doc = RichDoc(locale)
     doc.h(2, catalog.t("package.title", locale))
-    doc.p(catalog.t("package.count", locale, n=_num(pkg_list.count, locale)))
+    doc.p(_raw(format_count("count.packages", pkg_list.count, locale)))
 
     if not pkg_list.packages:
         doc.p(catalog.t("package.empty", locale))

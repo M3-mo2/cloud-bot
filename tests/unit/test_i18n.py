@@ -122,6 +122,68 @@ def test_assert_no_arabic_digits_helper():
         formatters.assert_no_arabic_digits("۱")  # Extended Arabic-Indic
 
 
+# -- TASK packages-wording: a pip package is a «مكتبة» in Arabic --------------
+#: The owner's vocabulary: a Python hosting user installs **libraries**, not
+#: "packages". ``حزم`` (plural) and ``حزمة`` (singular) are forbidden in Arabic
+#: user-facing copy; «حزمة» contains «حزم», so one check catches both forms.
+_FORBIDDEN_PACKAGE_WORDS = ("حزم", "حزمة")
+
+
+def _arabic_user_facing_strings() -> list[tuple[str, str]]:
+    """Every string an Arabic user can actually read, with a label.
+
+    Only **values** are returned: catalog keys are identifiers, never shown to a
+    user. ``PLURALS`` values are user-facing too, so they are scanned alongside
+    ``MESSAGES``.
+    """
+    module = CATALOGS[Locale.AR]
+    items = list(module.MESSAGES.items())
+    for key, forms in module.PLURALS.items():
+        items.extend((f"{key}[{category}]", value) for category, value in forms.items())
+    return items
+
+
+def test_arabic_catalogs_call_pip_packages_maktabat():
+    """No Arabic user-facing string may still call a pip package a «حزمة».
+
+    Why keys are allowed to keep saying ``package``: a key is an identifier an
+    agent reads, not a user; renaming ``package.*`` would churn every screen and
+    every golden without changing one word the user sees. Why the English catalog
+    is not scanned: "packages" is the correct English word — the owner asked
+    about the Arabic only.
+
+    The bite: put «الحزم» back in a screen's Arabic value and this test fails.
+    """
+    offenders = [
+        f"{key}: {value!r}"
+        for key, value in _arabic_user_facing_strings()
+        if any(word in value for word in _FORBIDDEN_PACKAGE_WORDS)
+    ]
+    assert not offenders, (
+        "Arabic copy still says «حزم»/«حزمة» for a pip package; use "
+        f"«مكتبات»/«مكتبة»: {offenders}"
+    )
+
+
+@pytest.mark.parametrize(
+    ("n", "expected"),
+    [
+        (0, "لا مكتبات مثبّتة"),
+        (1, "مكتبة واحدة مثبّتة"),
+        (2, "مكتبتان مثبّتتان"),
+        (3, "3 مكتبات مثبّتة"),
+        (11, "11 مكتبة مثبّتة"),
+    ],
+)
+def test_arabic_package_count_is_grammatical(n, expected):
+    """The four Arabic categories a count can land in render their own form.
+
+    1 is ``one``, 2 is ``two``, 3 is ``few`` and 11 is ``many``; hardcoding a
+    single form («{n} مكتبات») reads wrong for 1, 2 and 11 to a native speaker.
+    """
+    assert formatters.format_count("count.packages", n, Locale.AR) == expected
+
+
 def test_arabic_rtl_flag_is_still_true():
     from cloudbot.presentation.rich.document import RichDoc
 
