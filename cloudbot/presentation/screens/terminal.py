@@ -7,6 +7,7 @@ configuration (``/v1/meta``), never a hardcoded number.
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from datetime import datetime, timezone
 
 from cloudbot.core.locale import Locale
@@ -165,6 +166,7 @@ def terminal_view(
     truncated: bool = False,
     meta: EngineMeta | None = None,
     typing: bool = False,
+    installed: Collection[str] | None = None,
 ) -> Screen:
     """The live terminal view.
 
@@ -172,6 +174,11 @@ def terminal_view(
     (R1/R3): the screen then says the user is typing straight into the terminal
     and carries the one-tap **stop typing** control, so the state never traps
     anyone.
+
+    ``installed`` is the workspace's package list (normalised pip names) — the
+    offer skips a module that is already on disk instead of re-offering it from
+    old scrollback. ``None`` means the list could not be fetched and the screen
+    degrades to offering everything.
     """
     doc = RichDoc(locale)
     emoji = SESSION_STATUS_EMOJI.get(session.status, "—")
@@ -202,11 +209,14 @@ def terminal_view(
 
     # A package that is missing is the single most common reason a first command
     # fails in a fresh workspace, and the terminal is where it surfaces. The offer
-    # is built from the session's own output, so it appears for a `python3 app.py`
-    # typed here exactly as it does for a run started from the run screen.
+    # is built from the session's own output — bounded to the block the user is
+    # looking at and filtered by what is already installed, so a command that
+    # succeeded (or whose package is on disk) grows no button at all.
     from cloudbot.presentation.screens.packages import missing_section
 
-    offer_html, offer_rows = missing_section(output or "", ws_id, locale)
+    offer_html, offer_rows = missing_section(
+        output or "", ws_id, locale, installed=installed
+    )
     if offer_html:
         # ``missing_section`` is the screen that owns this wording and this button;
         # calling it keeps one implementation instead of a terminal-only copy.
@@ -267,10 +277,10 @@ def terminal_view_markup(
                 inline(catalog.t("terminal.ctrl_c", locale), _term.signal(ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
                 inline(catalog.t("terminal.ctrl_d", locale), _term.ctrl_d(ws_id, ses_id), intent=Intent.PRIMARY),
             ],
-            [
-                inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER),
-                inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY),
-            ],
+            # *Close* is destructive, so it gets its own row — never beside a
+            # button a hand taps by habit (MOHAMED.md).
+            [inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER)],
+            [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
         ]
         if extra_rows:
             rows = [*extra_rows, *rows]
@@ -282,8 +292,10 @@ def terminal_view_markup(
         ],
         [
             inline(catalog.t("terminal.ctrl_d", locale), _term.ctrl_d(ws_id, ses_id), intent=Intent.PRIMARY),
-            inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER),
         ],
+        # *Close* is destructive, so it gets its own row — never beside Ctrl-D,
+        # the button a hand taps by habit (MOHAMED.md).
+        [inline(catalog.t("terminal.close", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER)],
         [inline(catalog.t("terminal.my_title", locale), _term.list_(ws_id), intent=Intent.PRIMARY)],
     ]
     if extra_rows:

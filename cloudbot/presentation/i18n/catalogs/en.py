@@ -730,6 +730,7 @@ MESSAGES: dict[str, str] = {
     "package.result_no_net_title": "🌐 No internet access",
     "package.result_timed_out": "⏱️ The install timed out.",
     "package.result_truncated": "⚠️ Install output was shortened.",
+    "package.result_reason": "What pip said:",
     "package.result_duration": "Took {duration}",
     "package.result_target": "Installed into",
     "package.result_back": "✅ Installed {names} — Back",

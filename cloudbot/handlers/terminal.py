@@ -201,10 +201,21 @@ async def _show_view(cb, ctx, services, sender, ws_id, ses_id, *, state: FSMCont
     # The live terminal is a screen the install offer can appear on; "back" from
     # the install result must return to this exact session's view.
     from cloudbot.handlers.execution import remember_origin
+    from cloudbot.handlers.package_offer import package_names
 
     remember_origin(ctx.tg_id, ws_id, "terminal", str(session.id))
+    # Answer the offer with facts: the workspace's current package list, so a
+    # package that is already installed is never offered again from old output.
+    installed = await package_names(services, ctx.tg_id, ws_id)
     screen = term_screens.terminal_view(
-        session, ws_id, ctx.locale, output=output, truncated=truncated, meta=meta, typing=typing
+        session,
+        ws_id,
+        ctx.locale,
+        output=output,
+        truncated=truncated,
+        meta=meta,
+        typing=typing,
+        installed=installed,
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
@@ -340,8 +351,16 @@ async def _stream(
     """
     import asyncio
 
+    from cloudbot.handlers.package_offer import package_names
+
     key = (ctx.tg_id, str(ws_id), ses_id)
     meta = await services.sessions.meta()
+    # The workspace's package list is fetched lazily, after the first generation
+    # check: a follower that a newer command already superseded must not spend an
+    # engine read on a render it is about to abandon. One fetch serves the whole
+    # follow — an install cannot run mid-stream, so the list cannot change.
+    installed: frozenset[str] | None = None
+    installed_fetched = False
     first = True
     chat_id = None
     message_id = None
@@ -351,6 +370,9 @@ async def _stream(
         if generation is not None and not _follow_is_current(key, generation):
             log.info("terminal.follow_superseded", ws_id=str(ws_id), ses_id=ses_id)
             return
+        if not installed_fetched:
+            installed = await package_names(services, ctx.tg_id, ws_id)
+            installed_fetched = True
         session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
         output, truncated, next_offset = await _read_all(services, ctx.tg_id, ws_id, ses_id)
         if not session.status.is_terminal:
@@ -370,6 +392,7 @@ async def _stream(
             truncated=truncated,
             meta=meta,
             typing=typing,
+            installed=installed,
         )
         if first:
             if isinstance(event, CallbackQuery) and event.message is not None and not force_send:

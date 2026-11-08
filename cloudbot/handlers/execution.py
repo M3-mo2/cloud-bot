@@ -127,6 +127,7 @@ async def _run_exec_and_show(
     and the retry button re-runs this same ``command`` on one tap. Nothing here
     installs or re-runs on its own: a tap on an offer button is the only trigger.
     """
+    from cloudbot.handlers.package_offer import package_names
     from cloudbot.presentation.screens import packages as pkg_screens
 
     result = await services.execution.exec(ctx.tg_id, ws_id, command)
@@ -135,7 +136,10 @@ async def _run_exec_and_show(
     # Where the install offer's back button must return: this result screen.
     remember_origin(ctx.tg_id, ws_id, "run")
     remember_exec_result(ctx.tg_id, ws_id, result)
-    offer = pkg_screens.missing_section(result.stderr or "", ws_id, ctx.locale)
+    installed = await package_names(services, ctx.tg_id, ws_id)
+    offer = pkg_screens.missing_section(
+        result.stderr or "", ws_id, ctx.locale, installed=installed
+    )
     again = _cb("exec:again", ws_id) if result.exit_code != 0 else None
     await show_screen(
         event,
@@ -262,13 +266,21 @@ async def on_logs(cb: CallbackQuery, ctx: UserContext, services: Services, sende
 async def _stream_logs(cb, ctx, services, sender, ws_id, run_id, *, update_only: bool) -> None:
     # One bounded read for the in-place screen (the draft loop is driven by the
     # tail service; here we render the current state and persist it).
+    from cloudbot.handlers.package_offer import package_names
+
     state = await services.execution.read_all_logs(ctx.tg_id, ws_id, run_id)
     run = await services.execution.get_run(ctx.tg_id, ws_id, run_id)
     # A file run's live logs is a screen the install offer can appear on; "back"
     # must return to this exact run's logs.
     remember_origin(ctx.tg_id, ws_id, "runlog", str(run.id))
+    installed = await package_names(services, ctx.tg_id, ws_id)
     screen = run_screens.live_logs(
-        run, ctx.locale, stdout=state.stdout, stderr=state.stderr, truncated=state.truncated
+        run,
+        ctx.locale,
+        stdout=state.stdout,
+        stderr=state.stderr,
+        truncated=state.truncated,
+        installed=installed,
     )
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
@@ -286,12 +298,21 @@ async def on_stop(cb: CallbackQuery, ctx: UserContext, services: Services, sende
     decoded = decode_required(cb.data, 2)
     ws_id = _wid(decoded.key[0])
     run_id = decoded.key[1]
+    from cloudbot.handlers.package_offer import package_names
+
     await services.execution.stop_run(ctx.tg_id, ws_id, run_id)
     state = await services.execution.read_all_logs(ctx.tg_id, ws_id, run_id)
     run = await services.execution.get_run(ctx.tg_id, ws_id, run_id)
+    installed = await package_names(services, ctx.tg_id, ws_id)
     await show_screen(
         cb,
-        run_screens.live_logs(run, ctx.locale, stdout=state.stdout, stderr=state.stderr),
+        run_screens.live_logs(
+            run,
+            ctx.locale,
+            stdout=state.stdout,
+            stderr=state.stderr,
+            installed=installed,
+        ),
         ctx=ctx,
         sender=sender,
     )

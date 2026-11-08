@@ -729,6 +729,7 @@ MESSAGES: dict[str, str] = {
     "package.result_no_net_title": "🌐 لا يوجد اتصال بالإنترنت",
     "package.result_timed_out": "⏱️ انتهت مهلة التثبيت.",
     "package.result_truncated": "⚠️ تم اختصار مخرجات التثبيت.",
+    "package.result_reason": "اللي قاله pip:",
     "package.result_duration": "استغرق {duration}",
     "package.result_target": "تم التثبيت في",
     "package.result_back": "✅ تم تثبيت {names} — رجوع",

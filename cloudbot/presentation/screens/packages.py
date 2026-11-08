@@ -8,9 +8,17 @@ DEBUG+admin collapsed raw-payload block only.
 
 from __future__ import annotations
 
+import re
+from collections.abc import Collection
+
 from cloudbot.core.locale import Locale
 from cloudbot.core.modes import RunMode
-from cloudbot.domain.python_packages import missing_modules, pip_name_for
+from cloudbot.domain.python_packages import (
+    is_installed,
+    missing_modules,
+    normalize_distribution_name,
+    pip_name_for,
+)
 from cloudbot.domain.value_objects import PackageList, WorkspaceId
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.i18n.formatters import format_duration, localize_digits
@@ -27,10 +35,25 @@ from cloudbot.presentation.rich.components import RawPayloadDetails
 from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.rich.tags import Html, esc, italic
 from cloudbot.presentation.screens.screen import Screen
+from cloudbot.services.files import MAX_PREVIEW_BYTES, tail_preview
 from cloudbot.services.packages import InstallOutcome
 
 #: Keep install output bounded when shown; rich text caps at 32768 chars.
 MAX_OUTPUT_CHARS = 8000
+
+#: The offer is built from this many trailing bytes of a command's output (12
+#: KiB) — exactly the bound the screens themselves display (``terminal._tail``
+#: and ``run.live_logs`` use ``tail_preview``). A failure that scrolled off
+#: further up is not the failure the user is looking at, so offering to fix it is
+#: noise; the tail is the part still on screen.
+OFFER_TAIL_BYTES = MAX_PREVIEW_BYTES
+
+#: The start of a shell prompt line as a real PTY prints it: ``$ cmd``,
+#: ``# cmd`` (root), ``>>> expr``, or a ``user@host:~$ cmd`` prefix. Everything
+#: after the **last** such line is the newest command's block.
+_PROMPT_START = re.compile(
+    r"(?m)^(?:[^\s$#\n][^\n$#]{0,79}[$#]|[$#]|>>>)[ \t]"
+)
 
 
 def _num(value: int, locale: Locale) -> str:
@@ -172,10 +195,69 @@ def fix_callback(pip_name: str) -> str:
     return f"{FIX_PREFIX}{pip_name}"
 
 
+def last_failure(output: str) -> str:
+    """The **most recent command's** output, or ``""``.
+
+    A terminal's scrollback is a running log of everything typed; a line that
+    failed ten minutes ago is not the failure the user is looking at. Two
+    constraints narrow the offer to what is on screen:
+
+    * only the last :data:`OFFER_TAIL_BYTES` (12 KiB) are considered — the same
+      bound the screens display (``tail_preview``/``terminal._tail``), so a
+      failure that scrolled off further up is not offered;
+    * within that tail, only the **newest shell block** counts. A real PTY prints
+      a prompt before each command and again when it finishes:
+
+      - text after the last prompt is the command still printing — that block;
+      - when the tail ends in a fresh prompt, the finished command is the block
+        between the last two prompts (the prompt is the shell saying it is done);
+      - a bare prompt with nothing before it is an idle shell: no block, no
+        offer.
+
+    *Why the newest block, not the whole tail.* The report was a package installed
+    and the same command then run fine, yet the old failure line was still in the
+    scrollback and still produced a button. Keying on the newest block means a
+    later successful command cannot inherit an earlier failure's offer.
+    """
+    tail, _ = tail_preview(output or "", OFFER_TAIL_BYTES)
+    if not tail.strip():
+        return ""
+    matches = list(_PROMPT_START.finditer(tail))
+    if not matches:
+        # No prompt at all (e.g. a run's stderr): the tail is the failure text.
+        return tail
+    last = matches[-1]
+    after = tail[last.end():]
+    if after.strip():
+        # The command is still printing: its output follows the last prompt.
+        return after
+    # A fresh prompt closed the newest command: its block is the text between
+    # the previous prompt and this one (or everything before it).
+    start = matches[-2].end() if len(matches) >= 2 else 0
+    return tail[start:last.start()]
+
+
 def missing_section(
-    stderr: str, ws_id: WorkspaceId, locale: Locale
+    stderr: str,
+    ws_id: WorkspaceId,
+    locale: Locale,
+    *,
+    installed: Collection[str] | None = None,
 ) -> tuple[str, list[list]]:
     """The missing-package offer as **(html, keyboard rows)**, or ``("", [])``.
+
+    ``installed`` is the workspace's package list (normalised pip names), fetched
+    by the caller before rendering. A module whose pip name is **already
+    installed** is skipped completely — no header, no line, no button: the user
+    already solved that one, and an offer to install what is on disk is the
+    defect this filter exists to prevent. ``installed=None`` means the list could
+    not be fetched; the screen then degrades to the old behaviour and offers
+    everything (never a silent no-op).
+
+    The offer is answered by the **newest** command's output, not the whole
+    scrollback: :func:`last_failure` bounds it to the displayed tail and to the
+    block after the last prompt, and returns nothing when the shell is idle at a
+    prompt. A successful last command therefore produces no offer at all.
 
     One block per missing module (max five, from :func:`missing_modules`):
 
@@ -193,8 +275,27 @@ def missing_section(
     """
     doc = RichDoc(locale)
     rows: list[list] = []
-    for module in missing_modules(stderr):
+    seen: set[str] = set()
+    seen_unknown: set[str] = set()
+    unknown_button_added = False
+    for module in missing_modules(last_failure(stderr)):
         pip = pip_name_for(module)
+        if pip is not None:
+            key = normalize_distribution_name(pip)
+            if key in seen:
+                # Two import names for one distributable (e.g. a project whose
+                # module and package differ): one offer, not two buttons.
+                continue
+            if is_installed(pip, installed):
+                # Already on disk: no header, no line, no button.
+                continue
+            seen.add(key)
+        else:
+            key = module.casefold()
+            if key in seen_unknown:
+                # The same unknown module twice: one block, not two.
+                continue
+            seen_unknown.add(key)
         doc.h(2, _raw(f"<b>{esc(catalog.t('package.fix_title', locale, module=module))}</b>"))
         if pip is not None:
             doc.p(
@@ -222,15 +323,21 @@ def missing_section(
                     f"{esc(catalog.t('package.fix_unknown_tail', locale))}"
                 )
             )
-            rows.append(
-                [
-                    inline(
-                        catalog.t("package.fix_unknown_button", locale),
-                        _cb("pkg:install", ws_id),
-                        intent=Intent.PRIMARY,
-                    )
-                ]
-            )
+            # The control opens the same "type a package name" prompt whatever
+            # unknown module preceded it, so it is attached **once** even when a
+            # tail names two unknown modules: a repeated callback is a duplicate
+            # destination the keyboard guard rejects.
+            if not unknown_button_added:
+                rows.append(
+                    [
+                        inline(
+                            catalog.t("package.fix_unknown_button", locale),
+                            _cb("pkg:install", ws_id),
+                            intent=Intent.PRIMARY,
+                        )
+                    ]
+                )
+                unknown_button_added = True
     return doc.html, rows
 
 # -- install result ----------------------------------------------------------
@@ -260,6 +367,14 @@ def install_result_screen(
             doc.p(_raw(catalog.t("package.result_no_net", locale)))
         if result.timed_out:
             doc.p(catalog.t("package.result_timed_out", locale))
+        # A failed install must say *why* on the screen, and the engine's own
+        # output tail is the reason. It is bounded and escaped; it is pip's
+        # message, not JSON or an engine code, and it is the only text that can
+        # tell the user what to change (a version, a name, egress).
+        reason_tail, _ = tail_preview(result.output or result.stdout or "", MAX_OUTPUT_CHARS)
+        if reason_tail.strip():
+            doc.p(_raw(f"<b>{catalog.t('package.result_reason', locale)}</b>"))
+            doc.pre(reason_tail, language="text")
 
     doc.p(italic(catalog.t("package.result_duration", locale, duration=format_duration(result.duration_ms / 1000.0, locale))))
     if result.target:

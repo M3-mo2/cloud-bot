@@ -369,8 +369,15 @@ async def test_a_stale_generation_stops_before_the_next_engine_read():
             reads += 1
             raise AssertionError("a superseded follower read the engine")
 
+    class Packages:
+        async def list(self, *a, **k):
+            # The offer's installed check is reached only on a render; a
+            # superseded follower must never get this far.
+            raise AssertionError("a superseded follower fetched packages")
+
     class Bundle:
         sessions = FakeSessions()
+        packages = Packages()
 
     sent = []
 
@@ -422,8 +429,18 @@ async def test_a_new_command_supersedes_an_in_flight_follow():
 
             return SessionOutput(data="x", offset=0, next=1, eof=True, truncated=False)
 
+    class Packages:
+        async def list(self, *a, **k):
+            from cloudbot.domain.value_objects import PackageList
+
+            return PackageList(
+                packages=(), count=0, truncated=False, shared_enabled=True,
+                shared_available=False, shared_path="", private_path="",
+            )
+
     class Bundle:
         sessions = FakeSessions()
+        packages = Packages()
 
     class Sender:
         async def send(self, chat_id, doc, *, markup=None, reply_to=None):

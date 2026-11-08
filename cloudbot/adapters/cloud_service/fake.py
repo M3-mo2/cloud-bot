@@ -85,6 +85,11 @@ class FakeEngine:
         self._sessions: dict[str, TerminalSession] = {}
         self._session_output: dict[str, str] = {}
         self._tunnels: dict[str, Tunnel] = {}
+        #: Installed packages per workspace. Seeded with ``six`` and **updated by
+        #: install/remove**, because the screens now answer the missing-package
+        #: offer with the real list: a fake that always reported the same package
+        #: would make "installed is not offered again" untestable end to end.
+        self._installed: dict[str, list[Package]] = {}
         self._seq = 0
         #: The engine's per-workspace tunnel cap. Tests override it to prove
         #: nothing hardcodes the number; the real value lives in ``/v1/meta``.
@@ -99,6 +104,7 @@ class FakeEngine:
         self, ws_id: str, name: str, status: WorkspaceStatus, active: int = 0
     ) -> None:
         self._workspaces[ws_id] = _ws(ws_id, name, status, active=active)
+        self._installed[ws_id] = [Package(name="six", version="1.16.0")]
         self._files[ws_id] = [
             FileEntry("/src", "src", "dir", None, "drwxr-xr-x", _NOW, None),
             FileEntry("/data", "data", "dir", None, "drwxr-xr-x", _NOW, None),
@@ -122,6 +128,7 @@ class FakeEngine:
         ws_id = f"ws_FAKE{self._seq:020d}"
         ws = _ws(ws_id, name, WorkspaceStatus.ACTIVE, active=active)
         self._workspaces[ws_id] = ws
+        self._installed[ws_id] = []
         self._files[ws_id] = []
         return ws
 
@@ -634,9 +641,10 @@ class FakeEngine:
     # -- packages (Phase 2a) -------------------------------------------------
     async def list_packages(self, ws_id: WorkspaceId) -> PackageList:
         await self.get_workspace(ws_id)
+        packages = tuple(self._installed.get(str(ws_id), []))
         return PackageList(
-            packages=(Package(name="six", version="1.16.0"),),
-            count=1,
+            packages=packages,
+            count=len(packages),
             truncated=False,
             shared_enabled=True,
             shared_available=False,
@@ -657,6 +665,12 @@ class FakeEngine:
                 truncated=False,
                 target="/opt/python/private",
             )
+        # Record what landed, so the next list() reports it — the behaviour the
+        # installed-check relies on.
+        installed = self._installed.setdefault(str(ws_id), [])
+        for name in packages:
+            if not any(package.name.casefold() == name.casefold() for package in installed):
+                installed.append(Package(name=name, version=""))
         names = " ".join(packages)
         return InstallResult(
             exit_code=0,
@@ -670,9 +684,14 @@ class FakeEngine:
 
     async def remove_package(self, ws_id: WorkspaceId, name: str) -> None:
         await self.get_workspace(ws_id)
+        installed = self._installed.get(str(ws_id), [])
+        self._installed[str(ws_id)] = [
+            package for package in installed if package.name.casefold() != name.casefold()
+        ]
 
     async def remove_all_packages(self, ws_id: WorkspaceId) -> None:
         await self.get_workspace(ws_id)
+        self._installed[str(ws_id)] = []
 
     # -- tunnels (Phase 2b) --------------------------------------------------
     async def list_tunnels(self, ws_id: WorkspaceId) -> TunnelList:

@@ -1022,6 +1022,7 @@ _MISSING_TWO = (
     "ModuleNotFoundError: No module named 'flask'\n"
     "ModuleNotFoundError: No module named 'PIL'\n"
 )
+_MISSING_FLASK = "ModuleNotFoundError: No module named 'flask'\n"
 
 #: name → builder. This is the registry's payload; ``SECTION_OF`` assigns each
 #: name to a section (a first-class grouping, not a prefix convention).
@@ -1177,6 +1178,21 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     ),
     "terminal_view_ended": lambda f, loc: term_screens.terminal_view(f["ended_session"], f["ws"].id, loc, output="$ echo hi\nhi\n$ "),
     "terminal_view_failed": lambda f, loc: term_screens.terminal_view(f["failed_session"], f["ws"].id, loc),
+    # TASK package-offer-fresh: the same live view, but its output is a failed
+    # command whose package is **not** installed — the offer is on screen. Locked
+    # in both locales so the offer's shape cannot drift silently.
+    "terminal_view_offer": lambda f, loc: term_screens.terminal_view(
+        f["running_session"], f["ws"].id, loc, output="$ python3 app.py\n" + _MISSING_FLASK
+    ),
+    # ... and the same view after the package was installed: no offer. The pair is
+    # the golden proof of the task's central rule.
+    "terminal_view_offer_installed": lambda f, loc: term_screens.terminal_view(
+        f["running_session"],
+        f["ws"].id,
+        loc,
+        output="$ python3 app.py\n" + _MISSING_FLASK,
+        installed=frozenset({"flask"}),
+    ),
     "terminal_stale": lambda f, loc: term_screens.stale_screen(loc),
     "terminal_ended": lambda f, loc: term_screens.ended_screen(f["ended_session"], f["ws"].id, loc),
     "terminal_command": lambda f, loc: term_screens.command_prompt(f["ws"].id, f["running_session"].id, loc),

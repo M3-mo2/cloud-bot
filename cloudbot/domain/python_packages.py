@@ -19,6 +19,7 @@ plus that prefix cannot fit.
 from __future__ import annotations
 
 import re
+from collections.abc import Collection
 from types import MappingProxyType
 
 #: The callback prefix a "fix this missing package" button carries. Kept here so
@@ -95,6 +96,33 @@ if len(_LONGEST_FIX_CALLBACK.encode("utf-8")) > _TELEGRAM_CALLBACK_MAX:
     )
 
 
+def normalize_distribution_name(name: str) -> str:
+    """PEP 503-normalise a distribution name for comparison.
+
+    PyPI treats ``Pillow``, ``pillow`` and ``PILLOW`` as one project, and
+    ``scikit-learn``, ``scikit_learn`` and ``scikit.learn`` as one too: the
+    naming rules collapse any run of ``-``, ``_`` or ``.`` to a single ``-`` and
+    casefold the result. The store may report a project's canonical spelling
+    while a traceback names its import (``PIL``) and the table maps it to a third
+    (``pillow``); comparing the raw strings would miss an installed package and
+    keep offering it. One helper, used on **both** sides, so the comparison is
+    distribution-name aware and never a substring test.
+    """
+    return re.sub(r"[-_.]+", "-", (name or "").strip()).casefold()
+
+
+def is_installed(pip_name: str, installed: Collection[str] | None) -> bool:
+    """Whether ``pip_name`` is in the (already-normalised) installed set.
+
+    ``None`` means the list could not be fetched: unknown is **not** installed,
+    so the caller keeps the old offer-everything behaviour.
+    """
+    if installed is None:
+        return False
+    wanted = normalize_distribution_name(pip_name)
+    return any(normalize_distribution_name(name) == wanted for name in installed)
+
+
 def pip_name_for(module: str) -> str | None:
     """Return the pip name for ``module`` (case-insensitive), or ``None``.
 
@@ -150,6 +178,8 @@ __all__ = [
     "FIX_CALLBACK_PREFIX",
     "MAX_MISSING_MODULES",
     "MODULE_TO_PIP",
+    "is_installed",
     "missing_modules",
+    "normalize_distribution_name",
     "pip_name_for",
 ]

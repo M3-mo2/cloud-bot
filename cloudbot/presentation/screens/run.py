@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Collection
+
 from cloudbot.core.locale import Locale
 from cloudbot.domain.entities import Run, Workspace
 from cloudbot.domain.value_objects import ExecResult, RunStatus, WorkspaceId
@@ -89,6 +91,11 @@ def exec_result(
     doc = RichDoc(locale)
 
     offer_html, offer_rows = missing_offer if missing_offer is not None else ("", [])
+
+    if result.exit_code == 0:
+        # A command that succeeded never grows an offer, whatever a caller passed:
+        # the exit code is the strongest possible "nothing is missing" signal.
+        offer_html, offer_rows = "", []
 
     if result.exit_code == 124:
         doc.h(2, catalog.t("exec.timed_out", locale))
@@ -212,6 +219,7 @@ def live_logs(
     truncated: bool = False,
     elapsed_s: float | None = None,
     bounded_kb: int | None = None,
+    installed: Collection[str] | None = None,
 ) -> Screen:
     from cloudbot.services.files import tail_preview
 
@@ -234,10 +242,18 @@ def live_logs(
 
     # A run started from a file fails for the same reasons a typed command does,
     # and this screen is where that failure is read. The offer is built from the
-    # run's own stderr, so a missing package is one tap away here as well.
+    # run's own stderr, filtered by what is already installed so an install that
+    # just succeeded (and its "back" render) never resurrects the button.
     from cloudbot.presentation.screens.packages import missing_section
 
-    offer_html, offer_rows = missing_section(stderr or "", run.workspace_id, locale)
+    # A run that exited 0 has nothing missing; any stale stderr line (a warning,
+    # an earlier attempt) must not produce an install button.
+    if run.status.is_terminal and run.exit_code == 0:
+        offer_html, offer_rows = "", []
+    else:
+        offer_html, offer_rows = missing_section(
+            stderr or "", run.workspace_id, locale, installed=installed
+        )
     if offer_html:
         doc.raw(offer_html)
 

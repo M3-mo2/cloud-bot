@@ -180,6 +180,11 @@ async def test_the_bite_a_run_offer_install_returns_to_the_run_result():
     Fails against the old three-row markup: it had no ``origin:back`` row, so the
     first row was ``exec:again`` (or ``pkg:install``) and no button returned to the
     run the offer came from.
+
+    TASK package-offer-fresh: the return now renders with the **fresh** installed
+    list, and ``flask`` was installed by the tap above, so the offer is gone from
+    the run result. The last assertion was flipped from "the offer is still there"
+    (the defect this task fixes) to "the failure is still shown, the offer is not".
     """
     container, engine, bot, dispatcher = await _harness()
     try:
@@ -213,7 +218,12 @@ async def test_the_bite_a_run_offer_install_returns_to_the_run_result():
         await dispatcher.feed_update(bot, _callback(3, "origin:back", message_id=screen_id))
         landed = bot.messages[screen_id]["html"]
         assert catalog.t("exec.failed", Locale.EN, code="1") in landed
-        assert catalog.t("package.fix_title", Locale.EN, module="flask") in landed
+        # TASK package-offer-fresh changed this assertion deliberately: the offer
+        # is now answered by the **fresh** package list, and flask was just
+        # installed, so returning to the run result must NOT resurrect the button
+        # (the old assertion pinned the defect). The failure itself is still shown.
+        assert "ModuleNotFoundError" in landed
+        assert catalog.t("package.fix_title", Locale.EN, module="flask") not in landed
     finally:
         await container.aclose()
 

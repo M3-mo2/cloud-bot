@@ -210,6 +210,8 @@ async def on_origin_back(
     was deleted) degrades to the workspace home: one predictable destination,
     never a dead end and never a guessed wrong screen.
     """
+    from cloudbot.handlers.package_offer import package_names
+
     inside = await services.session.current(ctx.tg_id)
     if inside is None:
         workspaces = await services.workspaces.list(ctx.tg_id)
@@ -231,7 +233,13 @@ async def on_origin_back(
         if kind == "run":
             result = last_exec_result(ctx.tg_id, ws_id)
             if result is not None:
-                offer = pkg_screens.missing_section(result.stderr or "", ws_id, ctx.locale)
+                # The fresh list matters here most: this is the screen the user
+                # lands on after an install, so the offer must be answered with
+                # what is now on disk — never the failure that is already fixed.
+                installed = await package_names(services, ctx.tg_id, ws_id)
+                offer = pkg_screens.missing_section(
+                    result.stderr or "", ws_id, ctx.locale, installed=installed
+                )
                 again = cb_again(result, ws_id)
                 await show_screen(
                     cb,
@@ -259,6 +267,7 @@ async def on_origin_back(
                 run = None
             if run is not None:
                 remember_origin(ctx.tg_id, ws_id, "runlog", str(run.id))
+                installed = await package_names(services, ctx.tg_id, ws_id)
                 await show_screen(
                     cb,
                     run_screens.live_logs(
@@ -267,6 +276,7 @@ async def on_origin_back(
                         stdout=state.stdout,
                         stderr=state.stderr,
                         truncated=state.truncated,
+                        installed=installed,
                     ),
                     ctx=ctx,
                     sender=sender,
@@ -288,6 +298,7 @@ async def on_origin_back(
                     except EngineRefused:
                         output, truncated = "", False
                 remember_origin(ctx.tg_id, ws_id, "terminal", str(session.id))
+                installed = await package_names(services, ctx.tg_id, ws_id)
                 await show_screen(
                     cb,
                     term_screens.terminal_view(
@@ -297,6 +308,7 @@ async def on_origin_back(
                         output=output,
                         truncated=truncated,
                         meta=meta,
+                        installed=installed,
                     ),
                     ctx=ctx,
                     sender=sender,
