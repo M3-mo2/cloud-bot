@@ -94,3 +94,5 @@ and what is pending, so work can resume days later.
 - A destructive action gets its own row, never beside the one a hand taps by habit.
 - When he says "fix it", he means **the words and their meaning** — the ordering and the phrasing —
   not decoration.
+- The method for applying all of the above is in **`SCREENS.md`** (document API, buttons, catalog,
+  formatters, and the traps). Taste here, method there.

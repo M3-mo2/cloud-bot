@@ -10,6 +10,11 @@ read for the area you are touching.
 one, what "done" means, and the UI taste this product is held to. It is not optional context — read
 it alongside this file.
 
+**`SCREENS.md`** is the recipe for building a screen: the document API, buttons, catalog keys,
+formatters, the house look, and the traps already measured here. Read it **instead of** exploring
+`rich/`, `keyboards/`, `i18n/` and other screens — every decision it states was made against this
+code, and it names the file to copy for each common pattern.
+
 ## Hard rules
 
 1. **This repository is documentation-first.** Implement what the docs specify. Where a doc is
