@@ -1055,3 +1055,59 @@ session must not be reused; the view must carry Ctrl-C and a stop and no Ctrl-D;
 workspace home; and a source scan refuses `term:list` / `my_terminals` / `nav:terminals` anywhere.
 Each bite was run red-then-green (`OPEN` reuse removed, Ctrl-D re-added, stop re-routed to the dead
 view, the hygiene sweep disabled, the archive route re-added).
+
+---
+
+## CB-42 — Opening a terminal *is* being in it; the `⌨️ Send a command` button is deleted
+
+**The objection.** The live view carried `⌨️ Send a command` next to `Ctrl-C`, asking a question
+whose answer is already known: *"obviously when I open a terminal I'm going to run commands."* The
+button existed because of a real mechanism — plain text reached a session only while
+`TerminalInput.awaiting_command` was set, and `term:cmd` was the only thing that set it. So opening a
+terminal did not put the user *in* it; it showed a picture of one. The button was the symptom; the
+missing automatic entry was the defect.
+
+**Decision — entry is automatic.** `term:open` and `term:new` set `TerminalInput.awaiting_command`
+(as part of opening, before the view renders), through one helper `_enter_terminal`, so the next
+plain-text message goes to that session with no extra tap. The `term:cmd` action is **deleted
+entirely** — codec constant, arity, builder, handler and the rendered button. A live view has no
+"start typing" control because the view *is* the input mode.
+
+**The live view's buttons** are exactly what a terminal needs:
+
+```
+[Ctrl-C]
+[⏹ إيقاف الطرفية]
+[⬅️ رجوع]
+```
+
+- **Ctrl-C** interrupts the running process (unchanged).
+- **⏹ إيقاف الطرفية** is the one destructive verb: it kills the session and renders the workspace
+  home.
+- **⬅️ رجوع** leaves *without* killing: it clears the input state and renders the workspace home, so
+  a user who does not know a slash-command is never trapped. The session stays alive and is one tap
+  away again (open-or-reuse).
+
+There is no `⌨️ إرسال أمر` and no `↩️ إيقاف الكتابة`: there is nothing to start or stop.
+
+**Leaving by navigation is automatic — the load-bearing part.** Because entry is automatic, any other
+screen reached afterwards would otherwise swallow plain text into a terminal the user has visually
+left. That hole is closed in **one** place: `TerminalLeaveMiddleware`, registered on
+`dispatcher.callback_query`, clears the state for **any** callback data that does not start with
+`term:` — before dispatch. Per-handler clearing was rejected: a single handler that forgets is a
+silent trap (the message goes somewhere the user did not mean), and there is no way to prove every
+present and future handler remembered. One seam cannot miss one. Known slash-commands keep
+`TerminalStickyMiddleware`'s behaviour; an unknown one still re-renders the terminal.
+
+**The invariant** (docstring in `states/terminal_input.py`): *the input state is set if and only if
+the user's last interaction was with a terminal.*
+
+**Nothing else changed.** Same create/attach/kill calls, same PTY relay, same output rendering, same
+missing-package offer rows (`extra_rows`), same ended-session view. This decision is about who owns
+the keyboard, nothing more.
+
+**Bite.** `tests/unit/test_terminal_sticky.py` fails against the old design: after `term:open` alone,
+three plain messages must reach `send_line` with no intervening `term:cmd`; the trap is proved closed
+(`term:open` → `ws:view` → plain text reaches **no** session); `⬅️ رجوع` clears the state, renders the
+workspace home and does **not** kill the session; `⏹ Stop` kills and goes home. `term:cmd` is proven
+absent from the codec's action table, the router source and the rendered live view.

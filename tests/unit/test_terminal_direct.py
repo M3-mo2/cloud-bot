@@ -12,8 +12,9 @@ These tests pin the replacement, end to end through the real dispatcher:
   the bite, which fails against the deleted ``my_terminals``;
 * a second tap **reuses** the live session (one engine create, not two);
 * a session that **ended** is never reused (a tap creates a fresh one);
-* the live view carries ``Ctrl-C`` and one stop control, and **no** ``Ctrl-D`` in
-  the top row;
+* the live view carries ``Ctrl-C``, one stop control and ``⬅️ Back``, and **no**
+  ``Ctrl-D`` and **no** "Send a command" (TASK terminal-always: the view is the
+  input, so there is nothing to start);
 * **stop** returns to the workspace home, never to a list route;
 * finished handles are **forgotten** after a grace window, and stay viewable
   inside it;
@@ -149,11 +150,14 @@ async def test_the_bite_ended_sessions_do_not_displace_a_live_terminal():
             for b in row
             if b.callback_data
         ]
-        # A live terminal view: its status line and its command row.
+        # A live terminal view: its status line and its controls. TASK
+        # terminal-always removed the "Send a command" row — the view *is* the
+        # input — so the controls are Ctrl-C, Stop and Back.
         assert "Running" in html or "قيد التشغيل" in html, html[:200]
-        assert any(a.startswith("term:cmd") for a in actions), "no command row"
+        assert not any(a.startswith("term:cmd") for a in actions), "a send-command row is back"
         assert any(a.startswith("term:signal") for a in actions), "no Ctrl-C"
         assert any(a.startswith("term:close") for a in actions), "no stop control"
+        assert any(a.startswith("term:exit") for a in actions), "no Back control"
         # Never the archive: no route to it, and no per-session view list.
         assert not any("term:list" in a for a in actions)
         assert not any(a.startswith("term:view") for a in actions)
@@ -206,7 +210,7 @@ async def test_an_ended_session_is_not_reused():
         await dispatcher.feed_update(bot, _callback(1, term_cb.open_terminal(ws.id)))
         assert len(creates) == 1, "an ended session was reused"
         actions = _actions_from(bot.sent[-1])
-        assert any(a.startswith("term:cmd") for a in actions), "ended session's view rendered"
+        assert any(a.startswith("term:signal") for a in actions), "the new session's view rendered"
         # The ended handle is still present (inside the grace window), the new one too.
         ids = {s.id for s in await container.services.sessions.list_for_workspace(TG, ws.id)}
         assert ended in ids and len(ids) == 2
@@ -216,20 +220,21 @@ async def test_an_ended_session_is_not_reused():
 
 # -- 3. the live view's exact controls --------------------------------------
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_the_live_view_carries_ctrl_c_and_a_stop_and_no_ctrl_d(locale):
+def test_the_live_view_carries_ctrl_c_stop_back_and_no_ctrl_d(locale):
     session = TerminalSession(id="ses_01M6HJATZTFXTWXWBG8A5KWYS8", workspace_id=WS, status=SessionStatus.RUNNING)
     screen = term_screens.terminal_view(session, WS, locale, output="$ ")
     actions = _actions(screen)
     assert any(a.startswith("term:signal:") for a in actions), "Ctrl-C is missing"
     assert any(a.startswith("term:close") for a in actions), "the stop control is missing"
+    assert any(a.startswith("term:exit") for a in actions), "the Back control is missing"
     assert not any(a.startswith("term:ctrl_d") for a in actions), "Ctrl-D is still in the view"
+    assert not any(a.startswith("term:cmd") for a in actions), "a send-command button is back"
     # One destructive verb only: no second "close"-shaped action.
     close_like = [a for a in actions if a.startswith("term:close") or a.startswith("term:forget")]
     assert len(close_like) == 1, f"two exit verbs on a live view: {close_like}"
-    # The top row is the command row: send + Ctrl-C.
+    # The top row is Ctrl-C alone; sending a command is just typing.
     first_row = [b.callback_data for b in _rows(screen)[0] if b.callback_data]
-    assert any(a.startswith("term:cmd") for a in first_row)
-    assert any(a.startswith("term:signal") for a in first_row)
+    assert len(first_row) == 1 and first_row[0].startswith("term:signal")
 
 # -- 4. stop returns to the workspace home -----------------------------------
 async def test_stop_returns_to_the_workspace_home_never_a_list():

@@ -198,7 +198,11 @@ async def on_install_text(
 
 @router.callback_query(F.data == "origin:back")
 async def on_origin_back(
-    cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender
+    cb: CallbackQuery,
+    ctx: UserContext,
+    services: Services,
+    sender: RichSender,
+    state: FSMContext,
 ) -> None:
     """Return to the screen the install offer came from.
 
@@ -209,7 +213,13 @@ async def on_origin_back(
     An origin that is gone (a restart wiped the process memory, or the run/session
     was deleted) degrades to the workspace home: one predictable destination,
     never a dead end and never a guessed wrong screen.
+
+    A live terminal origin is re-entered (the input state is set with its view):
+    the user tapped back *to the terminal*, so their last interaction is a
+    terminal interaction and the next plain-text message belongs to that session.
     """
+    from cloudbot.states.terminal_input import TerminalInput
+
     from cloudbot.handlers.package_offer import package_names
 
     inside = await services.session.current(ctx.tg_id)
@@ -299,6 +309,14 @@ async def on_origin_back(
                         output, truncated = "", False
                 remember_origin(ctx.tg_id, ws_id, "terminal", str(session.id))
                 installed = await package_names(services, ctx.tg_id, ws_id)
+                # Coming back to a live terminal *is* being in it: re-arm the input
+                # state together with the view, exactly as opening does. Otherwise
+                # the user lands on a live terminal that does not accept text —
+                # the invariant is "the input state is set iff the last
+                # interaction was with a terminal", and this interaction is.
+                if not session.status.is_terminal:
+                    await state.set_state(TerminalInput.awaiting_command)
+                    await state.update_data(ws_id=str(ws_id), ses_id=str(session.id))
                 await show_screen(
                     cb,
                     term_screens.terminal_view(
@@ -309,6 +327,7 @@ async def on_origin_back(
                         truncated=truncated,
                         meta=meta,
                         installed=installed,
+                        typing=not session.status.is_terminal,
                     ),
                     ctx=ctx,
                     sender=sender,

@@ -1,16 +1,24 @@
-"""TASK 16/17 — sticky terminal input, driven through the real dispatcher.
+"""TASK terminal-always — opening a terminal *is* being in it.
 
-The reported bug (verbatim): *«عايز الترمنال اقدر اكتب فيها علطول مش كل مره ادوس
-ارسال امر»* — every single command cost a tap on **Send a command** because the
-handler cleared the FSM state after the first text message.
+History. TASK 16/17 fixed a reported bug (*«عايز الترمنال اقدر اكتب فيها علطول مش
+كل مره ادوس ارسال امر»* — every command cost a tap on **Send a command**) by making
+command mode sticky: tap the button once, then plain text keeps reaching the
+session. TASK terminal-always removed the cause instead of its symptom: the
+owner's objection was that **a terminal should need no "Send a command" button at
+all** — *"obviously when I open a terminal I'm going to run commands."* The state
+is now armed by ``term:open``/``term:new`` themselves, and the button is deleted.
 
 These tests drive the real aiogram dispatcher against the fake engine, exactly as
-the previous run measured by hand, so the sticky rules are proven end to end:
+a user would, and prove the rules end to end:
 
-* one tap, then three consecutive plain messages all reach ``send_line``;
-* the state is **not** cleared after a command (the reported bug);
+* the **bite**: after ``term:open`` a plain message reaches the session with **no**
+  intervening ``term:cmd``;
+* the state is **not** cleared after a command;
 * a known slash-command clears the state and is never sent into the session;
-* the one-tap **stop typing** control clears the state;
+* **the trap, proved closed**: any non-``term:`` callback (``ws:view``) leaves the
+  input mode, so the next plain message is normal navigation;
+* ``⬅️ Back`` clears the state, renders the workspace home and does **not** kill
+  the session;
 * a foreign user's message cannot reach the session (``NotOwned`` clears state);
 * a text message after the session ended renders the ended screen, clears the
   state and does not raise;
@@ -38,6 +46,7 @@ from cloudbot.domain.value_objects import SessionStatus
 from cloudbot.middleware.context import UserContext
 from cloudbot.middleware.terminal_sticky import TerminalStickyMiddleware
 from cloudbot.presentation.keyboards.callbacks import cb
+from cloudbot.presentation.screens import terminal_callbacks as term_cb
 from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.states.terminal_input import TerminalInput
 
@@ -154,18 +163,29 @@ def _short_follow(monkeypatch):
     yield
 
 
-# -- the reported bug --------------------------------------------------------
-async def test_one_tap_then_three_plain_messages_all_reach_send_line():
+# -- the bite: opening a terminal is being in it ------------------------------
+async def test_open_then_plain_text_reaches_the_session_with_no_term_cmd():
+    """TASK terminal-always' bite: ``term:open`` alone arms the input.
+
+    Fails against the old design, where plain text reached a session only after a
+    second tap on ``term:cmd``: here ``term:open`` is the **only** callback fed,
+    then three plain messages, and all three must reach ``send_line``.
+    """
     container, ws, session, sends = await _harness()
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
+        # No ``term:cmd`` between the open and the text — that button no longer
+        # exists at all (asserted against the rendered keyboard below).
         for uid, text in enumerate(["echo one", "echo two", "echo three"], start=2):
             await dispatcher.feed_update(bot, _message(uid, TG, text))
-        # All three reached the session, in order, with the right ids.
         assert [s[3] for s in sends] == ["echo one", "echo two", "echo three"]
         assert {(s[0], s[1], s[2]) for s in sends} == {(TG, str(ws.id), session.id)}
+        actions = _actions(bot.sent[0]["markup"])
+        assert not any(a.startswith("term:cmd") for a in actions), (
+            "the open screen still carries a send-command button"
+        )
     finally:
         await container.aclose()
 
@@ -175,7 +195,7 @@ async def test_state_is_not_cleared_after_a_command():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         await dispatcher.feed_update(bot, _message(2, TG, "echo one"))
         state = await dispatcher.fsm.storage.get_state(_key(TG))
         assert state == TerminalInput.awaiting_command.state, "the sticky state was cleared"
@@ -193,7 +213,7 @@ async def test_known_command_clears_state_and_is_not_sent_into_the_session(comma
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         await dispatcher.feed_update(bot, _message(2, TG, command))
         assert await dispatcher.fsm.storage.get_state(_key(TG)) is None
         # Never as terminal input.
@@ -208,7 +228,7 @@ async def test_unknown_command_re_renders_the_terminal_and_keeps_the_state():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         await dispatcher.feed_update(bot, _message(2, TG, "/frobnicate"))
         assert sends == [], "an unknown command was sent into the session"
         assert await dispatcher.fsm.storage.get_state(_key(TG)) == TerminalInput.awaiting_command.state
@@ -216,19 +236,50 @@ async def test_unknown_command_re_renders_the_terminal_and_keeps_the_state():
         await container.aclose()
 
 
-# -- the one-tap exit (R3) ---------------------------------------------------
-async def test_stop_typing_clears_the_state_and_the_next_message_is_not_a_command():
+# -- the trap, proved closed --------------------------------------------------
+async def test_navigating_away_with_any_callback_leaves_the_input_mode():
+    """The load-bearing hole: opening arms the input, so leaving must disarm it.
+
+    ``term:open`` → a workspace-screen callback (``ws:view``) → plain text. The
+    text must **not** reach a session: the callback is not a ``term:`` one, so the
+    single callback seam clears the state before dispatch and the text takes the
+    normal flow. Per-handler clearing is rejected precisely because it would miss a
+    screen like this one and the failure would be silent.
+    """
     container, ws, session, sends = await _harness()
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
-        # The exit control clears the state.
-        await dispatcher.feed_update(bot, _callback(2, TG, cb("term:exit", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
+        assert await dispatcher.fsm.storage.get_state(_key(TG)) == TerminalInput.awaiting_command.state
+        await dispatcher.feed_update(bot, _callback(2, TG, cb("ws:view", ws.id)))
+        assert await dispatcher.fsm.storage.get_state(_key(TG)) is None, (
+            "a non-term callback left the terminal input state armed"
+        )
+        await dispatcher.feed_update(bot, _message(3, TG, "echo beyond-the-trap"))
+        assert sends == [], "a message on another screen was swallowed by the terminal"
+    finally:
+        await container.aclose()
+
+
+# -- the non-destructive exit: ⬅️ Back ---------------------------------------
+async def test_back_clears_the_state_renders_workspace_home_and_keeps_the_session():
+    """``⬅️ Back`` leaves without killing: state cleared, home rendered, alive."""
+    container, ws, session, sends = await _harness()
+    bot = FakeBot()
+    dispatcher = build_dispatcher(container, bot)
+    try:
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
+        await dispatcher.feed_update(bot, _callback(2, TG, term_cb.exit_(ws.id, session.id)))
         assert await dispatcher.fsm.storage.get_state(_key(TG)) is None
+        # The workspace home: its terminal button is one tap away again.
+        actions = _actions(bot.sent[-1]["markup"])
+        assert any(a.startswith("term:open") for a in actions), actions
+        # Not killed: the same session is still running on the engine.
+        assert not (await container.engine.get_session(ws.id, session.id)).status.is_terminal
         # A later plain message is no longer a command.
-        await dispatcher.feed_update(bot, _message(3, TG, "echo not-sticky"))
-        assert sends == [], "a plain message after stop typing reached the session"
+        await dispatcher.feed_update(bot, _message(3, TG, "echo after-back"))
+        assert sends == [], "a plain message after Back reached the session"
     finally:
         await container.aclose()
 
@@ -259,7 +310,7 @@ async def test_two_users_states_do_not_collide():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         # The other user is never in the sticky state.
         assert await dispatcher.fsm.storage.get_state(_key(OTHER)) is None
         await dispatcher.feed_update(bot, _message(2, OTHER, "whoami"))
@@ -293,21 +344,21 @@ async def test_text_after_the_session_ended_renders_ended_clears_state_and_does_
         await container.aclose()
 
 
-# -- the module's own rule (R2) ----------------------------------------------
+# -- the view's own button set -----------------------------------------------
 async def test_the_terminal_view_after_a_command_still_carries_its_buttons():
     container, ws, session, sends = await _harness()
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         await dispatcher.feed_update(bot, _message(2, TG, "echo one"))
         actions = _actions(bot.sent[-1]["markup"])
-        # Every terminal button the live view carries is still there...
-        assert any(a.startswith("term:cmd") for a in actions)
+        # Exactly what a terminal needs: Ctrl-C, stop, and the non-destructive Back.
         assert any(a.startswith("term:signal") for a in actions)
         assert any(a.startswith("term:close") for a in actions)
-        # ...plus the one-tap exit.
         assert any(a.startswith("term:exit") for a in actions)
+        # The question the user's answer already knows is gone.
+        assert not any(a.startswith("term:cmd") for a in actions)
         # TASK terminal-direct: Ctrl-D no longer exists on the view at all.
         assert not any(a.startswith("term:ctrl_d") for a in actions)
     finally:
@@ -332,7 +383,7 @@ async def test_follow_is_cut_short_once_the_session_is_idle():
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         reads = 0
         await dispatcher.feed_update(bot, _message(2, TG, "echo one"))
         # The fake session never changes its output, so the follow is idle after
@@ -530,64 +581,117 @@ async def test_middleware_ignores_non_sticky_states_and_plain_text():
     assert state3._state == TerminalInput.awaiting_command.state
 
 
-# -- the view carries the exit and the active line (both locales) ------------
+# -- the callback seam: leaving by navigation (TASK terminal-always) ----------
+def _run_leave_mw(data: str, state) -> bool:
+    import asyncio
+
+    from cloudbot.middleware.terminal_sticky import TerminalLeaveMiddleware
+
+    called = {"handler": False}
+
+    async def handler(event, data_):
+        called["handler"] = True
+
+    async def run():
+        cbq = CallbackQuery.model_construct(data=data, id="1")
+        mw = TerminalLeaveMiddleware()
+        await mw(handler, cbq, {"state": state})
+
+    asyncio.run(run())
+    return called["handler"]
+
+
+@pytest.mark.parametrize("data", ["ws:view:ws_x", "nav:menu", "pkg:list", "adm:menu"])
+def test_leave_middleware_clears_any_non_term_callback(data):
+    """Every non-`term:` callback leaves the input mode, before dispatch."""
+    state = _DictState(state=TerminalInput.awaiting_command.state, data={"ws_id": "ws_x", "ses_id": SES})
+    assert _run_leave_mw(data, state) is True
+    assert state._state is None, f"{data!r} did not leave the terminal input state"
+
+
+@pytest.mark.parametrize("data", ["term:open:ws_x", "term:signal:ws_x:ses:INT", "term:close:ws_x:ses"])
+def test_leave_middleware_keeps_term_callbacks(data):
+    """A `term:` interaction is still \"in the terminal\": the state is kept."""
+    state = _DictState(state=TerminalInput.awaiting_command.state, data={"ws_id": "ws_x", "ses_id": SES})
+    assert _run_leave_mw(data, state) is True
+    assert state._state == TerminalInput.awaiting_command.state
+
+
+def test_leave_middleware_is_a_no_op_outside_the_input_state():
+    state = _DictState(state=None)
+    assert _run_leave_mw("ws:view:ws_x", state) is True
+    assert state._state is None
+
+
+# -- the view's button set, and one destructive verb (both locales) ---------
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_typing_view_carries_stop_typing_and_the_active_line(locale):
-    from cloudbot.domain.entities import TerminalSession
+def test_the_live_view_carries_ctrl_c_stop_back_and_no_send_command(locale):
+    """The exact button set the owner asked for, in both languages.
 
-    session = TerminalSession(id=SES, workspace_id="ws_01M6HJASCWM9Z1PF755GT89NK4", status=SessionStatus.RUNNING)
-    screen = term_screens.terminal_view(
-        session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale, typing=True
-    )
-    actions = _actions(screen.markup)
-    assert any(a.startswith("term:exit") for a in actions), "no stop-typing control"
-    # The mode exit is *not* destructive (it leaves command mode, it does not kill
-    # the session), so it must not look like the stop button beside it.
-    exit_button = next(b for row in screen.markup.inline_keyboard for b in row if b.callback_data and b.callback_data.startswith("term:exit"))
-    assert exit_button.style != "danger", "stopping typing must not read as stopping the terminal"
-    # The one destructive verb is the stop control, on its own row, in danger.
-    stop_button = next(
-        b
-        for row in screen.markup.inline_keyboard
-        for b in row
-        if b.callback_data and b.callback_data.startswith("term:close")
-    )
-    assert stop_button.style == "danger"
-    # The body says the session is active in the user's language.
-    assert "active" in screen.doc.html or "نشِطة" in screen.doc.html
-
-
-@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_stop_typing_and_stop_terminal_do_not_share_the_destructive_symbol(locale):
-    """Two different verbs must not look alike at a glance.
-
-    ``↩️ Stop typing`` leaves command mode; ``⏹ Stop terminal`` kills the session.
-    Reusing the danger square for both is how a hand taps the wrong one, so the
-    icons differ even though both words start with "stop".
+    Rewrite of the old ``stop typing`` tests: there is no command mode to start or
+    stop, so the view carries **Ctrl-C**, **⏹ Stop terminal** (destructive, own
+    row) and **⬅️ Back** (non-destructive, primary). No ``term:cmd`` and no
+    ``term:exit``-as-"stop typing" copy any more.
     """
     from cloudbot.domain.entities import TerminalSession
 
     session = TerminalSession(id=SES, workspace_id="ws_01M6HJASCWM9Z1PF755GT89NK4", status=SessionStatus.RUNNING)
-    screen = term_screens.terminal_view(
-        session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale, typing=True
-    )
-    by_action = {
-        b.callback_data.partition(":")[0] + ":" + b.callback_data.split(":")[1]: b
-        for row in screen.markup.inline_keyboard
-        for b in row
-        if b.callback_data and b.callback_data.startswith("term:")
-    }
-    exit_button = next(b for b in by_action.values() if (b.callback_data or "").startswith("term:exit"))
-    stop_button = next(b for b in by_action.values() if (b.callback_data or "").startswith("term:close"))
-    assert exit_button.text.split()[0] != stop_button.text.split()[0]
+    screen = term_screens.terminal_view(session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale, typing=True)
+    actions = [a for a in _actions(screen.markup) if a]
+    assert any(a.startswith("term:signal:") for a in actions), "Ctrl-C is missing"
+    assert any(a.startswith("term:close") for a in actions), "the stop control is missing"
+    assert any(a.startswith("term:exit") for a in actions), "the Back control is missing"
+    assert not any(a.startswith("term:cmd") for a in actions), "a send-command button is back"
+
+    rows = screen.markup.inline_keyboard
+    exit_button = next(b for row in rows for b in row if b.callback_data and b.callback_data.startswith("term:exit"))
+    stop_button = next(b for row in rows for b in row if b.callback_data and b.callback_data.startswith("term:close"))
+    # Back leaves without killing: primary, never the danger square.
+    assert exit_button.style != "danger"
+    # Stop kills: danger, and on its own row so a hand cannot tap it by habit.
+    assert stop_button.style == "danger"
+    stop_row = next(row for row in rows if any(b is stop_button for b in row))
+    assert len(stop_row) == 1, "the destructive verb shares its row"
+    # The button rows in order: Ctrl-C, Stop, Back.
+    callback_rows = [
+        [b.callback_data for b in row if b.callback_data]
+        for row in rows
+        if any(b.callback_data for b in row)
+    ]
+    assert callback_rows[0][0].startswith("term:signal")
+    assert callback_rows[1][0].startswith("term:close")
+    assert callback_rows[2][0].startswith("term:exit")
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
-def test_non_typing_view_does_not_carry_stop_typing(locale):
+def test_back_and_stop_terminal_do_not_share_a_symbol_or_a_row(locale):
+    """Two different verbs must not look alike at a glance.
+
+    ``⬅️ Back`` leaves without killing; ``⏹ Stop terminal`` kills. Reusing the
+    danger square for both is how a hand taps the wrong one.
+    """
     from cloudbot.domain.entities import TerminalSession
 
     session = TerminalSession(id=SES, workspace_id="ws_01M6HJASCWM9Z1PF755GT89NK4", status=SessionStatus.RUNNING)
-    screen = term_screens.terminal_view(session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale)
-    actions = _actions(screen.markup)
-    assert not any(a.startswith("term:exit") for a in actions)
+    screen = term_screens.terminal_view(session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale, typing=True)
+    rows = screen.markup.inline_keyboard
+    back = next(b for row in rows for b in row if b.callback_data and b.callback_data.startswith("term:exit"))
+    stop = next(b for row in rows for b in row if b.callback_data and b.callback_data.startswith("term:close"))
+    assert back.text.split()[0] != stop.text.split()[0]
+    assert not any(back is b for row in rows for b in row if any(b is stop for b in row))
 
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_the_live_view_is_always_an_input_view(locale):
+    """There is no typing-less live view any more: the view *is* the input mode.
+
+    ``typing`` no longer changes the button set — it only adds the active line —
+    so a live view rendered without it still offers Back (and never Send).
+    """
+    from cloudbot.domain.entities import TerminalSession
+
+    session = TerminalSession(id=SES, workspace_id="ws_01M6HJASCWM9Z1PF755GT89NK4", status=SessionStatus.RUNNING)
+    plain = term_screens.terminal_view(session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale)
+    actions = [a for a in _actions(plain.markup) if a]
+    assert any(a.startswith("term:exit") for a in actions)
+    assert not any(a.startswith("term:cmd") for a in actions)

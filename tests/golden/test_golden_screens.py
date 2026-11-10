@@ -132,8 +132,10 @@ KB_AFFECTED = {
     # The admin's entered screen reuses the user workspace home (session=False), so
     # its keyboard changed with it; lock it here too.
     "admin_entered",
-    # Task 16/17: the sticky terminal view (typing=True) is the changed keyboard —
-    # it keeps every terminal button and adds the one-tap "stop typing" exit (R2/R3).
+    # TASK terminal-always: the live view is the input mode, so its keyboard is
+    # Ctrl-C / Stop / Back — no "Send a command", no "Stop typing". Both the live
+    # view and the active (typing) variant are locked so the set cannot drift.
+    "terminal_view_running",
     "terminal_view_typing",
     # TASK package-return: the install result's keyboard is layout-load-bearing —
     # back-to-origin first, retry only on failure, and the no-origin fallback.

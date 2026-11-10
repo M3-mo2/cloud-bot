@@ -460,23 +460,27 @@ Keyboard: **⏹ إيقاف الكل / ⏹ Stop all** (danger), **⬅️ رجوع
 
 ---
 
-## 7. Interactive terminal — sticky input (Phase 1.5, task 16)
+## 7. Interactive terminal — opening it is being in it (task terminal-always)
 
 A workspace's **🖥 Terminals** opens the engine's native PTY sessions (never a
-hand-rolled FIFO; INTEGRATION-GUIDE §5.4). Each command used to need a fresh tap
-on **⌨️ Send a command** — the user reported it verbatim:
-*«عايز الترمنال اقدر اكتب فيها علطول مش كل مره ادوس ارسال امر»*.
+hand-rolled FIFO; INTEGRATION-GUIDE §5.4). The story in two beats:
 
-**The rule: entering command mode is sticky.** One tap on **⌨️ Send a command**
-enters it; from then on **plain text messages keep going to that session** until
-the user explicitly stops. There is no re-tap per command.
+- **task 16** made command input *sticky*: one tap on **⌨️ Send a command** and
+  plain text kept reaching the session (*«عايز الترمنال اقدر اكتب فيها علطول مش كل
+  مره ادوس ارسال امر»*).
+- **task terminal-always** removed the button and the tap with it: *"obviously
+  when I open a terminal I'm going to run commands."* Opening a terminal **is**
+  entering it, so plain text reaches the session immediately; the button was only
+  ever the thing that armed the state.
 
-### 7.1 Entering and the live view
+### 7.1 Entering is automatic
 
-Tapping **⌨️ Send a command** does **not** open a separate prompt: it enters the
-sticky state and (re)renders the **terminal view itself**, so the state is always
-paired with the visible terminal buttons. While the user is typing, the view
-adds one italic line and one button:
+`term:open` and `term:new` set `TerminalInput.awaiting_command` (with the session
+ids) **as part of opening**, before the view renders. The next plain-text message
+goes to that session with no extra tap. There is no **Send a command** button: the
+view *is* the input mode.
+
+The body adds one italic line while the input is active (no extra control):
 
 English:
 
@@ -485,7 +489,7 @@ English:
 <p><b>Status:</b> 🟢 Running</p>
 <pre><code class="language-text">$ </code></pre>
 <p><i>This terminal closes after 15m 00s idle, or 1h 00m 00s after it opens.</i></p>
-<p><i>This terminal is active. Send a command, or use the buttons below.</i></p>
+<p><i>This terminal is active — type a command and it runs here.</i></p>
 ```
 
 Arabic (`is_rtl=True`):
@@ -495,41 +499,47 @@ Arabic (`is_rtl=True`):
 <p><b>الحالة:</b> 🟢 قيد التشغيل</p>
 <pre><code class="language-text">$ </code></pre>
 <p><i>تُغلق هذه الطرفية بعد 15 د 00 ث من الخمول، أو 1 س 00 د 00 ث من فتحها.</i></p>
-<p><i>هذه الطرفية نشِطة. أرسل أمرًا، أو استخدم الأزرار بالأسفل.</i></p>
+<p><i>هذه الطرفية نشِطة — اكتب أمرًا وسيُشغَّل هنا.</i></p>
 ```
 
 ### 7.2 Keyboard (live view)
 
-A live terminal carries exactly what a terminal needs. The first row is the
-command row; the stop control is the **one** destructive verb, on its own row. A
-plain message while sticky is the command (sent with Enter).
+A live terminal carries exactly what a terminal needs: no "Send a command", no
+"Stop typing". A plain message is the command (sent with Enter).
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
-| ⌨️ إرسال أمر | ⌨️ Send a command | inline | primary | keeps the mode |
 | Ctrl-C | Ctrl-C | inline | primary | interrupts the running process |
-| ↩️ إيقاف الكتابة | ↩️ Stop typing | inline | primary | **exits command mode only** (R3); not destructive, so it does not wear the stop square |
-| ⏹ إيقاف الطرفية | ⏹ Stop terminal | inline | danger | **kills the session and returns to the workspace home** |
+| ⏹ إيقاف الطرفية | ⏹ Stop terminal | inline | danger | **kills the session and returns to the workspace home** (the one destructive verb, on its own row) |
+| ⬅️ رجوع | ⬅️ Back | inline | primary | **leaves without killing**: clears the input state and renders the workspace home |
 
 **Ctrl-D is gone from the view** (TASK terminal-direct). He did not ask for it, and
 an EOF that ends the shell looks identical to the stop button while doing
 something different. **Close and Stop are one verb**, never two: two names for one
-effect is how a hand taps the wrong one.
+effect is how a hand taps the wrong one. **Back is not a stop**: it is primary and
+on its own row, so it can never be mistaken for the danger square above it.
 
-### 7.3 Leaving the mode — three ways, none of them a dead end
+### 7.3 Leaving the mode — four ways, none of them a dead end
 
-1. **⏹ Stop typing** (primary) clears the state and returns to the ordinary
-   terminal view. It is a mode exit, not a destructive action.
-2. **A known slash-command** (`/start`, `/help`, `/settings`, `/admin`, …) clears
-   the state *before* the routers run, so a sticky state can never swallow a
-   command — it always does its own thing (R4).
-3. **The session ending** (stop, idle/lifetime, workspace stop) clears the state
+1. **⬅️ Back** clears the state and renders the workspace home. The session stays
+   alive and is one tap away again (open-or-reuse).
+2. **Any non-`term:` callback** (navigation to another screen) clears the state
+   *before* dispatch — `TerminalLeaveMiddleware`, one choke point. A user who taps
+   anywhere else has left the terminal, so their next plain message is ordinary
+   navigation, not a command. This is what makes automatic entry safe.
+3. **A known slash-command** (`/start`, `/help`, `/settings`, `/admin`, …) clears
+   the state *before* the routers run — `TerminalStickyMiddleware` — so a command
+   can never be swallowed (R4).
+4. **The session ending** (stop, idle/lifetime, workspace stop) clears the state
    and renders the ended screen, so the mode never outlives the session it
    pointed at (R5).
 
 An **unknown** slash-command is deliberately *not* sent into the session: it
-re-renders the terminal and the sticky state is kept, so it neither vanishes nor
-becomes terminal input.
+re-renders the terminal and the state is kept, so it neither vanishes nor becomes
+terminal input.
+
+The invariant: *the input state is set if and only if the user's last interaction
+was with a terminal.*
 
 ### 7.4 One command, one follow — cut short on idle, supersede on the next
 
@@ -599,8 +609,28 @@ terminal** and **Back to the workspace** — never a list.
 At the `too_many_sessions` cap the screen names the live sessions, each with the
 same **⏹ Stop terminal** control, so the message says what to stop and how.
 
-### 7.7 `command_prompt` is retired
+### 7.7 Opening a terminal *is* being in it (task terminal-always)
 
-The separate **⌨️ Send a command** prompt screen is no longer shown on this path:
-the sticky mode edits the terminal view in place instead. (The catalog keys
-remain, but the handler no longer routes here.)
+`term:open` and `term:new` set `TerminalInput.awaiting_command` as part of opening,
+so once the live view renders the next plain-text message goes to that session with
+no extra tap. There is no **⌨️ Send a command** button any more: a terminal is an
+input mode, and the view *is* that mode. The `term:cmd` action, its handler and its
+catalog keys are deleted.
+
+The live view's controls are exactly:
+
+```
+[Ctrl-C]
+[⏹ إيقاف الطرفية]     (destructive: kills the session, goes to the workspace home)
+[⬅️ رجوع]              (non-destructive: clears the input state, goes to the workspace home)
+```
+
+Leaving by navigation is automatic: `TerminalLeaveMiddleware` (on
+`dispatcher.callback_query`) clears the state for any callback data that does not
+start with `term:`, before dispatch. A known slash-command still leaves via
+`TerminalStickyMiddleware`; an unknown one still re-renders the terminal. The
+invariant: *the input state is set if and only if the user's last interaction was
+with a terminal.*
+
+The separate `command_prompt` screen stays retired (it predates the sticky mode);
+nothing routes to it.

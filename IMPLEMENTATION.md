@@ -86,12 +86,17 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
   - Input flows through the FSM state group `states/terminal_input.py`; a plain
     message is sent with a newline appended, and a `/command` is never swallowed
     as terminal input.
-  - **Sticky input (task 16):** one tap on **⌨️ Send a command** enters the mode,
-    and every following plain message is another command to the same session — no
-    re-tap. The one-tap **⏹ Stop typing** control (danger), a **known
-    slash-command**, or the session **ending** leaves the mode. A known command is
-    cleared by `TerminalStickyMiddleware` *before* the routers run, so the sticky
-    state can never swallow `/start`, `/help`, `/settings` or `/admin`.
+  - **Automatic entry (task terminal-always):** `term:open` and `term:new` set the
+    input state as part of opening, so the next plain message is another command
+    to that session — there is no **Send a command** button and no **Stop typing**
+    button. The live view carries **Ctrl-C**, **⏹ Stop terminal** (destructive,
+    own row) and **⬅️ Back** (non-destructive: clears the state, renders the
+    workspace home, session kept). A **known slash-command**, **any non-`term:`
+    callback** (`TerminalLeaveMiddleware`), or the session **ending** leaves the
+    mode. Known commands and navigation are cleared *before* the routers run, so
+    the state can never swallow `/start` or leak into another screen. The
+    invariant: the state is set iff the user's last interaction was with a
+    terminal.
   - Live output follows the **same offset protocol as run logs**, updating one
     message in place, bounded by iteration count and a poll interval. The follow
     **cuts short on idle** (no new output for a couple of polls) and a newer
@@ -102,11 +107,11 @@ not, how to run the tests, how to start the bot, and the known gaps. It follows
 ## How to use the terminal
 
 1. Open a workspace → **🖥 Terminals** → **➕ Open terminal**.
-2. The terminal view shows the status and recent output. Tap **⌨️ Send a command**
-   once, then type (for example) `ls`; it is sent with Enter. **The mode is
-   sticky** — keep typing commands; `cd`, `export`, aliases survive because it is
-   one long-lived shell. Tap **⏹ Stop typing** (or send `/start`) to leave; a known
-   command always leaves the mode.
+2. The terminal view shows the status and recent output. Just type (for example)
+   `ls`; it is sent with Enter — opening the terminal already put you in it. Keep
+   typing commands; `cd`, `export`, aliases survive because it is one long-lived
+   shell. Tap **⬅️ Back** (or send `/start`, or navigate away) to leave without
+   killing it; tap **⏹ Stop terminal** to kill it and go home.
 3. **Ctrl-C** sends `INT` to the foreground process group (it interrupts the
    running command without ending the terminal). **Ctrl-D** sends the EOF byte
    (`0x04`) to the shell — chosen over a `TERM` signal because it is the

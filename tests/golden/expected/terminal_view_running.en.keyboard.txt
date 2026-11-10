@@ -1,0 +1,3 @@
+Ctrl-C [term:signal:~dv4b8zrz] enabled
+⏹ Stop terminal [term:close:~5vfbvvg2] enabled
+⬅️ Back [term:exit:~5vfbvvg2] enabled

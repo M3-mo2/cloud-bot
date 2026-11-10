@@ -286,14 +286,36 @@ async def test_installing_from_a_file_run_logs_returns_to_that_run():
 
 
 async def test_installing_from_the_live_terminal_returns_to_that_session():
+    """Back to a live terminal re-enters it: the next plain text reaches it.
+
+    TASK terminal-always added the second half. Coming back *to the terminal* is a
+    terminal interaction, so the input state must be armed with the view (the
+    invariant is "set iff the last interaction was with a terminal"); otherwise the
+    user returns to a live screen that silently refuses text until they navigate
+    away and back through ``term:open``.
+    """
+    from aiogram.fsm.storage.base import StorageKey
+
+    from cloudbot.states.terminal_input import TerminalInput
+
     container, engine, bot, dispatcher = await _harness()
     try:
         session = await container.services.sessions.open(TG, WS)
         await dispatcher.feed_update(bot, _callback(1, cb("term:view", WS, session.id)))
         assert exec_handlers.last_origin(TG, WS) == ("terminal", session.id)
-        await dispatcher.feed_update(bot, _callback(2, "origin:back"))
+        # Leaving for the install result clears the input (a non-term callback).
+        await dispatcher.feed_update(bot, _callback(2, cb("ws:view", WS)))
+        key = StorageKey(bot_id=bot.id, chat_id=TG, user_id=TG)
+        assert await dispatcher.fsm.storage.get_state(key) is None
+        await dispatcher.feed_update(bot, _callback(3, "origin:back"))
         landed = bot.messages[max(bot.messages)]["html"]
         assert catalog.t("terminal.title", Locale.EN) in landed
+        assert await dispatcher.fsm.storage.get_state(key) == TerminalInput.awaiting_command.state
+        state_data = await dispatcher.fsm.storage.get_data(key)
+        assert state_data["ses_id"] == session.id
+        # The keyboard carries no "Send a command": the view is the input.
+        actions = bot.callbacks()
+        assert not any(a and a.startswith("term:cmd") for a in actions)
     finally:
         await container.aclose()
 

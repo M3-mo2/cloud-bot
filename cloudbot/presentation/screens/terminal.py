@@ -69,10 +69,10 @@ def terminal_view(
 ) -> Screen:
     """The live terminal view.
 
-    ``typing`` is set while the sticky input state is active for this session
-    (R1/R3): the screen then says the user is typing straight into the terminal
-    and carries the one-tap **stop typing** control, so the state never traps
-    anyone.
+    ``typing`` is set while the input state is active for this session: the body
+    then adds the one-line "this terminal is active" note. It no longer changes the
+    buttons — the view is **always** the input mode, so ``⬅️ Back`` is on every live
+    view (TASK terminal-always).
 
     ``installed`` is the workspace's package list (normalised pip names) — the
     offer skips a module that is already on disk instead of re-offering it from
@@ -147,6 +147,13 @@ def terminal_view_markup(
 
     ``Ctrl-C`` stays — it interrupts the running process without ending the shell.
 
+    ``⬅️ Back`` leaves the terminal **without** killing it: it clears the input
+    state and renders the workspace home, so a user who does not know a
+    slash-command is never trapped. It is primary (a mode exit, never a stop
+    square) and on its own row, so it cannot be mistaken for the destructive
+    ``⏹ Stop terminal`` above it. There is **no** "Send a command" control: the
+    view *is* the input mode (TASK terminal-always).
+
     ``extra_rows`` carries the missing-package offer built by
     :func:`cloudbot.presentation.screens.packages.missing_section`; it goes above
     the controls so a user who came here to install something finds it without
@@ -168,22 +175,18 @@ def terminal_view_markup(
         return inline_markup(rows)
 
     rows: list[list] = [
-        [
-            inline(catalog.t("terminal.send_command", locale), _term.cmd(ws_id, ses_id), intent=Intent.PRIMARY),
-            inline(catalog.t("terminal.ctrl_c", locale), _term.signal(ws_id, ses_id, "INT"), intent=Intent.PRIMARY),
-        ],
+        [inline(catalog.t("terminal.ctrl_c", locale), _term.signal(ws_id, ses_id, "INT"), intent=Intent.PRIMARY)],
     ]
-    if typing:
-        # Leaving command mode is not destructive; it is a mode exit, so it is
-        # primary (and reads with a hand, not a stop square, so it cannot be
-        # mistaken for the stop button on the row below).
-        rows.append(
-            [inline(catalog.t("terminal.stop_typing", locale), _term.exit_(ws_id, ses_id), intent=Intent.PRIMARY)]
-        )
     # *Stop* kills the session: destructive, so it gets its own row — never beside
     # a button a hand taps by habit (MOHAMED.md).
     rows.append(
         [inline(catalog.t("terminal.stop", locale), _term.close(ws_id, ses_id), intent=Intent.DANGER)]
+    )
+    # Leaving the terminal without killing it is **not** destructive (it is a mode
+    # exit), so it is primary and sits last: it can never be mistaken for the stop
+    # square above it, and it is the destination a tap falls back to.
+    rows.append(
+        [inline(catalog.t("common.back", locale), _term.exit_(ws_id, ses_id), intent=Intent.PRIMARY)]
     )
     if extra_rows:
         rows = [*extra_rows, *rows]

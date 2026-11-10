@@ -51,7 +51,6 @@ BUILDERS = [
     ("new", lambda: term_cb.new_terminal(WS), ("new", (WS,))),
     ("view", lambda: term_cb.view(WS, SES), ("view", (WS, SES))),
     ("refresh", lambda: term_cb.refresh(WS, SES), ("refresh", (WS, SES))),
-    ("cmd", lambda: term_cb.cmd(WS, SES), ("cmd", (WS, SES))),
     ("exit", lambda: term_cb.exit_(WS, SES), ("exit", (WS, SES))),
     ("signal", lambda: term_cb.signal(WS, SES, "INT"), ("signal", (WS, SES, "INT"))),
     ("ctrl_d", lambda: term_cb.ctrl_d(WS, SES), ("ctrl_d", (WS, SES))),
@@ -245,7 +244,9 @@ async def test_the_workspace_terminal_button_opens_a_terminal_directly():
     TASK terminal-direct: this assertion replaces the old one that required the
     button to render a list. A list was the defect (a corpse archive between the
     user and a prompt); the button now opens or reuses a session and renders its
-    live view, with the command row present.
+    live view, with its controls present. TASK terminal-always removed the "Send a
+    command" row: the view *is* the input, so its controls are Ctrl-C, Stop and
+    Back.
     """
     container, ws = await _container()
     bot = FakeBot()
@@ -261,10 +262,30 @@ async def test_the_workspace_terminal_button_opens_a_terminal_directly():
             for b in row
             if b.callback_data
         }
-        assert any(a.startswith("term:cmd") for a in actions), "no command row"
+        assert not any(a.startswith("term:cmd") for a in actions), "a send-command row is back"
         assert any(a.startswith("term:close") for a in actions), "no stop control"
+        assert any(a.startswith("term:exit") for a in actions), "no Back control"
     finally:
         await container.aclose()
+
+
+async def test_the_term_cmd_callback_no_longer_exists_anywhere():
+    """The ``term:cmd`` action is gone: no builder, no handler, no rendered button.
+
+    Greps the router registrations and the codec's action table — not only the
+    screens — because a deleted button whose route survived is exactly the
+    producer/consumer drift this repo keeps paying for.
+    """
+    import inspect
+
+    from cloudbot.handlers import terminal as terminal_handlers
+
+    assert not hasattr(term_cb, "cmd"), "the codec still builds a term:cmd callback"
+    assert "cmd" not in term_cb._ARITIES, "the codec still parses a term:cmd callback"
+    assert terminal_handlers.router.callback_query.handlers, "the terminal router registered no callbacks"
+    src = inspect.getsource(terminal_handlers)
+    assert "term:cmd" not in src, "a term:cmd route is still registered"
+    assert "def on_cmd" not in src, "the term:cmd handler still exists"
 
 
 async def test_every_terminal_button_in_the_live_view_renders_a_screen():
@@ -294,10 +315,14 @@ async def test_every_terminal_button_in_the_live_view_renders_a_screen():
             if b.callback_data and b.callback_data.startswith("term:")
         }
         assert actions, "the live view emitted no term: buttons"
-        # ``term:close`` on a fabricated id is a clean "already gone" path, but
-        # walk only the routes that need no matching engine record here; the
-        # command/stop row itself is asserted above.
-        for uid, data in enumerate(sorted(a for a in actions if a.startswith("term:cmd")), start=1):
+        # Walk the non-destructive routes (Ctrl-C and Back) that need no matching
+        # engine record here; ``term:close`` on a fabricated id is asserted by its
+        # own "already gone" test. There is no ``term:cmd`` any more.
+        walkable = sorted(
+            a for a in actions if a.startswith("term:signal") or a.startswith("term:exit")
+        )
+        assert walkable, "the live view has no non-destructive controls"
+        for uid, data in enumerate(walkable, start=1):
             before = len(bot.sent)
             await dispatcher.feed_update(bot, _callback(uid, TG, data))
             assert len(bot.sent) > before, f"{data!r} rendered nothing"

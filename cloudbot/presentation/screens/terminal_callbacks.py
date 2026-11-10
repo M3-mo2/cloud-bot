@@ -50,7 +50,9 @@ OPEN = "open"
 NEW = "new"
 VIEW = "view"
 REFRESH = "refresh"
-CMD = "cmd"
+#: Leave the terminal without killing it (the live view's ⬅️ Back control).
+#: The key stays ``exit`` for the buttons already drawn by an older process; its
+#: behaviour is the new one (clear the input state, render the workspace home).
 EXIT = "exit"
 SIGNAL = "signal"
 CTRL_D = "ctrl_d"
@@ -72,7 +74,6 @@ _ARITIES: dict[str, tuple[int, ...]] = {
     NEW: (1,),
     VIEW: (2,),
     REFRESH: (2,),
-    CMD: (2,),
     EXIT: (2,),
     SIGNAL: (3,),
     CTRL_D: (2,),
@@ -150,10 +151,6 @@ def view(ws_id: object, ses_id: object) -> str:
 
 def refresh(ws_id: object, ses_id: object) -> str:
     return _cb(f"{TERM_PREFIX}:{REFRESH}", ws_id, ses_id)
-
-
-def cmd(ws_id: object, ses_id: object) -> str:
-    return _cb(f"{TERM_PREFIX}:{CMD}", ws_id, ses_id)
 
 
 def exit_(ws_id: object, ses_id: object) -> str:

@@ -74,7 +74,7 @@ locked (INTEGRATION-GUIDE §8.4).
 | `features` (archives) | `arc:export_prompt`→text | export (read into a ZIP) | none | read — allowed |
 | `terminal` | `term:view`, `term:refresh`, `term:forget` | read / local | none | read — allowed |
 | `terminal` | `term:open`, `term:new` | start a shell (compute) | none | **gated** |
-| `terminal` | `term:cmd`→text, `term:signal`, `term:ctrl_d` | drive compute | none | **gated** |
+| `terminal` | plain text while `TerminalInput.awaiting_command` (armed by `term:open`/`term:new`), `term:signal` | drive compute | none | **gated** |
 | `terminal` | `term:exit`, `term:close` | cleanup | none | allowed |
 | `billing` | `pay:wallet`, `pay:plans`, `pay:packs`, `pay:history`, `pay:buy`, `pay:pack`, pre-checkout, successful payment | money | n/a (not workspace work) | unchanged; `pay:buy` now also extends the engine term |
 | `common` | `/start`, `/help`, `/settings`, `nav:*` | reads | none | read — allowed |
@@ -93,8 +93,8 @@ locked (INTEGRATION-GUIDE §8.4).
 
 ### 2.3 What leaks if the (imaginary) middleware is bypassed
 
-Every work row in §2.1 leaks today. Concretely: `exec`, `run`, `term:open`,
-`term:cmd`, `pkg:install`, `tnl:publish`, `proc:stop`, file writes, archive
+Every work row in §2.1 leaks today. Concretely: `exec`, `run`, `term:open`
+(and the plain terminal text it now enables), `pkg:install`, `tnl:publish`, `proc:stop`, file writes, archive
 extract — all reach the engine for a workspace whose plan is `EXPIRED` or
 `NONE`, and the engine accepts because it was told nothing about a term.
 

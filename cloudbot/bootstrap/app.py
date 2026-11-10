@@ -24,7 +24,10 @@ from cloudbot.middleware.forcejoin import ForceJoinMiddleware
 from cloudbot.middleware.inject import InjectMiddleware
 from cloudbot.middleware.mode_gate import ModeGateMiddleware
 from cloudbot.middleware.observability import ObservabilityMiddleware
-from cloudbot.middleware.terminal_sticky import TerminalStickyMiddleware
+from cloudbot.middleware.terminal_sticky import (
+    TerminalLeaveMiddleware,
+    TerminalStickyMiddleware,
+)
 from cloudbot.middleware.throttle import ThrottleMiddleware
 from cloudbot.presentation.rich.sender import RichSender
 
@@ -85,9 +88,11 @@ def build_dispatcher(container: Container, bot: Bot) -> Dispatcher:
     # silently. It exempts ``/start`` and its own ``fj:`` re-check callbacks.
     dispatcher.message.outer_middleware(ForceJoinMiddleware())
     dispatcher.callback_query.outer_middleware(ForceJoinMiddleware())
-    # A known slash-command must leave the sticky terminal state (R4). Registered
-    # after the admin gate so the gate still decides identity first.
+    # A known slash-command must leave the terminal input state, and **any**
+    # non-``term:`` callback must too: the state is set if and only if the user's
+    # last interaction was with a terminal. Both seams live in one module.
     dispatcher.message.outer_middleware(TerminalStickyMiddleware())
+    dispatcher.callback_query.outer_middleware(TerminalLeaveMiddleware())
 
     from cloudbot.handlers import (
         admin,

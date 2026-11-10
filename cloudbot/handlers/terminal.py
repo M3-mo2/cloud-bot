@@ -4,12 +4,17 @@ Thin aiogram routers: parse → call the ``sessions`` service → render one scr
 → send. The live view follows the engine's offset protocol through the service
 helper; it is bounded and paced, and it never builds a FIFO or a run-based PTY.
 
-**Sticky input.** Entering the terminal's command mode is sticky: after the user
-taps *Send a command* once, plain text messages keep going to that session until
-they explicitly stop (the ``term:exit`` control) or a known slash-command leaves
-the mode. A known command is cleared by ``TerminalStickyMiddleware`` before the
-routers run, so a sticky state can never swallow ``/start``, ``/help``,
-``/settings`` or ``/admin``.
+**You are in the terminal by opening it.** ``term:open``/``term:new`` set the
+input state as part of opening, so once the live view renders, the very next
+plain-text message goes to that session with no extra tap. There is no "Send a
+command" button any more: a terminal *is* an input mode.
+
+**Leaving is automatic.** The state is set **if and only if** the user's last
+interaction was with a terminal. A known slash-command leaves (see
+``TerminalStickyMiddleware``); any callback that is not a ``term:`` one leaves
+(see ``TerminalLeaveMiddleware``) — the one choke point, so no handler has to
+remember to clear it. The live view's ``⬅️ Back`` clears it and renders the
+workspace home without killing the session; ``⏹ Stop terminal`` kills it.
 
 **R7 — cut short on idle, supersede on a new command.** A follow stops once the
 session goes quiet (no new output for ``FOLLOW_IDLE_INTERVALS`` polls) instead of
@@ -103,11 +108,16 @@ async def _is_typing_here(state: FSMContext | None, ws_id, ses_id: str) -> bool:
 # -- open-or-reuse (the workspace home's 🖥 button) ---------------------------
 @router.callback_query(F.data.startswith("term:open"))
 async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext) -> None:
-    """One tap from the workspace home lands on a working prompt.
+    """One tap from the workspace home lands on a working prompt — and *is* the prompt.
 
     **Open-or-reuse**: a live session of this user in this workspace is shown;
     otherwise a new one is created and shown. There is no intermediate screen —
     the archive of dead sessions that used to sit here is deleted, not hidden.
+
+    Opening **is** entering: this sets ``TerminalInput.awaiting_command`` (paired
+    with the session ids) *before* the screen renders, so the next plain-text
+    message is sent into the session with no extra tap. The state and the view are
+    set together by :func:`_enter_terminal` — one place, so they can never drift.
     """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
@@ -121,7 +131,7 @@ async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sende
             raise
         await _show_cap(cb, ctx, services, sender, ws_id)
         return
-    await _show_view(cb, ctx, services, sender, ws_id, session.id, state=state)
+    await _enter_terminal(cb, ctx, services, sender, ws_id, session.id, state)
 
 
 @router.callback_query(F.data.startswith("term:new"))
@@ -131,6 +141,9 @@ async def on_new(cb: CallbackQuery, ctx: UserContext, services: Services, sender
     The only producer is a dead session's own view (``➕ New terminal``): a session
     that ended can never run again, so the user needs a new one there. ``term:open``
     is the workspace button and is open-or-reuse instead.
+
+    Like ``term:open``, a fresh session is entered as part of opening: the input
+    state is set with it, so the next plain-text message goes straight in.
     """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
@@ -144,7 +157,7 @@ async def on_new(cb: CallbackQuery, ctx: UserContext, services: Services, sender
             raise
         await _show_cap(cb, ctx, services, sender, ws_id)
         return
-    await _show_view(cb, ctx, services, sender, ws_id, session.id, state=state)
+    await _enter_terminal(cb, ctx, services, sender, ws_id, session.id, state)
 
 
 async def _show_cap(cb, ctx, services, sender, ws_id) -> None:
@@ -194,8 +207,8 @@ async def _show_view(cb, ctx, services, sender, ws_id, ses_id, *, state: FSMCont
     session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
     meta = await services.sessions.meta()
     if session.status.is_terminal and state is not None:
-        # The terminal ended under a sticky state: clear it so the mode does not
-        # outlive the session it pointed at (R5).
+        # The terminal ended under an active input state: clear it so the mode
+        # does not outlive the session it pointed at (R5).
         await state.clear()
     typing = await _is_typing_here(state, ws_id, ses_id)
     output = ""
@@ -229,33 +242,20 @@ async def _show_view(cb, ctx, services, sender, ws_id, ses_id, *, state: FSMCont
     await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
-# -- send a command (sticky) -------------------------------------------------
-@router.callback_query(F.data.startswith("term:cmd"))
-async def on_cmd(
-    cb: CallbackQuery,
-    ctx: UserContext,
-    services: Services,
-    sender: RichSender,
-    state: FSMContext,
-) -> None:
-    """Enter sticky command mode and show the live view carrying the exit.
+async def _enter_terminal(cb, ctx, services, sender, ws_id, ses_id, state: FSMContext) -> None:
+    """Open a terminal *and enter it* — state and view set together, one place.
 
-    The screen is the terminal view itself (in place), not a separate prompt, so
-    the sticky state is always paired with the terminal buttons and the one-tap
-    **stop typing** control (R2/R3). Plain text messages then keep going to this
-    session until the user stops or a known slash-command takes over (R1/R4).
+    Opening a terminal means the user is **in** it: the input state is set before
+    the view renders, so the next plain-text message is sent into the session with
+    no extra tap. This is the only place entry is armed; a handler that rendered a
+    live view without arming would show a picture of a terminal.
     """
-    parsed = await _parse_callback(cb, ctx, sender)
-    if parsed is None:
-        return
-    ws_id = parsed.ws_id
-    ses_id = parsed.ses_id
     await state.set_state(TerminalInput.awaiting_command)
     await state.update_data(ws_id=str(ws_id), ses_id=str(ses_id))
-    await _show_view(cb, ctx, services, sender, _wid(ws_id), ses_id, state=state)
+    await _show_view(cb, ctx, services, sender, ws_id, ses_id, state=state)
 
 
-# -- stop typing (the one-tap exit; R3) --------------------------------------
+# -- back (leave the terminal without killing it) -----------------------------
 @router.callback_query(F.data.startswith("term:exit"))
 async def on_exit(
     cb: CallbackQuery,
@@ -264,14 +264,22 @@ async def on_exit(
     sender: RichSender,
     state: FSMContext,
 ) -> None:
-    """Clear the sticky state and return to the ordinary terminal view."""
+    """``⬅️ Back`` — leave the terminal's input mode and render the workspace home.
+
+    Leaving must not trap the user and must not be destructive: the session stays
+    alive on the engine, only the bot-side input state is cleared, so the next
+    plain-text message is ordinary navigation again. The session is reachable
+    again with one tap on the workspace's terminal button (open-or-reuse).
+
+    The one destructive verb is ``⏹ Stop terminal`` (``term:close``); this button
+    is the *non*-destructive exit and must never be confused with it.
+    """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
         return
-    ws_id = parsed.ws_id
-    ses_id = parsed.ses_id
+    ws_id = _wid(parsed.ws_id)
     await state.clear()
-    await _show_view(cb, ctx, services, sender, _wid(ws_id), ses_id, state=state)
+    await _show_workspace_home(cb, ctx, services, sender, ws_id)
 
 
 @router.message(TerminalInput.awaiting_command)
