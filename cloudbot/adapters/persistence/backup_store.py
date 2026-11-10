@@ -74,8 +74,22 @@ class SqliteBackupStore:
         self._db = db
         self._path = Path(db.path)
 
+    def _require_sqlite(self) -> None:
+        """Database copies are a SQLite file operation; say so instead of failing obscurely.
+
+        The settings scope and every table read below work on either backend
+        through the facade; only ``snapshot``/``install`` (a whole-file copy and
+        swap) are inherently SQLite. A Postgres deployment backs up with
+        ``pg_dump`` outside the bot, so the refusal names the backend.
+        """
+        if self._db.is_postgres:
+            raise NotImplementedError(
+                "database file backups are SQLite-only; back up Postgres with pg_dump"
+            )
+
     # -- database copies -----------------------------------------------------
     async def snapshot(self) -> bytes:
+        self._require_sqlite()
         source = await self._db.connect()
         target = sqlite3.connect(":memory:")
         try:
@@ -90,6 +104,7 @@ class SqliteBackupStore:
         The write is atomic (write beside, ``os.replace``), so a crash mid-write
         leaves the old database in place, never a half-written one.
         """
+        self._require_sqlite()
         target = Path(self._path)
         target.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_name = tempfile.mkstemp(

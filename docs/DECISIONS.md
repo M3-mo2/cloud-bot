@@ -1111,3 +1111,55 @@ three plain messages must reach `send_line` with no intervening `term:cmd`; the 
 (`term:open` → `ws:view` → plain text reaches **no** session); `⬅️ رجوع` clears the state, renders the
 workspace home and does **not** kill the session; `⏹ Stop` kills and goes home. `term:cmd` is proven
 absent from the codec's action table, the router source and the rendered live view.
+
+## CB-43 — One facade over asyncpg, not a rewrite of the call sites
+
+**The measured shape of the code.** The persistence layer is written against a tiny, well-defined
+`aiosqlite` surface, and it is wide: **57** `async with conn.execute(...)` sites, **76** plain
+`await conn.execute(...)` sites, **35** `fetchone()` and **25** `fetchall()` calls, **3**
+`executemany`, **1** `executescript`, **41,896** `?` placeholders across **12** store modules (9 in
+`adapters/persistence/`, 3 in `adapters/store/`). SQLite-only SQL is confined to a handful of forms:
+`INSERT OR IGNORE` (3 sites, including `migrate()`), `INSERT OR REPLACE` (3), `PRAGMA foreign_keys`
+(1), `sqlite_master` (2 queries), `datetime('now')` (5), `lastrowid` (1 pattern in 3 files), and 12
+forward-only `.sql` migrations.
+
+**Decision.** Add **one** module, `adapters/persistence/pg_connection.py`, that presents that exact
+surface over `asyncpg`, and let `Database` choose the backend from the DSN. Not one store changes:
+`?` -> `$1..$n` is translated at execution time (outside string literals and comments), the
+SQLite-only forms become their Postgres equivalents inside the facade, and `PgCursor` is both
+awaitable (the 76 plain sites) and its own async context manager (the 57 `async with` sites).
+
+**Why.** Rewriting ~180 call sites by hand is 180 chances to introduce a bug that only shows at
+runtime. The surface the stores use is small and already stable; an adapter is one place to test,
+and a single test suite then proves the adapter once instead of proving every store twice. It also
+keeps SQLite the default and the test backend with zero risk to the path that runs today.
+
+**Type decisions (held consistently).** Timestamps stay **TEXT** (RFC3339 UTC), not `TIMESTAMPTZ`:
+`parse_dt` reads strings and several queries compare them as text, and the facade renders
+`datetime('now')` as the same UTC RFC3339 text so the read path is unchanged. Booleans stay
+**INTEGER 0/1** (the stores bind `0/1` and read `bool(...)`), JSON stays **TEXT**. Every SQLite
+`INTEGER` becomes **BIGINT** — the live run caught that Postgres's 32-bit `INTEGER` cannot hold a
+Telegram id (`6508129575`); every `INTEGER PRIMARY KEY AUTOINCREMENT` becomes `BIGSERIAL PRIMARY KEY`.
+
+**Operational details the live run forced.** Neon's DSN carries `channel_binding=require`, which
+asyncpg rejects; the app strips it (and keeps `sslmode`). Neon's pooler host also refuses a
+`search_path` passed as a startup `options` parameter and does not keep prepared statements per
+session, so the pool uses `setup=` (to set `search_path` on each acquired connection) and
+`statement_cache_size=0`. The pool is `min_size=2`, `max_size=5`: aiogram handles updates
+concurrently, so two connections are the useful floor and five stays far below the pooler's cap (112)
+while leaving room for a restore/import beside the bot.
+
+**What stays unchanged.** `database_url` in `.env` is untouched (SQLite remains the default);
+`:memory:` still works; `reload()` keeps its meaning (re-open the file for SQLite, reconnect the pool
+for Postgres); the running bot and production are untouched. The import is a separate one-shot,
+idempotent script (`scripts/import_sqlite_to_pg.py`), not part of startup.
+
+**Consequences.** `tests/unit/test_pg_translation.py` proves the translation offline; 
+`tests/contract/test_pg_facade.py` proves execution against a real Postgres when `TEST_PG_DSN` (or
+`~/.neon_uri`) is present and skips with a reason otherwise. The SQLite suite stays at its measured
+tally, which is the proof that the fallback path did not move.
+
+**Alternatives rejected.** Hand-rewriting every store to asyncpg: 180 edits, two dialects to keep in
+sync, and the SQLite suite would stop covering the production path. A query builder / ORM: a much
+larger change for a surface this small. Running both backends in the test suite by default: it needs
+a live Postgres and would make offline tests fail for everyone without one.

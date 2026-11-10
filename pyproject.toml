@@ -19,12 +19,18 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8", "pytest-asyncio>=0.23"]
+# Optional: only needed when CLOUDBOT_DATABASE_URL points at Postgres. SQLite
+# remains the default backend and imports nothing from this extra.
+postgres = ["asyncpg>=0.29"]
 
 [tool.setuptools.packages.find]
 include = ["cloudbot*"]
 
 [tool.setuptools.package-data]
-cloudbot = ["adapters/persistence/migrations/*.sql"]
+cloudbot = [
+    "adapters/persistence/migrations/*.sql",
+    "adapters/persistence/migrations_pg/*.sql",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
