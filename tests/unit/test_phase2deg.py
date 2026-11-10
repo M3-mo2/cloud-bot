@@ -63,6 +63,17 @@ async def test_metrics_interval_validation_uses_server_bounds(services):
 
 
 # -- metrics screen honesty --------------------------------------------------
+#: The metrics screen now builds **blocks** (the refresh button sits in the body),
+#: so these assertions read the built message rather than ``doc.html`` — the html
+#: half is empty by construction and asserting on it would pass vacuously. The
+#: shape itself is locked in ``test_metrics_shape.py``; these three keep their
+#: original honesty concerns alive.
+def _metrics_document(metrics) -> str:
+    return met_screens.metrics_screen(metrics, WS, Locale.EN).doc.build().model_dump_json(
+        exclude_none=True
+    )
+
+
 def test_metrics_incomplete_disk_is_never_an_exact_percentage():
     from cloudbot.domain.value_objects import WorkspaceMetrics
 
@@ -82,12 +93,12 @@ def test_metrics_incomplete_disk_is_never_an_exact_percentage():
         live_runs=0,
         live_cgroups=0,
     )
-    html = met_screens.metrics_screen(metrics, WS, Locale.EN).doc.html
+    document = _metrics_document(metrics)
     # The incomplete figure is labelled provisional and carries no percentage.
-    assert "99" not in html
-    assert "provisional" in html.lower()
-    # The complete figure still renders its which is a real number.
-    assert "512 MB" in html
+    assert "99%" not in document
+    assert "provisional" in document.lower()
+    # The complete figure still renders its value, which is a real number.
+    assert "512 MB" in document
 
 
 def test_metrics_complete_disk_renders_the_number():
@@ -109,9 +120,9 @@ def test_metrics_complete_disk_renders_the_number():
         live_runs=1,
         live_cgroups=1,
     )
-    html = met_screens.metrics_screen(metrics, WS, Locale.EN).doc.html
-    assert "provisional" not in html.lower()
-    assert "0%" in html
+    document = _metrics_document(metrics)
+    assert "provisional" not in document.lower()
+    assert "0%" in document
 
 
 def test_metrics_idle_state_is_not_a_warning():
@@ -133,10 +144,10 @@ def test_metrics_idle_state_is_not_a_warning():
         live_runs=0,
         live_cgroups=0,
     )
-    html = met_screens.metrics_screen(metrics, WS, Locale.EN).doc.html
-    assert "Nothing is running" in html
-    # No warning marker on the idle state.
-    assert "⚠️" not in html.split("<blockquote>")[0].split("</table>")[0]
+    document = _metrics_document(metrics)
+    assert "Nothing is running" in document
+    # No warning marker on the idle state (both figures are complete and empty).
+    assert "\u26a0\ufe0f" not in document
 
 
 # -- processes ---------------------------------------------------------------

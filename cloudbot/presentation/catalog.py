@@ -520,6 +520,42 @@ def fixtures() -> dict[str, Any]:
         live_runs=0,
         live_cgroups=0,
     )
+    #: TASK metrics-shape: the goldens must cover all four corners — idle and
+    #: busy, complete and incomplete — so a tone/bar/idle rule cannot regress in
+    #: the combination nobody snapshotted. ``metrics`` is busy+complete and
+    #: ``metrics_idle`` is idle+incomplete; these two fill the other corners.
+    metrics_busy_incomplete = WorkspaceMetrics(
+        workspace_id=str(ws.id),
+        timestamp="2026-11-04T16:06:07Z",
+        interval_seconds=3,
+        ram_used_bytes=18_874_368,
+        ram_limit_bytes=536_870_912,
+        ram_percent=3.5,
+        ram_complete=True,
+        disk_used_bytes=6089,
+        disk_limit_bytes=1_073_741_824,
+        disk_percent=0.0006,
+        disk_complete=False,
+        write_rate_limit_mb_s=12,
+        live_runs=1,
+        live_cgroups=1,
+    )
+    metrics_idle_complete = WorkspaceMetrics(
+        workspace_id=str(ws.id),
+        timestamp="2026-11-04T16:06:07Z",
+        interval_seconds=3,
+        ram_used_bytes=0,
+        ram_limit_bytes=536_870_912,
+        ram_percent=0.0,
+        ram_complete=True,
+        disk_used_bytes=0,
+        disk_limit_bytes=1_073_741_824,
+        disk_percent=0.0,
+        disk_complete=True,
+        write_rate_limit_mb_s=0,
+        live_runs=0,
+        live_cgroups=0,
+    )
     process_list = ProcessList(
         processes=(
             ProcessEntry(
@@ -612,6 +648,8 @@ def fixtures() -> dict[str, Any]:
         partial_port_report=partial_port_report,
         metrics=metrics,
         metrics_idle=metrics_idle,
+        metrics_busy_incomplete=metrics_busy_incomplete,
+        metrics_idle_complete=metrics_idle_complete,
         process_list=process_list,
         empty_process_list=empty_process_list,
         stop_stopped=stop_stopped,
@@ -1281,6 +1319,12 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     # -- Phase 2d: metrics ---------------------------------------------------
     "metrics": lambda f, loc: met_screens.metrics_screen(f["metrics"], f["ws"].id, loc),
     "metrics_idle_incomplete": lambda f, loc: met_screens.metrics_screen(f["metrics_idle"], f["ws"].id, loc),
+    "metrics_busy_incomplete": lambda f, loc: met_screens.metrics_screen(
+        f["metrics_busy_incomplete"], f["ws"].id, loc
+    ),
+    "metrics_idle_complete": lambda f, loc: met_screens.metrics_screen(
+        f["metrics_idle_complete"], f["ws"].id, loc
+    ),
     # -- Phase 2e: processes -------------------------------------------------
     "process_list": lambda f, loc: proc_screens.processes_screen(f["process_list"], f["ws"].id, loc),
     "process_list_empty": lambda f, loc: proc_screens.processes_screen(f["empty_process_list"], f["ws"].id, loc),

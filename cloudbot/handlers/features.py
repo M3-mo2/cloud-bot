@@ -660,11 +660,14 @@ def _invalid(field: str, reason: str):
 async def on_metrics(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
     decoded = decode_required(cb.data, 1)
     ws_id = _wid(decoded.key[0])
-    page = _page_of(decoded.key)
+    # No page part: the four fixed figures never overflow a page, so this screen
+    # does not go through the pager (see ``screens/metrics.py``). An older
+    # ``met:view:<ws>:<page>`` callback still decodes — the extra key part is
+    # simply ignored — so a button drawn by a previous build still works.
     metrics = await services.metrics.snapshot(ctx.tg_id, ws_id)
     await show_screen(
         cb,
-        met_screens.metrics_screen(metrics, ws_id, ctx.locale, page=page),
+        met_screens.metrics_screen(metrics, ws_id, ctx.locale),
         ctx=ctx,
         sender=sender,
     )

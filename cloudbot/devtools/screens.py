@@ -26,6 +26,8 @@ TRANSIENT_SCREENS: frozenset[str] = frozenset(
 )
 
 #: Callbacks that land on a paged list; a screen carrying one has a pager.
+#: ``met:view`` is deliberately absent: the resources screen is four fixed figures
+#: with no pager (TASK metrics-shape), so a ``met:view`` button is not paging.
 PAGER_ACTIONS: frozenset[str] = frozenset(
     {
         "ws:list",
@@ -33,7 +35,6 @@ PAGER_ACTIONS: frozenset[str] = frozenset(
         "port:list",
         "proc:list",
         "pkg:list",
-        "met:view",
         "tnl:list",
         "arc:result",
         "run:history",

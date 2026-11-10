@@ -12,9 +12,9 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 164 |
-| Screens including the /dev tool | 167 |
-| Button edges | 515 |
+| Catalog screens | 166 |
+| Screens including the /dev tool | 169 |
+| Button edges | 517 |
 | Distinct destinations (actions) | 135 |
 | Entry commands | 9 |
 | Callback re-entry actions | 135 |
@@ -22,7 +22,7 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 242 |
+| Contradictions: two-screen loops | 247 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -110,7 +110,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `file:upload` | file_upload |
 | `lang:ar` | menu, menu_empty, menu_inside |
 | `lang:en` | menu, menu_empty, menu_inside |
-| `met:view` | metrics, metrics_idle_incomplete |
+| `met:view` | metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete |
 | `nav:cancel` | menu, menu_empty, menu_inside |
 | `nav:clear` | (handler only — no screen) |
 | `nav:help` | help, help_inside |
@@ -487,8 +487,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -783,8 +785,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -1188,8 +1192,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -1651,8 +1657,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -2103,8 +2111,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -2584,8 +2594,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -3025,8 +3037,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -3380,8 +3394,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -4034,18 +4050,17 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -4053,10 +4068,23 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -4069,9 +4097,11 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
-  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
-    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
+  - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+    - **metrics** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_busy_incomplete** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_idle_complete** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_idle_incomplete** — (no title) ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
@@ -4588,8 +4618,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -4975,8 +5007,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -5366,8 +5400,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -5770,8 +5806,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -6334,8 +6372,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -6860,8 +6900,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -7069,8 +7111,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -7460,8 +7504,10 @@ One tree per command. The same screen reached twice is shown both times (that is
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -7971,8 +8017,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -8523,8 +8571,10 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -8534,18 +8584,17 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -8553,10 +8602,23 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -8804,8 +8866,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -9179,8 +9243,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -9584,8 +9650,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -10047,8 +10115,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -10499,8 +10569,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -10980,8 +11052,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -11421,8 +11495,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -11776,8 +11852,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -12430,18 +12508,17 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -12449,10 +12526,23 @@ _No screen is rendered by this command._
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -12465,9 +12555,11 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
-  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
-    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
+  - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+    - **metrics** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_busy_incomplete** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_idle_complete** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_idle_incomplete** — (no title) ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
@@ -12984,8 +13076,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -13371,8 +13465,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -13762,8 +13858,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -14339,8 +14437,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -14821,8 +14921,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -15347,8 +15449,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -15556,8 +15660,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -15947,8 +16053,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -16477,8 +16585,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -17080,8 +17190,10 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -17091,18 +17203,17 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -17110,10 +17221,23 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -17421,8 +17545,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -17565,8 +17691,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -17887,8 +18015,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -18655,8 +18785,10 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -18666,18 +18798,17 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -18685,10 +18816,23 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -19561,18 +19705,17 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -19580,10 +19723,23 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - ↩ `process_list` (already on this path)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -19596,9 +19752,11 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
     - **process_list_empty** — 🧠 Processes ↩ (already expanded at depth 4)
-  - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-    - **metrics** — 📊 Resources ↩ (already expanded at depth 4)
-    - **metrics_idle_incomplete** — 📊 Resources ↩ (already expanded at depth 4)
+  - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+    - **metrics** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_busy_incomplete** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_idle_complete** — (no title) ↩ (already expanded at depth 4)
+    - **metrics_idle_incomplete** — (no title) ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings
       - 🛑 Stop all processes → `ws:stop_confirm` → ws_stop_confirm
@@ -19832,8 +19990,10 @@ _No screen is rendered by this command._
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
@@ -20483,8 +20643,10 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - ↩ `process_list` (already on this path)
             - … `process_list_empty` at depth 6 (not expanded)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
@@ -20494,18 +20656,17 @@ _No screen is rendered by this command._
           - 🔄 Refresh → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - ↩ `process_list_empty` (already on this path)
-          - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+          - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
             - … `metrics` at depth 6 (not expanded)
+            - … `metrics_busy_incomplete` at depth 6 (not expanded)
+            - … `metrics_idle_complete` at depth 6 (not expanded)
             - … `metrics_idle_incomplete` at depth 6 (not expanded)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-      - 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
-        - **metrics** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - ↩ `metrics` (already on this path)
-            - … `metrics_idle_incomplete` at depth 6 (not expanded)
+      - 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
+        - **metrics** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -20513,10 +20674,23 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-        - **metrics_idle_incomplete** — 📊 Resources
-          - 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
-            - … `metrics` at depth 6 (not expanded)
-            - ↩ `metrics_idle_incomplete` (already on this path)
+        - **metrics_busy_incomplete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **metrics_idle_complete** — (no title)
+          - 🧠 Processes → `proc:list` → process_list, process_list_empty
+            - … `process_list` at depth 6 (not expanded)
+            - … `process_list_empty` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **metrics_idle_incomplete** — (no title)
           - 🧠 Processes → `proc:list` → process_list, process_list_empty
             - … `process_list` at depth 6 (not expanded)
             - … `process_list_empty` at depth 6 (not expanded)
@@ -20658,7 +20832,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (242)
+### 3.5 Loops that are not obvious (247)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -20745,10 +20919,15 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **menu_inside** —“➕ New Workspace”→ **ws_create_name** —“✖️ Cancel”→ **menu_inside** (expected (back/affordance))
 - **menu_inside** —“🏠 demo”→ **ws_list** —“🏠 Home”→ **menu_inside** (**unobvious**)
 - **menu_inside** —“🏠 demo”→ **ws_list_empty** —“🏠 Home”→ **menu_inside** (**unobvious**)
-- **metrics** —“🔄 Refresh”→ **metrics_idle_incomplete** —“🔄 Refresh”→ **metrics** (**unobvious**)
 - **metrics** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics** (**unobvious**)
 - **metrics** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics** (**unobvious**)
 - **metrics** —“⬅️ Back”→ **ws_detail** —“📊 Resources”→ **metrics** (expected (back/affordance))
+- **metrics_busy_incomplete** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics_busy_incomplete** (**unobvious**)
+- **metrics_busy_incomplete** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics_busy_incomplete** (**unobvious**)
+- **metrics_busy_incomplete** —“⬅️ Back”→ **ws_detail** —“📊 Resources”→ **metrics_busy_incomplete** (expected (back/affordance))
+- **metrics_idle_complete** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics_idle_complete** (**unobvious**)
+- **metrics_idle_complete** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics_idle_complete** (**unobvious**)
+- **metrics_idle_complete** —“⬅️ Back”→ **ws_detail** —“📊 Resources”→ **metrics_idle_complete** (expected (back/affordance))
 - **metrics_idle_incomplete** —“🧠 Processes”→ **process_list** —“📊 Resources”→ **metrics_idle_incomplete** (**unobvious**)
 - **metrics_idle_incomplete** —“🧠 Processes”→ **process_list_empty** —“📊 Resources”→ **metrics_idle_incomplete** (**unobvious**)
 - **metrics_idle_incomplete** —“⬅️ Back”→ **ws_detail** —“📊 Resources”→ **metrics_idle_incomplete** (expected (back/affordance))
@@ -21181,7 +21360,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
 - 🔌 Ports → `port:list` → port_list, port_list_partial
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
-- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+- 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Leave workspace → `adm:leave` → admin_overview, admin_overview_unreachable
 
@@ -21655,19 +21834,31 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ➕ New Workspace → `ws:new` → ws_create_name
 - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
 
-### metrics — 📊 Resources
+### metrics — (no title)
 
-_Sampled roughly every 3 seconds. Refresh to take a new snapshot._
+_(no body text)_
 
-- 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
-### metrics_idle_incomplete — 📊 Resources
+### metrics_busy_incomplete — (no title)
 
-_Nothing is running in this workspace._
+_(no body text)_
 
-- 🔄 Refresh → `met:view` → metrics, metrics_idle_incomplete
+- 🧠 Processes → `proc:list` → process_list, process_list_empty
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+
+### metrics_idle_complete — (no title)
+
+_(no body text)_
+
+- 🧠 Processes → `proc:list` → process_list, process_list_empty
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+
+### metrics_idle_incomplete — (no title)
+
+_(no body text)_
+
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
@@ -21760,7 +21951,7 @@ _2 live_
 - ⏹ Stop python3 → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
 - ⏹ Stop sleep → `proc:stop_confirm` → process_gone, process_stop_confirm, process_stopped
 - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+- 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### process_list_empty — 🧠 Processes
@@ -21768,7 +21959,7 @@ _2 live_
 _0 live_
 
 - 🔄 Refresh → `proc:list` → process_list, process_list_empty
-- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+- 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### process_stop_confirm — ⏹ Stop this process?
@@ -22260,7 +22451,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
 - 🔌 Ports → `port:list` → port_list, port_list_partial
 - 🧠 Processes → `proc:list` → process_list, process_list_empty
-- 📊 Resources → `met:view` → metrics, metrics_idle_incomplete
+- 📊 Resources → `met:view` → metrics, metrics_busy_incomplete, metrics_idle_complete, metrics_idle_incomplete
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 

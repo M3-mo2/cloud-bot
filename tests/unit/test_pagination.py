@@ -270,18 +270,30 @@ def test_an_out_of_range_page_is_clamped_not_empty(name, locale):
     assert _table_rows(screen.doc.html) >= 1
 
 
-def test_metrics_goes_through_the_one_pager_too():
+def test_metrics_is_deliberately_not_a_paged_list():
+    """TASK metrics-shape reversed this test's rule for one screen, on purpose.
+
+    It used to assert that metrics went through the one pager "so no list screen
+    is the odd one out". The catalog audit caught the cost: four fixed figures
+    can never overflow a page, so the pager only ever printed ``Page 1 of 1`` —
+    noise on the one screen whose job is a glance. A capacity figure is not a
+    list row either; it is a bar. The screen therefore carries no footer and no
+    pager row, and this test fails if either comes back.
+    """
     from cloudbot.presentation.catalog import fixtures
 
     metrics = fixtures()["metrics"]
     for locale in LOCALES:
         screen = met_screens.metrics_screen(metrics, WS, locale)
+        document = screen.doc.build().model_dump_json(exclude_none=True)
         assert catalog.t(
             "common.page",
             locale,
             page="1",  # TASK digits: ASCII in every locale
             total="1",  # TASK digits: ASCII in every locale
-        ) in screen.doc.html
+        ) not in document
+        actions = [b.callback_data for b in _buttons(screen) if b.callback_data]
+        assert not any(a.startswith("met:view") for a in actions), actions
 
 
 # -- the catalog audit -------------------------------------------------------
@@ -293,13 +305,12 @@ def _has_pager(screen) -> bool:
             "port:list",
             "proc:list",
             "pkg:list",
-            "met:view",
             "tnl:list",
             "arc:result",
         }
         or (b.callback_data or "").startswith(
             ("ws:list:", "file:ls:", "port:list:", "proc:list:",
-             "pkg:list:", "met:view:", "tnl:list:", "arc:result:")
+             "pkg:list:", "tnl:list:", "arc:result:")
         )
         for b in _buttons(screen)
     )

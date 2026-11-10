@@ -213,10 +213,15 @@ def frame(*, disk_complete, disk_percent):
     )
 
 
-incomplete = met.metrics_screen(frame(disk_complete=False, disk_percent=99.0), WS, Locale.EN).doc.html
-assert "99" not in incomplete, "an incomplete figure rendered as an exact percentage"
+# The screen builds **blocks** (the refresh button rides in the body), so the
+# document is the built message serialised — ``doc.html`` is empty by design.
+def doc(frame_):
+    return met.metrics_screen(frame_, WS, Locale.EN).doc.build().model_dump_json(exclude_none=True)
+
+incomplete = doc(frame(disk_complete=False, disk_percent=99.0))
+assert "99%" not in incomplete, "an incomplete figure rendered as an exact percentage"
 assert "provisional" in incomplete.lower(), "the incomplete figure was not labelled"
-complete = met.metrics_screen(frame(disk_complete=True, disk_percent=99.0), WS, Locale.EN).doc.html
+complete = doc(frame(disk_complete=True, disk_percent=99.0))
 assert "99%" in complete, "a complete figure did not render its percentage"
 print("OK: disk_complete:false renders provisional (no exact %); complete renders the number")
 PY
