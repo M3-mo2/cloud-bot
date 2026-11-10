@@ -4,8 +4,8 @@ Task 07 made the ``adm:`` panel safe by construction: a screen producer and a
 handler consumer drifted, and the button raised ``IndexError`` on first use. The
 same family produced the Task 22 defects on terminal buttons:
 
-* ``term:list`` raised ``IndexError`` when the process restarted between drawing
-  the button and tapping it (the content-addressed token registry is in-memory);
+* a terminal list button raised ``IndexError`` when the process restarted between
+  drawing it and tapping it (the content-addressed token registry is in-memory);
 * ``term:resize`` (the **↔️ Resize** button on the terminal view) had **no handler
   at all** and was silently dead.
 

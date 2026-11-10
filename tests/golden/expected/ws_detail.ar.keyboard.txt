@@ -1,5 +1,5 @@
 📁 الملفات [file:ls:ws_01M6HJASCWM9Z1PF755GT89NK4:0] enabled | ▶️ تشغيل [run:choose:ws_01M6HJASCWM9Z1PF755GT89NK4] disabled
-🗜 الأرشيفات [arc:menu:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🖥 الطرفيات [term:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
+🗜 الأرشيفات [arc:menu:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🖥 الطرفيات [term:open:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 📜 التشغيلات [run:history:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 📦 قوالب جاهزة [tpl:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🐍 المكتبات [pkg:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🌐 الروابط العامة [tnl:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled
 🔌 المنافذ [port:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled | 🧠 العمليات [proc:list:ws_01M6HJASCWM9Z1PF755GT89NK4] enabled

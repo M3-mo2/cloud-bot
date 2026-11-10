@@ -84,7 +84,7 @@ class SessionRow:
     out_offset: int
     created_at: str
     last_seen_at: str
-
+    ended_at: str | None = None
 
 def row_to_session(row: Any) -> SessionRow:
     return SessionRow(
@@ -96,4 +96,5 @@ def row_to_session(row: Any) -> SessionRow:
         out_offset=int(row["out_offset"]),
         created_at=str(row["created_at"]),
         last_seen_at=str(row["last_seen_at"]),
+        ended_at=str(_optional(row, "ended_at")) if _optional(row, "ended_at") else None,
     )

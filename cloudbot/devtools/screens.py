@@ -29,7 +29,6 @@ TRANSIENT_SCREENS: frozenset[str] = frozenset(
 PAGER_ACTIONS: frozenset[str] = frozenset(
     {
         "ws:list",
-        "term:list",
         "file:ls",
         "port:list",
         "proc:list",

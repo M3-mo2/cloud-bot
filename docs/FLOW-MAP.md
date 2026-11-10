@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 166 |
-| Screens including the /dev tool | 169 |
-| Button edges | 533 |
-| Distinct destinations (actions) | 137 |
+| Catalog screens | 164 |
+| Screens including the /dev tool | 167 |
+| Button edges | 516 |
+| Distinct destinations (actions) | 136 |
 | Entry commands | 9 |
-| Callback re-entry actions | 137 |
+| Callback re-entry actions | 136 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 247 |
+| Contradictions: two-screen loops | 242 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 137 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 136 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -146,13 +146,12 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `run:purge_confirm` | purge_conflict, run_history |
 | `run:refresh` | live_logs_finished, live_logs_running |
 | `run:stop_confirm` | (handler only — no screen) |
-| `term:close` | terminal_ended, terminal_stale |
+| `term:close` | terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended |
 | `term:cmd` | terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
-| `term:ctrl_d` | terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
 | `term:exit` | terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
-| `term:forget` | terminal_list, terminal_list_empty, terminal_stale |
-| `term:list` | terminal_list, terminal_list_empty, terminal_stale |
-| `term:open` | terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
+| `term:forget` | terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended |
+| `term:new` | terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
+| `term:open` | terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
 | `term:signal` | terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
 | `term:view` | terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing |
 | `tnl:list` | tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped |
@@ -458,10 +457,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -750,10 +753,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -1151,10 +1158,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -1610,10 +1621,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -2058,10 +2073,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -2535,10 +2554,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -2972,10 +2995,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -3321,10 +3348,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -3385,10 +3416,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -3435,235 +3470,166 @@ One tree per command. The same screen reached twice is shown both times (that is
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-    - **terminal_list** — 🖥 Terminals
-      - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+  - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+    - **terminal_stale** — ♻️ This button is out of date
+      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_empty** — 📦 My Workspaces
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **terminal_view_ended** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
+    - **terminal_view_ended** — 🖥 Terminal
+      - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 2)
+        - ↩ `terminal_view_ended` (already on this path)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
             - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_failed** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - ↩ `terminal_view_failed` (already on this path)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer** — 🖥 Terminal
-          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
           - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_ended` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer_installed** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_running** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_typing** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-      - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - ↩ `terminal_list` (already on this path)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
+      - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 2)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
-    - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+    - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
   - 📜 Runs → `run:history` → run_history
     - **run_history** — 📜 Runs
       - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -4612,10 +4578,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -4995,10 +4965,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -5382,10 +5356,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -5782,10 +5760,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -6342,10 +6324,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -6864,10 +6850,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -7069,10 +7059,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -7456,10 +7450,14 @@ One tree per command. The same screen reached twice is shown both times (that is
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -7961,10 +7959,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -8025,10 +8027,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -8105,58 +8111,149 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals
-          - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_list` at depth 6 (not expanded)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+        - **terminal_view_ended** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📜 Runs → `run:history` → run_history
         - **run_history** — 📜 Runs
           - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -8598,10 +8695,14 @@ _No screen is rendered by this command._
         - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
-        - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
         - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
@@ -8713,10 +8814,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -9084,10 +9189,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -9485,10 +9594,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -9944,10 +10057,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -10392,10 +10509,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -10869,10 +10990,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -11306,10 +11431,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -11655,10 +11784,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -11719,10 +11852,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -11769,235 +11906,166 @@ _No screen is rendered by this command._
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-    - **terminal_list** — 🖥 Terminals
-      - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+  - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+    - **terminal_stale** — ♻️ This button is out of date
+      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_empty** — 📦 My Workspaces
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **terminal_view_ended** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
+    - **terminal_view_ended** — 🖥 Terminal
+      - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 2)
+        - ↩ `terminal_view_ended` (already on this path)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `ws_detail` at depth 6 (not expanded)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
             - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_failed** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - ↩ `terminal_view_failed` (already on this path)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer** — 🖥 Terminal
-          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
           - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_ended` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer_installed** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_running** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_typing** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-      - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - ↩ `terminal_list` (already on this path)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - … `ws_detail` at depth 6 (not expanded)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
+      - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 2)
+        - **ws_detail** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - **ws_detail** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
-    - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+    - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
   - 📜 Runs → `run:history` → run_history
     - **run_history** — 📜 Runs
       - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -12946,10 +13014,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -13329,10 +13401,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -13716,10 +13792,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -14289,10 +14369,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -14767,10 +14851,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -15289,10 +15377,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -15494,10 +15586,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -15881,10 +15977,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -16405,10 +16505,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -16469,10 +16573,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -16600,58 +16708,149 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals
-          - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_list` at depth 6 (not expanded)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+        - **terminal_view_ended** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📜 Runs → `run:history` → run_history
         - **run_history** — 📜 Runs
           - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -17093,10 +17292,14 @@ _No screen is rendered by this command._
         - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
-        - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
         - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
@@ -17266,10 +17469,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -17330,10 +17537,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -17402,10 +17613,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -17466,10 +17681,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -17716,10 +17935,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -17780,10 +18003,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -18076,58 +18303,149 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals
-          - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_list` at depth 6 (not expanded)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+        - **terminal_view_ended** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📜 Runs → `run:history` → run_history
         - **run_history** — 📜 Runs
           - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -18569,10 +18887,14 @@ _No screen is rendered by this command._
         - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
       - ▶️ Run → `run:choose` → run_mode
         - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
-        - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
       - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
         - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
         - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
@@ -18653,10 +18975,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -18703,235 +19029,166 @@ _No screen is rendered by this command._
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-  - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-    - **terminal_list** — 🖥 Terminals
-      - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+  - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+    - **terminal_stale** — ♻️ This button is out of date
+      - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
+        - **ws_list** — (no title)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_empty** — 📦 My Workspaces
+          - ➕ New Workspace → `ws:new` → ws_create_name
+            - … `ws_create_name` at depth 6 (not expanded)
+          - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
+            - … `menu` at depth 6 (not expanded)
+            - … `menu_empty` at depth 6 (not expanded)
+            - … `menu_inside` at depth 6 (not expanded)
+        - **ws_list_inside** — (no title)
+          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-        - **terminal_view_ended** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+            - ↩ `ws_list_inside` (already on this path)
+    - **terminal_view_ended** — 🖥 Terminal
+      - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 2)
+        - ↩ `terminal_view_ended` (already on this path)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - … `ws_detail_suspended` at depth 6 (not expanded)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
             - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_failed** — 🖥 Terminal
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - ↩ `terminal_view_failed` (already on this path)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer** — 🖥 Terminal
-          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
           - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_ended` at depth 6 (not expanded)
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer` (already on this path)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_offer_installed** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - ↩ `terminal_view_offer_installed` (already on this path)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_running** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - ↩ `terminal_view_running` (already on this path)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-        - **terminal_view_typing** — 🖥 Terminal
-          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
             - … `terminal_view_failed` at depth 6 (not expanded)
             - … `terminal_view_offer` at depth 6 (not expanded)
             - … `terminal_view_offer_installed` at depth 6 (not expanded)
             - … `terminal_view_running` at depth 6 (not expanded)
             - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
             - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - ↩ `terminal_view_typing` (already on this path)
-          - ⏹ Close → `term:close` → terminal_ended, terminal_stale
-            - … `terminal_ended` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-      - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
-      - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-        - ↩ `terminal_list` (already on this path)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - … `ws_detail_suspended` at depth 6 (not expanded)
-        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
-        - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
-        - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
+      - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+        - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 2)
+        - ↩ `ws_detail` (already on this path)
+        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
+        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-    - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
-    - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+    - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
   - 📜 Runs → `run:history` → run_history
     - **run_history** — 📜 Runs
       - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -19515,67 +19772,9 @@ _No screen is rendered by this command._
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
-    - **ws_list** — (no title)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — (no title)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-        - **menu_empty** — ☁️ CloudBot
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-          - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
-            - … `wallet` at depth 6 (not expanded)
-            - … `wallet_expired` at depth 6 (not expanded)
-            - … `wallet_no_plan` at depth 6 (not expanded)
-            - … `wallet_two_plans` at depth 6 (not expanded)
-          - ⚙️ Settings → `nav:settings` → settings, settings_inside
-            - … `settings` at depth 6 (not expanded)
-            - … `settings_inside` at depth 6 (not expanded)
-        - **menu_inside** — (no title)
-          - ➕ New Workspace → `ws:new` → ws_create_name
-            - … `ws_create_name` at depth 6 (not expanded)
-          - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - … `ws_detail_suspended` at depth 6 (not expanded)
-            - ↩ `ws_list` (already on this path)
-            - … `ws_list_empty` at depth 6 (not expanded)
-            - … `ws_list_inside` at depth 6 (not expanded)
-    - **ws_list_empty** — 📦 My Workspaces
-      - ➕ New Workspace → `ws:new` → ws_create_name
-        - **ws_create_name** — ➕ New Workspace
-          - ✖️ Cancel → `nav:cancel` → menu, menu_empty, menu_inside
-            - … `menu` at depth 6 (not expanded)
-            - … `menu_empty` at depth 6 (not expanded)
-            - … `menu_inside` at depth 6 (not expanded)
-      - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
-        - **menu** — (no title) ↩ (already expanded at depth 4)
-        - **menu_empty** — ☁️ CloudBot ↩ (already expanded at depth 4)
-        - **menu_inside** — (no title) ↩ (already expanded at depth 4)
-    - **ws_list_inside** — (no title)
-      - 🏠 demo → `ws:home` → ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside
-        - ↩ `ws_detail` (already on this path)
-        - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
-        - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
-        - **ws_list** — (no title) ↩ (already expanded at depth 2)
-        - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 2)
-        - ↩ `ws_list_inside` (already on this path)
+    - **ws_list** — (no title) ↩ (already expanded at depth 4)
+    - **ws_list_empty** — 📦 My Workspaces ↩ (already expanded at depth 4)
+    - **ws_list_inside** — (no title) ↩ (already expanded at depth 4)
 - **ws_detail_locked** — (no title)
   - 🔄 Renew → `ws:renew` → wallet_plans
     - **wallet_plans** — 📦 Choose a plan
@@ -19721,10 +19920,14 @@ _No screen is rendered by this command._
             - … `run_mode` at depth 6 (not expanded)
           - 🗜 Archives → `arc:menu` → archive_menu
             - … `archive_menu` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - 📜 Runs → `run:history` → run_history
             - … `run_history` at depth 6 (not expanded)
           - 📦 Starter templates → `tpl:list` → tpl_list
@@ -19772,10 +19975,14 @@ _No screen is rendered by this command._
             - … `file_browser_page_2` at depth 6 (not expanded)
           - ▶️ Run → `run:choose` → run_mode
             - … `run_mode` at depth 6 (not expanded)
-          - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-            - … `terminal_list` at depth 6 (not expanded)
-            - … `terminal_list_empty` at depth 6 (not expanded)
+          - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
             - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
           - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
             - … `ws_settings` at depth 6 (not expanded)
             - … `ws_settings_suspended` at depth 6 (not expanded)
@@ -19964,58 +20171,149 @@ _No screen is rendered by this command._
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
             - ↩ `ws_detail_suspended` (already on this path)
-      - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-        - **terminal_list** — 🖥 Terminals
-          - 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - ↩ `terminal_list` (already on this path)
-            - … `terminal_list_empty` at depth 6 (not expanded)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
-        - **terminal_list_empty** — 🖥 Terminals
-          - ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-            - … `terminal_list` at depth 6 (not expanded)
-            - ↩ `terminal_list_empty` (already on this path)
-            - … `terminal_stale` at depth 6 (not expanded)
-            - … `terminal_view_ended` at depth 6 (not expanded)
-            - … `terminal_view_failed` at depth 6 (not expanded)
-            - … `terminal_view_offer` at depth 6 (not expanded)
-            - … `terminal_view_offer_installed` at depth 6 (not expanded)
-            - … `terminal_view_running` at depth 6 (not expanded)
-            - … `terminal_view_typing` at depth 6 (not expanded)
-          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-            - ↩ `ws_detail` (already on this path)
-            - … `ws_detail_locked` at depth 6 (not expanded)
-            - ↩ `ws_detail_suspended` (already on this path)
+      - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
         - **terminal_stale** — ♻️ This button is out of date
           - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
             - … `ws_list` at depth 6 (not expanded)
             - … `ws_list_empty` at depth 6 (not expanded)
             - … `ws_list_inside` at depth 6 (not expanded)
+        - **terminal_view_ended** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `terminal_view_ended` (already on this path)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **terminal_view_failed** — 🖥 Terminal
+          - ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - ↩ `terminal_view_failed` (already on this path)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+          - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **terminal_view_offer** — 🖥 Terminal
+          - 📦 Install flask → `pkg:fix` → (handler only — no screen)
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer` (already on this path)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **terminal_view_offer_installed** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - ↩ `terminal_view_offer_installed` (already on this path)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **terminal_view_running** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - ↩ `terminal_view_running` (already on this path)
+            - … `terminal_view_typing` at depth 6 (not expanded)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
+        - **terminal_view_typing** — 🖥 Terminal
+          - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_ended` at depth 6 (not expanded)
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+            - … `terminal_stale` at depth 6 (not expanded)
+            - … `terminal_view_ended` at depth 6 (not expanded)
+            - … `terminal_view_failed` at depth 6 (not expanded)
+            - … `terminal_view_offer` at depth 6 (not expanded)
+            - … `terminal_view_offer_installed` at depth 6 (not expanded)
+            - … `terminal_view_running` at depth 6 (not expanded)
+            - ↩ `terminal_view_typing` (already on this path)
+          - ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+            - … `terminal_stale` at depth 6 (not expanded)
+            - ↩ `ws_detail` (already on this path)
+            - … `ws_detail_locked` at depth 6 (not expanded)
+            - ↩ `ws_detail_suspended` (already on this path)
       - 📜 Runs → `run:history` → run_history
         - **run_history** — 📜 Runs
           - 📜 run_0…K4 → `run:logs` → live_logs_finished, live_logs_running
@@ -20453,10 +20751,14 @@ _No screen is rendered by this command._
     - **file_browser_page_2** — (no title) ↩ (already expanded at depth 4)
   - ▶️ Run → `run:choose` → run_mode
     - **run_mode** — ▶️ Run ↩ (already expanded at depth 4)
-  - 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-    - **terminal_list** — 🖥 Terminals ↩ (already expanded at depth 4)
-    - **terminal_list_empty** — 🖥 Terminals ↩ (already expanded at depth 4)
+  - 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
     - **terminal_stale** — ♻️ This button is out of date ↩ (already expanded at depth 4)
+    - **terminal_view_ended** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_failed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_offer_installed** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_running** — 🖥 Terminal ↩ (already expanded at depth 4)
+    - **terminal_view_typing** — 🖥 Terminal ↩ (already expanded at depth 4)
   - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
     - **ws_settings** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
     - **ws_settings_suspended** — ⚙️ Workspace settings ↩ (already expanded at depth 4)
@@ -20497,7 +20799,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (247)
+### 3.5 Loops that are not obvious (242)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -20614,38 +20916,33 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_running** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
 - **terminal_ended** —“➕ New terminal”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_ended** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_list_empty** —“➕ New terminal”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_view_ended** —“➕ New terminal”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_view_failed** —“➕ New terminal”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_view_offer** —“🖥 Terminals”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_view_offer_installed** —“🖥 Terminals”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_view_running** —“🖥 Terminals”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“➕ New terminal”→ **terminal_view_typing** —“🖥 Terminals”→ **terminal_list** (**unobvious**)
-- **terminal_list** —“⬅️ Back”→ **ws_detail** —“🖥 Terminals”→ **terminal_list** (expected (back/affordance))
-- **terminal_list** —“⬅️ Back”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_list** (expected (back/affordance))
-- **terminal_list_empty** —“➕ New terminal”→ **terminal_view_ended** —“➕ New terminal”→ **terminal_list_empty** (**unobvious**)
-- **terminal_list_empty** —“➕ New terminal”→ **terminal_view_failed** —“➕ New terminal”→ **terminal_list_empty** (**unobvious**)
-- **terminal_list_empty** —“➕ New terminal”→ **terminal_view_offer** —“🖥 Terminals”→ **terminal_list_empty** (**unobvious**)
-- **terminal_list_empty** —“➕ New terminal”→ **terminal_view_offer_installed** —“🖥 Terminals”→ **terminal_list_empty** (**unobvious**)
-- **terminal_list_empty** —“➕ New terminal”→ **terminal_view_running** —“🖥 Terminals”→ **terminal_list_empty** (**unobvious**)
-- **terminal_list_empty** —“➕ New terminal”→ **terminal_view_typing** —“🖥 Terminals”→ **terminal_list_empty** (**unobvious**)
-- **terminal_list_empty** —“⬅️ Back”→ **ws_detail** —“🖥 Terminals”→ **terminal_list_empty** (expected (back/affordance))
-- **terminal_list_empty** —“⬅️ Back”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_list_empty** (expected (back/affordance))
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_failed** —“➕ New terminal”→ **terminal_view_ended** (**unobvious**)
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_offer** —“Ctrl-C”→ **terminal_view_ended** (**unobvious**)
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_view_ended** (**unobvious**)
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_running** —“Ctrl-C”→ **terminal_view_ended** (**unobvious**)
 - **terminal_view_ended** —“➕ New terminal”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_ended** (**unobvious**)
+- **terminal_view_ended** —“⬅️ Back”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_ended** (expected (back/affordance))
+- **terminal_view_ended** —“⬅️ Back”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_ended** (expected (back/affordance))
 - **terminal_view_failed** —“➕ New terminal”→ **terminal_view_offer** —“Ctrl-C”→ **terminal_view_failed** (**unobvious**)
 - **terminal_view_failed** —“➕ New terminal”→ **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_view_failed** (**unobvious**)
 - **terminal_view_failed** —“➕ New terminal”→ **terminal_view_running** —“Ctrl-C”→ **terminal_view_failed** (**unobvious**)
 - **terminal_view_failed** —“➕ New terminal”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_failed** (**unobvious**)
+- **terminal_view_failed** —“⬅️ Back”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_failed** (expected (back/affordance))
+- **terminal_view_failed** —“⬅️ Back”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_failed** (expected (back/affordance))
 - **terminal_view_offer** —“Ctrl-C”→ **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_view_offer** (**unobvious**)
 - **terminal_view_offer** —“Ctrl-C”→ **terminal_view_running** —“Ctrl-C”→ **terminal_view_offer** (**unobvious**)
 - **terminal_view_offer** —“Ctrl-C”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_offer** (**unobvious**)
+- **terminal_view_offer** —“⏹ Stop terminal”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_offer** (**unobvious**)
+- **terminal_view_offer** —“⏹ Stop terminal”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_offer** (**unobvious**)
 - **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_view_running** —“Ctrl-C”→ **terminal_view_offer_installed** (**unobvious**)
 - **terminal_view_offer_installed** —“Ctrl-C”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_offer_installed** (**unobvious**)
+- **terminal_view_offer_installed** —“⏹ Stop terminal”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_offer_installed** (**unobvious**)
+- **terminal_view_offer_installed** —“⏹ Stop terminal”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_offer_installed** (**unobvious**)
 - **terminal_view_running** —“Ctrl-C”→ **terminal_view_typing** —“Ctrl-C”→ **terminal_view_running** (**unobvious**)
+- **terminal_view_running** —“⏹ Stop terminal”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_running** (**unobvious**)
+- **terminal_view_running** —“⏹ Stop terminal”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_running** (**unobvious**)
+- **terminal_view_typing** —“⏹ Stop terminal”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_typing** (**unobvious**)
+- **terminal_view_typing** —“⏹ Stop terminal”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_typing** (**unobvious**)
 - **tpl_confirm** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm** (**unobvious**)
 - **tpl_confirm_conflict** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm_conflict** (**unobvious**)
 - **tpl_list** —“⬅️ Back”→ **ws_detail** —“📦 Starter templates”→ **tpl_list** (expected (back/affordance))
@@ -21019,7 +21316,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run → `run:choose` → run_mode
 - 🗜 Archives → `arc:menu` → archive_menu
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - 📜 Runs → `run:history` → run_history
 - 🐍 Packages → `pkg:list` → package_list, package_list_empty
 - 🌐 Public links → `tnl:list` → tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped
@@ -21209,9 +21506,7 @@ _Exactly as the user sees it:_
 
 - ▶️ #0 ⌨️ Send a command → `dev:tap` → dev_inspect
 - ▶️ #1 Ctrl-C → `dev:tap` → dev_inspect
-- ▶️ #2 Ctrl-D (EOF) → `dev:tap` → dev_inspect
-- ▶️ #3 ⏹ Close → `dev:tap` → dev_inspect
-- ▶️ #4 🖥 Terminals → `dev:tap` → dev_inspect
+- ▶️ #2 ⏹ Stop terminal → `dev:tap` → dev_inspect
 - 🌐 Show Arabic → `dev:inspect` → dev_inspect
 - ✅ Run all checks (this section) → `dev:run` → dev_report
 - ✅ Run all checks (whole catalog) → `dev:run` → dev_report
@@ -21683,30 +21978,13 @@ _Send a command to run in this terminal._
 
 _That terminal has closed._
 
-- ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-
-### terminal_list — 🖥 Terminals
-
-_2 terminals_
-
-- 🖥 ses_01M6HJATZ… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- 🖥 ses_01M6HJATY… → `term:view` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
-
-### terminal_list_empty — 🖥 Terminals
-
-_You don't have any terminals open in this workspace._
-
-- ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+- ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+- 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_stale — ♻️ This button is out of date
 
-_The terminal changed since this button was drawn. Open it again from your terminals._
+_The terminal changed since this button was drawn. Open it again from the workspace._
 
 - 📦 My workspaces → `ws:list` → ws_list, ws_list_empty, ws_list_inside
 
@@ -21714,17 +21992,17 @@ _The terminal changed since this button was drawn. Open it again from your termi
 
 _Status: ⏱️ Timed out_
 
-- ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+- 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_view_failed — 🖥 Terminal
 
 _Status: ⚠️ Could not start_
 
-- ➕ New terminal → `term:open` → terminal_list, terminal_list_empty, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- 🗑 Remove from list → `term:forget` → terminal_list, terminal_list_empty, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ➕ New terminal → `term:new` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+- 🗑 Forget this terminal → `term:forget` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
+- ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_view_offer — 🖥 Terminal
 
@@ -21733,9 +22011,7 @@ _Status: 🟢 Running_
 - 📦 Install flask → `pkg:fix` → (handler only — no screen)
 - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⏹ Close → `term:close` → terminal_ended, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_view_offer_installed — 🖥 Terminal
 
@@ -21743,9 +22019,7 @@ _Status: 🟢 Running_
 
 - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⏹ Close → `term:close` → terminal_ended, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_view_running — 🖥 Terminal
 
@@ -21753,20 +22027,16 @@ _Status: 🟢 Running_
 
 - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⏹ Close → `term:close` → terminal_ended, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### terminal_view_typing — 🖥 Terminal
 
 _Status: 🟢 Running_
 
 - ⌨️ Send a command → `term:cmd` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⏹ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - Ctrl-C → `term:signal` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- Ctrl-D (EOF) → `term:ctrl_d` → terminal_ended, terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
-- ⏹ Close → `term:close` → terminal_ended, terminal_stale
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- ↩️ Stop typing → `term:exit` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
+- ⏹ Stop terminal → `term:close` → terminal_stale, ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tpl_confirm — 📦 Python module
 
@@ -22125,7 +22395,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run (disabled) → `run:choose` → run_mode
 - 🗜 Archives → `arc:menu` → archive_menu
-- 🖥 Terminals → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- 🖥 Terminals → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - 📜 Runs → `run:history` → run_history
 - 📦 Starter templates → `tpl:list` → tpl_list
 - 🐍 Packages → `pkg:list` → package_list, package_list_empty
@@ -22152,7 +22422,7 @@ _▬▬▭▭▬▬▭▭▬▬▭▭_
 - ▶️ Resume → `ws:resume` → ws_detail, ws_detail_locked, ws_detail_suspended
 - 📁 Files → `file:ls` → file_browser, file_browser_empty, file_browser_page_2
 - ▶️ Run (disabled) → `run:choose` → run_mode
-- 🖥 Terminals (disabled) → `term:list` → terminal_list, terminal_list_empty, terminal_stale
+- 🖥 Terminals (disabled) → `term:open` → terminal_stale, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing
 - ⚙️ Settings → `ws:settings` → ws_settings, ws_settings_suspended
 - 🚪 Log out of workspace → `ws:logout` → ws_list, ws_list_empty, ws_list_inside
 

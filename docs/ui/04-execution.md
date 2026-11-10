@@ -498,30 +498,34 @@ Arabic (`is_rtl=True`):
 <p><i>هذه الطرفية نشِطة. أرسل أمرًا، أو استخدم الأزرار بالأسفل.</i></p>
 ```
 
-### 7.2 Keyboard (sticky)
+### 7.2 Keyboard (live view)
 
-Every button the terminal view normally carries is **kept**, plus the one-tap
-exit. A plain message in this state is the command (sent with Enter).
+A live terminal carries exactly what a terminal needs. The first row is the
+command row; the stop control is the **one** destructive verb, on its own row. A
+plain message while sticky is the command (sent with Enter).
 
 | Label (AR) | Label (EN) | Type | Style | Flags |
 | --- | --- | --- | --- | --- |
 | ⌨️ إرسال أمر | ⌨️ Send a command | inline | primary | keeps the mode |
-| ⏹ إيقاف الكتابة | ⏹ Stop typing | inline | danger | **exits the mode** (R3) |
-| Ctrl-C | Ctrl-C | inline | primary | — |
-| Ctrl-D (نهاية الملف) | Ctrl-D (EOF) | inline | primary | — |
-| ⏹ إغلاق | ⏹ Close | inline | danger | — |
-| 🖥 طرفياتي | 🖥 My terminals | inline | primary | **the single exit** (task term26) |
+| Ctrl-C | Ctrl-C | inline | primary | interrupts the running process |
+| ↩️ إيقاف الكتابة | ↩️ Stop typing | inline | primary | **exits command mode only** (R3); not destructive, so it does not wear the stop square |
+| ⏹ إيقاف الطرفية | ⏹ Stop terminal | inline | danger | **kills the session and returns to the workspace home** |
+
+**Ctrl-D is gone from the view** (TASK terminal-direct). He did not ask for it, and
+an EOF that ends the shell looks identical to the stop button while doing
+something different. **Close and Stop are one verb**, never two: two names for one
+effect is how a hand taps the wrong one.
 
 ### 7.3 Leaving the mode — three ways, none of them a dead end
 
-1. **⏹ Stop typing** (danger) clears the state and returns to the ordinary
-   terminal view. This is the primary exit.
+1. **⏹ Stop typing** (primary) clears the state and returns to the ordinary
+   terminal view. It is a mode exit, not a destructive action.
 2. **A known slash-command** (`/start`, `/help`, `/settings`, `/admin`, …) clears
    the state *before* the routers run, so a sticky state can never swallow a
    command — it always does its own thing (R4).
-3. **The session ending** (close, Ctrl-D, idle/lifetime, workspace stop) clears
-   the state and renders the ended screen, so the mode never outlives the session
-   it pointed at (R5).
+3. **The session ending** (stop, idle/lifetime, workspace stop) clears the state
+   and renders the ended screen, so the mode never outlives the session it
+   pointed at (R5).
 
 An **unknown** slash-command is deliberately *not* sent into the session: it
 re-renders the terminal and the sticky state is kept, so it neither vanishes nor
@@ -569,23 +573,30 @@ drawn before this change. They are **answered** by re-rendering the live view an
 clearing any resize input state — never a dead button and never a swallowed text
 message.
 
-### 7.6 My terminals — compact and paginated (task term26)
+### 7.6 The terminal button opens a terminal (task terminal-direct)
 
-The list is one line per terminal (`id · status · relative age`), running first
-then newest, and paginated with the **workspace list's own contract**
+**🖥 الطرفيات** on the workspace home is **open-or-reuse**: if this user already has
+a **live** session in this workspace, its view is shown; otherwise one is created
+and shown. There is no intermediate screen and no archive — one tap from the
+workspace home to a working prompt.
 
-> **Names are unique within the list (screens-b).** Session ids are ULIDs;
-> two opened in the same millisecond share their first ~12 characters, so a fixed
-> prefix renders two terminals identically. The label extends the prefix only
-> until it is distinct (and numbers an exact duplicate), while the callback still
-> carries the full id.
+What this replaced, and why it was wrong: the button used to render a paginated
+list of *every* session ever opened (`ses_… · status · relative age`), and every
+idle/lifetime expiry added another dead row. Ten dead rows across three pages, none
+of which opened anything, was the natural result of the design — not bad luck. The
+list, its pager, its catalog keys, its short-id labels and its `/dev` fixture are
+deleted, not hidden: there is no stored callback left in any chat, so nothing needs
+to answer the old route.
 
+Finished sessions stop accumulating: a handle whose terminal status was observed
+longer than a **one-hour grace window** ago is forgotten (the bot owns only the
+handle; the engine owns the process). A user already looking at a dead session's
+view keeps that rendered view — it simply stops being reachable afterwards. The
+dead view offers **➕ New terminal** (a genuinely fresh session), **🗑 Forget this
+terminal** and **Back to the workspace** — never a list.
 
-(`PAGE_SIZE = 10`, `page`/`total_pages`/`has_more`, `⬅️ Previous` / `Next ➡️`,
-`صفحة {page} من {total}`). Per-session buttons follow the page, so the keyboard
-cannot grow one-for-one with the session count; **Open terminal** and **Back**
-stay fixed at the bottom. The count is the page's count. The `too_many_sessions`
-cap path still renders this same list.
+At the `too_many_sessions` cap the screen names the live sessions, each with the
+same **⏹ Stop terminal** control, so the message says what to stop and how.
 
 ### 7.7 `command_prompt` is retired
 

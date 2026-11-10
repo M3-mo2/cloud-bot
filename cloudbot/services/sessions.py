@@ -10,6 +10,7 @@ pseudo-terminal (INTEGRATION-GUIDE §5.4).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from typing import AsyncIterator
 
 from cloudbot.core.errors import InvalidInput
@@ -42,6 +43,13 @@ DEFAULT_COLS = 100
 DEFAULT_ROWS = 30
 #: ``Ctrl-D`` (EOF) as a literal control byte: it is input, not a signal.
 CTRL_D = "\u0004"
+#: How long a finished session's bot-side handle is kept after its status turned
+#: terminal. The engine owns the process; the bot owns only the handle. Forgetting
+#: the handle after this grace window is *hygiene*, not deletion of evidence: a
+#: user still reading a dead session's view keeps that view (it was rendered), and
+#: the engine's own record is untouched. Past the window it simply stops being
+#: listed anywhere — which is what stops a revisit from resurrecting a corpse list.
+FORGET_GRACE = timedelta(hours=1)
 
 
 @dataclass
@@ -143,6 +151,52 @@ class SessionsService:
         sessions = await self.list_for_workspace(tg_id, ws_id)
         return [s for s in sessions if s.status is not SessionStatus.UNKNOWN]
 
+    async def open_or_reuse(
+        self, tg_id: int, ws_id: WorkspaceId, *, cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS
+    ) -> TerminalSession:
+        """One tap from the workspace home lands on a working prompt.
+
+        Open-or-reuse: the user's **live** session in this workspace is shown when
+        one exists, otherwise a new one is opened. There is no intermediate list —
+        a terminal button that first makes the user read an archive of dead
+        sessions is the defect this replaces.
+
+        Finished handles past :data:`FORGET_GRACE` are forgotten first (hygiene,
+        not deletion: the engine owns the process; the bot owns only the handle).
+        They are *not* reused: a session in a terminal state can never run again,
+        so a tap creates a fresh one.
+        """
+        await self._ownership.assert_owned(tg_id, ws_id)
+        await self.forget_finished(tg_id, ws_id)
+        for session in await self.list_for_workspace(tg_id, ws_id):
+            if session.status is SessionStatus.RUNNING:
+                return session
+        return await self.open(tg_id, ws_id, cols=cols, rows=rows)
+
+    async def forget_finished(
+        self, tg_id: int, ws_id: WorkspaceId, *, now: datetime | None = None
+    ) -> int:
+        """Drop handles of sessions that ended more than :data:`FORGET_GRACE` ago.
+
+        The engine keeps the ended record; only the bot-side handle is removed, so
+        a revisit cannot resurrect a corpse list. A session inside the window is
+        kept and stays viewable; a user already looking at a dead session keeps the
+        rendered view regardless.
+        """
+        await self._ownership.assert_owned(tg_id, ws_id)
+        # Start the clock for anything that is terminal but has never been
+        # recorded as ended (e.g. handles written by an older version).
+        if now is None:
+            now = datetime.now(timezone.utc)
+        for handle in await self._store.list_for_workspace(tg_id, ws_id):
+            if handle.ended_at is not None:
+                continue
+            session = await self._merge(ws_id, handle)
+            if session.status.is_terminal:
+                await self._store.mark_ended(tg_id, SessionId(handle.id), now)
+        cutoff = now - FORGET_GRACE
+        return await self._store.delete_ended_before(tg_id, ws_id, cutoff)
+
     async def get(self, tg_id: int, ws_id: WorkspaceId, ses_id: str) -> TerminalSession:
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_tracked(tg_id, ses_id)
@@ -167,6 +221,7 @@ class SessionsService:
                 rows=handle.rows,
                 out_offset=handle.out_offset,
                 created_at=handle.created_at,
+                ended_at=handle.ended_at,
             )
         return TerminalSession(
             id=live.id,
@@ -176,6 +231,7 @@ class SessionsService:
             rows=live.rows,
             out_offset=handle.out_offset,
             created_at=live.created_at or handle.created_at,
+            ended_at=handle.ended_at,
             reason=live.reason,
             diagnostic=live.diagnostic,
             exit_code=live.exit_code,
@@ -302,10 +358,12 @@ class SessionsService:
     async def forget(self, tg_id: int, ws_id: WorkspaceId, ses_id: str) -> None:
         """Drop the bot-side handle for a session the caller owns.
 
-        This is the only path that removes a terminal row. Ownership and
-        tracking are enforced first, so a foreign or unknown id still raises
-        ``NotOwned``. The engine record is untouched (the engine removes it with
-        the workspace); the terminal simply leaves *my terminals*.
+        This is the only path that removes a terminal row (the automatic hygiene
+        sweep calls :meth:`forget_finished`). Ownership and tracking are enforced
+        first, so a foreign or unknown id still raises ``NotOwned``. The engine
+        record is untouched (the engine removes it with the workspace): the bot
+        owns only the handle, so forgetting it is hygiene, never deletion of
+        evidence the user still needs.
         """
         await self._ownership.assert_owned(tg_id, ws_id)
         await self._assert_tracked(tg_id, ses_id)

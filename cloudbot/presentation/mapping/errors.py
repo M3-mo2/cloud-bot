@@ -186,9 +186,16 @@ def _extra_actions_for(
     if code == "insufficient_storage":
         return (("err.manage_files", "nav:manage_files", Intent.PRIMARY),)
     if code == "too_many_sessions":
-        return (("err.my_terminals", "nav:terminals", Intent.PRIMARY),)
+        # The recovery route is the terminal itself: open-or-reuse shows the live
+        # session (and its stop control) instead of a dead archive.
+        if ws_id:
+            return (("err.reopen_terminal", f"term:open:{ws_id}", Intent.PRIMARY),)
+        return (("menu.workspaces", "ws:list", Intent.PRIMARY),)
     if code == "session_ended":
-        return (("err.new_terminal", "nav:new_terminal", Intent.SUCCESS),)
+        # A fresh session, never the reuse route: the old one can never run again.
+        if ws_id:
+            return (("err.new_terminal", f"term:new:{ws_id}", Intent.SUCCESS),)
+        return (("menu.workspaces", "ws:list", Intent.PRIMARY),)
     return ()
 
 

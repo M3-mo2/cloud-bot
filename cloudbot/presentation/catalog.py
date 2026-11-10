@@ -1170,8 +1170,6 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "live_logs_finished": lambda f, loc: run_screens.live_logs(f["finished_run"], loc, stdout="done: 500 records\n"),
     "run_history": lambda f, loc: history_screens.run_history(f["run_page"], f["ws"].id, loc, now=NOW),
     "purge_conflict": lambda f, loc: history_screens.purge_conflict(f["ws"].id, loc),
-    "terminal_list": lambda f, loc: term_screens.my_terminals([f["running_session"], f["ended_session"]], f["ws"].id, loc, now=NOW),
-    "terminal_list_empty": lambda f, loc: term_screens.my_terminals([], f["ws"].id, loc),
     "terminal_view_running": lambda f, loc: term_screens.terminal_view(
         f["running_session"], f["ws"].id, loc, output="$ ls\nmain.py  README.md\n$ ", meta=f["meta"]
     ),

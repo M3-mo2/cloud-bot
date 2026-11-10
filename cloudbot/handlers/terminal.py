@@ -1,4 +1,4 @@
-"""Terminal handlers (Phase 1.5): my terminals, the view, input, resize, signals.
+"""Terminal handlers (Phase 1.5): open-or-reuse, the view, input, signals.
 
 Thin aiogram routers: parse → call the ``sessions`` service → render one screen
 → send. The live view follows the engine's offset protocol through the service
@@ -27,6 +27,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from cloudbot.core.errors import EngineRefused, InvalidInput, NotOwned
+from cloudbot.domain.value_objects import SessionStatus
 from cloudbot.handlers.render import show_screen
 from cloudbot.middleware.context import UserContext
 from cloudbot.presentation.rich.sender import RichSender
@@ -99,55 +100,63 @@ async def _is_typing_here(state: FSMContext | None, ws_id, ses_id: str) -> bool:
     return str(data.get("ws_id")) == str(ws_id) and data.get("ses_id") == ses_id
 
 
-# -- my terminals ------------------------------------------------------------
-@router.callback_query(F.data.startswith("term:list"))
-async def on_list(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender) -> None:
-    parsed = await _parse_callback(cb, ctx, sender)
-    if parsed is None:
-        return
-    ws_id = _wid(parsed.ws_id)
-    sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
-    await _show_list(cb, ctx, sender, sessions, ws_id, page=parsed.page)
-
-
-async def _show_list(cb, ctx, sender, sessions, ws_id, *, page: int = 0) -> None:
-    """Render one page of *my terminals* (the one project pager contract)."""
-    from cloudbot.presentation import pagination
-
-    ordered = term_screens.order_sessions(sessions)
-    # ``window`` clamps a stale/out-of-range page (e.g. a message drawn before a
-    # session was forgotten) so the screen never shows an empty page.
-    window, total_pages, has_more = pagination.window(ordered, page)
-    page = max(0, min(page, total_pages - 1))
-    screen = term_screens.my_terminals(
-        window,
-        ws_id,
-        ctx.locale,
-        page=page,
-        total_pages=total_pages,
-        has_more=has_more,
-    )
-    await show_screen(cb, screen, ctx=ctx, sender=sender)
-
-
-# -- open --------------------------------------------------------------------
+# -- open-or-reuse (the workspace home's 🖥 button) ---------------------------
 @router.callback_query(F.data.startswith("term:open"))
 async def on_open(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext) -> None:
+    """One tap from the workspace home lands on a working prompt.
+
+    **Open-or-reuse**: a live session of this user in this workspace is shown;
+    otherwise a new one is created and shown. There is no intermediate screen —
+    the archive of dead sessions that used to sit here is deleted, not hidden.
+    """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
         return
     ws_id = _wid(parsed.ws_id)
     size = _open_size(parsed)
     try:
-        session = await services.sessions.open(ctx.tg_id, ws_id, **size)
+        session = await services.sessions.open_or_reuse(ctx.tg_id, ws_id, **size)
     except EngineRefused as exc:
         if exc.engine_code != "too_many_sessions":
             raise
-        # The documented cap screen, never a raw error.
-        sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
-        await _show_list(cb, ctx, sender, sessions, ws_id)
+        await _show_cap(cb, ctx, services, sender, ws_id)
         return
     await _show_view(cb, ctx, services, sender, ws_id, session.id, state=state)
+
+
+@router.callback_query(F.data.startswith("term:new"))
+async def on_new(cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext) -> None:
+    """Open a **fresh** session, never reusing a live one.
+
+    The only producer is a dead session's own view (``➕ New terminal``): a session
+    that ended can never run again, so the user needs a new one there. ``term:open``
+    is the workspace button and is open-or-reuse instead.
+    """
+    parsed = await _parse_callback(cb, ctx, sender)
+    if parsed is None:
+        return
+    ws_id = _wid(parsed.ws_id)
+    await state.clear()
+    try:
+        session = await services.sessions.open(ctx.tg_id, ws_id)
+    except EngineRefused as exc:
+        if exc.engine_code != "too_many_sessions":
+            raise
+        await _show_cap(cb, ctx, services, sender, ws_id)
+        return
+    await _show_view(cb, ctx, services, sender, ws_id, session.id, state=state)
+
+
+async def _show_cap(cb, ctx, services, sender, ws_id) -> None:
+    """The documented cap screen: name what to close and give the stop control.
+
+    It lists only sessions that are **live** — a stop button has to be reachable
+    to free a slot — never the archive of ended ones this task deleted.
+    """
+    sessions = await services.sessions.list_for_workspace(ctx.tg_id, ws_id)
+    live = [s for s in sessions if s.status is SessionStatus.RUNNING]
+    screen = term_screens.cap_screen(live, ws_id, ctx.locale)
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
 def _open_size(parsed) -> dict[str, int]:
@@ -512,11 +521,21 @@ async def on_retired_resize(
     await _show_view(cb, ctx, services, sender, ws_id, parsed.ses_id, state=state)
 
 
-# -- close -------------------------------------------------------------------
+# -- stop (the one destructive verb on a live terminal) ----------------------
 @router.callback_query(F.data.startswith("term:close"))
 async def on_close(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
+    """Kill the session and return to the **workspace home**, never to a list.
+
+    Stopping a terminal is leaving it: the user goes back to the workspace they
+    were in, where the terminal button is one tap away again. Rendering a dead
+    session's own view (or an archive) here would be a screen nobody asked for.
+
+    The bot-side handle is forgotten immediately: the engine already keeps the
+    ended record, and this is the user saying they are done with it. Forgetting is
+    hygiene, not deletion of evidence — the engine owns the process.
+    """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
         return
@@ -524,15 +543,29 @@ async def on_close(
     ses_id = parsed.ses_id
     await state.clear()
     try:
-        session = await services.sessions.close(ctx.tg_id, ws_id, ses_id)
+        await services.sessions.close(ctx.tg_id, ws_id, ses_id)
     except EngineRefused as exc:
-        if exc.engine_code == "not_found":
-            session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
-        elif exc.engine_code == "session_ended":
-            session = await services.sessions.get(ctx.tg_id, ws_id, ses_id)
-        else:
+        # Already ended (or the engine forgot it): the outcome the user asked for
+        # is the truth, so this is not an error screen.
+        if exc.engine_code not in ("not_found", "session_ended"):
             raise
-    await show_screen(cb, term_screens.ended_screen(session, ws_id, ctx.locale), ctx=ctx, sender=sender)
+    await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
+    await _show_workspace_home(cb, ctx, services, sender, ws_id)
+
+
+async def _show_workspace_home(cb, ctx, services, sender, ws_id) -> None:
+    from cloudbot.handlers.workspaces import _plan_state
+    from cloudbot.presentation.screens import workspaces as ws_screens
+
+    ws = await services.workspaces.get(ctx.tg_id, ws_id)
+    screen = ws_screens.workspace_detail(
+        ws,
+        ctx.locale,
+        active_run=ws.summary.runs_active > 0,
+        mode=ctx.mode,
+        plan_state=await _plan_state(services, ctx.tg_id, ws, ctx.locale),
+    )
+    await show_screen(cb, screen, ctx=ctx, sender=sender)
 
 
 # -- forget (drop the bot-side handle) ---------------------------------------
@@ -540,16 +573,23 @@ async def on_close(
 async def on_forget(
     cb: CallbackQuery, ctx: UserContext, services: Services, sender: RichSender, state: FSMContext
 ) -> None:
-    """Remove an ended terminal from *my terminals* without touching the engine."""
+    """Drop an ended terminal's bot-side handle without touching the engine.
+
+    There is no list to return to any more, and the dead session's own view is
+    already on screen: forgetting it would re-render that view for a handle that
+    no longer exists. The honest destination is the workspace home.
+    """
     parsed = await _parse_callback(cb, ctx, sender)
     if parsed is None:
         return
     ws_id = _wid(parsed.ws_id)
     ses_id = parsed.ses_id
     await state.clear()
-    await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
-    sessions = await services.sessions.list_open_for_workspace(ctx.tg_id, ws_id)
-    await _show_list(cb, ctx, sender, sessions, ws_id)
+    try:
+        await services.sessions.forget(ctx.tg_id, ws_id, ses_id)
+    except NotOwned:
+        pass
+    await _show_workspace_home(cb, ctx, services, sender, ws_id)
 
 
 def _parse_size(spec: str) -> tuple[int, int]:

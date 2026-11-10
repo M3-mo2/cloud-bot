@@ -1,8 +1,8 @@
 """The one codec for ``term:`` callback data — typed builders + a total parser.
 
-The live ``IndexError`` in ``handlers/terminal.py`` (``on_list``) was the same
-*family* as Bug A (TASK 07): a callback's arity did not match what the handler
-indexed, and it was invisible until someone tapped the button.
+The live ``IndexError`` in ``handlers/terminal.py`` (the old ``on_list``) was the
+same *family* as Bug A (TASK 07): a callback's arity did not match what the
+handler indexed, and it was invisible until someone tapped the button.
 
 Here the mechanism was subtler. Terminal callbacks carry a workspace id and a
 session id, which together overflow Telegram's 64-byte ``callback_data`` cap, so
@@ -41,8 +41,12 @@ from cloudbot.presentation.keyboards.callbacks import cb as _cb, decode
 TERM_PREFIX = "term"
 
 # -- action keys (the segment after ``term:``) -------------------------------
-LIST = "list"
+#: Open-or-reuse: the workspace home's terminal button lands on a working prompt.
+#: It replaced a paginated archive of every session ever opened; that route and its
+#: screen are deleted — there is no stored callback left in any chat, so nothing
+#: needs to answer it, and leaving it registered would be a dead route.
 OPEN = "open"
+NEW = "new"
 VIEW = "view"
 REFRESH = "refresh"
 CMD = "cmd"
@@ -60,11 +64,11 @@ FORGET = "forget"
 
 #: How many key parts each action may decode to. The parser validates the decoded
 #: arity against this table, so a lost token (key ``()``) is caught, not indexed.
-#: An unknown action is rejected outright. Tuples allow the documented optional
-#: tail (page on ``list``; ``cols``/``rows`` on ``open``).
+#: An unknown action is rejected outright. The tuple on ``open`` allows the
+#: documented optional ``cols``/``rows`` tail (the ``--cols/--rows`` power route).
 _ARITIES: dict[str, tuple[int, ...]] = {
-    LIST: (1, 2),
     OPEN: (1, 3),
+    NEW: (1,),
     VIEW: (2,),
     REFRESH: (2,),
     CMD: (2,),
@@ -100,16 +104,6 @@ class TermCallback:
     def ses_id(self) -> str:
         return self.args[1] if len(self.args) > 1 else ""
 
-    @property
-    def page(self) -> int:
-        """The ``term:list`` page (0 when the callback carries none)."""
-        if len(self.args) < 2:
-            return 0
-        try:
-            return max(0, int(self.args[1]))
-        except (TypeError, ValueError):
-            return 0
-
 
 @dataclass(frozen=True)
 class InvalidTermCallback:
@@ -128,12 +122,6 @@ TermParseResult: TypeAlias = TermCallback | InvalidTermCallback
 
 
 # -- builders ----------------------------------------------------------------
-def list_(ws_id: object, page: int | None = None) -> str:
-    if page is None:
-        return _cb(f"{TERM_PREFIX}:{LIST}", ws_id)
-    return _cb(f"{TERM_PREFIX}:{LIST}", ws_id, int(page))
-
-
 def open_terminal(
     ws_id: object, *, cols: int | None = None, rows: int | None = None
 ) -> str:
@@ -148,6 +136,11 @@ def open_terminal(
     if cols is None or rows is None:
         raise ValueError("cols and rows must be given together")
     return _cb(f"{TERM_PREFIX}:{OPEN}", ws_id, int(cols), int(rows))
+
+
+def new_terminal(ws_id: object) -> str:
+    """Open a **fresh** session, never reusing a live one (the dead view's action)."""
+    return _cb(f"{TERM_PREFIX}:{NEW}", ws_id)
 
 
 def view(ws_id: object, ses_id: object) -> str:

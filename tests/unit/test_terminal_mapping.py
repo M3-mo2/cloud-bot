@@ -95,20 +95,20 @@ def test_ended_screen_shows_reason_sentence(locale):
 
 
 def test_terminal_has_a_visible_way_out_on_every_screen():
-    """The FSM is only entered by an explicit action, and buttons are always shown.
+    """A live terminal carries exactly one destructive verb and a clear way out.
 
-    term26 contract change: the live view carries **one** exit — the terminals
-    list — instead of both that and a redundant Back row that led to the workspace
-    home (one tap further, via the list's own Back).
-
-    TASK labels: the list is named ``🖥 Terminals`` / ``🖥 الطرفيات`` on every
-    screen now (it used to be *My terminals* here and *Terminals* on the workspace
-    home — two names for one destination). The assertion below follows the single
-    name; the way out is unchanged.
+    TASK terminal-direct contract change: the archive (*My terminals*) is deleted,
+    so the exit is no longer a list. The live view keeps ``Ctrl-C`` and one
+    destructive ``⏹ Stop terminal`` whose handler returns to the workspace home;
+    ``Ctrl-D`` is gone from the top row (an EOF that ends the shell looks identical
+    to the stop button while doing something else). Asserted on the callback set,
+    not on label text, so a reworded button cannot hide a route change.
     """
     session = TerminalSession(id=SES, workspace_id=WS, status=SessionStatus.RUNNING)
     view = term_screens.terminal_view(session, WS, Locale.EN)
-    labels = [b.text for row in view.markup.inline_keyboard for b in row]
-    assert any("Close" in label for label in labels)
-    assert any("Terminals" in label for label in labels)
-    assert not any("Back" in label for label in labels)
+    actions = [
+        b.callback_data for row in view.markup.inline_keyboard for b in row if b.callback_data
+    ]
+    assert any(a.startswith("term:signal:") for a in actions), "Ctrl-C is gone"
+    assert any(a.startswith("term:close") for a in actions), "no stop control"
+    assert not any(a.startswith("term:ctrl_d") for a in actions), "Ctrl-D is back"

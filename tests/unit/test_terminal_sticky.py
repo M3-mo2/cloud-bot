@@ -302,12 +302,14 @@ async def test_the_terminal_view_after_a_command_still_carries_its_buttons():
         await dispatcher.feed_update(bot, _callback(1, TG, cb("term:cmd", ws.id, session.id)))
         await dispatcher.feed_update(bot, _message(2, TG, "echo one"))
         actions = _actions(bot.sent[-1]["markup"])
-        # Every terminal button the view normally carries is still there...
+        # Every terminal button the live view carries is still there...
         assert any(a.startswith("term:cmd") for a in actions)
-        assert any(a.startswith("term:ctrl_d") for a in actions)
+        assert any(a.startswith("term:signal") for a in actions)
         assert any(a.startswith("term:close") for a in actions)
         # ...plus the one-tap exit.
         assert any(a.startswith("term:exit") for a in actions)
+        # TASK terminal-direct: Ctrl-D no longer exists on the view at all.
+        assert not any(a.startswith("term:ctrl_d") for a in actions)
     finally:
         await container.aclose()
 
@@ -539,12 +541,45 @@ def test_typing_view_carries_stop_typing_and_the_active_line(locale):
     )
     actions = _actions(screen.markup)
     assert any(a.startswith("term:exit") for a in actions), "no stop-typing control"
-    # The one-tap exit is the danger action, so it reads as the way out.
+    # The mode exit is *not* destructive (it leaves command mode, it does not kill
+    # the session), so it must not look like the stop button beside it.
     exit_button = next(b for row in screen.markup.inline_keyboard for b in row if b.callback_data and b.callback_data.startswith("term:exit"))
-    assert exit_button.style == "danger"
-    assert exit_button.text in ("⏹ Stop typing", "⏹ إيقاف الكتابة")
+    assert exit_button.style != "danger", "stopping typing must not read as stopping the terminal"
+    # The one destructive verb is the stop control, on its own row, in danger.
+    stop_button = next(
+        b
+        for row in screen.markup.inline_keyboard
+        for b in row
+        if b.callback_data and b.callback_data.startswith("term:close")
+    )
+    assert stop_button.style == "danger"
     # The body says the session is active in the user's language.
     assert "active" in screen.doc.html or "نشِطة" in screen.doc.html
+
+
+@pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])
+def test_stop_typing_and_stop_terminal_do_not_share_the_destructive_symbol(locale):
+    """Two different verbs must not look alike at a glance.
+
+    ``↩️ Stop typing`` leaves command mode; ``⏹ Stop terminal`` kills the session.
+    Reusing the danger square for both is how a hand taps the wrong one, so the
+    icons differ even though both words start with "stop".
+    """
+    from cloudbot.domain.entities import TerminalSession
+
+    session = TerminalSession(id=SES, workspace_id="ws_01M6HJASCWM9Z1PF755GT89NK4", status=SessionStatus.RUNNING)
+    screen = term_screens.terminal_view(
+        session, "ws_01M6HJASCWM9Z1PF755GT89NK4", locale, typing=True
+    )
+    by_action = {
+        b.callback_data.partition(":")[0] + ":" + b.callback_data.split(":")[1]: b
+        for row in screen.markup.inline_keyboard
+        for b in row
+        if b.callback_data and b.callback_data.startswith("term:")
+    }
+    exit_button = next(b for b in by_action.values() if (b.callback_data or "").startswith("term:exit"))
+    stop_button = next(b for b in by_action.values() if (b.callback_data or "").startswith("term:close"))
+    assert exit_button.text.split()[0] != stop_button.text.split()[0]
 
 
 @pytest.mark.parametrize("locale", [Locale.EN, Locale.AR])

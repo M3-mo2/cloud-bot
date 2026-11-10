@@ -367,7 +367,7 @@ _TOOLS: tuple[tuple[str, str], ...] = (
     ("ws.files", "file:ls"),
     ("ws.run", "run:choose"),
     ("ws.archives", "arc:menu"),
-    ("ws.terminals", "term:list"),
+    ("ws.terminals", "term:open"),
     ("ws.runs", "run:history"),
     ("ws.templates", "tpl:list"),
     ("ws.packages", "pkg:list"),
@@ -438,7 +438,7 @@ def workspace_detail_markup(
                 inline(catalog.t("ws.run", locale), _cb("run:choose", ws_id), intent=Intent.MUTED, disabled=True),
                 inline(
                     catalog.t("ws.terminals", locale),
-                    _cb("term:list", ws_id),
+                    _cb("term:open", ws_id),
                     intent=Intent.MUTED,
                     disabled=True,
                 ),

@@ -72,8 +72,8 @@ locked (INTEGRATION-GUIDE §8.4).
 | `features` (archives) | `arc:menu`, `arc:result` | read | none | read — allowed |
 | `features` (archives) | `arc:upload`→document, `arc:extract_prompt`→text, `arc:apply` | write files | none | **gated** |
 | `features` (archives) | `arc:export_prompt`→text | export (read into a ZIP) | none | read — allowed |
-| `terminal` | `term:list`, `term:view`, `term:refresh`, `term:forget` | read / local | none | read — allowed |
-| `terminal` | `term:open` | start a shell (compute) | none | **gated** |
+| `terminal` | `term:view`, `term:refresh`, `term:forget` | read / local | none | read — allowed |
+| `terminal` | `term:open`, `term:new` | start a shell (compute) | none | **gated** |
 | `terminal` | `term:cmd`→text, `term:signal`, `term:ctrl_d` | drive compute | none | **gated** |
 | `terminal` | `term:exit`, `term:close` | cleanup | none | allowed |
 | `billing` | `pay:wallet`, `pay:plans`, `pay:packs`, `pay:history`, `pay:buy`, `pay:pack`, pre-checkout, successful payment | money | n/a (not workspace work) | unchanged; `pay:buy` now also extends the engine term |

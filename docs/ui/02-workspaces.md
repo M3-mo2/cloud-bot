@@ -158,7 +158,7 @@ last row with one button; it is never padded with a placeholder.
 | 📁 الملفات | 📁 Files | `file:ls` | primary | — |
 | ▶️ تشغيل | ▶️ Run | `run:choose` | success | `disabled` if a run is active |
 | 🗜 الأرشيفات | 🗜 Archives | `arc:menu` | primary | — |
-| 🖥 الطرفيات | 🖥 Terminals | `term:list` | primary | — |
+| 🖥 الطرفيات | 🖥 Terminals | `term:open` | primary | opens or reuses a live terminal |
 | 📜 التشغيلات | 📜 Runs | `run:history` | primary | — |
 | 📦 قوالب جاهزة | 📦 Starter templates | `tpl:list` | primary | owner's home only, not the admin's entered view |
 | 🐍 المكتبات | 🐍 Packages | `pkg:list` | primary | — |

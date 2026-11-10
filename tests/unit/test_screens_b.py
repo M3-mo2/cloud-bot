@@ -164,47 +164,21 @@ def test_admin_lists_are_three_columns_or_fewer(locale):
     assert fixtures  # the fixture map still feeds the builders
 
 
-# -- 3. terminal names are unique within the list ----------------------------
-def test_two_sessions_sharing_a_twelve_character_prefix_get_distinct_labels():
-    """Measured ULIDs: they differ only at character 12, so a fixed prefix lies."""
-    first = "ses_01M6HJATZTFXTWXWBG8A5KWYS8"
-    second = "ses_01M6HJATYTFXTWXWBG8A5KWYS8"
-    assert first[:12] == second[:12]
-    labels = term_screens.unique_short_ids([first, second])
-    assert labels[0] != labels[1]
-    # Short when it can be: the shared prefix plus one character is enough.
-    assert all(label.startswith("ses_01M6HJAT") for label in labels)
-    assert len(labels[0]) <= 16
+# -- 3. the terminal archive is deleted, not hidden ---------------------------
+# TASK terminal-direct: the workspace button opens a terminal directly, so the
+# paginated terminal list and its short-id labels are gone. Neither function
+# survives, which is what makes the old screen impossible to render again.
+def test_the_terminal_archive_and_its_label_helper_are_gone():
+    """The rewritten test that replaced the list's label test.
 
-
-def test_identical_ids_are_numbered_rather_than_repeated():
-    labels = term_screens.unique_short_ids(["ses_same", "ses_same"])
-    assert labels[0] != labels[1]
-
-
-@pytest.mark.parametrize("locale", LOCALES)
-def test_the_terminals_screen_shows_distinct_labels_but_full_callbacks(locale):
-    CallbackCodec()
-    first = TerminalSession(
-        id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
-        workspace_id=WS,
-        status=SessionStatus.RUNNING,
-        created_at=NOW,
-    )
-    second = TerminalSession(
-        id="ses_01M6HJATYTFXTWXWBG8A5KWYS8",
-        workspace_id=WS,
-        status=SessionStatus.TIMED_OUT,
-        created_at=NOW,
-    )
-    screen = term_screens.my_terminals([first, second], WS, locale, now=NOW)
-    view_buttons = [
-        button for button in _buttons(screen) if (button.callback_data or "").startswith("term:view")
-    ]
-    assert len(view_buttons) == 2
-    assert view_buttons[0].text != view_buttons[1].text
-    assert view_buttons[0].callback_data != view_buttons[1].callback_data
-
+    The list's identity problem (two ULIDs sharing a 12-character prefix rendering
+    identically) only existed because sessions were listed. With direct-open there
+    is nothing to label, so the screen and the helper are removed outright rather
+    than left unreferenced.
+    """
+    assert not hasattr(term_screens, "my_terminals")
+    assert not hasattr(term_screens, "my_terminals_markup")
+    assert not hasattr(term_screens, "unique_short_ids")
 
 # -- 4. the help screen actually explains the product ------------------------
 @pytest.mark.parametrize("locale", LOCALES)

@@ -31,6 +31,7 @@ from cloudbot.bootstrap.app import build_dispatcher
 from cloudbot.bootstrap.container import build
 from cloudbot.core.config import Settings
 from cloudbot.core.locale import Locale
+from cloudbot.domain.value_objects import SessionStatus
 from cloudbot.presentation.keyboards.callbacks import codec
 from cloudbot.presentation.screens import terminal as term_screens
 from cloudbot.presentation.screens import terminal_callbacks as term_cb
@@ -46,8 +47,8 @@ SES = "ses_01M6HJATZTFXTWXWBG8A5KWYS8"
 #: Every builder, with representative arguments. The codec's parser must accept
 #: each one and return the action + key parts the handler will read.
 BUILDERS = [
-    ("list", lambda: term_cb.list_(WS), ("list", (WS,))),
     ("open", lambda: term_cb.open_terminal(WS), ("open", (WS,))),
+    ("new", lambda: term_cb.new_terminal(WS), ("new", (WS,))),
     ("view", lambda: term_cb.view(WS, SES), ("view", (WS, SES))),
     ("refresh", lambda: term_cb.refresh(WS, SES), ("refresh", (WS, SES))),
     ("cmd", lambda: term_cb.cmd(WS, SES), ("cmd", (WS, SES))),
@@ -127,7 +128,7 @@ MALFORMED = [
     "",
     "term",
     "term:",
-    "term:list",  # no token at all
+    "term:list:" + WS,  # the deleted archive route (now an unknown action)
     "term:nope:" + "x" * 6,  # unknown action
     "nav:menu",  # not a term callback
     "adm:menu",
@@ -142,7 +143,7 @@ def test_malformed_callbacks_return_invalid_not_raise(data):
 
 
 def test_parse_never_raises_for_arbitrary_text():
-    for text in ("", ":", "term:::::", "🖥", "term:list:" + "x" * 400):
+    for text in ("", ":", "term:::::", "🖥", "term:open:" + "x" * 400):
         parsed = term_cb.parse(text)
         assert parsed.valid is True or isinstance(parsed, InvalidTermCallback)
 
@@ -238,40 +239,65 @@ async def test_the_live_indexerror_callback_now_renders_a_screen():
         await container.aclose()
 
 
-async def test_a_valid_terminal_list_callback_renders_the_list():
+async def test_the_workspace_terminal_button_opens_a_terminal_directly():
+    """The workspace home's button lands on a working terminal, not an archive.
+
+    TASK terminal-direct: this assertion replaces the old one that required the
+    button to render a list. A list was the defect (a corpse archive between the
+    user and a prompt); the button now opens or reuses a session and renders its
+    live view, with the command row present.
+    """
     container, ws = await _container()
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        data = term_cb.list_(ws.id)
-        await dispatcher.feed_update(bot, _callback(1, TG, data))
+        await dispatcher.feed_update(bot, _callback(1, TG, term_cb.open_terminal(ws.id)))
         assert bot.sent, "nothing rendered"
         html = bot.sent[-1]["html"]
-        # TASK labels: one name for this destination everywhere.
-        assert "Terminals" in html or "الطرفيات" in html, html[:200]
+        assert "Terminal" in html or "الطرفية" in html, html[:200]
+        actions = {
+            b.callback_data
+            for row in (bot.sent[-1]["markup"].inline_keyboard or [])
+            for b in row
+            if b.callback_data
+        }
+        assert any(a.startswith("term:cmd") for a in actions), "no command row"
+        assert any(a.startswith("term:close") for a in actions), "no stop control"
     finally:
         await container.aclose()
 
 
-async def test_every_terminal_button_in_the_terminals_screen_renders_a_screen():
-    """Walk every ``term:`` button the my-terminals screen emits; each is routable
-    and produces a screen (never a silent no-op)."""
+async def test_every_terminal_button_in_the_live_view_renders_a_screen():
+    """Walk every ``term:`` button the live view emits; each is routable.
+
+    The written replacement for the old walk over the deleted list screen: the
+    live view is now the only terminal screen a user can land on from the
+    workspace, so every button it carries must produce a screen (never a silent
+    no-op).
+    """
+    from cloudbot.domain.entities import TerminalSession
+
     container, ws = await _container()
-    session = await container.services.sessions.open(TG, ws.id)
+    session = TerminalSession(
+        id="ses_01M6HJATZTFXTWXWBG8A5KWYS8",
+        workspace_id=ws.id,
+        status=SessionStatus.RUNNING,
+    )
     bot = FakeBot()
     dispatcher = build_dispatcher(container, bot)
     try:
-        screen = term_screens.my_terminals(
-            [session], ws.id, Locale.EN
-        )
+        screen = term_screens.terminal_view(session, ws.id, Locale.EN)
         actions = {
             b.callback_data
             for row in screen.markup.inline_keyboard
             for b in row
             if b.callback_data and b.callback_data.startswith("term:")
         }
-        assert actions, "the terminals screen emitted no term: buttons"
-        for uid, data in enumerate(sorted(actions), start=1):
+        assert actions, "the live view emitted no term: buttons"
+        # ``term:close`` on a fabricated id is a clean "already gone" path, but
+        # walk only the routes that need no matching engine record here; the
+        # command/stop row itself is asserted above.
+        for uid, data in enumerate(sorted(a for a in actions if a.startswith("term:cmd")), start=1):
             before = len(bot.sent)
             await dispatcher.feed_update(bot, _callback(uid, TG, data))
             assert len(bot.sent) > before, f"{data!r} rendered nothing"

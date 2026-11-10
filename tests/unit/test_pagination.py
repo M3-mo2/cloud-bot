@@ -289,7 +289,6 @@ def _has_pager(screen) -> bool:
     return any(
         (b.callback_data or "") in {
             "ws:list",
-            "term:list",
             "file:ls",
             "port:list",
             "proc:list",
@@ -299,7 +298,7 @@ def _has_pager(screen) -> bool:
             "arc:result",
         }
         or (b.callback_data or "").startswith(
-            ("ws:list:", "term:list:", "file:ls:", "port:list:", "proc:list:",
+            ("ws:list:", "file:ls:", "port:list:", "proc:list:",
              "pkg:list:", "met:view:", "tnl:list:", "arc:result:")
         )
         for b in _buttons(screen)

@@ -1014,3 +1014,43 @@ the derivation by changing `PLANS['week'].amount_stars` and watching the page fo
 title/description still use `wallet.packs.title`, `wallet.pack.button` and `wallet.pack.title`;
 `wallet.packs.body` / `wallet.packs.balance` are no longer printed by this screen and are kept only
 for catalog key parity (no rename, no removal).
+
+## CB-41 — The terminal button opens a terminal; the archive is deleted
+
+**The defect.** The workspace home's **🖥 الطرفيات** mapped to a paginated list of *every* session
+ever opened — `id · status · relative age`, running first, ten to a page. Sessions expire on idle and
+on lifetime, so every visit added a corpse; ten dead rows across three pages was the design working
+as built. Nothing on that screen opened a prompt, and the user had to read the graveyard before
+finding **➕ New terminal**. His words: *"what is this even"*; his ask: one tap to a working terminal,
+a stop button, Ctrl-C, *"not a dumb list like this."*
+
+**Decision.** The button is **open-or-reuse** (`term:open`): a live session of this user in this
+workspace is shown, otherwise one is created and shown. One tap from the workspace home to a prompt.
+The list screen, its pager plumbing, its catalog keys, its short-id label helper and its `/dev`
+fixture are **deleted** — a route that no longer exists is not left registered: no stored callback
+carries it, and the workspace button no longer emits it.
+
+**The live view.** The top row is the command row (`⌨️ Send a command`, `Ctrl-C`). **Ctrl-D is gone**:
+an EOF that ends the shell looks identical to the stop button while doing something different, and he
+did not ask for it. One destructive verb, `⏹ Stop terminal`, on its own row; it kills the session and
+renders the **workspace home**, never a list. Stopping typing stays, but as a non-destructive mode
+exit (`↩️`, primary) so it cannot be mistaken for the stop square.
+
+**Dead sessions stop accumulating.** A handle whose terminal status was first observed more than
+`FORGET_GRACE` (one hour) ago is forgotten by `SessionsService.forget_finished`, called on every
+open-or-reuse. The engine owns the process; the bot owns only the handle, so forgetting is hygiene,
+not deletion of evidence: a user already looking at a dead session's view keeps that rendered view,
+it simply stops being reachable afterwards. The dead view offers a genuinely fresh session
+(`term:new`, never the reuse route), forget, and Back to the workspace.
+
+**The cap.** At `too_many_sessions` the screen lists the **live** sessions only, each with the same
+stop control, so the message says what to stop and how — a stop button that frees nothing (a dead
+session) would be noise.
+
+**Bite.** `tests/unit/test_terminal_direct.py` (the rewritten `test_terminal_pagination.py`, renamed
+because the subject changed) fails against the deleted design: two ended rows plus a live one must
+render a live view with a command row; a second tap must create one engine session, not two; an ended
+session must not be reused; the view must carry Ctrl-C and a stop and no Ctrl-D; stop returns to the
+workspace home; and a source scan refuses `term:list` / `my_terminals` / `nav:terminals` anywhere.
+Each bite was run red-then-green (`OPEN` reuse removed, Ctrl-D re-added, stop re-routed to the dead
+view, the hygiene sweep disabled, the archive route re-added).

@@ -212,7 +212,7 @@ async def test_every_screen_button_survives_a_restart():
     [
         "ws:view:{ws}",           # the terminal view's Back button — the live failure
         "file:ls:{ws}:0",         # a file listing button
-        "term:list:{ws}",         # a terminal list button
+        "term:open:{ws}",         # the workspace home's terminal button
     ],
     ids=["ws:", "file:", "term:"],
 )

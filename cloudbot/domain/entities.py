@@ -106,6 +106,10 @@ class TerminalSession:
     rows: int = 24
     out_offset: int = 0
     created_at: datetime | None = None
+    #: When the bot first observed this session in a terminal state. It is the
+    #: bot-side handle's own clock (the engine's status stays authoritative), and
+    #: it is what the :data:`FORGET_GRACE` hygiene window is measured from.
+    ended_at: datetime | None = None
     #: Human-facing copy is derived from ``status`` + ``reason`` in presentation.
     reason: str = ""
     #: ``diagnostic`` is engine-internal (a failed launch); it must NEVER be
