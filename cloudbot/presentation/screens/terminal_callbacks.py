@@ -43,8 +43,9 @@ TERM_PREFIX = "term"
 # -- action keys (the segment after ``term:``) -------------------------------
 #: Open-or-reuse: the workspace home's terminal button lands on a working prompt.
 #: It replaced a paginated archive of every session ever opened; that route and its
-#: screen are deleted — there is no stored callback left in any chat, so nothing
-#: needs to answer it, and leaving it registered would be a dead route.
+#: screen are deleted. Nothing stored relies on the old route (the bot-side handle
+#: store holds session ids, never callback data), so leaving an alias would only
+#: re-register a route this task removes.
 OPEN = "open"
 NEW = "new"
 VIEW = "view"

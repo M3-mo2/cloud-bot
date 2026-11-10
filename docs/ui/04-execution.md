@@ -585,8 +585,9 @@ list of *every* session ever opened (`ses_… · status · relative age`), and e
 idle/lifetime expiry added another dead row. Ten dead rows across three pages, none
 of which opened anything, was the natural result of the design — not bad luck. The
 list, its pager, its catalog keys, its short-id labels and its `/dev` fixture are
-deleted, not hidden: there is no stored callback left in any chat, so nothing needs
-to answer the old route.
+deleted, not hidden: nothing stored relies on the old route (the bot-side handle
+store holds session ids, never callback data), so an alias would only resurrect a
+route this task removes.
 
 Finished sessions stop accumulating: a handle whose terminal status was observed
 longer than a **one-hour grace window** ago is forgotten (the bot owns only the

@@ -1027,8 +1027,9 @@ a stop button, Ctrl-C, *"not a dumb list like this."*
 **Decision.** The button is **open-or-reuse** (`term:open`): a live session of this user in this
 workspace is shown, otherwise one is created and shown. One tap from the workspace home to a prompt.
 The list screen, its pager plumbing, its catalog keys, its short-id label helper and its `/dev`
-fixture are **deleted** — a route that no longer exists is not left registered: no stored callback
-carries it, and the workspace button no longer emits it.
+fixture are **deleted** — a route that no longer exists is not left registered. Nothing stored relies
+on the old route (the bot-side handle store holds session ids, never callback data), so an alias would
+only resurrect a route this task removes.
 
 **The live view.** The top row is the command row (`⌨️ Send a command`, `Ctrl-C`). **Ctrl-D is gone**:
 an EOF that ends the shell looks identical to the stop button while doing something different, and he
