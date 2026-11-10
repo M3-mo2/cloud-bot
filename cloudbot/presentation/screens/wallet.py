@@ -16,6 +16,8 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 
+from aiogram.types import RichTextBold
+
 from cloudbot.core.locale import Locale
 from cloudbot.domain import plans
 from cloudbot.domain.billing import StarPack, StarsPayment, packs
@@ -333,37 +335,241 @@ def plan_picker_screen(
 
 
 def packs_screen(view: WalletView, *, back_action: str = "pay:wallet") -> Screen:
-    """The Star packs to buy through Telegram Stars.
+    """The Star packs to buy through Telegram Stars — one block per pack.
+
+    A pack amount is not an arbitrary price: every pack mirrors a plan's price in
+    Stars, so it can be stated as **time you can actually use** („50 Stars ⟸ one
+    week“). That mapping is derived here from :mod:`cloudbot.domain.plans` at
+    render time — never a table of strings — so a catalogue price change moves the
+    page with it instead of leaving a stale sentence behind.
+
+    The body therefore builds in **blocks**, not html: each pack carries its own
+    in-body button (``doc.buttons``) right under the sentence it acts on. Telegram
+    refuses a ``callback_data`` button in the html form, and ``InputRichMessage``
+    takes either ``html`` or ``blocks``, never both (see
+    ``admin/user_page.py`` and ``files.py``).
 
     ``back_action`` lets the create wizard return to its plan step instead of the
-    wallet, so buying Stars mid-flow does not lose the half-built workspace.
+    wallet, so buying Stars mid-flow does not lose the half-built workspace; the
+    keyboard keeps that exit in every branch.
     """
     locale = view.locale
+    rule = catalog.t("ws.head.rule", locale)
     doc = RichDoc(locale)
-    doc.h(2, catalog.t("wallet.packs.title", locale))
-    doc.p(catalog.t("wallet.packs.body", locale))
-    doc.p(
-        _raw(catalog.t("wallet.packs.balance", locale, stars=_stars(view.balance, locale)))
-    )
-    doc.p(italic(catalog.t("wallet.packs.note", locale)))
 
-    kb: list[list] = []
-    row: list = []
-    for pack in packs():
-        row.append(
-            inline(
-                catalog.t("wallet.pack.button", locale, stars=_num(pack.stars, locale)),
-                f"pay:pack:{pack.code}",
-                intent=Intent.SUCCESS,
+    # -- header: the balance is the number this page exists to change ---------
+    doc.paragraph(rule)
+    doc.heading(catalog.t("wallet.packs.heading", locale, stars=_stars(view.balance, locale)))
+    doc.paragraph(rule)
+
+    # -- what to do, said first: what he can buy now, or how far he is --------
+    paid = plans.paid_plans()
+    cheapest = min(paid, key=lambda plan: plan.amount_stars)
+    affordable = [plan for plan in paid if view.balance >= plan.amount_stars]
+    if affordable:
+        # Enough Stars already: a shop would be the wrong answer, so lead with the
+        # best plan that balance actually covers (the longest commitment).
+        best = max(affordable, key=lambda plan: plan.amount_stars)
+        doc.paragraph_rich(
+            RichTextBold(
+                text=catalog.t(
+                    "wallet.packs.afford.ready",
+                    locale,
+                    plan=_plan_name(best.code, locale),
+                    needed=_num(best.amount_stars, locale),
+                )
             )
         )
-        if len(row) == 2:
-            kb.append(row)
-            row = []
-    if row:
-        kb.append(row)
-    kb.append([inline(catalog.t("common.back", locale), back_action, intent=Intent.PRIMARY)])
+        doc.paragraph(catalog.t("wallet.packs.afford.ready_hint", locale))
+    else:
+        missing = cheapest.amount_stars - view.balance
+        doc.paragraph_rich(
+            RichTextBold(
+                text=catalog.t(
+                    "wallet.packs.afford.short",
+                    locale,
+                    needed=_num(cheapest.amount_stars, locale),
+                    missing=_num(missing, locale),
+                )
+            )
+        )
+        doc.paragraph(
+            catalog.t("wallet.packs.afford.hint", locale)
+            if view.balance > 0
+            else catalog.t("wallet.packs.empty", locale)
+        )
+
+    # The plan the user could buy right now, with the action beside it — the user
+    # who already has the Stars does not need a pack shop.
+    if affordable:
+        best = max(affordable, key=lambda plan: plan.amount_stars)
+        plan_action = f"pay:buy:{best.code}"
+        if len(plan_action.encode("utf-8")) <= MAX_CALLBACK_BYTES:
+            doc.buttons(
+                [
+                    (
+                        catalog.t(
+                            "wallet.packs.afford.plan_button",
+                            locale,
+                            plan=_plan_name(best.code, locale),
+                        ),
+                        plan_action,
+                        "success",
+                    )
+                ]
+            )
+
+    doc.divider()
+
+    # -- one block per pack: what it is worth in time, then its own button ----
+    for pack in packs():
+        label = _pack_time_label(pack.stars, paid, locale)
+        value = _pack_value_line(pack.stars, paid, locale)
+        doc.paragraph(
+            catalog.t(
+                "wallet.pack.line",
+                locale,
+                stars=_num(pack.stars, locale),
+                unit=label,
+            )
+        )
+        if value is not None:
+            doc.paragraph(value)
+        action = f"pay:pack:{pack.code}"
+        # ``doc.buttons`` enforces the 64-byte cap; assert it here as the contract
+        # asks, so a future pack code fails loudly instead of at Telegram.
+        assert len(action.encode("utf-8")) <= MAX_CALLBACK_BYTES, action
+        doc.buttons(
+            [
+                (
+                    catalog.t("wallet.pack.buy", locale, stars=_num(pack.stars, locale)),
+                    action,
+                    "success",
+                )
+            ]
+        )
+
+    doc.divider()
+    doc.footer(catalog.t("wallet.packs.note", locale))
+
+    kb: list[list] = [
+        [inline(catalog.t("common.back", locale), back_action, intent=Intent.PRIMARY)]
+    ]
     return Screen(doc=doc, markup=inline_markup(kb))
+
+
+#: The Telegram cap on ``callback_data``, in bytes (the same number the codec uses).
+MAX_CALLBACK_BYTES = 64
+
+#: Stars-per-day reference: the weekly plan. ``plans.py`` documents the reasoning;
+#: every saving is measured against this one rate so the two cannot disagree.
+def _weekly_reference() -> tuple[int, int]:
+    week = plans.plan("week")
+    return week.amount_stars, week.period_days
+
+
+def _pack_time_label(stars: int, paid: tuple, locale: Locale) -> str:
+    """A pack's worth in time, derived from the plan catalogue.
+
+    An exact pack→plan match keeps that plan's own period („one week“). A pack that
+    matches no plan is described in its **nearest whole unit** of a plan family,
+    rounded to the nearest unit (at least one), and the caller says how it was
+    computed.
+    """
+    exact = next((plan for plan in paid if plan.amount_stars == stars), None)
+    if exact is not None:
+        return _period_label(exact.code, 1, locale)
+    family = _nearest_family(stars, paid)
+    count = max(1, round(stars / family.amount_stars))
+    return _period_label(family.code, count, locale)
+
+
+def _nearest_family(stars: int, paid: tuple):
+    """The plan whose unit the pack is closest to, by whole units of that plan."""
+    def distance(plan) -> tuple[float, int]:
+        count = max(1, round(stars / plan.amount_stars))
+        return (abs(stars / plan.amount_stars - count), -plan.period_days)
+
+    return min(paid, key=distance)
+
+
+def _period_label(plan_code: str, count: int, locale: Locale) -> str:
+    """``one week`` / ``{n} weeks`` / ``10 semanas`` — a plan code in whole units."""
+    key = f"wallet.pack.plan.{plan_code}"
+    if not catalog.has(f"{key}.one", locale):
+        # An unknown family: name its own plan rather than invent a unit.
+        plan = plans.plan(plan_code)
+        return catalog.t(
+            "wallet.plan.period", locale, days=_num(plan.period_days * count, locale)
+        )
+    return _plural_form(key, count, locale)
+
+
+def _plural_form(key: str, n: int, locale: Locale) -> str:
+    """A two-form (Arabic six-form) unit label, chosen from ``n``."""
+    if n == 1:
+        category = "one"
+    elif n == 2 and catalog.has(f"{key}.two", locale):
+        category = "two"
+    else:
+        from cloudbot.presentation.i18n.formatters import _plural_category
+
+        category = _plural_category(locale, n)
+    for candidate in (category, "few", "other"):
+        form = f"{key}.{candidate}"
+        if catalog.has(form, locale):
+            return catalog.t(form, locale, n=_num(n, locale))
+    return _num(n, locale)
+
+
+def _pack_value_line(stars: int, paid: tuple, locale: Locale) -> str | None:
+    """The computed worth, from the weekly reference rate ``plans.py`` documents.
+
+    Every pack is measured in **Stars per day** against the weekly plan: a pack
+    that buys more days per Star than the week does saves that fraction of the
+    weekly rate. That is the one arithmetic ``plans.py`` reasons with (30 % for the
+    month; the year lands at 54 % on the same scale), so all packs are compared to
+    one reference and the figure is computed, never typed.
+
+    A pack that saves nothing loses its saving line: the reference pack instead
+    says what its Stars cover, and a pack that matches no plan and saves nothing
+    says nothing — never a „0 %“ or a negative „saving“.
+    """
+    reference_stars, reference_days = _weekly_reference()
+    reference_rate = reference_stars / reference_days
+    pack_rate = stars / _pack_days(stars, paid)
+    saved = round((1 - pack_rate / reference_rate) * 100)
+    if saved > 0:
+        return catalog.t("wallet.pack.value.save", locale, percent=_num(saved, locale))
+    exact = next((plan for plan in paid if plan.amount_stars == stars), None)
+    if exact is not None:
+        return catalog.t(
+            "wallet.pack.value.exact", locale, plan=_plan_name(exact.code, locale)
+        )
+    family = _nearest_family(stars, paid)
+    count = max(1, round(stars / family.amount_stars))
+    return catalog.t(
+        "wallet.pack.value.computed",
+        locale,
+        unit=_period_label(family.code, count, locale),
+        stars=_num(stars, locale),
+        unit_stars=_num(family.amount_stars, locale),
+        count=_num(count, locale),
+        plan=_plan_name(family.code, locale),
+    )
+
+
+def _pack_days(stars: int, paid: tuple) -> int:
+    """How many plan-days this pack's Stars buy, read from the catalogue.
+
+    An exact pack→plan match buys that plan's own period. Any other pack is read
+    in whole units of its nearest plan family, so the rate is derived, never typed.
+    """
+    exact = next((plan for plan in paid if plan.amount_stars == stars), None)
+    if exact is not None:
+        return exact.period_days
+    family = _nearest_family(stars, paid)
+    return family.period_days * max(1, round(stars / family.amount_stars))
 
 
 def receipt_screen(view: WalletView, pack: StarPack, *, replay: bool = False) -> Screen:

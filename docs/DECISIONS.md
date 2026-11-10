@@ -975,3 +975,42 @@ read from it or state 3.
 store/port methods take `ws_id`; `workspaces.create` requires `plan_code`; the wallet screen lists one
 row per workspace; goldens `ws_create_advanced`/`ws_create_profile` removed and `ws_create_network` +
 `ws_create_plan*` added; the `wallet*` goldens changed (per-workspace table).
+
+## CB-40 — The Star page sells time; the pack→plan mapping is derived at render
+
+**The defect.** `packs_screen` was a paragraph and four visually identical price buttons. The only
+question a reader had — *which one do I need?* — was unanswered, because nothing connected a Star
+amount to anything purchasable and a 2×2 grid of «50 / 150 / 500 / 1200» gave the eye no discriminator.
+
+**The insight.** Pack amounts are not arbitrary: they mirror the plan prices exactly (50 = `week`,
+150 = `month`, 1200 = `year`; 500 buys ten weekly plans). So a pack can be stated as **time you can
+actually use**, which is what the user buys.
+
+**The decision.** `packs_screen` renders one block per pack — a `✦ {stars} ⟸ {unit}` line, its computed
+value line, and its own in-body button (``doc.buttons``). Everything is derived from
+`domain.plans.PLANS` at render time: an exact pack→plan match takes that plan's own period; a pack with
+no exact match is described in its nearest whole unit and the sentence shows the division that
+produced it. Savings are the weekly-reference arithmetic `plans.py` already documents (`1 − p_pack /
+p_week`), computed, not typed — 30 % for the 150 pack, 54 % for 1200 on the same scale (the yearly plan
+is 3.29 Stars/day against the week's 7.14). The reference pack itself carries no saving line; the 500
+pack has no commitment discount, so it carries none either.
+
+**Affordability leads.** With fewer Stars than the cheapest plan the page says the exact shortfall and
+does not scold; with enough Stars it says which plan the balance covers and puts **that plan's button**
+inside the body (`pay:buy:<code>`), because a user who already has the Stars does not need a shop.
+
+**Why blocks, not html.** In-body callback buttons exist only in the blocks form (Telegram refuses
+``<tg-button callback_data>`` in html) and `InputRichMessage` takes either form, never both — the same
+seam `admin/user_page.py` and `files.py` use. `RichDoc` gained two block helpers, `paragraph_rich` (a
+rich-text paragraph, for one bold clause) and `divider`.
+
+**Bite.** `tests/unit/test_packs_page.py` fails against the pre-task screen (no per-pack lines, no
+in-body buttons, no derived mapping, no savings, no affordability sentence, no plan offer) and proves
+the derivation by changing `PLANS['week'].amount_stars` and watching the page follow. The wizard's
+`back_action="ws:continue"` is locked by its own golden (`wallet_packs_wizard`) plus the existing
+`test_planws` flow.
+
+**Display only.** No price, `STAR_PACKS`, invoice, payload or payment-handler line changed. The invoice
+title/description still use `wallet.packs.title`, `wallet.pack.button` and `wallet.pack.title`;
+`wallet.packs.body` / `wallet.packs.balance` are no longer printed by this screen and are kept only
+for catalog key parity (no rename, no removal).

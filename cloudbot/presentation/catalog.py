@@ -1043,6 +1043,12 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
         _wallet_view(f, loc), needed_plan="year"
     ),
     "wallet_packs": lambda f, loc: wallet_screens.packs_screen(_wallet_view(f, loc)),
+    # The same page bought mid-wizard: its Back returns to the create flow's plan
+    # step instead of the wallet, so «متابعة» is never lost. Locked separately
+    # because that exit is the part that changes.
+    "wallet_packs_wizard": lambda f, loc: wallet_screens.packs_screen(
+        _wallet_view(f, loc), back_action="ws:continue"
+    ),
     "wallet_receipt": lambda f, loc: wallet_screens.receipt_screen(
         _wallet_view(f, loc), STAR_PACKS["stars_150"]
     ),

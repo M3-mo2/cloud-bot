@@ -176,6 +176,25 @@ class RichDoc:
         self._blocks.append(InputRichBlockParagraph(text=text))
         return self
 
+    def paragraph_rich(self, text: object) -> "RichDoc":
+        """A paragraph whose text is already a ``RichText`` value.
+
+        The blocks form accepts rich spans (``RichTextBold`` …) as well as plain
+        strings; this is the seam for a sentence that must bold one clause without
+        mixing an html document into a blocks one.
+        """
+        from aiogram.types import InputRichBlockParagraph
+
+        self._blocks.append(InputRichBlockParagraph(text=text))
+        return self
+
+    def divider(self) -> "RichDoc":
+        """A divider block — the blocks form's ``<hr>``."""
+        from aiogram.types import InputRichBlockDivider
+
+        self._blocks.append(InputRichBlockDivider())
+        return self
+
     def heading(self, text: str, *, size: int = 2) -> "RichDoc":
         """A heading block (``size`` 1-6, 1 largest) — the blocks form's <h2>."""
         from aiogram.types import InputRichBlockSectionHeading

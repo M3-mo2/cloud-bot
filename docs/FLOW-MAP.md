@@ -12,17 +12,17 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 
 | Measure | Value |
 | --- | ---: |
-| Catalog screens | 165 |
-| Screens including the /dev tool | 168 |
-| Button edges | 536 |
-| Distinct destinations (actions) | 138 |
+| Catalog screens | 166 |
+| Screens including the /dev tool | 169 |
+| Button edges | 533 |
+| Distinct destinations (actions) | 137 |
 | Entry commands | 9 |
-| Callback re-entry actions | 138 |
+| Callback re-entry actions | 137 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
 | Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 246 |
+| Contradictions: two-screen loops | 247 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 138 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 137 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -122,8 +122,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `origin:back` | exec_missing_mapped, exec_missing_two, exec_missing_unknown, exec_result_fail, exec_result_ok, live_logs_finished, live_logs_running, package_list, package_list_empty, run_mode, terminal_view_ended, terminal_view_failed, terminal_view_offer, terminal_view_offer_installed, terminal_view_running, terminal_view_typing, ws_detail, ws_detail_locked, ws_detail_suspended, ws_list, ws_list_empty, ws_list_inside |
 | `pay:buy` | wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans |
 | `pay:history` | wallet_history, wallet_history_empty, wallet_history_page_2 |
-| `pay:pack` | wallet_packs |
-| `pay:packs` | wallet_packs |
+| `pay:packs` | wallet_packs, wallet_packs_wizard |
 | `pay:plans` | wallet_plans |
 | `pay:wallet` | wallet, wallet_expired, wallet_no_plan, wallet_two_plans |
 | `pkg:fix` | (handler only — no screen) |
@@ -173,7 +172,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `ws:list` | ws_list, ws_list_empty, ws_list_inside |
 | `ws:logout` | ws_list, ws_list_empty, ws_list_inside |
 | `ws:new` | ws_create_name |
-| `ws:packs` | wallet_packs |
+| `ws:packs` | wallet_packs, wallet_packs_wizard |
 | `ws:plan` | ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended |
 | `ws:renew` | wallet_plans |
 | `ws:resume` | ws_detail, ws_detail_locked, ws_detail_suspended |
@@ -7839,8 +7838,9 @@ _No screen is rendered by this command._
             - ↩ `ws_list_inside` (already on this path)
       - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -7857,8 +7857,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -7875,8 +7876,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -7893,8 +7895,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -16185,21 +16188,19 @@ _No screen is rendered by this command._
 - **wallet_support** — 🛟 Payment support
   - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
     - **wallet** — 💳 Wallet & subscription
-      - ⭐ Buy Stars → `pay:packs` → wallet_packs
-        - **wallet_packs** — ⭐ Buy Stars
-          - ⭐ 50 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 150 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 500 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 1200 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
+      - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
+        - **wallet_packs** — (no title)
           - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
             - ↩ `wallet` (already on this path)
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_packs_wizard** — (no title)
+          - ⬅️ Back → `ws:continue` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used
+            - … `ws_create_name` at depth 6 (not expanded)
+            - … `ws_create_plan` at depth 6 (not expanded)
+            - … `ws_create_plan_short` at depth 6 (not expanded)
+            - … `ws_create_plan_trial_used` at depth 6 (not expanded)
       - 📦 Plans → `pay:plans` → wallet_plans
         - **wallet_plans** — 📦 Choose a plan
           - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
@@ -16246,8 +16247,9 @@ _No screen is rendered by this command._
       - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - ↩ `wallet` (already on this path)
         - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -16264,8 +16266,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -16282,8 +16285,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17139,8 +17143,9 @@ _No screen is rendered by this command._
             - ↩ `ws_list_inside` (already on this path)
       - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17157,8 +17162,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17175,8 +17181,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17193,8 +17200,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17474,21 +17482,19 @@ _No screen is rendered by this command._
         - ↩ `ws_list_inside` (already on this path)
   - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
     - **wallet** — 💳 Wallet & subscription
-      - ⭐ Buy Stars → `pay:packs` → wallet_packs
-        - **wallet_packs** — ⭐ Buy Stars
-          - ⭐ 50 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 150 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 500 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 1200 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
+      - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
+        - **wallet_packs** — (no title)
           - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
             - ↩ `wallet` (already on this path)
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_packs_wizard** — (no title)
+          - ⬅️ Back → `ws:continue` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used
+            - … `ws_create_name` at depth 6 (not expanded)
+            - … `ws_create_plan` at depth 6 (not expanded)
+            - … `ws_create_plan_short` at depth 6 (not expanded)
+            - … `ws_create_plan_trial_used` at depth 6 (not expanded)
       - 📦 Plans → `pay:plans` → wallet_plans
         - **wallet_plans** — 📦 Choose a plan
           - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
@@ -17535,8 +17541,9 @@ _No screen is rendered by this command._
       - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - ↩ `wallet` (already on this path)
         - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17553,8 +17560,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17571,8 +17579,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17787,21 +17796,19 @@ _No screen is rendered by this command._
         - ↩ `ws_list_inside` (already on this path)
   - 💳 Wallet → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
     - **wallet** — 💳 Wallet & subscription
-      - ⭐ Buy Stars → `pay:packs` → wallet_packs
-        - **wallet_packs** — ⭐ Buy Stars
-          - ⭐ 50 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 150 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 500 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
-          - ⭐ 1200 Stars → `pay:pack` → wallet_packs
-            - ↩ `wallet_packs` (already on this path)
+      - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
+        - **wallet_packs** — (no title)
           - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
             - ↩ `wallet` (already on this path)
             - … `wallet_expired` at depth 6 (not expanded)
             - … `wallet_no_plan` at depth 6 (not expanded)
             - … `wallet_two_plans` at depth 6 (not expanded)
+        - **wallet_packs_wizard** — (no title)
+          - ⬅️ Back → `ws:continue` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used
+            - … `ws_create_name` at depth 6 (not expanded)
+            - … `ws_create_plan` at depth 6 (not expanded)
+            - … `ws_create_plan_short` at depth 6 (not expanded)
+            - … `ws_create_plan_trial_used` at depth 6 (not expanded)
       - 📦 Plans → `pay:plans` → wallet_plans
         - **wallet_plans** — 📦 Choose a plan
           - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
@@ -17848,8 +17855,9 @@ _No screen is rendered by this command._
       - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
         - ↩ `wallet` (already on this path)
         - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17866,8 +17874,9 @@ _No screen is rendered by this command._
             - ↩ `menu_empty` (already on this path)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -17884,8 +17893,9 @@ _No screen is rendered by this command._
             - ↩ `menu_empty` (already on this path)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - … `wallet_plans` at depth 6 (not expanded)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -19571,8 +19581,9 @@ _No screen is rendered by this command._
     - **wallet_plans** — 📦 Choose a plan
       - Buy Weekly — 50 Stars → `pay:buy` → wallet, wallet_expired, wallet_no_plan, wallet_plans, wallet_two_plans
         - **wallet** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - ↩ `wallet_plans` (already on this path)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -19589,8 +19600,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_expired** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - ↩ `wallet_plans` (already on this path)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -19607,8 +19619,9 @@ _No screen is rendered by this command._
             - … `menu_empty` at depth 6 (not expanded)
             - … `menu_inside` at depth 6 (not expanded)
         - **wallet_no_plan** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - ↩ `wallet_plans` (already on this path)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -19626,8 +19639,9 @@ _No screen is rendered by this command._
             - … `menu_inside` at depth 6 (not expanded)
         - ↩ `wallet_plans` (already on this path)
         - **wallet_two_plans** — 💳 Wallet & subscription
-          - ⭐ Buy Stars → `pay:packs` → wallet_packs
+          - ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
             - … `wallet_packs` at depth 6 (not expanded)
+            - … `wallet_packs_wizard` at depth 6 (not expanded)
           - 📦 Plans → `pay:plans` → wallet_plans
             - ↩ `wallet_plans` (already on this path)
           - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
@@ -20483,7 +20497,7 @@ A screen not reachable from any command entry through the button graph. Error sc
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (246)
+### 3.5 Loops that are not obvious (247)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -20717,6 +20731,7 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **wallet_no_plan** —“📦 Plans”→ **wallet_plans** —“Buy Weekly — 50 Stars”→ **wallet_no_plan** (**unobvious**)
 - **wallet_no_plan** —“🔄 Refresh”→ **wallet_two_plans** —“🔄 Refresh”→ **wallet_no_plan** (**unobvious**)
 - **wallet_packs** —“⬅️ Back”→ **wallet_two_plans** —“⭐ Buy Stars”→ **wallet_packs** (expected (back/affordance))
+- **wallet_packs_wizard** —“⬅️ Back”→ **ws_create_plan_short** —“⭐ Buy Stars”→ **wallet_packs_wizard** (expected (back/affordance))
 - **wallet_plans** —“Buy Weekly — 50 Stars”→ **wallet_two_plans** —“📦 Plans”→ **wallet_plans** (**unobvious**)
 - **ws_create_network** —“متابعة”→ **ws_create_plan** —“⬅️ Back”→ **ws_create_network** (expected (back/affordance))
 - **ws_create_network** —“متابعة”→ **ws_create_plan_short** —“⬅️ Back”→ **ws_create_network** (expected (back/affordance))
@@ -20742,7 +20757,7 @@ _None: the inside/outside rule holds on every catalog screen._
 
 ### 3.7 Depths (0)
 
-The deepest chain found from the entry screens is 4 screens long: `admin_entered` → `terminal_list` → `terminal_view_offer` → `terminal_ended`
+The deepest chain found from the entry screens is 5 screens long: `menu` → `wallet` → `wallet_packs_wizard` → `ws_create_plan` → `ws_create_network`
 
 Screens more than 4 taps from `/start`:
 
@@ -21962,7 +21977,7 @@ _Couldn't publish a link. Please try again._
 
 _(no body text)_
 
-- ⭐ Buy Stars → `pay:packs` → wallet_packs
+- ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -21972,7 +21987,7 @@ _(no body text)_
 
 _(no body text)_
 
-- ⭐ Buy Stars → `pay:packs` → wallet_packs
+- ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -22001,21 +22016,23 @@ _12 entries_
 
 _(no body text)_
 
-- ⭐ Buy Stars → `pay:packs` → wallet_packs
+- ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
 - 🏠 Home → `nav:menu` → menu, menu_empty, menu_inside
 
-### wallet_packs — ⭐ Buy Stars
+### wallet_packs — (no title)
 
-_Stars are Telegram's digital currency, used to pay for plans._
+_(no body text)_
 
-- ⭐ 50 Stars → `pay:pack` → wallet_packs
-- ⭐ 150 Stars → `pay:pack` → wallet_packs
-- ⭐ 500 Stars → `pay:pack` → wallet_packs
-- ⭐ 1200 Stars → `pay:pack` → wallet_packs
 - ⬅️ Back → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
+
+### wallet_packs_wizard — (no title)
+
+_(no body text)_
+
+- ⬅️ Back → `ws:continue` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used
 
 ### wallet_plans — 📦 Choose a plan
 
@@ -22043,7 +22060,7 @@ _We're here to help with anything about paying inside Telegram._
 
 _(no body text)_
 
-- ⭐ Buy Stars → `pay:packs` → wallet_packs
+- ⭐ Buy Stars → `pay:packs` → wallet_packs, wallet_packs_wizard
 - 📦 Plans → `pay:plans` → wallet_plans
 - 📜 History → `pay:history` → wallet_history, wallet_history_empty, wallet_history_page_2
 - 🔄 Refresh → `pay:wallet` → wallet, wallet_expired, wallet_no_plan, wallet_two_plans
@@ -22082,7 +22099,7 @@ _Plan for demo:_
 - Weekly — 50 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
 - Monthly — 150 Stars ✓ → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
 - Yearly — 1200 Stars → `ws:plan` → ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used, ws_detail, ws_detail_locked, ws_detail_suspended
-- ⭐ Buy Stars → `ws:packs` → wallet_packs
+- ⭐ Buy Stars → `ws:packs` → wallet_packs, wallet_packs_wizard
 - ⬅️ Back → `ws:back_net` → ws_create_network
 
 ### ws_create_plan_trial_used — 📦 Choose a plan
