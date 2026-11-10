@@ -14,15 +14,15 @@ Labels are the English catalog, so one row per button is stable; every screen ex
 | --- | ---: |
 | Catalog screens | 166 |
 | Screens including the /dev tool | 169 |
-| Button edges | 517 |
-| Distinct destinations (actions) | 135 |
+| Button edges | 505 |
+| Distinct destinations (actions) | 134 |
 | Entry commands | 9 |
-| Callback re-entry actions | 135 |
+| Callback re-entry actions | 134 |
 | Contradictions: one destination, several labels | 0 |
 | Contradictions: repeated button on one screen | 0 |
 | Contradictions: dead ends | 1 |
-| Contradictions: orphans | 5 |
-| Contradictions: two-screen loops | 247 |
+| Contradictions: orphans | 10 |
+| Contradictions: two-screen loops | 245 |
 | Contradictions: inside/outside nav rule | 0 |
 | Screens deeper than 4 taps from `/start` | 0 |
 
@@ -42,7 +42,7 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `/settings` | settings, settings_inside |
 | `/start` | fj_gate, language_card, menu, menu_empty, menu_inside, ws_detail, ws_detail_locked, ws_detail_suspended |
 
-**Callback re-entry.** A tap on any button of a stale message re-enters here: 135 distinct actions are handled.
+**Callback re-entry.** A tap on any button of a stale message re-enters here: 134 distinct actions are handled.
 
 | Action | Screens it can render |
 | --- | --- |
@@ -161,7 +161,6 @@ Read from the routers' own `Command(…)` decorators, not guessed. There is **no
 | `tnl:remove_confirm` | tunnel_already_published, tunnel_gate_allow_net, tunnel_gate_allow_tunnels, tunnel_gate_deleted, tunnel_gate_locked, tunnel_gate_server, tunnel_gate_suspended, tunnel_list, tunnel_list_at_cap, tunnel_list_empty, tunnel_list_stopped, tunnel_remove_confirm |
 | `tpl:confirm` | tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list |
 | `tpl:list` | tpl_list |
-| `tpl:pick` | tpl_confirm, tpl_confirm_conflict, tpl_list |
 | `ws:back_net` | ws_create_network |
 | `ws:continue` | ws_create_name, ws_create_plan, ws_create_plan_short, ws_create_plan_trial_used |
 | `ws:delete` | ws_list, ws_list_empty, ws_list_inside |
@@ -8283,54 +8282,6 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -16902,54 +16853,6 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -18497,54 +18400,6 @@ _No screen is rendered by this command._
             - … `ws_detail_suspended` at depth 6 (not expanded)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -19257,68 +19112,6 @@ _No screen is rendered by this command._
         - **ws_detail_suspended** — (no title) ↩ (already expanded at depth 4)
   - 📦 Starter templates → `tpl:list` → tpl_list
     - **tpl_list** — (no title)
-      - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module
-          - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
-            - … `tpl_done_created` at depth 6 (not expanded)
-            - … `tpl_done_failed` at depth 6 (not expanded)
-            - … `tpl_done_refused` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `tpl:list` → tpl_list
-            - ↩ `tpl_list` (already on this path)
-        - **tpl_confirm_conflict** — 📦 Simple script
-          - ✅ Create the files → `tpl:confirm` → tpl_done_created, tpl_done_failed, tpl_done_refused, tpl_list
-            - … `tpl_done_created` at depth 6 (not expanded)
-            - … `tpl_done_failed` at depth 6 (not expanded)
-            - … `tpl_done_refused` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - ⬅️ Back → `tpl:list` → tpl_list
-            - ↩ `tpl_list` (already on this path)
-        - ↩ `tpl_list` (already on this path)
-      - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
-      - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-        - **tpl_confirm** — 📦 Python module ↩ (already expanded at depth 4)
-        - **tpl_confirm_conflict** — 📦 Simple script ↩ (already expanded at depth 4)
-        - ↩ `tpl_list` (already on this path)
       - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
         - ↩ `ws_detail` (already on this path)
         - **ws_detail_locked** — (no title) ↩ (already expanded at depth 4)
@@ -20355,54 +20148,6 @@ _No screen is rendered by this command._
             - ↩ `ws_detail_suspended` (already on this path)
       - 📦 Starter templates → `tpl:list` → tpl_list
         - **tpl_list** — (no title)
-          - 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
-          - 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-            - … `tpl_confirm` at depth 6 (not expanded)
-            - … `tpl_confirm_conflict` at depth 6 (not expanded)
-            - ↩ `tpl_list` (already on this path)
           - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
             - ↩ `ws_detail` (already on this path)
             - … `ws_detail_locked` at depth 6 (not expanded)
@@ -20820,7 +20565,7 @@ A dead end is a screen from which no button path reaches a home screen (menu, wo
 
 Transient cards (no buttons by design — sent to the user, not navigated): `admin_notify_capped`, `admin_notify_gap`, `admin_notify_message`, `tunnel_publishing`
 
-### 3.4 Orphans (5)
+### 3.4 Orphans (10)
 
 A screen not reachable from any command entry through the button graph. Error screens are excluded: the error guard reaches them, not a button.
 
@@ -20829,10 +20574,15 @@ A screen not reachable from any command entry through the button graph. Error sc
 - **file_view** — 🐍 main.py
 - **file_view_binary** — 📦 archive.zip
 - **terminal_command** — ⌨️ Send a command
+- **tpl_confirm** — 📦 Python module
+- **tpl_confirm_conflict** — 📦 Simple script
+- **tpl_done_created** — ✅ Files created
+- **tpl_done_failed** — ⚠️ Template stopped
+- **tpl_done_refused** — ⛔ Template not created
 
 Reached by the error guard (not orphans): `err_not_found`, `err_unavailable`, `err_unprocessable`, `err_workspace_suspended`, `terminal_stale`
 
-### 3.5 Loops that are not obvious (247)
+### 3.5 Loops that are not obvious (245)
 
 Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are not back/cancel affordances: each screen names the other as a forward destination, so the hierarchy reads flat.
 
@@ -20981,8 +20731,6 @@ Every two-screen loop `A → B → A`. `unobvious` marks a loop whose labels are
 - **terminal_view_running** —“⏹ Stop terminal”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_running** (**unobvious**)
 - **terminal_view_typing** —“⏹ Stop terminal”→ **ws_detail** —“🖥 Terminals”→ **terminal_view_typing** (**unobvious**)
 - **terminal_view_typing** —“⏹ Stop terminal”→ **ws_detail_suspended** —“🖥 Terminals”→ **terminal_view_typing** (**unobvious**)
-- **tpl_confirm** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm** (**unobvious**)
-- **tpl_confirm_conflict** —“✅ Create the files”→ **tpl_list** —“🌐 Flask API”→ **tpl_confirm_conflict** (**unobvious**)
 - **tpl_list** —“⬅️ Back”→ **ws_detail** —“📦 Starter templates”→ **tpl_list** (expected (back/affordance))
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_list** —“🗑 Remove 8080”→ **tunnel_already_published** (**unobvious**)
 - **tunnel_already_published** —“🗑 Remove 8080”→ **tunnel_list_at_cap** —“🗑 Remove 8080”→ **tunnel_already_published** (**unobvious**)
@@ -21113,6 +20861,11 @@ _None._
 - **file_view** — 🐍 main.py
 - **file_view_binary** — 📦 archive.zip
 - **terminal_command** — ⌨️ Send a command
+- **tpl_confirm** — 📦 Python module
+- **tpl_confirm_conflict** — 📦 Simple script
+- **tpl_done_created** — ✅ Files created
+- **tpl_done_failed** — ⚠️ Template stopped
+- **tpl_done_refused** — ⛔ Template not created
 
 ### Reached after a text / document / payment step (not a button)
 
@@ -22123,20 +21876,8 @@ _Simple script_
 
 ### tpl_list — (no title)
 
-_▬▬▭▭▬▬▭▭▬▬▭▭_
+_(no body text)_
 
-- 📄 Simple script → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 📝 Script with arguments → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🧩 Python module → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🧪 Test project → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 📈 Read a CSV → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🌐 Flask API → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🧰 Command-line tool → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🛰️ Async request → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🤖 Telegram bot → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🖥️ Web page → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 🔎 Username checker → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
-- 📡 JSON API client → `tpl:pick` → tpl_confirm, tpl_confirm_conflict, tpl_list
 - ⬅️ Back → `ws:view` → ws_detail, ws_detail_locked, ws_detail_suspended
 
 ### tunnel_already_published — 🌐 Public links

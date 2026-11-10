@@ -1,10 +1,15 @@
 """Starter-template screens: the list, the confirmation, and the honest result.
 
-Three screens, one flow (TASK python-templates, TASK template-folders):
+Three screens, one flow (TASK python-templates, TASK template-folders, TASK
+template-cards):
 
-* **A — the list** (``tpl:list``): one quiet line per template (its icon and
-  title), then a button per template and a way back to the workspace. No
-  description: the confirmation is where a user reads it.
+* **A — the list** (``tpl:list``): one **card per template**, grouped, each with
+  its icon + bold title, a one-line ``tpl.<key>.short`` description and its own
+  in-body «use» button. TASK template-cards overturned the old assumption that
+  the description belonged only to the confirmation: a picker that hides what a
+  template is makes the user open twelve confirmations to choose. The list now
+  builds in **blocks** because its buttons sit beside each card, not in the
+  keyboard below; the keyboard keeps only «back».
 * **B — the confirmation** (``tpl:pick``): names the template, explains it, and
   lists every path it will create — each under the template's **own folder**
   (``hello/hello.py``), which is what the user sees on disk. If the folder
@@ -21,6 +26,8 @@ The list is static data from :mod:`cloudbot.domain.templates`; no network, no
 from __future__ import annotations
 
 from typing import Sequence
+
+from aiogram.types import RichTextBold
 
 from cloudbot.core.locale import Locale
 from cloudbot.domain import templates as catalog_templates
@@ -71,6 +78,17 @@ def _detail(template: Template, locale: Locale) -> str:
     return catalog.t(template.detail_key, locale)
 
 
+def _short(template: Template, locale: Locale) -> str:
+    """The one-line description the list card prints (``tpl.<key>.short``).
+
+    TASK template-cards: this is a *separate* key from ``detail`` on purpose. The
+    detail runs 40-70 characters and embeds paths; the card needs one short line
+    that fits beside the title, and it must name a required library because that
+    is the fact that changes a choice.
+    """
+    return catalog.t(template.short_key, locale)
+
+
 def _notes(template: Template, locale: Locale) -> str:
     return catalog.t(template.notes_key, locale)
 
@@ -79,50 +97,56 @@ def _ws_of(ws_id: WorkspaceId | str) -> str:
     return str(ws_id)
 
 
-def _pick_label(template: Template, locale: Locale) -> str:
-    """The pick button: the template's own icon and title."""
-    return f"{_icon(template)} {_title(template, locale)}"
-
-
 # -- A. the list --------------------------------------------------------------
 def list_screen(ws_id: WorkspaceId | str, locale: Locale) -> Screen:
-    """The template catalog: the house header, then one line per template.
+    """The template catalog: one **card per template**, grouped, in the body.
 
-    One short intro line, then each template on its own line (icon + title, no
-    description), so the screen stays quiet. The description lives on the
-    confirmation, where a user actually needs it.
+    TASK template-cards: the old list was twelve bare ``icon + title`` lines and
+    twelve near-identical keyboard buttons, so a user had to open a confirmation
+    (twelve times, if wrong) to learn what a template was. Each card now carries
+    the one-line ``short`` description and its own in-body button; the picker can
+    be judged in place. Cards are grouped by ``Template.group`` (domain data, not
+    a dict in this screen), because twelve unbroken blocks do not read either.
+
+    The whole message builds in **blocks**: an in-body callback button is only
+    legal there (see ``document.py``), and ``doc.buttons`` enforces the 64-byte
+    callback cap. The keyboard below keeps only «back».
     """
     ws = _ws_of(ws_id)
     doc = RichDoc(locale)
-    rule = bold(catalog.t("ws.head.rule", locale))
+    rule = catalog.t("ws.head.rule", locale)
     header = catalog.t("tpl.list.title", locale)
     count = format_count("count.templates", len(catalog_templates.TEMPLATES), locale)
+    pick = catalog.t("tpl.list.pick", locale)
 
-    doc.p(rule)
-    doc.p(_raw(f"<b>✦ {header} ⟸ {count}</b>"))
-    doc.p(rule)
-    doc.p(catalog.t("tpl.list.intro", locale))
+    doc.paragraph(rule)
+    doc.heading(f"✦ {header} ⟸ {count}", size=2)
+    doc.paragraph(rule)
+    # The one fact that matters: each template owns its folder, so nothing a user
+    # already wrote is ever overwritten. Kept from the old intro, as one bold line
+    # (the sentence *is* the fact, so splitting a class of it would only weaken it).
+    doc.paragraph_rich([RichTextBold(text=catalog.t("tpl.list.intro", locale))])
 
-    for template in catalog_templates.TEMPLATES:
-        doc.p(f"{_icon(template)} {_title(template, locale)}")
-
-    rows: list[list] = []
-    pick_row: list = []
-    for template in catalog_templates.TEMPLATES:
-        pick_row.append(
-            inline(
-                _pick_label(template, locale),
-                _cb("tpl:pick", template.key, ws),
-                intent=Intent.PRIMARY,
+    for group in catalog_templates.GROUPS:
+        members = [t for t in catalog_templates.TEMPLATES if t.group == group]
+        if not members:
+            continue
+        doc.heading(catalog.t(f"tpl.group.{group}", locale), size=3)
+        for template in members:
+            doc.paragraph_rich(
+                [
+                    RichTextBold(text=f"{_icon(template)} {_title(template, locale)}"),
+                    "\n",
+                    _short(template, locale),
+                ]
             )
-        )
-        if len(pick_row) == 2:
-            rows.append(pick_row)
-            pick_row = []
-    if pick_row:
-        rows.append(pick_row)
-    rows.append([inline(catalog.t("common.back", locale), _cb("ws:view", ws), intent=Intent.PRIMARY)])
-    return Screen(doc=doc, markup=inline_markup(rows))
+            doc.buttons(
+                [(pick, _cb("tpl:pick", template.key, ws), "primary")],
+                align="left",
+            )
+
+    back = inline(catalog.t("common.back", locale), _cb("ws:view", ws), intent=Intent.PRIMARY)
+    return Screen(doc=doc, markup=inline_markup([[back]]))
 
 
 # -- B. the confirmation ------------------------------------------------------

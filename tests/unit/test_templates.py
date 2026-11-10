@@ -47,6 +47,7 @@ from cloudbot.domain import templates as tpl
 from cloudbot.presentation import catalog as screen_catalog
 from cloudbot.presentation.i18n.catalog import catalog
 from cloudbot.presentation.keyboards.callbacks import cb
+from cloudbot.presentation.rich.document import RichDoc
 from cloudbot.presentation.screens import workspaces as ws_screens
 from cloudbot.services.files import FilesService, FileWrite, TemplatePathsExist
 from cloudbot.services.ownership import OwnershipService
@@ -401,6 +402,7 @@ def test_the_import_guard_bites():
         detail_key=hello.detail_key,
         notes_key=hello.notes_key,
         icon=hello.icon,
+        group=hello.group,
         files=(
             tpl.TemplateFile(
                 path="hello.py", content="import requests\n\nprint('hi')\n"
@@ -816,38 +818,215 @@ def test_the_failed_screen_never_prints_the_raw_engine_message(locale):
     assert "flask-api/app.py" in html
 
 
-@pytest.mark.parametrize("locale", LOCALES)
-def test_the_list_is_one_line_per_template_and_never_a_table(locale):
-    """His rule: the templates screen carries no long copy.
+def test_the_card_check_bites_on_the_old_name_only_list():
+    """Bite: the very card assertion above rejects the pre-task screen.
 
-    Each template is **one** paragraph (icon + title); its description belongs to
-    the confirmation, where a user actually needs it. A known description is
-    asserted absent here and present there.
+    TASK template-cards needs proof, not a claim: take the old rendering — one
+    ``icon + title`` paragraph per template, no ``short`` line — and feed it to
+    the same reader the card test uses. The missing description and the missing
+    in-body button must both be visible, otherwise the green card test could be
+    passing over an unchanged screen.
     """
     from cloudbot.presentation.screens import templates as tpl_screens
 
-    screen = tpl_screens.list_screen("ws_x", locale)
-    html = screen.doc.html
-    assert "<table" not in html, "the template list must not be a table"
-
-    # One paragraph per template, and nothing else beyond header + intro.
-    # TASK template-catalog-v2: the icon is the template's own `icon` field (an emoji
-    # carried by the domain catalog), not a `tpl.<key>.icon` translation.
-    for template in tpl.TEMPLATES:
-        title = catalog.t(template.title_key, locale)
-        assert f"<p>{template.icon} {title}</p>" in html, (template.key, locale)
-        assert catalog.t(template.detail_key, locale) not in html, (
-            f"the list still prints {template.key}'s description"
-        )
-
-    # The header is the house shape: ✦ label ⟸ count.
-    assert "⟸" in html
-
-    # The description is exactly where it is needed: the confirmation.
     hello = tpl.by_key("hello")
     assert hello is not None
-    confirm = tpl_screens.confirm_screen(hello, "ws_x", locale).doc.html
-    assert catalog.t(hello.detail_key, locale) in confirm
+    locale = Locale.EN
+    old_html = RichDoc(locale)
+    for template in tpl.TEMPLATES:
+        old_html.p(f"{template.icon} {catalog.t(template.title_key, locale)}")
+
+    # The old list had no blocks, so it had no cards and no body buttons at all.
+    class _OldScreen:
+        doc = old_html
+
+    assert _blocks(_OldScreen()) == []
+    assert _body_buttons(_OldScreen()) == []
+    short = catalog.t(hello.short_key, locale)
+    old_paragraphs = [f"{t.icon} {catalog.t(t.title_key, locale)}" for t in tpl.TEMPLATES]
+    assert short not in "\n".join(old_paragraphs), short
+    assert f"{hello.icon} {catalog.t(hello.title_key, locale)}\n{short}" not in old_paragraphs
+
+    # ... and the real screen has both.
+    screen = tpl_screens.list_screen("ws_x", locale)
+    assert short in "\n".join(_paragraph_texts(screen))
+    assert cb("tpl:pick", hello.key, "ws_x") in [b.callback_data for b in _body_buttons(screen)]
+
+
+def test_every_short_line_exists_in_both_locales():
+    """The two catalogs are written as a pair; a one-locale ``short`` is a bug.
+
+    ``catalog.has`` checks one locale at a time, so this compares the key sets:
+    adding ``tpl.<new>.short`` to ``en`` and forgetting ``ar`` (or the reverse)
+    fails here rather than rendering the raw key in one language.
+    """
+    from cloudbot.presentation.i18n.catalog import keys_for
+
+    required = {template.short_key for template in tpl.TEMPLATES}
+    assert required <= keys_for(Locale.EN), sorted(required - keys_for(Locale.EN))
+    assert required <= keys_for(Locale.AR), sorted(required - keys_for(Locale.AR))
+
+
+# -- TASK template-cards: the list is a wall of cards, not a wall of names ----
+def _blocks(screen):
+    """The list's block form (its cards carry in-body buttons, so it has no html)."""
+    return screen.doc.build().blocks or []
+
+
+def _text_of(value) -> str:
+    """Flatten a rich-text value (``str``, list, or RichText span) to plain text."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (list, tuple)):
+        return "".join(_text_of(part) for part in value)
+    inner = getattr(value, "text", None)
+    if inner is not None:
+        return _text_of(inner)
+    return str(value)
+
+
+def _paragraph_texts(screen) -> list[str]:
+    return [
+        _text_of(block.text)
+        for block in _blocks(screen)
+        if type(block).__name__ == "InputRichBlockParagraph"
+    ]
+
+
+def _body_buttons(screen) -> list:
+    """Every in-body button, in document order."""
+    return [
+        button
+        for block in _blocks(screen)
+        for button in (getattr(block, "buttons", None) or [])
+    ]
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_each_template_is_a_card_with_its_short_line_and_its_own_button(locale):
+    """TASK template-cards — the bite.
+
+    The pre-task list rendered twelve ``icon + title`` paragraphs and no
+    descriptions; a user had to open a confirmation to learn what a template was.
+    Each template now renders **one block**: bold icon + title, its one-line
+    ``short`` description, and its own in-body button whose callback is
+    ``tpl:pick:<key>:<ws>``. This fails against the old screen twice over: there
+    is no ``short`` text anywhere, and the list is html (no blocks, no body
+    buttons) there.
+    """
+    from cloudbot.presentation.screens import templates as tpl_screens
+
+    ws = "ws_x"
+    screen = tpl_screens.list_screen(ws, locale)
+    paragraphs = _paragraph_texts(screen)
+    button_data = [b.callback_data for b in _body_buttons(screen)]
+
+    for template in tpl.TEMPLATES:
+        title = catalog.t(template.title_key, locale)
+        short = catalog.t(template.short_key, locale)
+        card = f"{template.icon} {title}\n{short}"
+        assert card in paragraphs, (template.key, locale, card)
+        assert catalog.t(template.detail_key, locale) not in paragraphs, (
+            f"the list printed {template.key}'s long detail instead of its short line"
+        )
+        assert cb("tpl:pick", template.key, ws) in button_data, template.key
+
+    # No bare `icon + title`-only paragraph survives — that is the old screen.
+    for template in tpl.TEMPLATES:
+        bare = f"{template.icon} {catalog.t(template.title_key, locale)}"
+        assert bare not in paragraphs, (
+            f"{template.key} is still a name-only line with no description"
+        )
+
+    # One in-body pick button per template, no duplicates.
+    picks = [data for data in button_data if (data or "").startswith("tpl:pick")]
+    assert len(picks) == len(tpl.TEMPLATES), picks
+    assert len(set(picks)) == len(picks), picks
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_the_keyboard_keeps_only_the_back_button(locale):
+    """TASK template-cards: no 12-button grid; the keyboard is «back» and nothing else."""
+    from cloudbot.presentation.screens import templates as tpl_screens
+
+    screen = tpl_screens.list_screen("ws_x", locale)
+    rows = screen.markup.inline_keyboard
+    flat = [button for row in rows for button in row]
+    assert len(rows) == 1 and len(flat) == 1, rows
+    assert flat[0].text == catalog.t("common.back", locale)
+    assert flat[0].callback_data == cb("ws:view", "ws_x")
+    assert not any((b.callback_data or "").startswith("tpl:pick") for b in flat)
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_the_list_header_is_the_house_shape(locale):
+    """``✦ label ⟸ count`` still heads the page, in the block form."""
+    from cloudbot.presentation.screens import templates as tpl_screens
+
+    screen = tpl_screens.list_screen("ws_x", locale)
+    headings = [
+        _text_of(block.text)
+        for block in _blocks(screen)
+        if type(block).__name__ == "InputRichBlockSectionHeading"
+    ]
+    assert any("⟸" in text and catalog.t("tpl.list.title", locale) in text for text in headings), (
+        headings
+    )
+
+
+@pytest.mark.parametrize("locale", LOCALES)
+def test_every_template_has_a_short_line_in_both_locales(locale):
+    """A guard: a 13th template added without ``tpl.<key>.short`` fails here."""
+    for template in tpl.TEMPLATES:
+        assert catalog.has(template.short_key, locale), template.short_key
+        assert catalog.t(template.short_key, locale).strip(), template.short_key
+
+
+def test_every_template_short_line_is_one_line():
+    """The card line fits beside the title: one line, no newline, no path list."""
+    for locale in LOCALES:
+        for template in tpl.TEMPLATES:
+            short = catalog.t(template.short_key, locale)
+            assert "\n" not in short, (template.key, locale)
+            assert len(short) <= 80, (template.key, locale, short)
+
+
+def test_a_template_that_needs_a_library_says_so_in_its_short_line():
+    """The fact that changes a choice is in the card, not only the confirmation.
+
+    ``pytest-suite`` needs pytest, ``flask-api`` needs flask and ``async-fetch``
+    needs httpx; a user who sees the requirement after opening a confirmation has
+    already chosen wrongly.
+    """
+    expected = {"pytest-suite": "pytest", "flask-api": "flask", "async-fetch": "httpx"}
+    for key, package in expected.items():
+        template = tpl.by_key(key)
+        assert template is not None
+        for locale in LOCALES:
+            short = catalog.t(template.short_key, locale)
+            assert package in short, (key, locale, short)
+
+
+def test_every_template_belongs_to_exactly_one_declared_group():
+    """Grouping is ``Template`` data: no group means no card, so it must fail.
+
+    TASK template-cards: the screen iterates :data:`GROUPS` and prints each
+    template under its own ``group``. A template whose group is absent from that
+    tuple would vanish from the page in silence — this makes that loud.
+    """
+    assert tpl.GROUPS, "the list has no groups to draw"
+    for template in tpl.TEMPLATES:
+        assert template.group in tpl.GROUPS, (template.key, template.group)
+    drawn = [
+        template.key
+        for group in tpl.GROUPS
+        for template in tpl.TEMPLATES
+        if template.group == group
+    ]
+    assert sorted(drawn) == sorted(tpl.keys()), drawn
+    # Every group has at least one card.
+    for group in tpl.GROUPS:
+        assert any(t.group == group for t in tpl.TEMPLATES), group
 
 
 @pytest.mark.parametrize("locale", LOCALES)
@@ -912,16 +1091,29 @@ class FakeBot:
     async def delete_message(self, chat_id, message_id):
         return True
 
+    @staticmethod
+    def _rendered(rich_message) -> str:
+        """The message as text, whichever form it was built in.
+
+        TASK template-cards moved the list to **blocks** (its cards carry in-body
+        buttons), so ``.html`` is ``None`` for it. A harness that only read
+        ``.html`` would see an empty string and silently drop every assertion.
+        """
+        html = getattr(rich_message, "html", None)
+        if html is not None:
+            return html
+        return rich_message.model_dump_json(exclude_none=True)
+
     async def send_rich_message(
         self, chat_id, rich_message, reply_markup=None, reply_parameters=None
     ):
-        self.sent.append(rich_message.html or "")
+        self.sent.append(self._rendered(rich_message))
         return Message.model_construct(chat={"id": chat_id}, message_id=len(self.sent))
 
     async def edit_message_text(
         self, chat_id, message_id, rich_message=None, reply_markup=None
     ):
-        self.sent.append(getattr(rich_message, "html", "") or "")
+        self.sent.append(self._rendered(rich_message) if rich_message is not None else "")
         return Message.model_construct(chat={"id": chat_id}, message_id=message_id)
 
     async def __call__(self, method):

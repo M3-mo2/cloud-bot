@@ -34,6 +34,7 @@ import re
 from dataclasses import dataclass
 
 __all__ = [
+    "GROUPS",
     "TEMPLATES",
     "Template",
     "TemplateFile",
@@ -45,6 +46,13 @@ __all__ = [
     "template_relative_path",
     "template_root",
 ]
+
+#: The three groups the list screen draws, in display order. A group is
+#: template data (``Template.group``), not a mapping invented by the screen:
+#: adding a template means choosing one of these, and the list cannot silently
+#: lose it. The headings are catalog keys (``tpl.group.<group>``), so the domain
+#: carries only the locale-independent name.
+GROUPS: tuple[str, ...] = ("starts", "projects", "web")
 
 #: A key is a single lowercase path segment; it becomes a directory name.
 _KEY_RE = re.compile(r"[a-z][a-z0-9-]*\Z")
@@ -69,6 +77,12 @@ class Template:
     presentation layer owns every human word, so no prose lives here. ``icon`` is
     the one exception: it is a locale-independent emoji, carried by the template
     so the list can print its mark without a second catalog lookup.
+
+    ``group`` is required and one of :data:`GROUPS`. It is the list's section, so
+    a template added without one is a construction error and a test failure —
+    never a card that quietly disappears from the screen. ``short_key`` is
+    derived from ``key`` (``tpl.<key>.short``) so the one-line description a
+    picker needs cannot be spelled differently in a second place.
     """
 
     key: str
@@ -76,7 +90,20 @@ class Template:
     detail_key: str
     notes_key: str
     icon: str
+    group: str
     files: tuple[TemplateFile, ...]
+
+    @property
+    def short_key(self) -> str:
+        """The one-line description the list screen prints (``tpl.<key>.short``).
+
+        A template key is a folder name (``script-with-args``) while a catalog key
+        is underscored (``tpl.script_with_args.detail``), so the same rule that
+        names every other template key maps ``-`` to ``_`` here. Deriving it from
+        ``key`` keeps one spelling: a template cannot carry a short line under a
+        second name the screen would never read.
+        """
+        return f"tpl.{self.key.replace('-', '_')}.short"
 
     def paths(self) -> tuple[str, ...]:
         """Every workspace-absolute path this template writes, in order."""
@@ -138,6 +165,7 @@ _HELLO = Template(
     detail_key="tpl.hello.detail",
     notes_key="tpl.hello.notes",
     icon="📄",
+    group="starts",
     files=(
         _f(
             "hello.py",
@@ -174,6 +202,7 @@ _SCRIPT_WITH_ARGS = Template(
     detail_key="tpl.script_with_args.detail",
     notes_key="tpl.script_with_args.notes",
     icon="📝",
+    group="starts",
     files=(
         _f(
             "greet.py",
@@ -235,6 +264,7 @@ _MODULE = Template(
     detail_key="tpl.module.detail",
     notes_key="tpl.module.notes",
     icon="🧩",
+    group="starts",
     files=(
         _f(
             "mypkg/__init__.py",
@@ -323,6 +353,7 @@ _PYTEST_SUITE = Template(
     detail_key="tpl.pytest_suite.detail",
     notes_key="tpl.pytest_suite.notes",
     icon="🧪",
+    group="projects",
     files=(
         _f("src/__init__.py", ""),
         _f(
@@ -407,6 +438,7 @@ _DATA_CSV = Template(
     detail_key="tpl.data_csv.detail",
     notes_key="tpl.data_csv.notes",
     icon="📈",
+    group="projects",
     files=(
         _f(
             "sales.csv",
@@ -494,6 +526,7 @@ _FLASK_API = Template(
     detail_key="tpl.flask_api.detail",
     notes_key="tpl.flask_api.notes",
     icon="🌐",
+    group="web",
     files=(
         _f(
             "app.py",
@@ -562,6 +595,7 @@ _CLI_APP = Template(
     detail_key="tpl.cli_app.detail",
     notes_key="tpl.cli_app.notes",
     icon="🧰",
+    group="projects",
     files=(
         _f(
             "cli.py",
@@ -656,6 +690,7 @@ _ASYNC_FETCH = Template(
     detail_key="tpl.async_fetch.detail",
     notes_key="tpl.async_fetch.notes",
     icon="🛰️",
+    group="web",
     files=(
         _f(
             "fetch.py",
@@ -749,6 +784,7 @@ _TELEGRAM_BOT = Template(
     detail_key="tpl.telegram_bot.detail",
     notes_key="tpl.telegram_bot.notes",
     icon="🤖",
+    group="web",
     files=(
         _f(
             "bot.py",
@@ -931,6 +967,7 @@ _WEB_PAGE = Template(
     detail_key="tpl.web_page.detail",
     notes_key="tpl.web_page.notes",
     icon="🖥️",
+    group="web",
     files=(
         _f(
             "server.py",
@@ -1012,6 +1049,7 @@ _TELEGRAM_CHECKER = Template(
     detail_key="tpl.telegram_checker.detail",
     notes_key="tpl.telegram_checker.notes",
     icon="🔎",
+    group="web",
     files=(
         _f(
             "check.py",
@@ -1151,6 +1189,7 @@ _HTTP_API_CLIENT = Template(
     detail_key="tpl.http_api_client.detail",
     notes_key="tpl.http_api_client.notes",
     icon="📡",
+    group="web",
     files=(
         _f(
             "client.py",
