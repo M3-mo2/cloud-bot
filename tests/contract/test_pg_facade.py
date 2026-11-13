@@ -80,14 +80,14 @@ async def test_database_reports_postgres_and_has_no_path(database):
 
 
 # -- migrations ---------------------------------------------------------------
-async def test_fresh_database_gets_all_twelve_migrations(schema):
+async def test_fresh_database_gets_all_thirteen_migrations(schema):
     db = Database(_dsn(), search_path=schema)
     try:
         await db.connect()
         applied = await db.migrate()
         expected = [version for version, _ in discover_migrations(db.migrations_dir)]
         assert applied == expected
-        assert len(applied) == 12
+        assert len(applied) == 13
         assert await db.migrate() == []
 
         connection = await db.connect()
@@ -95,7 +95,7 @@ async def test_fresh_database_gets_all_twelve_migrations(schema):
             "SELECT version, applied_at FROM schema_migrations ORDER BY version"
         ) as cur:
             rows = await cur.fetchall()
-        assert [int(row["version"]) for row in rows] == list(range(1, 13))
+        assert [int(row["version"]) for row in rows] == list(range(1, 14))
         # applied_at is RFC3339 UTC text, not a datetime object.
         assert isinstance(rows[0]["applied_at"], str)
         assert rows[0]["applied_at"].endswith("Z")

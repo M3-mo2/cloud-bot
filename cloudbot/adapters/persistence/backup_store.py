@@ -54,6 +54,15 @@ SETTINGS_TABLES: tuple[str, ...] = (
 def _settings_sql() -> str:
     return ", ".join(f"'{name}'" for name in SETTINGS_TABLES)
 
+def _message_id(row: object) -> str | None:
+    """The stored Telegram message id, tolerating a pre-0013 row."""
+    try:
+        value = row["last_message_id"]  # type: ignore[index]
+    except (KeyError, IndexError):
+        return None
+    text = str(value) if value is not None else ""
+    return text or None
+
 def _utc(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -274,6 +283,7 @@ class SqliteBackupStore:
             next_run_at=_utc(row["next_run_at"]),
             last_run_at=_utc(row["last_run_at"]),
             last_error=str(row["last_error"] or ""),
+            last_message_id=_message_id(row),
             updated_at=_utc(row["updated_at"]),
             updated_by=int(row["updated_by"]),
         )
@@ -284,8 +294,8 @@ class SqliteBackupStore:
             "INSERT INTO backup_config "
             "(id, enabled, period_kind, period_hours, daily_time, tz_name, "
             " destination_chat_id, retention_keep, next_run_at, last_run_at, "
-            " last_error, updated_at, updated_by) "
-            "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+            " last_error, last_message_id, updated_at, updated_by) "
+            "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(id) DO UPDATE SET "
             " enabled = excluded.enabled, period_kind = excluded.period_kind, "
             " period_hours = excluded.period_hours, daily_time = excluded.daily_time, "
@@ -293,8 +303,9 @@ class SqliteBackupStore:
             " destination_chat_id = excluded.destination_chat_id, "
             " retention_keep = excluded.retention_keep, "
             " next_run_at = excluded.next_run_at, last_run_at = excluded.last_run_at, "
-            " last_error = excluded.last_error, updated_at = excluded.updated_at, "
-            " updated_by = excluded.updated_by",
+            " last_error = excluded.last_error, "
+            " last_message_id = excluded.last_message_id, "
+            " updated_at = excluded.updated_at, updated_by = excluded.updated_by",
             (
                 1 if config.enabled else 0,
                 config.period_kind,
@@ -306,6 +317,7 @@ class SqliteBackupStore:
                 _iso(config.next_run_at) if config.next_run_at else None,
                 _iso(config.last_run_at) if config.last_run_at else None,
                 config.last_error,
+                config.last_message_id,
                 _iso(datetime.now(timezone.utc)),
                 int(actor),
             ),
@@ -356,8 +368,15 @@ class SqliteBackupStore:
     async def prune(self, keep: int) -> list[str]:
         keep = max(1, int(keep))
         owned = await self.files()
-        # Newest first already; everything past ``keep`` is deleted, oldest first.
-        doomed = [f.name for f in owned[keep:]]
+        # Retention counts **full** artifacts only (settings JSONs are tiny and
+        # are never pruned). The newest full artifact is always kept, whatever
+        # ``keep`` says — that is the artifact the operator would restore.
+        fulls = [f for f in owned if f.scope == "full"]
+        if not fulls:
+            return []
+        doomed = [f.name for f in fulls[keep:]]
+        protected = fulls[0].name
+        doomed = [name for name in doomed if name != protected]
         directory = Path(self.backup_dir())
         for name in reversed(doomed):
             try:

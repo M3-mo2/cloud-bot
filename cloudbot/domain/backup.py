@@ -36,6 +36,9 @@ class BackupConfig:
     next_run_at: datetime | None = None
     last_run_at: datetime | None = None
     last_error: str = ""
+    #: The Telegram message id of the last delivered artifact; None when the last
+    #: run did not deliver. Stored so "did it arrive?" is a fact, not a log hunt.
+    last_message_id: str | None = None
     updated_at: datetime | None = None
     updated_by: int = 0
 

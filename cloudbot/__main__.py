@@ -38,7 +38,7 @@ async def _run() -> int:
     from cloudbot.bootstrap import app as app_module
     from cloudbot.bootstrap import lifecycle
     from cloudbot.bootstrap.container import build
-    from cloudbot.bootstrap.backup_scheduler import BackupScheduler
+    from cloudbot.bootstrap.backup_scheduler import BackupScheduler, enabled_from_env
     from cloudbot.bootstrap.notify import NotificationDispatcher, NotificationPoller
     from cloudbot.core.locale import Locale
     from cloudbot.presentation.rich.sender import RichSender
@@ -75,10 +75,14 @@ async def _run() -> int:
     async def _send_backup(chat_id: int, filename: str, data: bytes) -> None:
         await sender.send_document(chat_id, filename, data)
 
+    # Scheduled backups have exactly one owner: the panel's cron tick. This
+    # scheduler is the fallback for a bot-only deployment and is off unless the
+    # operator opted in; either way the manual Telegram action still works.
     backup_scheduler = BackupScheduler(
         container.services.backup,
         admin_ids=lambda: sorted(settings.admin_ids),
         send=_send_backup,
+        enabled=enabled_from_env(),
     )
 
     try:

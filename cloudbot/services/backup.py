@@ -33,6 +33,7 @@ from datetime import datetime, timezone
 
 import structlog
 
+from cloudbot.core.scrub import scrub_error
 from cloudbot.domain.backup import (
     FULL_PREFIX,
     SETTINGS_PREFIX,
@@ -72,6 +73,26 @@ def _iso(dt: datetime) -> str:
 class BackupService:
     def __init__(self, store: BackupStore) -> None:
         self._store = store
+
+    def _secrets(self) -> tuple[str, ...]:
+        """The live secret values a failure message might echo, for the scrubber.
+
+        The store's DSN is not readable through the port, but the settings are:
+        the engine key and the bot token are the two values a failed HTTP call
+        can carry into an exception string. They are passed to :func:`scrub_error`
+        by exact value as well as by shape.
+        """
+        values: list[str] = []
+        try:
+            from cloudbot.core.config import get_settings
+
+            settings = get_settings()
+            values.append(settings.bot_token.get_secret_value())
+            values.append(settings.engine_api_key.get_secret_value())
+            values.append(settings.database_url)
+        except Exception:  # noqa: BLE001 - scrubbing must work without settings
+            pass
+        return tuple(value for value in values if value)
 
     # -- configuration -------------------------------------------------------
     async def config(self) -> BackupConfig:
@@ -200,14 +221,34 @@ class BackupService:
         try:
             artifact = await self.make_backup("full", persist=True)
         except Exception as exc:  # noqa: BLE001 - a failed run must not kill the loop
-            log.error("backup.run_failed", error=type(exc).__name__)
+            # The stored string is the *real* failure, scrubbed and capped: a
+            # literal "failed" told the operator and the panel nothing, which is
+            # how two silent runs went unexplained. ``exc_info`` puts the whole
+            # traceback in journald. The pointer is guarded separately below.
+            message = scrub_error(exc, secrets=self._secrets())
+            log.error(
+                "backup.run_failed",
+                error=type(exc).__name__,
+                detail=message,
+                exc_info=True,
+            )
             failed = replace(
-                config, last_error="failed", last_run_at=now,
+                config, last_error=message, last_run_at=now,
                 next_run_at=next_run_after(config, now),
             )
             await self._store.save_config(failed, actor=0)
             return None
-        await self._store.prune(config.retention_keep)
+        # A failed prune must not masquerade as a failed backup: the artifact
+        # exists and is valid, so it is recorded as a success. The prune problem
+        # is logged loudly instead of silently swallowed.
+        try:
+            await self._store.prune(config.retention_keep)
+        except Exception as exc:  # noqa: BLE001
+            log.error(
+                "backup.prune_failed",
+                detail=scrub_error(exc, secrets=self._secrets()),
+                exc_info=True,
+            )
         advanced = after_run(config, _utc_now())
         await self._store.save_config(advanced, actor=0)
         return artifact
