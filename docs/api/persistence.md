@@ -185,3 +185,37 @@ infra answer was "SQLite now, abstracted" rather than "SQLite tied in".
   workspaces, but the bot cannot attribute them to users. Keep it backed up, and
   record this risk in `DECISIONS.md`. (An operator could re-adopt orphan
   workspaces with an admin tool; noted as a Phase 2 maintenance tool.)
+
+### 8.1 The artifact is a dump of the database in use
+
+`BackupService.make_backup("full")` writes one `.zip` carrying the database dump
+and `manifest.json`. Which dump it is follows `DATABASE_URL`, never the
+deployment's history:
+
+| Deployment | Member | Producer |
+| --- | --- | --- |
+| Postgres (`postgresql://…`) | `database.sql` | `pg_dump --no-owner --no-privileges --clean --if-exists --format=plain --inserts` |
+| SQLite (`sqlite+aiosqlite://…`) | `bot.db` | SQLite's own backup API |
+
+The manifest carries `format` (`postgres-plain-sql` / `sqlite`),
+`database_version`, both schema versions, and `counts` read from the **same
+snapshot that produced the dump**. On Postgres the adapter pins one connection,
+`pg_export_snapshot()`s it, starts the `pg_dump` child with `--snapshot=<id>`
+and runs `select count(*)` on that same transaction — so the manifest can never
+describe a later moment than its own bytes. `sha256` is over the dump bytes and
+is verified when the artifact is read for a restore.
+
+`pg_dump` runs as a child of the process that holds the DSN. Its environment is
+built explicitly (`PGHOST`/`PGPORT`/`PGUSER`/`PGDATABASE`/`PGPASSWORD`/`PGSSLMODE`
+from the DSN) because a scheduler's child is not guaranteed to inherit ours, and
+the DSN itself is never placed on a command line (`ps` can see it) nor logged.
+`CLOUDBOT_PG_DUMP_BIN` / `CLOUDBOT_PSQL_BIN` override the binaries; by default
+the newest installed client at or above the server's major version is chosen,
+because an older client refuses a newer server.
+
+**Legacy SQLite archives are never produced again and never auto-deleted.** On a
+Postgres deployment they cannot be restored (the restore path refuses them), so
+retention counts only the current format: exactly `retention_keep` `database.sql`
+artifacts survive, the newest is protected whatever the setting says, settings
+JSONs are kept, and every other file in the directory is untouched. The admin
+screen says this in words.

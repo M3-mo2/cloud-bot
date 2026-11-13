@@ -5,21 +5,25 @@ The admin panel and the scheduler are **triggers**: both call
 :meth:`BackupService.restore`. Nothing about the artifact shape lives in a screen
 or a handler.
 
-The artifact is a single ``.zip`` holding
+The artifact is a single ``.zip`` holding the database dump and a manifest:
 
-* ``bot.db`` — a consistent copy made with SQLite's own backup API, and
-* ``manifest.json`` — scope, created_at, the code schema version, the database
-  schema version and row counts.
+* on a **Postgres** deployment, ``database.sql`` — a real ``pg_dump
+  --no-owner --no-privileges`` of ``DATABASE_URL`` — plus ``manifest.json``;
+* on a **SQLite** deployment, ``bot.db`` — a consistent copy made with SQLite's
+  own backup API — plus ``manifest.json``.
 
-A zip (not a bare ``.db``) is chosen because one artifact has to carry the
-manifest that restore validates against, and Telegram's document size limit is
-more comfortably met by a deflated database. The settings scope is a ``.json``
-file, which is its own manifest — there is no database copy in it at all.
+The manifest carries ``format``, ``database_version``, the schema versions and
+``counts`` read from the **same snapshot that produced the dump** (on Postgres,
+the exportable snapshot the dump was taken from). The ``sha256`` is over the
+dump bytes and is verified on read. A zip (not a bare dump) is used because one
+artifact has to carry the manifest that restore validates against. The settings
+scope is a ``.json`` file, which is its own manifest — there is no database copy
+in it at all.
 
 **Never included:** ``.env``, the bot token, the engine key, any MTProto session
-file, or a log. None of those live in ``bot.db``; this module reads the database
-and nothing else. ``tests/unit/test_backup.py`` greps every artifact for the
-project's own secret shapes and asserts the value is absent.
+file, or a log. None of those live in the database; this module reads the
+database and nothing else. ``tests/unit/test_backup.py`` greps every artifact
+for the project's own secret shapes and asserts the value is absent.
 """
 
 from __future__ import annotations
@@ -36,7 +40,11 @@ import structlog
 from cloudbot.core.scrub import scrub_error
 from cloudbot.domain.backup import (
     FULL_PREFIX,
+    MANIFEST_MEMBER,
+    PG_FORMAT,
+    PG_MEMBER,
     SETTINGS_PREFIX,
+    SQLITE_MEMBER,
     BackupArtifact,
     BackupConfig,
     BackupFile,
@@ -51,8 +59,6 @@ from cloudbot.domain.ports.backup import BackupStore
 
 log = structlog.get_logger("cloudbot.backup")
 
-DB_MEMBER = "bot.db"
-MANIFEST_MEMBER = "manifest.json"
 #: What separates a preview token from the user-chosen restore scope.
 SCOPE_SUFFIX = {"full": ".zip", "settings": ".json"}
 
@@ -180,27 +186,28 @@ class BackupService:
                 created_at=created_at,
             )
         else:
-            database = await self._store.snapshot()
-            schema_version = await self._store.schema_version()
-            counts = await self._store.counts()
+            snapshot = await self._store.snapshot()
+            member = PG_MEMBER if snapshot.format == PG_FORMAT else SQLITE_MEMBER
             manifest = {
                 "scope": "full",
                 "created_at": _iso(created_at),
-                "code_schema_version": schema_version,
-                "database_schema_version": schema_version,
-                "counts": counts,
-                "sha256": hashlib.sha256(database).hexdigest(),
-                "members": [DB_MEMBER, MANIFEST_MEMBER],
+                "code_schema_version": snapshot.schema_version,
+                "database_schema_version": snapshot.schema_version,
+                "database_version": snapshot.database_version,
+                "counts": snapshot.counts,
+                "sha256": hashlib.sha256(snapshot.database).hexdigest(),
+                "members": [member, MANIFEST_MEMBER],
+                "format": snapshot.format,
             }
             buffer = io.BytesIO()
             with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-                archive.writestr(DB_MEMBER, database)
+                archive.writestr(member, snapshot.database)
                 archive.writestr(MANIFEST_MEMBER, json.dumps(manifest, sort_keys=True, indent=2))
             artifact = BackupArtifact(
                 scope="full",
                 filename=f"{FULL_PREFIX}{created_at.strftime('%Y%m%dT%H%M%SZ')}.zip",
                 data=buffer.getvalue(),
-                schema_version=schema_version,
+                schema_version=snapshot.schema_version,
                 created_at=created_at,
             )
         if persist:
@@ -302,26 +309,30 @@ class BackupService:
         except zipfile.BadZipFile:
             return RestoreValidation(ok=False, scope="full", reason="not_a_backup")
         names = set(archive.namelist())
-        if DB_MEMBER not in names:
-            return RestoreValidation(ok=False, scope="full", reason="missing_database")
         if MANIFEST_MEMBER not in names:
             return RestoreValidation(ok=False, scope="full", reason="missing_manifest")
+        member = PG_MEMBER if PG_MEMBER in names else SQLITE_MEMBER if SQLITE_MEMBER in names else ""
+        if not member:
+            return RestoreValidation(ok=False, scope="full", reason="missing_database")
         try:
             manifest = json.loads(archive.read(MANIFEST_MEMBER).decode("utf-8"))
         except (KeyError, UnicodeDecodeError, json.JSONDecodeError):
             return RestoreValidation(ok=False, scope="full", reason="missing_manifest")
-        database = archive.read(DB_MEMBER)
+        database = archive.read(member)
         expected_digest = str(manifest.get("sha256") or "")
         if expected_digest and hashlib.sha256(database).hexdigest() != expected_digest:
             return RestoreValidation(ok=False, scope="full", reason="corrupt", manifest=manifest)
-        looks_sqlite = database[:16] == b"SQLite format 3\x00"
         if not database:
             return RestoreValidation(ok=False, scope="full", reason="missing_database", manifest=manifest)
         probe = await self._store.probe(database)
-        if not probe.sqlite:
-            reason = "truncated" if looks_sqlite else "not_sqlite"
+        if probe.postgres:
+            reason = "" if probe.format == PG_FORMAT else "not_postgres"
+            if reason:
+                return RestoreValidation(ok=False, scope="full", reason=reason, manifest=manifest)
+        elif not probe.sqlite:
+            reason = "truncated" if database[:16] == b"SQLite format 3\x00" else "not_sqlite"
             return RestoreValidation(ok=False, scope="full", reason=reason, manifest=manifest)
-        if probe.integrity and probe.integrity.lower() != "ok":
+        elif probe.integrity and probe.integrity.lower() != "ok":
             return RestoreValidation(
                 ok=False, scope="full", reason="corrupt", detail=probe.integrity, manifest=manifest
             )

@@ -153,6 +153,8 @@ def backup_screen(view: AdminView) -> Screen:
             _file_block(doc, item, locale)
     else:
         doc.paragraph(catalog.t("admin.bk.files_empty", locale))
+    if any(item.format == "legacy-sqlite" for item in files):
+        doc.paragraph(catalog.t("admin.bk.legacy_note", locale))
     doc.paragraph(f"{_before_hint(locale)}{backup.directory or 'data/backups'}{_after_hint(locale)}")
 
     kb = []
@@ -201,17 +203,21 @@ def backup_screen(view: AdminView) -> Screen:
 
 
 def _file_block(doc: RichDoc, item: BackupFile, locale) -> None:
-    """One backup file: name (bold), its scope/size/time, and its own restore button."""
+    """One backup file: name (bold), its format/size/time, and its own restore button."""
     doc.heading(item.name, size=3)
-    doc.paragraph(
-        " · ".join(
-            [
-                catalog.t(f"admin.bk.scope.{item.scope}", locale),
-                format_bytes(item.size_bytes, locale),
-                _when(item.created_at, locale),
-            ]
-        )
-    )
+    facts = [
+        catalog.t(f"admin.bk.scope.{item.scope}", locale),
+        format_bytes(item.size_bytes, locale),
+        _when(item.created_at, locale),
+    ]
+    if item.format:
+        label = catalog.t(f"admin.bk.format.{item.format}", locale)
+        facts.insert(1, label if catalog.has(f"admin.bk.format.{item.format}", locale) else item.format)
+    doc.paragraph(" · ".join(facts))
+    # A legacy SQLite archive is history: restore refuses it into Postgres, so
+    # the button is not offered at all.
+    if item.format == "legacy-sqlite":
+        return
     action = admin_cb.backup_disk(item.name)
     # A filename long enough to overflow Telegram's 64-byte callback cap simply
     # gets no per-file button; the upload/restore path still reaches it.

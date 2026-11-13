@@ -21,6 +21,32 @@ FULL_PREFIX = "cloudbot-backup-"
 SETTINGS_PREFIX = "cloudbot-settings-"
 OWNED_PREFIXES = (FULL_PREFIX, SETTINGS_PREFIX)
 
+#: What a full artifact actually contains. ``postgres-plain-sql`` is a
+#: ``pg_dump --no-owner --no-privileges`` of ``DATABASE_URL`` stored as
+#: ``database.sql``; ``sqlite`` is a copy of the bot's SQLite file stored as
+#: ``bot.db``; ``legacy-sqlite`` is a ``bot.db`` archive produced before the
+#: Postgres producer existed. Retention counts only the format this deployment
+#: currently produces and never touches ``legacy-sqlite``.
+PG_FORMAT = "postgres-plain-sql"
+SQLITE_FORMAT = "sqlite"
+LEGACY_FORMAT = "legacy-sqlite"
+SETTINGS_FORMAT = "settings"
+PG_MEMBER = "database.sql"
+SQLITE_MEMBER = "bot.db"
+MANIFEST_MEMBER = "manifest.json"
+
+#: The tables a full manifest counts, in one fixed order.
+COUNT_TABLES: tuple[str, ...] = (
+    "users",
+    "user_workspaces",
+    "events",
+    "subscriptions",
+    "wallet_ledger",
+    "stars_payments",
+    "forcejoin_chats",
+    "terminal_sessions",
+)
+
 #: The timezone his account is in; a daily schedule is wall-clock time there.
 DEFAULT_TZ = "Africa/Cairo"
 
@@ -48,20 +74,44 @@ class BackupFile:
     size_bytes: int
     created_at: datetime
     scope: BackupScope
+    #: ``postgres-plain-sql`` / ``sqlite`` / ``legacy-sqlite`` for a full
+    #: artifact, ``settings`` for the configuration JSON. Retention reads it.
+    format: str = ""
 
 @dataclass(frozen=True)
 class DbProbe:
-    """A measured reading of a SQLite database, from the adapter."""
+    """A measured reading of a database dump, from the adapter."""
 
     sqlite: bool
     table_names: frozenset[str] = frozenset()
     schema_version: int = 0
     integrity: str = ""
     detail: str = ""
+    #: ``postgres-plain-sql`` when the bytes are a plain-SQL Postgres dump.
+    format: str = ""
+    #: The DDL the dump carries, so a restore can apply it to a scratch database.
+    postgres: bool = False
 
     @property
     def has_migrations(self) -> bool:
         return "schema_migrations" in self.table_names
+
+@dataclass(frozen=True)
+class BackupSnapshot:
+    """One dump plus the counts read from the **same** database snapshot.
+
+    ``database`` is the plain-SQL ``pg_dump`` output; ``counts`` is
+    ``select count(*)`` for the tables present, taken on the exportable
+    snapshot the dump was taken from, so a manifest never describes a different
+    moment than its own bytes.
+    """
+
+    format: str
+    database: bytes
+    counts: dict[str, int]
+    schema_version: int
+    database_version: str
+    table_names: frozenset[str] = frozenset()
 
 @dataclass(frozen=True)
 class RestoreValidation:

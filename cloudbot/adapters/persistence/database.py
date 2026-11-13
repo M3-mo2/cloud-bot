@@ -124,6 +124,16 @@ class Database:
         return self._path
 
     @property
+    def url(self) -> str:
+        """The DSN this facade was built with.
+
+        Used by the backup adapter to hand ``pg_dump`` the connection details it
+        needs. It is the same value the process was configured with; callers
+        must never log it.
+        """
+        return self._url
+
+    @property
     def is_postgres(self) -> bool:
         return self._postgres
 

@@ -8,6 +8,18 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def _isolate_backup_dir(tmp_path, monkeypatch):
+    """Never let a test write an artifact into the repository's ``backups/``.
+
+    A backup artifact is a snapshot of whatever database the test built; leaving
+    one behind looks exactly like a real backup and (measured) four stale SQLite
+    archives ended up in the directory the scheduler reads. ``CLOUDBOT_BACKUP_DIR``
+    is the one switch the adapter honours, so pointing it at a per-test temp
+    directory keeps the production directory untouched.
+    """
+    monkeypatch.setenv("CLOUDBOT_BACKUP_DIR", str(tmp_path / "backups"))
+
+@pytest.fixture(autouse=True)
 def _reset_global_routers():
     """Handler routers are process-global modules; detach them before each test so
     a second ``build_dispatcher`` does not trip aiogram's 'already attached' guard.

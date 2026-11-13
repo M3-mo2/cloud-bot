@@ -10,19 +10,23 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from cloudbot.domain.backup import BackupConfig, BackupFile, DbProbe
+from cloudbot.domain.backup import BackupConfig, BackupFile, BackupSnapshot, DbProbe
 
 class BackupStore(Protocol):
-    #: A consistent copy of the live database, made with SQLite's own backup API.
-    async def snapshot(self) -> bytes: ...
+    #: True when the live database is Postgres (dumps are ``database.sql``).
+    @property
+    def is_postgres(self) -> bool: ...
 
-    #: Replace the live database with ``data`` and re-open it (no restart).
+    #: A dump of the live database and the counts of **that same snapshot**.
+    async def snapshot(self) -> BackupSnapshot: ...
+
+    #: Apply a dump of the live database and re-open it (no restart).
     async def install(self, data: bytes) -> None: ...
 
-    #: A byte-for-byte safety copy of the live database beside it; returns the path.
+    #: A re-appliable safety copy of the live database; returns the path.
     async def safety_copy(self) -> str: ...
 
-    #: Inspect arbitrary bytes as a SQLite database without touching the live one.
+    #: Inspect arbitrary dump bytes without touching the live one.
     async def probe(self, data: bytes) -> DbProbe: ...
 
     async def schema_version(self) -> int: ...
