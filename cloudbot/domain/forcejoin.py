@@ -19,6 +19,14 @@ from datetime import datetime
 from typing import Literal
 
 ChatKind = Literal["channel", "group"]
+ChatState = Literal["subscribed", "absent", "unknown"]
+
+#: The decision outcomes written to ``forcejoin_events``.
+#:
+#: ``pass`` / ``deny`` / ``unknown`` / ``error`` are membership decisions; a
+#: ``config`` row is an operator change (add/remove/enable/disable/test/switch) so
+#: one table answers both "what did users experience" and "what changed".
+EventOutcome = Literal["pass", "deny", "unknown", "error", "joined", "config"]
 
 def chat_kind_for_type(chat_type: str) -> ChatKind:
     """A Telegram chat type (``channel``/``supergroup``/``group``) → gate kind."""
@@ -56,29 +64,111 @@ class ForceJoinChat:
         return ""
 
 @dataclass(frozen=True)
+class GateEvent:
+    """One recorded gate decision (a row of ``forcejoin_events``).
+
+    ``reason`` is a short stable code; ``detail`` a scrubbed error string capped
+    at :data:`EVENT_DETAIL_MAX`. Written by the service, never by a handler.
+    """
+
+    outcome: EventOutcome
+    reason: str = ""
+    tg_id: int | None = None
+    chat_id: int | None = None
+    latency_ms: int | None = None
+    cached: bool = False
+    detail: str = ""
+
+    def normalized(self) -> "GateEvent":
+        from dataclasses import replace
+
+        return replace(self, detail=scrub_detail(self.detail))
+
+#: The detail column is capped at 300 characters (TASK forcejoin-v2 hard rule 3).
+EVENT_DETAIL_MAX = 300
+#: Substrings that must never reach ``detail`` (a token is a credential).
+_SECRET_MARKERS = ("bearer ", "token", "api_key", "apikey", "secret", "password")
+
+def scrub_detail(text: str) -> str:
+    """Cap at :data:`EVENT_DETAIL_MAX` and blank anything credential-shaped.
+
+    A Telegram error never carries a bot token, but a hard rule is cheap to honour
+    here: an error string that mentions a token/key is not written at all.
+    """
+    raw = " ".join(str(text or "").split())
+    lowered = raw.lower()
+    if any(marker in lowered for marker in _SECRET_MARKERS):
+        return ""
+    return raw[:EVENT_DETAIL_MAX]
+
+
+@dataclass(frozen=True)
 class MembershipResult:
     """The outcome of one membership check.
 
     ``subscribed`` is ``True`` / ``False`` only when the answer is known;
     ``unknown`` means the gate cannot tell and must **allow**.
+
+    ``latency_ms`` and ``cached`` describe how the answer was obtained (the
+    membership call's own duration, and whether a positive cache answered) so the
+    service can record them without measuring twice.
     """
 
     chat_id: int
     subscribed: bool
     unknown: bool = False
     reason: str = ""
+    latency_ms: int = 0
+    cached: bool = False
+    detail: str = ""
+    retry_after: int = 0
 
     @classmethod
-    def allowed(cls, chat_id: int) -> "MembershipResult":
-        return cls(chat_id=chat_id, subscribed=True)
+    def allowed(cls, chat_id: int, *, reason: str = "subscribed") -> "MembershipResult":
+        return cls(chat_id=chat_id, subscribed=True, reason=reason)
 
     @classmethod
-    def refused(cls, chat_id: int) -> "MembershipResult":
-        return cls(chat_id=chat_id, subscribed=False)
+    def refused(cls, chat_id: int, *, reason: str = "absent") -> "MembershipResult":
+        return cls(chat_id=chat_id, subscribed=False, reason=reason)
 
     @classmethod
-    def unknown_for(cls, chat_id: int, reason: str) -> "MembershipResult":
-        return cls(chat_id=chat_id, subscribed=True, unknown=True, reason=reason)
+    def unknown_for(
+        cls, chat_id: int, reason: str, *, detail: str = "", retry_after: int = 0
+    ) -> "MembershipResult":
+        return cls(
+            chat_id=chat_id,
+            subscribed=True,
+            unknown=True,
+            reason=reason,
+            detail=detail,
+            retry_after=int(retry_after or 0),
+        )
+
+    @property
+    def state(self) -> ChatState:
+        if self.unknown:
+            return "unknown"
+        return "subscribed" if self.subscribed else "absent"
+
+    def with_measurement(self, *, latency_ms: int, cached: bool) -> "MembershipResult":
+        from dataclasses import replace
+
+        return replace(self, latency_ms=int(latency_ms), cached=cached)
+
+
+@dataclass(frozen=True)
+class ChatVerdict:
+    """One chat's canonical state for one user, with the chat it names.
+
+    The UI never has to join two sources to name a pending chat: ``chat`` carries
+    the title/username and ``state`` is exactly ``subscribed | absent | unknown``.
+    """
+
+    chat: ForceJoinChat
+    state: ChatState
+    reason: str = ""
+    cached: bool = False
+
 
 @dataclass(frozen=True)
 class GateStatus:
@@ -88,10 +178,16 @@ class GateStatus:
     required: tuple[ForceJoinChat, ...] = ()
     missing: tuple[ForceJoinChat, ...] = ()
     warnings: tuple[str, ...] = ()
+    verdicts: tuple[ChatVerdict, ...] = ()
 
     @property
     def must_join(self) -> bool:
         return self.enabled and bool(self.missing)
+
+    @property
+    def unknown_chats(self) -> tuple[ChatVerdict, ...]:
+        """Chats the gate could not verify — the user was let through them."""
+        return tuple(v for v in self.verdicts if v.state == "unknown")
 
 def status_is_subscribed(status: str, *, is_member: bool = False) -> bool:
     """Map a ``getChatMember`` status to subscribed/not.

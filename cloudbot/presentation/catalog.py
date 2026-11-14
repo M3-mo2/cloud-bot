@@ -786,6 +786,78 @@ def _banned_user(tg_id: int, reason: str = "Abuse", *, expires_in_days: int | No
         expires_at=NOW + timedelta(days=expires_in_days) if expires_in_days else None,
     )
 
+
+def _forcejoin_stats():
+    """A gate-stats read model for the golden screen (TASK forcejoin-v2 Part 3)."""
+    from cloudbot.domain.forcejoin_stats import (
+        CacheStat,
+        ChatStat,
+        ForceJoinStats,
+        Funnel,
+        GateCounts,
+        Health,
+        OutcomeCount,
+        RefusedUser,
+        Volume,
+    )
+
+    return ForceJoinStats(
+        range="7d",
+        has_data=True,
+        gate=GateCounts(
+            enabled=True, chats_total=2, chats_enabled=2, chats_needing_attention=1
+        ),
+        volume=Volume(decisions=42, distinct_users=17),
+        outcomes=(
+            OutcomeCount("pass", 24, 57.14),
+            OutcomeCount("deny", 12, 28.57),
+            OutcomeCount("unknown", 4, 9.52),
+            OutcomeCount("error", 2, 4.76),
+        ),
+        funnel=Funnel(hit_gate=17, refused=9, then_passed=6),
+        per_chat=(
+            ChatStat(
+                chat_id=-1001234567890,
+                title="Cloud World",
+                username="cloud_world",
+                bot_admin=True,
+                enabled=True,
+                decisions=30,
+                deny_rate=33.33,
+                unknown_rate=6.67,
+                last_decision_at="2026-11-06T11:59:00Z",
+            ),
+            ChatStat(
+                chat_id=-1009876543210,
+                title="Cloud Chat",
+                username="cloud_chat",
+                bot_admin=False,
+                enabled=True,
+                decisions=12,
+                deny_rate=16.67,
+                unknown_rate=16.67,
+                last_decision_at="2026-11-06T11:58:00Z",
+            ),
+        ),
+        cache=CacheStat(hits=9, misses=33, hit_rate=21.43, p50_ms=180, p95_ms=640),
+        top_refused=(
+            RefusedUser(tg_id=6508129575, display_name="Mohamed", denials=5),
+            RefusedUser(tg_id=123456789, display_name="", denials=3),
+        ),
+        health=Health(
+            unknown_rate=9.52, error_rate=4.76, chats_needing_attention=1, cache_hit_rate=21.43
+        ),
+    )
+
+
+
+def _forcejoin_stats_empty():
+    """The honest empty range: ``has_data=False`` renders "no decisions"."""
+    from dataclasses import replace
+
+    return replace(_forcejoin_stats(), range="all", has_data=False, volume=replace(_forcejoin_stats().volume, decisions=0, distinct_users=0))
+
+
 def _moderation_view(locale: Locale) -> AdminView:
     view = _admin_view(locale)
     from dataclasses import replace
@@ -1363,6 +1435,14 @@ SCREEN_BUILDERS: dict[str, ScreenBuilder] = {
     "admin_user": lambda f, loc: admin_user.user_screen(_admin_view(loc)),
     "admin_notifications": lambda f, loc: admin_notify.notifications_screen(_admin_view(loc)),
     "admin_forcejoin": lambda f, loc: admin_forcejoin.forcejoin_screen(_admin_view(loc)),
+    "admin_forcejoin_stats": lambda f, loc: admin_forcejoin.stats_screen(
+        _admin_view(loc), stats=_forcejoin_stats(), range_key="7d"
+    ),
+    "admin_forcejoin_stats_empty": lambda f, loc: admin_forcejoin.stats_screen(
+        _admin_view(loc),
+        stats=_forcejoin_stats_empty(),
+        range_key="all",
+    ),
     "fj_gate": lambda f, loc: gate_screen(
         GateStatus(
             enabled=True,

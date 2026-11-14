@@ -1,15 +1,21 @@
-"""Ports for the force-join gate: chat storage + the Telegram membership reads.
+"""Ports for the force-join gate: chat storage + membership reads + the event log.
 
 The gate is a middleware. It cannot import aiogram or an adapter, so it depends
-on these two protocols: ``ForceJoinStore`` (SQLite) and ``TelegramDirectory``
-(the Bot API reads ``getChat`` / ``getChatMember``).
+on these protocols: ``ForceJoinStore`` (SQLite/Postgres), ``ForceJoinEventSink``
+(the append-only decision log), and ``TelegramDirectory`` (the Bot API reads
+``getChat`` / ``getChatMember``).
 """
 
 from __future__ import annotations
 
 from typing import Protocol
 
-from cloudbot.domain.forcejoin import ChatKind, ForceJoinChat, MembershipResult
+from cloudbot.domain.forcejoin import (
+    ChatKind,
+    ForceJoinChat,
+    GateEvent,
+    MembershipResult,
+)
 
 class ForceJoinStore(Protocol):
     async def chats(self) -> list[ForceJoinChat]: ...
@@ -30,6 +36,11 @@ class ForceJoinStore(Protocol):
     async def set_admin(self, chat_id: int, is_admin: bool) -> None: ...
     async def flag(self, key: str, default: bool) -> bool: ...
     async def set_flag(self, key: str, value: bool) -> None: ...
+
+class ForceJoinEventSink(Protocol):
+    """Append-only decision log; ``record`` never raises for the caller."""
+
+    async def record(self, event: GateEvent) -> None: ...
 
 class TelegramDirectory(Protocol):
     """The two Bot API reads the gate and the admin add-flow need."""

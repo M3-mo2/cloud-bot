@@ -2,6 +2,10 @@
 
 The middleware exempts ``fj:`` so these two routes are the only way a gated user
 can get in — which is why they never depend on the gate having already passed.
+
+A press of «تحقّقت» starts the button's short disabled window (the remaining
+seconds are rendered on the next screen), and a successful check does **not**
+re-show the gate: the user gets a one-line confirmation and is on their way.
 """
 
 from __future__ import annotations
@@ -24,9 +28,11 @@ async def on_gate_check(
     cb, ctx: UserContext, services: Services, sender: RichSender
 ) -> None:
     """Re-check every required chat (bypassing the cache) and admit on success."""
+    services.forcejoin.mark_press(ctx.tg_id)
     status = await services.forcejoin.status(ctx.tg_id, force=True)
     if not status.must_join:
-        # A short confirmation, then the product the user came for.
+        # A short confirmation, then the product the user came for. The gate is
+        # never re-shown after a pass.
         doc = RichDoc(ctx.locale)
         doc.h(2, catalog.t("fj.welcome_title", ctx.locale))
         doc.p(catalog.t("fj.welcome", ctx.locale))
@@ -38,7 +44,16 @@ async def on_gate_check(
         )
         services.forcejoin.clear_user_cache(ctx.tg_id)
         return
-    await show_screen(cb, gate_screen(status, ctx.locale), ctx=ctx, sender=sender)
+    await show_screen(
+        cb,
+        gate_screen(
+            status,
+            ctx.locale,
+            cooldown_s=services.forcejoin.press_remaining(ctx.tg_id),
+        ),
+        ctx=ctx,
+        sender=sender,
+    )
 
 @router.callback_query(F.data.startswith("fj:chat:"))
 async def on_gate_chat(
@@ -46,4 +61,13 @@ async def on_gate_chat(
 ) -> None:
     """A required chat without a public username: explain, and re-show the gate."""
     status = await services.forcejoin.status(ctx.tg_id)
-    await show_screen(cb, gate_screen(status, ctx.locale), ctx=ctx, sender=sender)
+    await show_screen(
+        cb,
+        gate_screen(
+            status,
+            ctx.locale,
+            cooldown_s=services.forcejoin.press_remaining(ctx.tg_id),
+        ),
+        ctx=ctx,
+        sender=sender,
+    )

@@ -19,6 +19,21 @@ async def startup(container: Container) -> None:
     applied = await container.database.migrate()
     log.info("db.migrated", applied=applied)
 
+    # The gate's own boot work, both best-effort and never fatal:
+    # * retention — keep 90 days of decisions, and log the row count removed;
+    # * self-check — measure the bot's admin rights in every enabled chat and
+    #   write ``is_admin``, so the panel shows "needs attention" before the first
+    #   user is ever gated.
+    try:
+        removed = await container.forcejoin_events.prune(keep_days=90)
+        log.info("forcejoin.retention", removed=removed, keep_days=90)
+    except Exception as exc:  # noqa: BLE001 - retention must not stop the boot
+        log.warning("forcejoin.retention_failed", error=type(exc).__name__)
+    try:
+        await container.services.forcejoin.self_check()
+    except Exception as exc:  # noqa: BLE001 - a broken check must not stop the boot
+        log.warning("forcejoin.self_check_failed", error=type(exc).__name__)
+
     try:
         meta = await container.engine.meta(refresh=True)
         log.info(

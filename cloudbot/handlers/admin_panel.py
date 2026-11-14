@@ -549,7 +549,9 @@ async def _route_fj_toggle(cb, parsed: AdminCallback, ctx, services, sender, sta
     if chat is None:
         await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
         return
-    await services.forcejoin.set_chat_enabled(chat_id, not chat.enabled)
+    await services.forcejoin.set_chat_enabled(
+        chat_id, not chat.enabled, actor=ctx.actor_tg_id
+    )
     refreshed = await services.forcejoin.recheck(chat_id)
     banner = ""
     if refreshed is not None and not refreshed.bot_is_admin:
@@ -562,12 +564,12 @@ async def _route_fj_remove(cb, parsed: AdminCallback, ctx, services, sender, sta
     if chat is None:
         await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
         return
-    await services.forcejoin.remove_chat(chat_id)
+    await services.forcejoin.remove_chat(chat_id, actor=ctx.actor_tg_id)
     await _show_forcejoin(cb, ctx, services, sender)
 
 async def _route_fj_switch(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
     enabled = parsed.args[0] == "on"
-    await services.forcejoin.set_enabled(enabled)
+    await services.forcejoin.set_enabled(enabled, actor=ctx.actor_tg_id)
     await _show_forcejoin(cb, ctx, services, sender)
 
 async def _route_fj_check(cb, parsed, ctx, services, sender, state, events) -> None:
@@ -579,6 +581,39 @@ async def _route_fj_check(cb, parsed, ctx, services, sender, state, events) -> N
     await show_screen(
         cb,
         forcejoin_screen_mod.check_result_screen(view, rows=rows, ok=ok),
+        ctx=ctx,
+        sender=sender,
+    )
+
+async def _route_fj_test(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    """One real ``getChatMember`` against the operator's own id, with the outcome."""
+    chat_id = parsed.arg_int(0)
+    chat = await services.forcejoin.recheck(chat_id)
+    if chat is None:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    result = await services.forcejoin.test_chat(chat_id, ctx.actor_tg_id)
+    view = await _view(ctx, services)
+    await show_screen(
+        cb,
+        forcejoin_screen_mod.test_result_screen(view, chat=chat, result=result),
+        ctx=ctx,
+        sender=sender,
+    )
+
+async def _route_fj_stats(cb, parsed: AdminCallback, ctx, services, sender, state, events) -> None:
+    """The gate's own numbers, for the selected range, straight from SQL."""
+    from cloudbot.adapters.persistence.forcejoin_stats import normalize_range
+
+    range_key = normalize_range(parsed.subject)
+    stats = await services.forcejoin.stats(range_key)
+    view = await _view(ctx, services)
+    if stats is None:
+        await show_screen(cb, _stale(ctx), ctx=ctx, sender=sender)
+        return
+    await show_screen(
+        cb,
+        forcejoin_screen_mod.stats_screen(view, stats=stats, range_key=range_key),
         ctx=ctx,
         sender=sender,
     )
@@ -1331,6 +1366,8 @@ _ROUTES = {
     admin_cb.FJ_REMOVE: _route_fj_remove,
     admin_cb.FJ_SWITCH: _route_fj_switch,
     admin_cb.FJ_CHECK: _route_fj_check,
+    admin_cb.FJ_TEST: _route_fj_test,
+    admin_cb.FJ_STATS: _route_fj_stats,
     admin_cb.BK_SCHEDULE: _route_bk_schedule,
     admin_cb.BK_INSTANT: _route_bk_instant,
     admin_cb.BK_SWITCH: _route_bk_switch,

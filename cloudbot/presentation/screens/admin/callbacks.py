@@ -61,6 +61,8 @@ FJ_TOGGLE = "fj_toggle"
 FJ_REMOVE = "fj_remove"
 FJ_SWITCH = "fj_switch"
 FJ_CHECK = "fj_check"
+FJ_TEST = "fj_test"
+FJ_STATS = "fj_stats"
 # -- backup --------------------------------------------------------------
 BK_SCHEDULE = "bk_sched"
 BK_INSTANT = "bk_now"
@@ -249,6 +251,14 @@ def forcejoin_switch(enabled: bool) -> str:
 
 def forcejoin_check() -> str:
     return _action(FJ_CHECK)
+
+def forcejoin_test(chat_id: int) -> str:
+    """One real ``getChatMember`` for the operator, against that chat."""
+    return _action(FJ_TEST, int(chat_id))
+
+def forcejoin_stats(range_key: str = "7d") -> str:
+    """Open the gate stats for one range (24h / 7d / 30d / 90d / all)."""
+    return _action(FJ_STATS, str(range_key))
 
 
 # -- backup ------------------------------------------------------------------
@@ -472,6 +482,19 @@ def parse(data: str) -> AdminParseResult:
     if action == FJ_SWITCH:
         if len(rest) != 1 or rest[0] not in ("on", "off"):
             return _invalid(data, "bad_switch", action)
+        return AdminCallback(action, (rest[0],))
+
+    if action == FJ_TEST:
+        if len(rest) != 1:
+            return _invalid(data, "bad_arity", action)
+        chat_id = _require_int(data, rest[0], action)
+        if isinstance(chat_id, InvalidAdminCallback):
+            return chat_id
+        return AdminCallback(action, (str(chat_id),))
+
+    if action == FJ_STATS:
+        if len(rest) != 1 or rest[0] not in ("24h", "7d", "30d", "90d", "all"):
+            return _invalid(data, "bad_scope", action)
         return AdminCallback(action, (rest[0],))
 
     if action == BK_SCHEDULE or action == BK_PRUNE or action == BK_RESTORE:

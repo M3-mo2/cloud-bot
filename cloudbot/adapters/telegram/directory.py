@@ -10,10 +10,17 @@ right becomes a ``MembershipResult.unknown`` so the gate can allow the user.
 from __future__ import annotations
 
 import re
+import time
 from typing import Any
 
 import structlog
-from aiogram.exceptions import TelegramAPIError, TelegramBadRequest, TelegramNetworkError
+from aiogram.exceptions import (
+    TelegramAPIError,
+    TelegramBadRequest,
+    TelegramNetworkError,
+    TelegramNotFound,
+    TelegramRetryAfter,
+)
 
 from cloudbot.domain.forcejoin import (
     ChatResolutionError,
@@ -101,19 +108,50 @@ class TelegramDirectory:
         return str(getattr(member, "status", "")) in ("administrator", "creator")
 
     async def membership(self, chat_id: int, user_id: int) -> MembershipResult:
-        """One user's membership. Every "cannot know" result is ``unknown``."""
+        """One user's membership. Every "cannot know" result is ``unknown``.
+
+        The *reason* distinguishes the cases the service must act on: a rate limit
+        (``rate_limited``, with the wait), and a chat the bot can no longer read
+        (``not_admin``, which means the stored row's admin flag is stale), from a
+        plain network failure. The service records the reason and never surfaces
+        any of them to the user.
+        """
+        started = time.monotonic()
         try:
             member = await self._bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+        except TelegramRetryAfter as exc:
+            wait = int(getattr(exc, "retry_after", 0) or 0)
+            log.warning(
+                "forcejoin.membership_rate_limited",
+                chat_id=chat_id,
+                user_id=user_id,
+                retry_after=wait,
+            )
+            return _measured(
+                MembershipResult.unknown_for(
+                    chat_id,
+                    "rate_limited",
+                    detail=str(getattr(exc, "message", "") or exc),
+                    retry_after=wait,
+                ),
+                started,
+            )
+        except TelegramNotFound as exc:
+            return _measured(_not_admin(chat_id, user_id, exc), started)
         except TelegramBadRequest as exc:
             message = str(getattr(exc, "message", "") or exc)
-            # A deleted chat, or the bot lost its admin right: cannot verify.
+            if _is_not_admin_error(message):
+                return _measured(_not_admin(chat_id, user_id, exc), started)
             log.warning(
                 "forcejoin.membership_unknown",
                 chat_id=chat_id,
                 user_id=user_id,
                 error=message[:120],
             )
-            return MembershipResult.unknown_for(chat_id, "bad_request")
+            return _measured(
+                MembershipResult.unknown_for(chat_id, "bad_request", detail=message),
+                started,
+            )
         except TelegramNetworkError as exc:
             log.warning(
                 "forcejoin.membership_network",
@@ -121,7 +159,12 @@ class TelegramDirectory:
                 user_id=user_id,
                 error=type(exc).__name__,
             )
-            return MembershipResult.unknown_for(chat_id, "network")
+            return _measured(
+                MembershipResult.unknown_for(
+                    chat_id, "network", detail=type(exc).__name__
+                ),
+                started,
+            )
         except TelegramAPIError as exc:
             log.warning(
                 "forcejoin.membership_unknown",
@@ -129,9 +172,45 @@ class TelegramDirectory:
                 user_id=user_id,
                 error=type(exc).__name__,
             )
-            return MembershipResult.unknown_for(chat_id, "api")
+            return _measured(
+                MembershipResult.unknown_for(
+                    chat_id, "api", detail=str(getattr(exc, "message", "") or exc)
+                ),
+                started,
+            )
         status = str(getattr(member, "status", ""))
         is_member = bool(getattr(member, "is_member", False))
         if status_is_subscribed(status, is_member=is_member):
-            return MembershipResult.allowed(chat_id)
-        return MembershipResult.refused(chat_id)
+            return _measured(MembershipResult.allowed(chat_id), started)
+        return _measured(MembershipResult.refused(chat_id), started)
+
+
+#: A Bot API message that means "this chat is gone, or the bot lost its rights".
+_NOT_ADMIN_MARKERS = (
+    "chat not found",
+    "peer_id_invalid",
+    "bot is not a member",
+    "not enough rights",
+    "chat_write_forbidden",
+    "have no rights",
+    "user not found",
+)
+
+def _is_not_admin_error(message: str) -> bool:
+    lowered = (message or "").lower()
+    return any(marker in lowered for marker in _NOT_ADMIN_MARKERS)
+
+def _not_admin(chat_id: int, user_id: int, exc: Exception) -> MembershipResult:
+    detail = str(getattr(exc, "message", "") or exc)
+    log.warning(
+        "forcejoin.membership_not_admin",
+        chat_id=chat_id,
+        user_id=user_id,
+        error=detail[:120],
+    )
+    return MembershipResult.unknown_for(chat_id, "not_admin", detail=detail)
+
+def _measured(result: MembershipResult, started: float) -> MembershipResult:
+    return result.with_measurement(
+        latency_ms=int((time.monotonic() - started) * 1000), cached=False
+    )

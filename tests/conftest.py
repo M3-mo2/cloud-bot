@@ -70,6 +70,8 @@ from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
 from cloudbot.adapters.persistence.broadcast_store import SqliteBroadcastStore
 from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
+from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+from cloudbot.adapters.persistence.forcejoin_stats import ForceJoinStatsReader
 from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.locale import Locale
 from cloudbot.core.runtime import BotRuntime
@@ -190,6 +192,10 @@ async def forcejoin_store(database):
     return SqliteForceJoinStore(database)
 
 @pytest.fixture
+async def forcejoin_events(database):
+    return SqliteForceJoinEventStore(database)
+
+@pytest.fixture
 async def moderation_store(database):
     return SqliteModerationStore(database)
 
@@ -234,7 +240,11 @@ async def services(
         notifier=NotifierService(event_log, admin_state),
         broadcast=BroadcastService(SqliteBroadcastStore(database)),
         forcejoin=ForceJoinService(
-            SqliteForceJoinStore(database), fake_directory, bot_id=42
+            SqliteForceJoinStore(database),
+            fake_directory,
+            bot_id=42,
+            events=SqliteForceJoinEventStore(database),
+            stats=ForceJoinStatsReader(database),
         ),
         moderation=moderation,
     )

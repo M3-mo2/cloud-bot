@@ -441,3 +441,270 @@ async def test_an_ordinary_command_is_gated_through_the_real_dispatcher(database
     assert len(bot.sent) > before
 
     await container.aclose()
+
+# -- 8. TASK forcejoin-v2: every decision is recorded -----------------------
+async def _event_rows(database):
+    conn = await database.connect()
+    async with conn.execute(
+        "SELECT ts, tg_id, chat_id, outcome, reason, latency_ms, cached, detail "
+        "FROM forcejoin_events ORDER BY id"
+    ) as cur:
+        return [dict(r) for r in await cur.fetchall()]
+
+def _measured_directory(base: "Directory", latencies: dict[int, int] | None = None):
+    """A directory whose answers carry the measurement the service records."""
+    latency = latencies or {}
+
+    class Measured(Directory):
+        async def membership(self, chat_id, user_id):
+            result = await super().membership(chat_id, user_id)
+            return result.with_measurement(
+                latency_ms=latency.get(chat_id, 12), cached=False
+            )
+
+    measured = Measured()
+    measured.results = base.results
+    measured.admins = base.admins
+    measured.chats = base.chats
+    measured.bot_id = base.bot_id
+    return measured
+
+async def test_pass_deny_unknown_each_write_one_row(store, directory):
+    from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+
+    await _add(store, -1001)
+    await _add(store, -1002)
+    await _add(store, -1003)
+    directory.results[-1001] = MembershipResult.allowed(-1001)
+    directory.results[-1002] = MembershipResult.refused(-1002)
+    directory.results[-1003] = MembershipResult.unknown_for(-1003, "network")
+    db = store._db
+    events = SqliteForceJoinEventStore(db)
+    gate = ForceJoinService(store, directory, bot_id=BOT, events=events)
+    await gate.status(USER)
+
+    rows = await _event_rows(db)
+    by_chat = {r["chat_id"]: (r["outcome"], r["reason"]) for r in rows}
+    assert by_chat[-1001] == ("pass", "subscribed")
+    assert by_chat[-1002] == ("deny", "absent")
+    assert by_chat[-1003] == ("unknown", "network")
+
+async def test_cached_positive_writes_cached_one_and_zero_latency(store, directory):
+    from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+
+    await _add(store, -1001)
+    directory.results[-1001] = MembershipResult.allowed(-1001)
+    db = store._db
+    gate = ForceJoinService(
+        store, _measured_directory(directory), bot_id=BOT,
+        events=SqliteForceJoinEventStore(db),
+    )
+    await gate.status(USER)          # a live call (fresh row)
+    await gate.status(USER)          # inside the positive TTL -> cached row
+
+    rows = await _event_rows(db)
+    assert [r["cached"] for r in rows] == [0, 1]
+    cached_row = rows[-1]
+    assert cached_row["outcome"] == "pass"
+    assert cached_row["reason"] == "cached_positive"
+    assert cached_row["latency_ms"] == 0
+
+async def test_a_refusal_is_never_cached_two_fresh_rows(store, directory):
+    from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+
+    await _add(store, -1001)
+    directory.results[-1001] = MembershipResult.refused(-1001)
+    db = store._db
+    gate = ForceJoinService(store, directory, bot_id=BOT, events=SqliteForceJoinEventStore(db))
+    await gate.status(USER)
+    await gate.status(USER)
+
+    rows = await _event_rows(db)
+    assert len(rows) == 2
+    assert all(r["outcome"] == "deny" and r["cached"] == 0 for r in rows)
+
+async def test_a_failed_event_write_does_not_raise_out_of_status(store, directory):
+    await _add(store, -1001)
+    directory.results[-1001] = MembershipResult.refused(-1001)
+
+    class ExplodingSink:
+        async def record(self, event):
+            raise RuntimeError("disk full")
+
+    gate = ForceJoinService(store, directory, bot_id=BOT, events=ExplodingSink())
+    status = await gate.status(USER)  # must not raise
+    assert status.must_join is True
+
+async def test_user_cooldown_returns_previous_answer_and_force_bypasses_it(store, directory):
+    await _add(store, -1001)
+    directory.results[-1001] = MembershipResult.unknown_for(-1001, "network")
+    clock = {"now": 100.0}
+    gate = ForceJoinService(store, directory, bot_id=BOT, clock=lambda: clock["now"])
+    await gate.status(USER)                  # one live call (unknown, cooldown stored)
+    calls = {"n": 0}
+
+    class Counting(Directory):
+        async def membership(self, chat_id, user_id):
+            calls["n"] += 1
+            return await super().membership(chat_id, user_id)
+
+    counting = Counting()
+    counting.results = directory.results
+    counting.admins, counting.chats, counting.bot_id = directory.admins, directory.chats, directory.bot_id
+    gate._directory = counting
+
+    clock["now"] += 1.0
+    cached = await gate.status(USER)           # inside 3 s -> previous answer
+    assert calls["n"] == 0
+    assert cached.verdicts[0].cached is True
+
+    forced = await gate.status(USER, force=True)  # admin test bypasses it
+    assert calls["n"] == 1
+    assert forced.verdicts[0].cached is False
+
+async def test_rate_limit_becomes_unknown_allows_and_pauses_the_chat(store):
+    """A 429 is not a refusal: the user is admitted, and the chat backs off."""
+    from aiogram.exceptions import TelegramRetryAfter
+    from aiogram.methods import GetChatMember
+
+    from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+    from cloudbot.adapters.telegram.directory import TelegramDirectory
+
+    class Bot:
+        id = BOT
+        calls = 0
+
+        async def get_chat_member(self, chat_id, user_id):
+            Bot.calls += 1
+            raise TelegramRetryAfter(
+                method=GetChatMember(chat_id=chat_id, user_id=user_id),
+                message="Too Many Requests: retry after 30",
+                retry_after=30,
+            )
+
+    await _add(store, -1001)
+    db = store._db
+    clock = {"now": 100.0}
+    gate = ForceJoinService(
+        store, TelegramDirectory(Bot()), bot_id=BOT,
+        events=SqliteForceJoinEventStore(db), clock=lambda: clock["now"],
+    )
+    status = await gate.status(USER)
+    assert status.must_join is False  # admitted
+    assert status.verdicts[0].state == "unknown"
+
+    rows = await _event_rows(db)
+    assert rows[-1]["outcome"] == "error"
+    assert rows[-1]["reason"] == "rate_limited"
+
+    # The per-chat pause means the next check does not call the API again.
+    before = Bot.calls
+    clock["now"] += 5.0
+    again = await gate.status(USER)
+    assert again.must_join is False
+    assert Bot.calls == before
+
+async def test_chat_not_found_marks_not_admin_without_disabling(store):
+    from aiogram.exceptions import TelegramBadRequest
+    from aiogram.methods import GetChatMember
+
+    from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+    from cloudbot.adapters.telegram.directory import TelegramDirectory
+
+    class Bot:
+        id = BOT
+
+        async def get_chat_member(self, chat_id, user_id):
+            raise TelegramBadRequest(
+                method=GetChatMember(chat_id=chat_id, user_id=user_id),
+                message="Bad Request: bot is not a member of the channel chat",
+            )
+
+    await _add(store, -1001)
+    db = store._db
+    gate = ForceJoinService(
+        store, TelegramDirectory(Bot()), bot_id=BOT,
+        events=SqliteForceJoinEventStore(db),
+    )
+    with structlog.testing.capture_logs() as logs:
+        status = await gate.status(USER)
+    assert status.must_join is False  # admitted
+    row = await store.get(-1001)
+    assert row is not None
+    assert row.bot_is_admin is False
+    assert row.enabled is True  # never disabled silently
+    assert any(e["event"] == "forcejoin.chat_needs_attention" for e in logs)
+
+async def test_boot_self_check_writes_is_admin_and_logs_one_line(store, directory):
+    await _add(store, -1001)
+    await _add(store, -1002)
+    directory.admins[-1001] = True
+    directory.admins[-1002] = False
+    gate = ForceJoinService(store, directory, bot_id=BOT)
+    with structlog.testing.capture_logs() as logs:
+        ok, total, bad = await gate.self_check()
+    assert (ok, total, bad) == (1, 2, [-1002])
+    assert (await store.get(-1001)).bot_is_admin is True
+    assert (await store.get(-1002)).bot_is_admin is False
+    assert any(
+        "1/2 chats ok" in str(e.get("summary", "")) and e.get("needs_attention") == [-1002]
+        for e in logs
+    )
+
+async def test_admin_actions_are_recorded_as_config_rows(store, directory):
+    from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
+
+    db = store._db
+    gate = ForceJoinService(store, directory, bot_id=BOT, events=SqliteForceJoinEventStore(db))
+    directory.chats["@cloud"] = {
+        "chat_id": -1006, "username": "cloud", "title": "Cloud", "type": "channel",
+    }
+    directory.admins[-1006] = True
+    await gate.add_chat("@cloud", added_by=ADMIN)
+    await gate.set_chat_enabled(-1006, False, actor=ADMIN)
+    await gate.remove_chat(-1006, actor=ADMIN)
+    await gate.set_enabled(False, actor=ADMIN)
+
+    rows = await _event_rows(db)
+    assert [r["outcome"] for r in rows] == ["config"] * 4
+    assert [r["reason"] for r in rows] == ["add", "disable", "remove", "gate_off"]
+
+def test_event_detail_is_capped_and_scrubbed():
+    from cloudbot.domain.forcejoin import EVENT_DETAIL_MAX, GateEvent, scrub_detail
+
+    assert len(scrub_detail("x" * 500)) == EVENT_DETAIL_MAX
+    # A credential-shaped string is never written.
+    assert scrub_detail("Authorization: Bearer 123:ABC") == ""
+    assert scrub_detail("bot token 123:ABC") == ""
+    event = GateEvent(outcome="error", detail="y" * 400)
+    assert len(event.normalized().detail) == EVENT_DETAIL_MAX
+
+async def test_gate_screen_names_each_chat_and_offers_one_check_button(store, directory):
+    await _add(store, -1001, title="Channel One", username="one")
+    await _add(store, -1002, title="Group Two", username="", kind="group")
+    directory.results[-1001] = MembershipResult.refused(-1001)
+    directory.results[-1002] = MembershipResult.refused(-1002)
+    status = await gate_status(store, directory)
+    screen = gate_screen(status, Locale.EN, cooldown_s=3)
+    built = screen.doc.build()
+    paragraph_texts = [b.text for b in built.blocks if getattr(b, "type", "") == "paragraph"]
+    assert any("Channel One" not in t for t in paragraph_texts)  # titles are on buttons
+    button_blocks = [b for b in built.blocks if getattr(b, "type", "") == "buttons"]
+    labels = [b.buttons[0].text for b in button_blocks]
+    assert labels[0] == "Channel One"
+    assert labels[1] == "Group Two"
+    assert labels[-1] == "✅ I have joined (3 s)"
+    assert button_blocks[-1].buttons[0].disabled is not None
+
+async def test_gate_screen_says_unknown_is_let_through(store, directory):
+    await _add(store, -1001)
+    directory.results[-1001] = MembershipResult.unknown_for(-1001, "network")
+    status = await gate_status(store, directory)
+    screen = gate_screen(status, Locale.EN)
+    text = screen.doc.build().blocks
+    paragraphs = [b.text for b in text if getattr(b, "type", "") == "paragraph"]
+    assert any("could not be verified" in t for t in paragraphs)
+
+async def gate_status(store, directory):
+    gate = ForceJoinService(store, directory, bot_id=BOT)
+    return await gate.status(USER)

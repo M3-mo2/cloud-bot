@@ -14,8 +14,8 @@ async def test_migrations_apply_and_are_idempotent():
     db = Database(":memory:")
     await db.connect()
     applied = await db.migrate()
-    # Updated when 0011_broadcast was added: forward-only, every file applies once.
-    assert applied == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    # Updated when 0014_forcejoin_events was added: forward-only, every file applies once.
+    assert applied == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     again = await db.migrate()
     assert again == []  # forward-only, idempotent
     await db.close()
@@ -30,7 +30,10 @@ async def test_schema_tables_exist():
         "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
     ) as cur:
         names = {row["name"] for row in await cur.fetchall()}
-    for table in ("users", "user_workspaces", "terminal_sessions", "schema_migrations"):
+    for table in (
+        "users", "user_workspaces", "terminal_sessions", "schema_migrations",
+        "forcejoin_chats", "forcejoin_events",
+    ):
         assert table in names
     await db.close()
 

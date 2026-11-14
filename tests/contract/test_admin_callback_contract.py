@@ -100,6 +100,8 @@ def test_the_dispatch_table_covers_every_codec_action():
         admin_cb.FJ_REMOVE,
         admin_cb.FJ_SWITCH,
         admin_cb.FJ_CHECK,
+        admin_cb.FJ_TEST,
+        admin_cb.FJ_STATS,
         admin_cb.BK_SCHEDULE,
         admin_cb.BK_INSTANT,
         admin_cb.BK_SWITCH,

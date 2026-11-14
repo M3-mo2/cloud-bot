@@ -283,12 +283,18 @@ class RichDoc:
                 action = e.get("callback_data")
                 if action is not None and len(str(action).encode("utf-8")) > 64:
                     raise ValueError(f"callback_data over 64 bytes: {action!r}")
+                disabled = e.get("disabled")
+                if disabled is True:
+                    from aiogram.types import DisabledButton
+
+                    disabled = DisabledButton()
                 built.append(
                     RichMessageButton(
                         text=e.get("text", ""),
                         callback_data=action,
                         url=e.get("url"),
                         style=e.get("style"),
+                        disabled=disabled,
                     )
                 )
             self._blocks.append(InputRichBlockButtons(buttons=built, align=align))

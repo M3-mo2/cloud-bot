@@ -12,6 +12,7 @@ from cloudbot.adapters.cloud_service.fake import FakeEngine
 from cloudbot.adapters.persistence.backup_store import SqliteBackupStore
 from cloudbot.adapters.persistence.broadcast_store import SqliteBroadcastStore
 from cloudbot.adapters.persistence.database import Database
+from cloudbot.adapters.persistence.forcejoin_stats import ForceJoinStatsReader
 from cloudbot.adapters.persistence.sqlite_events import (
     SqliteAdminStateStore,
     SqliteEventLog,
@@ -20,6 +21,7 @@ from cloudbot.adapters.persistence.sqlite_moderation import SqliteModerationStor
 from cloudbot.adapters.persistence.sqlite_sessions import SqliteSessionStore
 from cloudbot.adapters.persistence.sqlite_users import SqliteUserRepository
 from cloudbot.adapters.store.sqlite_forcejoin import SqliteForceJoinStore
+from cloudbot.adapters.store.sqlite_forcejoin_events import SqliteForceJoinEventStore
 from cloudbot.adapters.store.sqlite_subscriptions import SqliteSubscriptions
 from cloudbot.core.clock import SystemClock
 from cloudbot.core.config import Settings
@@ -80,6 +82,7 @@ class Container:
     admin_state: SqliteAdminStateStore
     subscriptions: SqliteSubscriptions
     forcejoin_store: SqliteForceJoinStore
+    forcejoin_events: SqliteForceJoinEventStore
     backup_store: SqliteBackupStore
     moderation_store: SqliteModerationStore
     broadcast_store: SqliteBroadcastStore
@@ -109,6 +112,7 @@ def build(settings: Settings) -> Container:
     admin_state = SqliteAdminStateStore(database)
     subscriptions = SqliteSubscriptions(database)
     forcejoin_store = SqliteForceJoinStore(database)
+    forcejoin_events = SqliteForceJoinEventStore(database)
     backup_store = SqliteBackupStore(database)
     moderation_store = SqliteModerationStore(database)
     broadcast_store = SqliteBroadcastStore(database)
@@ -150,7 +154,12 @@ def build(settings: Settings) -> Container:
         # The directory is wired with the real Bot in ``build_dispatcher``; this
         # placeholder keeps the service constructible (and keeps the gate's
         # "unknown ⇒ allow" path the safe default) until then.
-        forcejoin=ForceJoinService(forcejoin_store, _NO_DIRECTORY),
+        forcejoin=ForceJoinService(
+            forcejoin_store,
+            _NO_DIRECTORY,
+            events=forcejoin_events,
+            stats=ForceJoinStatsReader(database),
+        ),
         moderation=moderation,
     )
     return Container(
@@ -163,6 +172,7 @@ def build(settings: Settings) -> Container:
         admin_state=admin_state,
         subscriptions=subscriptions,
         forcejoin_store=forcejoin_store,
+        forcejoin_events=forcejoin_events,
         backup_store=backup_store,
         moderation_store=moderation_store,
         broadcast_store=broadcast_store,
